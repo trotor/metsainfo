@@ -18,15 +18,16 @@ const CONFIG = {
     // WFS endpoint for forest data
     wfsUrl: 'https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows',
 
+    // MML INSPIRE WFS for cadastral boundaries (no API key required)
+    cadastralWfsUrl: 'https://inspire-wfs.maanmittauslaitos.fi/inspire-wfs/cp/ows',
+
     // Search radius in meters
     searchRadius: 200,
 
     // Map layers
     layers: {
         // OpenStreetMap as base layer (works with Web Mercator)
-        background: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        // Kapsi.fi WMS for property boundaries (no API key required)
-        boundariesWMS: 'https://tiles.kartat.kapsi.fi/kiinteistorajat'
+        background: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
     }
 };
 
@@ -159,24 +160,28 @@ function initMap() {
  * Initialize map layers
  */
 function initLayers() {
-    // Property boundaries WMS layer from Kapsi.fi (no API key required)
-    boundaryLayer = L.tileLayer.wms(CONFIG.layers.boundariesWMS, {
-        layers: 'kiinteistorajat',
-        format: 'image/png',
-        transparent: true,
-        attribution: '&copy; <a href="https://www.maanmittauslaitos.fi/">MML</a>',
-        opacity: 0.7,
-        maxZoom: 19
-    });
-
-    // Add boundaries layer to map (visible at higher zoom levels)
-    boundaryLayer.addTo(map);
+    // Cadastral boundaries layer (GeoJSON, populated on click)
+    boundaryLayer = L.geoJSON(null, {
+        style: boundaryStyle
+    }).addTo(map);
 
     // Forest stands layer (GeoJSON, populated on click)
     forestLayer = L.geoJSON(null, {
         style: featureStyle,
         onEachFeature: onEachFeature
     }).addTo(map);
+}
+
+/**
+ * Style function for cadastral boundaries
+ */
+function boundaryStyle(feature) {
+    return {
+        color: '#e74c3c',
+        weight: 2,
+        opacity: 0.9,
+        dashArray: '5, 5'
+    };
 }
 
 /**
@@ -235,21 +240,13 @@ function initControls() {
     const toggleBoundaries = document.getElementById('toggle-boundaries');
     const toggleForest = document.getElementById('toggle-forest');
 
-    // Disable boundaries toggle if layer not available
-    if (!boundaryLayer) {
-        toggleBoundaries.disabled = true;
-        toggleBoundaries.checked = false;
-        toggleBoundaries.parentElement.style.opacity = '0.5';
-        toggleBoundaries.parentElement.title = 'Kiinteistörajat vaativat MML API-avaimen';
-    } else {
-        toggleBoundaries.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                boundaryLayer.addTo(map);
-            } else {
-                map.removeLayer(boundaryLayer);
-            }
-        });
-    }
+    toggleBoundaries.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            boundaryLayer.addTo(map);
+        } else {
+            map.removeLayer(boundaryLayer);
+        }
+    });
 
     toggleForest.addEventListener('change', (e) => {
         if (e.target.checked) {
@@ -275,6 +272,7 @@ function initEventListeners() {
             clickMarker = null;
         }
         forestLayer.clearLayers();
+        boundaryLayer.clearLayers();
     });
 }
 
@@ -308,13 +306,25 @@ async function onMapClick(e) {
 
     // Clear previous features
     forestLayer.clearLayers();
+    boundaryLayer.clearLayers();
 
     try {
-        // Fetch forest data
-        const features = await fetchForestData(lat, lng);
+        // Fetch forest data and cadastral boundaries in parallel
+        const [features, boundaries] = await Promise.all([
+            fetchForestData(lat, lng),
+            fetchCadastralBoundaries(lat, lng)
+        ]);
         currentFeatures = features;
 
         loading.classList.add('hidden');
+
+        // Add cadastral boundaries to map
+        if (boundaries.length > 0) {
+            boundaryLayer.addData({
+                type: 'FeatureCollection',
+                features: boundaries
+            });
+        }
 
         if (features.length > 0) {
             // Add features to map
@@ -341,7 +351,7 @@ async function onMapClick(e) {
         }
     } catch (error) {
         loading.classList.add('hidden');
-        console.error('Error fetching forest data:', error);
+        console.error('Error fetching data:', error);
         content.innerHTML = `
             <div class="no-data">
                 <div class="no-data-icon">⚠️</div>
@@ -413,10 +423,77 @@ async function fetchForestData(lat, lng) {
 }
 
 /**
+ * Fetch cadastral boundaries from MML INSPIRE WFS
+ */
+async function fetchCadastralBoundaries(lat, lng) {
+    // Convert to ETRS-TM35FIN
+    const [x, y] = toETRS(lng, lat);
+    const r = CONFIG.searchRadius;
+
+    // Create BBOX
+    const bbox = `${x - r},${y - r},${x + r},${y + r},EPSG:3067`;
+
+    // Build WFS GetFeature URL
+    const params = new URLSearchParams({
+        service: 'WFS',
+        version: '2.0.0',
+        request: 'GetFeature',
+        typeNames: 'cp:CadastralBoundary',
+        outputFormat: 'application/json',
+        srsName: 'EPSG:3067',
+        bbox: bbox
+    });
+
+    const url = `${CONFIG.cadastralWfsUrl}?${params}`;
+
+    console.log('Fetching cadastral boundaries:', url);
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            console.warn(`Cadastral WFS error: ${response.status}`);
+            return [];
+        }
+
+        const data = await response.json();
+
+        // Convert coordinates from EPSG:3067 to WGS84 for Leaflet
+        if (data.features) {
+            data.features.forEach(feature => {
+                if (feature.geometry) {
+                    feature.geometry = convertGeometry(feature.geometry);
+                }
+            });
+        }
+
+        return data.features || [];
+    } catch (error) {
+        console.warn('Failed to fetch cadastral boundaries:', error);
+        return [];
+    }
+}
+
+/**
  * Convert geometry coordinates from EPSG:3067 to WGS84
  */
 function convertGeometry(geometry) {
-    if (geometry.type === 'Polygon') {
+    if (geometry.type === 'Point') {
+        const [lng, lat] = toWGS84(geometry.coordinates[0], geometry.coordinates[1]);
+        geometry.coordinates = [lng, lat];
+    } else if (geometry.type === 'LineString') {
+        geometry.coordinates = geometry.coordinates.map(coord => {
+            const [lng, lat] = toWGS84(coord[0], coord[1]);
+            return [lng, lat];
+        });
+    } else if (geometry.type === 'MultiLineString') {
+        geometry.coordinates = geometry.coordinates.map(line =>
+            line.map(coord => {
+                const [lng, lat] = toWGS84(coord[0], coord[1]);
+                return [lng, lat];
+            })
+        );
+    } else if (geometry.type === 'Polygon') {
         geometry.coordinates = geometry.coordinates.map(ring =>
             ring.map(coord => {
                 const [lng, lat] = toWGS84(coord[0], coord[1]);
