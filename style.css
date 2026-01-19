@@ -81,7 +81,7 @@ body {
     position: absolute;
     top: 70px;
     left: 10px;
-    width: 340px;
+    width: 420px;
     max-height: calc(100vh - 140px);
     background: white;
     border-radius: 12px;
@@ -286,6 +286,36 @@ body {
 .no-data-icon {
     font-size: 3rem;
     margin-bottom: 12px;
+}
+
+/* Parcel info section */
+.parcel-section {
+    background: linear-gradient(135deg, #e74c3c15 0%, #e74c3c08 100%);
+    margin: -16px -20px 20px -20px;
+    padding: 20px;
+    border-bottom: 2px solid #e74c3c30;
+}
+
+.parcel-section h3 {
+    color: #c0392b;
+    border-bottom-color: #e74c3c40;
+}
+
+.parcel-info {
+    text-align: center;
+}
+
+.parcel-id {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #c0392b;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.parcel-details {
+    font-size: 0.8rem;
+    color: #888;
 }
 
 /* Footer */
