@@ -14,7 +14,7 @@ const CONFIG = {
     // Default center in WGS84 (lat, lng) - central Finland
     defaultCenter: [64.0, 26.0],
     defaultZoom: 6,
-    minZoomForParcels: 14, // Minimum zoom level to load parcels
+    minZoomForParcels: 12, // Minimum zoom level to load parcels
 
     // WFS endpoint for forest data
     wfsUrl: 'https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows',
@@ -43,6 +43,30 @@ const CODES = {
         1: 'Raivaus', 2: 'Maanmuokkaus', 3: 'Kylvö', 4: 'Istutus', 5: 'Täydennysviljely',
         6: 'Taimikonhoito', 7: 'Nuoren metsän kunnostus', 8: 'Pystykarsinta', 9: 'Lannoitus',
         10: 'Kunnostusojitus', 11: 'Metsätien rakentaminen', 12: 'Metsätien perusparannus'
+    },
+    fertilityClass: {
+        1: 'Lehto', 2: 'Lehtomainen kangas', 3: 'Tuore kangas', 4: 'Kuivahko kangas',
+        5: 'Kuiva kangas', 6: 'Karukkokangas', 7: 'Kalliomaa/hietikko', 8: 'Lakimetsä/tunturi'
+    },
+    soilType: {
+        1: 'Kallio', 2: 'Kivikko', 3: 'Louhikko', 4: 'Sora', 5: 'Hieno hiekka',
+        6: 'Karkea hieta', 7: 'Hieno hieta', 8: 'Hiesu', 9: 'Savi', 10: 'Liejusavi',
+        11: 'Lieju', 12: 'Saraturve', 13: 'Rahkaturve', 21: 'Moreeni'
+    },
+    developmentClass: {
+        'A0': 'Aukea', 'S0': 'Siemenpuumetsikkö', 'Y1': 'Ylispuustoinen taimikko',
+        '02': 'Pieni taimikko', '03': 'Varttunut taimikko', '04': 'Nuori kasvatusmetsikkö',
+        '05': 'Varttunut kasvatusmetsikkö', '06': 'Uudistuskypsä metsikkö', '07': 'Suojuspuumetsikkö',
+        'T1': 'Taimikko', 'T2': 'Nuori metsä', 'ER': 'Eri-ikäisrakenteinen'
+    },
+    drainageState: {
+        1: 'Ojittamaton kangas', 2: 'Ojitettu kangas', 3: 'Ojikko', 4: 'Muuttuma', 5: 'Turvekangas'
+    },
+    accessibility: {
+        1: 'Ympärivuotinen', 2: 'Kelirikkokaudella rajoitettu', 3: 'Talvikorjuu', 4: 'Ei korjuukelpoinen'
+    },
+    mainGroup: {
+        1: 'Metsämaa', 2: 'Kitumaa', 3: 'Joutomaa', 4: 'Muu metsätalousmaa'
     }
 };
 
@@ -51,9 +75,12 @@ let map = null;
 let forestLayer = null;
 let cadastralLayer = null;      // All parcels in view
 let selectedParcelLayer = null; // Selected/highlighted parcel
+let parcelLabelsLayer = null;   // Labels for parcel IDs
+let highlightedStandLayer = null; // Highlighted individual stand
 let clickMarker = null;
 let currentFeatures = [];
 let currentParcel = null;
+let selectedStandIndex = null;  // Currently selected stand index
 let loadedParcels = new Map();  // Cache loaded parcels by ID
 
 /**
@@ -95,6 +122,9 @@ function initLayers() {
         coordsToLatLng: coordsEPSG3067ToLatLng
     }).addTo(map);
 
+    // Parcel labels layer
+    parcelLabelsLayer = L.layerGroup().addTo(map);
+
     // Selected parcel layer (highlighted)
     selectedParcelLayer = L.geoJSON(null, {
         style: selectedParcelStyle,
@@ -107,6 +137,25 @@ function initLayers() {
         onEachFeature: onEachFeature,
         coordsToLatLng: coordsEPSG3067ToLatLng
     }).addTo(map);
+
+    // Highlighted individual stand layer
+    highlightedStandLayer = L.geoJSON(null, {
+        style: highlightedStandStyle,
+        coordsToLatLng: coordsEPSG3067ToLatLng
+    }).addTo(map);
+}
+
+/**
+ * Style for highlighted individual stand
+ */
+function highlightedStandStyle(feature) {
+    return {
+        fillColor: '#f39c12',
+        weight: 4,
+        opacity: 1,
+        color: '#e67e22',
+        fillOpacity: 0.7
+    };
 }
 
 /**
@@ -235,6 +284,110 @@ function initEventListeners() {
         forestLayer.clearLayers();
         currentParcel = null;
     });
+
+    // Search functionality
+    const searchInput = document.getElementById('search-input');
+    const searchButton = document.getElementById('search-button');
+
+    searchButton.addEventListener('click', () => searchParcel());
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchParcel();
+    });
+}
+
+/**
+ * Convert user input to 14-digit nationalCadastralReference format
+ * Accepts formats like "91-416-1-123" or "091-416-0001-0123" or "09141600010123"
+ */
+function normalizeParcelId(input) {
+    // Remove all non-numeric characters
+    const clean = input.replace(/[^0-9]/g, '');
+
+    // If already 14 digits, return as-is
+    if (clean.length === 14) {
+        return clean;
+    }
+
+    // Try to parse dash-separated format (e.g., "91-416-1-123")
+    const parts = input.split(/[-\s]+/);
+    if (parts.length === 4) {
+        const [kunta, kyla, tila, yksikko] = parts.map(p => p.replace(/[^0-9]/g, ''));
+        return kunta.padStart(3, '0') +
+               kyla.padStart(3, '0') +
+               tila.padStart(4, '0') +
+               yksikko.padStart(4, '0');
+    }
+
+    return null;
+}
+
+/**
+ * Search for a parcel by cadastral reference
+ */
+async function searchParcel() {
+    const input = document.getElementById('search-input').value.trim();
+    const errorEl = document.getElementById('search-error');
+    const button = document.getElementById('search-button');
+
+    errorEl.classList.add('hidden');
+
+    if (!input) {
+        errorEl.textContent = 'Syötä kiinteistötunnus';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    const normalizedId = normalizeParcelId(input);
+    if (!normalizedId) {
+        errorEl.textContent = 'Virheellinen muoto. Käytä muotoa 91-416-1-123';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Haetaan...';
+
+    try {
+        const params = new URLSearchParams({
+            service: 'WFS',
+            version: '2.0.0',
+            request: 'GetFeature',
+            typeNames: 'cp:CadastralParcel',
+            outputFormat: 'application/json',
+            srsName: 'EPSG:3067',
+            CQL_FILTER: `nationalCadastralReference='${normalizedId}'`
+        });
+
+        const response = await fetch(`${CONFIG.cadastralWfsUrl}?${params}`);
+        if (!response.ok) {
+            throw new Error('Haku epäonnistui');
+        }
+
+        const data = await response.json();
+
+        if (data.features && data.features.length > 0) {
+            const parcel = data.features[0];
+
+            // Zoom to parcel
+            const bounds = getGeometryBounds3067(parcel.geometry);
+            const sw = proj4('EPSG:3067', 'WGS84', [bounds.minX, bounds.minY]);
+            const ne = proj4('EPSG:3067', 'WGS84', [bounds.maxX, bounds.maxY]);
+            map.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], { maxZoom: 16, padding: [50, 50] });
+
+            // Select the parcel
+            selectParcel(parcel);
+        } else {
+            errorEl.textContent = 'Kiinteistöä ei löytynyt';
+            errorEl.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Search error:', error);
+        errorEl.textContent = 'Haku epäonnistui. Yritä uudelleen.';
+        errorEl.classList.remove('hidden');
+    } finally {
+        button.disabled = false;
+        button.textContent = 'Hae';
+    }
 }
 
 /**
@@ -246,6 +399,7 @@ async function loadParcelsInView() {
     // Only load parcels at sufficient zoom level
     if (zoom < CONFIG.minZoomForParcels) {
         cadastralLayer.clearLayers();
+        parcelLabelsLayer.clearLayers();
         loadedParcels.clear();
         return;
     }
@@ -275,17 +429,58 @@ async function loadParcelsInView() {
         if (data.features) {
             // Clear and reload parcels
             cadastralLayer.clearLayers();
+            parcelLabelsLayer.clearLayers();
             loadedParcels.clear();
 
             data.features.forEach(feature => {
                 const id = feature.properties?.nationalCadastralReference || feature.id;
                 loadedParcels.set(id, feature);
                 cadastralLayer.addData(feature);
+
+                // Add label at parcel center (only at zoom >= 15 for readability)
+                if (zoom >= 15) {
+                    addParcelLabel(feature);
+                }
             });
         }
     } catch (error) {
         console.warn('Failed to load parcels:', error);
     }
+}
+
+/**
+ * Add a label marker for a parcel
+ */
+function addParcelLabel(feature) {
+    const props = feature.properties;
+    const label = props?.label || formatCadastralReference(props?.nationalCadastralReference);
+    if (!label) return;
+
+    // Use referencePoint if available, otherwise calculate centroid
+    let latLng;
+    if (props?.referencePoint?.coordinates) {
+        const [x, y] = props.referencePoint.coordinates;
+        const [lng, lat] = proj4('EPSG:3067', 'WGS84', [x, y]);
+        latLng = L.latLng(lat, lng);
+    } else {
+        // Calculate centroid from geometry
+        const bounds = getGeometryBounds3067(feature.geometry);
+        const centerX = (bounds.minX + bounds.maxX) / 2;
+        const centerY = (bounds.minY + bounds.maxY) / 2;
+        const [lng, lat] = proj4('EPSG:3067', 'WGS84', [centerX, centerY]);
+        latLng = L.latLng(lat, lng);
+    }
+
+    const labelMarker = L.marker(latLng, {
+        icon: L.divIcon({
+            className: 'parcel-label',
+            html: `<span>${label}</span>`,
+            iconSize: null
+        }),
+        interactive: false
+    });
+
+    parcelLabelsLayer.addLayer(labelMarker);
 }
 
 /**
@@ -607,17 +802,54 @@ function showSummary(features, parcel) {
                     <div class="stat-value">${formatNumber(stats.avgPulpwood, 0)}</div>
                     <div class="stat-label">Kuitua (m³/ha)</div>
                 </div>
+                <div class="stat-item">
+                    <div class="stat-value">${formatNumber(stats.totalSawlog, 0)}</div>
+                    <div class="stat-label">Tukkia yht. (m³)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${formatNumber(stats.totalPulpwood, 0)}</div>
+                    <div class="stat-label">Kuitua yht. (m³)</div>
+                </div>
             </div>
+        </div>
+
+        <div class="summary-section">
+            <h3>Kasvupaikka</h3>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-value">${formatNumber(stats.avgBasalArea, 1)}</div>
+                    <div class="stat-label">Pohjapinta-ala (m²/ha)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${formatNumber(stats.avgStemCount, 0)}</div>
+                    <div class="stat-label">Runkoluku (kpl/ha)</div>
+                </div>
+            </div>
+            ${stats.fertilityDistribution.length > 0 ? `
+            <div class="distribution-list">
+                <strong>Kasvupaikkatyypit:</strong>
+                ${stats.fertilityDistribution.map(f => `<span class="dist-item">${f.name} (${f.area} ha)</span>`).join('')}
+            </div>
+            ` : ''}
+            ${stats.developmentDistribution.length > 0 ? `
+            <div class="distribution-list">
+                <strong>Kehitysluokat:</strong>
+                ${stats.developmentDistribution.map(d => `<span class="dist-item">${d.name} (${d.count} kpl)</span>`).join('')}
+            </div>
+            ` : ''}
         </div>
 
         ${stats.cuttingRecommendations.length > 0 ? `
         <div class="summary-section">
             <h3>Hakkuuehdotukset</h3>
-            <ul class="recommendations-list">
+            <ul class="recommendations-list clickable">
                 ${stats.cuttingRecommendations.map(r => `
-                    <li>
+                    <li data-filter="cutting" data-value="${r.code}">
                         <span class="recommendation-type">${r.name}</span>
-                        <span class="recommendation-count">${r.count} kuviota</span>
+                        <span class="recommendation-info">
+                            <span class="recommendation-count">${r.count} kuviota</span>
+                            ${r.year ? `<span class="recommendation-year">${r.year}</span>` : ''}
+                        </span>
                     </li>
                 `).join('')}
             </ul>
@@ -627,16 +859,26 @@ function showSummary(features, parcel) {
         ${stats.silvicultureRecommendations.length > 0 ? `
         <div class="summary-section">
             <h3>Metsänhoitoehdotukset</h3>
-            <ul class="recommendations-list">
+            <ul class="recommendations-list clickable">
                 ${stats.silvicultureRecommendations.map(r => `
-                    <li>
+                    <li data-filter="silviculture" data-value="${r.code}">
                         <span class="recommendation-type">${r.name}</span>
-                        <span class="recommendation-count">${r.count} kuviota</span>
+                        <span class="recommendation-info">
+                            <span class="recommendation-count">${r.count} kuviota</span>
+                            ${r.year ? `<span class="recommendation-year">${r.year}</span>` : ''}
+                        </span>
                     </li>
                 `).join('')}
             </ul>
         </div>
         ` : ''}
+
+        <div class="summary-section stands-section">
+            <h3>Kuviot <span class="stands-count">(${features.length} kpl)</span></h3>
+            <div class="stands-list">
+                ${features.map((f, idx) => renderStandItem(f, idx)).join('')}
+            </div>
+        </div>
         ` : `
         <div class="no-data">
             <div class="no-data-icon">🌲</div>
@@ -644,6 +886,198 @@ function showSummary(features, parcel) {
         </div>
         `}
     `;
+
+    // Add event listeners for stand items
+    attachStandEventListeners();
+    attachFilterEventListeners();
+}
+
+/**
+ * Render a single stand item for the list
+ */
+function renderStandItem(feature, index) {
+    const p = feature.properties;
+    const species = CODES.treeSpecies[p.MAINTREESPECIES] || '-';
+    const devClass = CODES.developmentClass[p.DEVELOPMENTCLASS] || p.DEVELOPMENTCLASS || '-';
+    const fertility = CODES.fertilityClass[p.FERTILITYCLASS] || '-';
+    const accessibility = CODES.accessibility[p.ACCESSIBILITY] || '-';
+    const drainage = CODES.drainageState[p.DRAINAGESTATE] || '-';
+    const soil = CODES.soilType[p.SOILTYPE] || '-';
+    const cutting = CODES.cuttingType[p.CUTTINGTYPE];
+    const silviculture = CODES.silvicultureType[p.SILVICULTURETYPE];
+    const measureDate = p.MEASUREMENTDATE ? new Date(p.MEASUREMENTDATE).toLocaleDateString('fi-FI') : '-';
+
+    // Calculate species percentages
+    const pineP = Math.round((p.PROPORTIONPINE || 0) * 100);
+    const spruceP = Math.round((p.PROPORTIONSPRUCE || 0) * 100);
+    const otherP = Math.round((p.PROPORTIONOTHER || 0) * 100);
+
+    return `
+        <div class="stand-item" data-index="${index}">
+            <div class="stand-header">
+                <div class="stand-title">
+                    <span class="stand-number">Kuvio ${p.STANDNUMBER || (index + 1)}</span>
+                    <span class="stand-species">${species}</span>
+                </div>
+                <div class="stand-summary">
+                    <span class="stand-area">${formatNumber(p.AREA, 2)} ha</span>
+                    <span class="stand-volume">${formatNumber(p.VOLUME, 0)} m³/ha</span>
+                </div>
+                <div class="stand-toggle">▼</div>
+            </div>
+            <div class="stand-details">
+                <div class="detail-group">
+                    <div class="detail-title">Perustiedot</div>
+                    <div class="detail-grid">
+                        <div class="detail-row"><span>Kehitysluokka:</span><span>${devClass}</span></div>
+                        <div class="detail-row"><span>Kasvupaikka:</span><span>${fertility}</span></div>
+                        <div class="detail-row"><span>Maalaji:</span><span>${soil}</span></div>
+                        <div class="detail-row"><span>Ojitustilanne:</span><span>${drainage}</span></div>
+                        <div class="detail-row"><span>Kulkukelpoisuus:</span><span>${accessibility}</span></div>
+                    </div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-title">Puusto</div>
+                    <div class="detail-grid">
+                        <div class="detail-row"><span>Ikä:</span><span>${p.MEANAGE || '-'} v</span></div>
+                        <div class="detail-row"><span>Pituus:</span><span>${formatNumber(p.MEANHEIGHT, 1)} m</span></div>
+                        <div class="detail-row"><span>Läpimitta:</span><span>${formatNumber(p.MEANDIAMETER, 1)} cm</span></div>
+                        <div class="detail-row"><span>Pohjapinta-ala:</span><span>${formatNumber(p.BASALAREA, 1)} m²/ha</span></div>
+                        <div class="detail-row"><span>Runkoluku:</span><span>${formatNumber(p.STEMCOUNT, 0)} kpl/ha</span></div>
+                        <div class="detail-row"><span>Kasvu:</span><span>${formatNumber(p.VOLUMEGROWTH, 1)} m³/ha/v</span></div>
+                    </div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-title">Puulajijakauma</div>
+                    <div class="mini-species-bar">
+                        ${pineP > 0 ? `<div class="pine" style="width: ${pineP}%" title="Mänty ${pineP}%"></div>` : ''}
+                        ${spruceP > 0 ? `<div class="spruce" style="width: ${spruceP}%" title="Kuusi ${spruceP}%"></div>` : ''}
+                        ${otherP > 0 ? `<div class="birch" style="width: ${otherP}%" title="Lehtipuut ${otherP}%"></div>` : ''}
+                    </div>
+                    <div class="mini-species-legend">
+                        ${pineP > 0 ? `<span>Mänty ${pineP}%</span>` : ''}
+                        ${spruceP > 0 ? `<span>Kuusi ${spruceP}%</span>` : ''}
+                        ${otherP > 0 ? `<span>Lehtipuut ${otherP}%</span>` : ''}
+                    </div>
+                </div>
+                <div class="detail-group">
+                    <div class="detail-title">Puutavaralajit</div>
+                    <div class="detail-grid">
+                        <div class="detail-row"><span>Tukkipuu:</span><span>${formatNumber(p.SAWLOGVOLUME, 0)} m³/ha</span></div>
+                        <div class="detail-row"><span>Kuitupuu:</span><span>${formatNumber(p.PULPWOODVOLUME, 0)} m³/ha</span></div>
+                        <div class="detail-row"><span>Yhteensä:</span><span>${formatNumber(p.VOLUME, 0)} m³/ha</span></div>
+                        <div class="detail-row"><span>Kuviolla yht:</span><span>${formatNumber((p.VOLUME || 0) * (p.AREA || 0), 0)} m³</span></div>
+                    </div>
+                </div>
+                ${cutting || silviculture ? `
+                <div class="detail-group">
+                    <div class="detail-title">Toimenpide-ehdotukset</div>
+                    <div class="detail-grid">
+                        ${cutting ? `<div class="detail-row highlight"><span>Hakkuu:</span><span>${cutting}${p.CUTTINGPROPOSALYEAR ? ` (${p.CUTTINGPROPOSALYEAR})` : ''}</span></div>` : ''}
+                        ${silviculture ? `<div class="detail-row highlight"><span>Hoito:</span><span>${silviculture}${p.SILVICULTUREPROPOSALYEAR ? ` (${p.SILVICULTUREPROPOSALYEAR})` : ''}</span></div>` : ''}
+                    </div>
+                </div>
+                ` : ''}
+                <div class="detail-footer">
+                    <span class="measurement-date">Mitattu: ${measureDate}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Attach event listeners for stand items
+ */
+function attachStandEventListeners() {
+    document.querySelectorAll('.stand-item').forEach(item => {
+        const header = item.querySelector('.stand-header');
+        const details = item.querySelector('.stand-details');
+        const toggle = item.querySelector('.stand-toggle');
+        const index = parseInt(item.dataset.index);
+
+        header.addEventListener('click', () => {
+            const isExpanded = item.classList.toggle('expanded');
+            toggle.textContent = isExpanded ? '▲' : '▼';
+
+            // Highlight stand on map
+            highlightStand(index, isExpanded);
+        });
+    });
+}
+
+/**
+ * Attach event listeners for filter items (recommendations)
+ */
+function attachFilterEventListeners() {
+    document.querySelectorAll('.recommendations-list.clickable li').forEach(item => {
+        item.addEventListener('click', () => {
+            const filterType = item.dataset.filter;
+            const filterValue = parseInt(item.dataset.value);
+
+            // Toggle active state
+            const wasActive = item.classList.contains('active');
+            document.querySelectorAll('.recommendations-list.clickable li').forEach(li => li.classList.remove('active'));
+
+            if (!wasActive) {
+                item.classList.add('active');
+                highlightFilteredStands(filterType, filterValue);
+            } else {
+                highlightedStandLayer.clearLayers();
+            }
+        });
+    });
+}
+
+/**
+ * Highlight stands matching a filter
+ */
+function highlightFilteredStands(filterType, filterValue) {
+    highlightedStandLayer.clearLayers();
+
+    const matchingFeatures = currentFeatures.filter(f => {
+        const p = f.properties;
+        if (filterType === 'cutting') {
+            return p.CUTTINGTYPE === filterValue;
+        } else if (filterType === 'silviculture') {
+            return p.SILVICULTURETYPE === filterValue;
+        }
+        return false;
+    });
+
+    matchingFeatures.forEach(f => highlightedStandLayer.addData(f));
+
+    // Fit bounds to highlighted features if any
+    if (matchingFeatures.length > 0) {
+        const bounds = highlightedStandLayer.getBounds();
+        if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: map.getZoom() });
+        }
+    }
+}
+
+/**
+ * Highlight a single stand on the map
+ */
+function highlightStand(index, highlight) {
+    highlightedStandLayer.clearLayers();
+    document.querySelectorAll('.recommendations-list.clickable li').forEach(li => li.classList.remove('active'));
+
+    if (highlight && currentFeatures[index]) {
+        const feature = currentFeatures[index];
+        highlightedStandLayer.addData(feature);
+
+        // Pan to the stand
+        const bounds = getGeometryBounds3067(feature.geometry);
+        const centerX = (bounds.minX + bounds.maxX) / 2;
+        const centerY = (bounds.minY + bounds.maxY) / 2;
+        const [lng, lat] = proj4('EPSG:3067', 'WGS84', [centerX, centerY]);
+        map.panTo([lat, lng]);
+
+        selectedStandIndex = index;
+    } else {
+        selectedStandIndex = null;
+    }
 }
 
 /**
@@ -661,9 +1095,15 @@ function calculateStatistics(features) {
         avgGrowth: 0,
         avgSawlog: 0,
         avgPulpwood: 0,
+        totalSawlog: 0,
+        totalPulpwood: 0,
+        avgBasalArea: 0,
+        avgStemCount: 0,
         speciesPercent: { pine: 0, spruce: 0, birch: 0, other: 0 },
         cuttingRecommendations: [],
-        silvicultureRecommendations: []
+        silvicultureRecommendations: [],
+        fertilityDistribution: [],
+        developmentDistribution: []
     };
 
     if (features.length === 0) return stats;
@@ -672,9 +1112,12 @@ function calculateStatistics(features) {
     let totalSpecies = 0;
     let validAgeCount = 0, validHeightCount = 0, validDiameterCount = 0, validGrowthCount = 0;
     let validSawlogCount = 0, validPulpwoodCount = 0;
+    let validBasalAreaCount = 0, validStemCountCount = 0;
 
     const cuttingCounts = {};
     const silvicultureCounts = {};
+    const fertilityCounts = {};
+    const developmentCounts = {};
 
     features.forEach(f => {
         const p = f.properties;
@@ -683,6 +1126,8 @@ function calculateStatistics(features) {
         stats.totalArea += area;
         stats.totalVolume += (p.VOLUME || 0) * area;
         stats.avgVolume += p.VOLUME || 0;
+        stats.totalSawlog += (p.SAWLOGVOLUME || 0) * area;
+        stats.totalPulpwood += (p.PULPWOODVOLUME || 0) * area;
 
         if (p.MEANAGE) { stats.avgAge += p.MEANAGE; validAgeCount++; }
         if (p.MEANHEIGHT) { stats.avgHeight += p.MEANHEIGHT; validHeightCount++; }
@@ -690,6 +1135,8 @@ function calculateStatistics(features) {
         if (p.VOLUMEGROWTH) { stats.avgGrowth += p.VOLUMEGROWTH; validGrowthCount++; }
         if (p.SAWLOGVOLUME) { stats.avgSawlog += p.SAWLOGVOLUME; validSawlogCount++; }
         if (p.PULPWOODVOLUME) { stats.avgPulpwood += p.PULPWOODVOLUME; validPulpwoodCount++; }
+        if (p.BASALAREA) { stats.avgBasalArea += p.BASALAREA; validBasalAreaCount++; }
+        if (p.STEMCOUNT) { stats.avgStemCount += p.STEMCOUNT; validStemCountCount++; }
 
         let pine = p.PROPORTIONPINE || 0;
         let spruce = p.PROPORTIONSPRUCE || 0;
@@ -707,13 +1154,45 @@ function calculateStatistics(features) {
         totalSpecies += area;
 
         if (p.CUTTINGTYPE) {
-            const name = CODES.cuttingType[p.CUTTINGTYPE] || `Tyyppi ${p.CUTTINGTYPE}`;
-            cuttingCounts[name] = (cuttingCounts[name] || 0) + 1;
+            const code = p.CUTTINGTYPE;
+            const name = CODES.cuttingType[code] || `Tyyppi ${code}`;
+            const year = p.CUTTINGPROPOSALYEAR;
+            const key = `${code}`;
+            if (!cuttingCounts[key]) {
+                cuttingCounts[key] = { code, name, count: 0, years: [] };
+            }
+            cuttingCounts[key].count++;
+            if (year) cuttingCounts[key].years.push(year);
         }
 
         if (p.SILVICULTURETYPE) {
-            const name = CODES.silvicultureType[p.SILVICULTURETYPE] || `Tyyppi ${p.SILVICULTURETYPE}`;
-            silvicultureCounts[name] = (silvicultureCounts[name] || 0) + 1;
+            const code = p.SILVICULTURETYPE;
+            const name = CODES.silvicultureType[code] || `Tyyppi ${code}`;
+            const year = p.SILVICULTUREPROPOSALYEAR;
+            const key = `${code}`;
+            if (!silvicultureCounts[key]) {
+                silvicultureCounts[key] = { code, name, count: 0, years: [] };
+            }
+            silvicultureCounts[key].count++;
+            if (year) silvicultureCounts[key].years.push(year);
+        }
+
+        if (p.FERTILITYCLASS) {
+            const code = p.FERTILITYCLASS;
+            const name = CODES.fertilityClass[code] || `Tyyppi ${code}`;
+            if (!fertilityCounts[code]) {
+                fertilityCounts[code] = { name, area: 0 };
+            }
+            fertilityCounts[code].area += area;
+        }
+
+        if (p.DEVELOPMENTCLASS) {
+            const code = p.DEVELOPMENTCLASS;
+            const name = CODES.developmentClass[code] || code;
+            if (!developmentCounts[code]) {
+                developmentCounts[code] = { name, count: 0 };
+            }
+            developmentCounts[code].count++;
         }
     });
 
@@ -724,6 +1203,8 @@ function calculateStatistics(features) {
     stats.avgGrowth = validGrowthCount > 0 ? stats.avgGrowth / validGrowthCount : 0;
     stats.avgSawlog = validSawlogCount > 0 ? stats.avgSawlog / validSawlogCount : 0;
     stats.avgPulpwood = validPulpwoodCount > 0 ? stats.avgPulpwood / validPulpwoodCount : 0;
+    stats.avgBasalArea = validBasalAreaCount > 0 ? stats.avgBasalArea / validBasalAreaCount : 0;
+    stats.avgStemCount = validStemCountCount > 0 ? stats.avgStemCount / validStemCountCount : 0;
 
     if (totalSpecies > 0) {
         stats.speciesPercent.pine = Math.round(totalPine / totalSpecies);
@@ -736,12 +1217,29 @@ function calculateStatistics(features) {
         }
     }
 
-    stats.cuttingRecommendations = Object.entries(cuttingCounts)
-        .map(([name, count]) => ({ name, count }))
+    stats.cuttingRecommendations = Object.values(cuttingCounts)
+        .map(r => ({
+            code: r.code,
+            name: r.name,
+            count: r.count,
+            year: r.years.length > 0 ? Math.min(...r.years) : null
+        }))
         .sort((a, b) => b.count - a.count);
 
-    stats.silvicultureRecommendations = Object.entries(silvicultureCounts)
-        .map(([name, count]) => ({ name, count }))
+    stats.silvicultureRecommendations = Object.values(silvicultureCounts)
+        .map(r => ({
+            code: r.code,
+            name: r.name,
+            count: r.count,
+            year: r.years.length > 0 ? Math.min(...r.years) : null
+        }))
+        .sort((a, b) => b.count - a.count);
+
+    stats.fertilityDistribution = Object.values(fertilityCounts)
+        .map(f => ({ name: f.name, area: formatNumber(f.area, 2) }))
+        .sort((a, b) => parseFloat(b.area) - parseFloat(a.area));
+
+    stats.developmentDistribution = Object.values(developmentCounts)
         .sort((a, b) => b.count - a.count);
 
     return stats;

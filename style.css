@@ -31,6 +31,18 @@ body {
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+#version-badge {
+    font-size: 0.7rem;
+    font-weight: 400;
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
 }
 
 #header p {
@@ -45,10 +57,71 @@ body {
     z-index: 1;
 }
 
+/* Search control */
+#search-control {
+    position: absolute;
+    top: 80px;
+    right: 10px;
+    background: white;
+    padding: 10px 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1000;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-width: 280px;
+}
+
+#search-input {
+    flex: 1;
+    min-width: 150px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: #2d5a27;
+}
+
+#search-button {
+    padding: 8px 16px;
+    background: #2d5a27;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+#search-button:hover {
+    background: #1a3518;
+}
+
+#search-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+#search-error {
+    width: 100%;
+    color: #c0392b;
+    font-size: 0.75rem;
+    padding: 4px 0;
+}
+
+#search-error.hidden {
+    display: none;
+}
+
 /* Layer controls */
 #layer-controls {
     position: absolute;
-    top: 80px;
+    top: 160px;
     right: 10px;
     background: white;
     padding: 12px 16px;
@@ -348,6 +421,12 @@ body {
         top: auto;
     }
 
+    #search-control {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+
     #layer-controls {
         top: auto;
         bottom: 70px;
@@ -371,4 +450,259 @@ body {
     border: 3px solid white;
     border-radius: 50%;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Parcel labels */
+.parcel-label {
+    background: none;
+    border: none;
+}
+
+.parcel-label span {
+    display: block;
+    background: rgba(139, 69, 19, 0.85);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transform: translate(-50%, -50%);
+}
+
+/* Distribution lists */
+.distribution-list {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: #555;
+}
+
+.distribution-list strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.dist-item {
+    display: inline-block;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin: 2px 4px 2px 0;
+    font-size: 0.75rem;
+}
+
+/* Clickable recommendations */
+.recommendations-list.clickable li {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.recommendations-list.clickable li:hover {
+    background: #f5f5f5;
+}
+
+.recommendations-list.clickable li.active {
+    background: #fff3e0;
+    border-left: 3px solid #f39c12;
+    padding-left: 8px;
+    margin-left: -11px;
+}
+
+.recommendation-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.recommendation-year {
+    background: #e3f2fd;
+    color: #1565c0;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* Stands section */
+.stands-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stands-count {
+    font-weight: 400;
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.stands-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Stand item */
+.stand-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.stand-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.stand-item.expanded {
+    border-color: #f39c12;
+    box-shadow: 0 2px 12px rgba(243, 156, 18, 0.2);
+}
+
+.stand-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    background: #fafafa;
+    cursor: pointer;
+    gap: 12px;
+}
+
+.stand-header:hover {
+    background: #f5f5f5;
+}
+
+.stand-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.stand-number {
+    font-weight: 600;
+    color: #2d5a27;
+    display: block;
+}
+
+.stand-species {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.stand-summary {
+    text-align: right;
+    font-size: 0.8rem;
+}
+
+.stand-area {
+    display: block;
+    font-weight: 600;
+    color: #333;
+}
+
+.stand-volume {
+    color: #666;
+}
+
+.stand-toggle {
+    color: #999;
+    font-size: 0.75rem;
+    transition: transform 0.2s;
+}
+
+/* Stand details (expandable) */
+.stand-details {
+    display: none;
+    padding: 0 12px 12px;
+    background: white;
+}
+
+.stand-item.expanded .stand-details {
+    display: block;
+}
+
+.detail-group {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.detail-group:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+.detail-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #888;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.detail-grid {
+    display: grid;
+    gap: 4px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    padding: 2px 0;
+}
+
+.detail-row span:first-child {
+    color: #666;
+}
+
+.detail-row span:last-child {
+    font-weight: 500;
+    color: #333;
+}
+
+.detail-row.highlight {
+    background: #fff8e1;
+    padding: 4px 8px;
+    margin: 2px -8px;
+    border-radius: 4px;
+}
+
+.detail-row.highlight span:last-child {
+    color: #e65100;
+}
+
+/* Mini species bar for stand details */
+.mini-species-bar {
+    display: flex;
+    height: 16px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.mini-species-bar .pine { background: #3498db; }
+.mini-species-bar .spruce { background: #27ae60; }
+.mini-species-bar .birch { background: #f1c40f; }
+
+.mini-species-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.7rem;
+    color: #666;
+}
+
+.detail-footer {
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.measurement-date {
+    font-size: 0.7rem;
+    color: #999;
+    font-style: italic;
 }
