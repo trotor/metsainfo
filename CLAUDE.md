@@ -56,10 +56,12 @@ The `CODES` object maps numeric IDs to Finnish names:
 ## File Structure
 
 ```
-metsainfo/
 ├── index.html    # Entry point, CDN imports
-├── app.js        # All application logic (~760 lines)
+├── app.js        # All application logic (~1370 lines)
 ├── style.css     # Styling
+├── version.js    # Version information
+├── CLAUDE.md     # Developer instructions (this file)
+├── CLAUDE-HOWTO.md # AI usage guide and development history
 └── README.md     # Finnish documentation
 ```
 
@@ -71,9 +73,16 @@ metsainfo/
 
 ## Version Management
 
-When making changes to the application, remember to update the version number in `metsainfo/version.js`:
+When making changes to the application, remember to update the version number in `version.js`:
 - **Patch** (1.x.Y): Bug fixes, minor tweaks
 - **Minor** (1.X.0): New features, enhancements
 - **Major** (X.0.0): Breaking changes, major rewrites
 
 Update both `number` and `date` fields.
+
+## AI Development Guide
+
+See [CLAUDE-HOWTO.md](CLAUDE-HOWTO.md) for:
+- How this application was built using AI (Claude Code)
+- Example prompts for developing the application further
+- Ideas for integrating AI features into the application itself
