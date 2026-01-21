@@ -322,6 +322,29 @@ function normalizeParcelId(input) {
 }
 
 /**
+ * Fetch all parcel parts by cadastral reference
+ */
+async function fetchParcelsByReference(reference) {
+    const params = new URLSearchParams({
+        service: 'WFS',
+        version: '2.0.0',
+        request: 'GetFeature',
+        typeNames: 'cp:CadastralParcel',
+        outputFormat: 'application/json',
+        srsName: 'EPSG:3067',
+        CQL_FILTER: `nationalCadastralReference='${reference}'`
+    });
+
+    const response = await fetch(`${CONFIG.cadastralWfsUrl}?${params}`);
+    if (!response.ok) {
+        throw new Error('Haku epäonnistui');
+    }
+
+    const data = await response.json();
+    return data.features || [];
+}
+
+/**
  * Search for a parcel by cadastral reference
  */
 async function searchParcel() {
@@ -348,34 +371,26 @@ async function searchParcel() {
     button.textContent = 'Haetaan...';
 
     try {
-        const params = new URLSearchParams({
-            service: 'WFS',
-            version: '2.0.0',
-            request: 'GetFeature',
-            typeNames: 'cp:CadastralParcel',
-            outputFormat: 'application/json',
-            srsName: 'EPSG:3067',
-            CQL_FILTER: `nationalCadastralReference='${normalizedId}'`
-        });
+        const parcels = await fetchParcelsByReference(normalizedId);
 
-        const response = await fetch(`${CONFIG.cadastralWfsUrl}?${params}`);
-        if (!response.ok) {
-            throw new Error('Haku epäonnistui');
-        }
+        if (parcels.length > 0) {
+            // Calculate combined bounds for all parcel parts
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            parcels.forEach(parcel => {
+                const bounds = getGeometryBounds3067(parcel.geometry);
+                minX = Math.min(minX, bounds.minX);
+                minY = Math.min(minY, bounds.minY);
+                maxX = Math.max(maxX, bounds.maxX);
+                maxY = Math.max(maxY, bounds.maxY);
+            });
 
-        const data = await response.json();
-
-        if (data.features && data.features.length > 0) {
-            const parcel = data.features[0];
-
-            // Zoom to parcel
-            const bounds = getGeometryBounds3067(parcel.geometry);
-            const sw = proj4('EPSG:3067', 'WGS84', [bounds.minX, bounds.minY]);
-            const ne = proj4('EPSG:3067', 'WGS84', [bounds.maxX, bounds.maxY]);
+            // Zoom to combined bounds
+            const sw = proj4('EPSG:3067', 'WGS84', [minX, minY]);
+            const ne = proj4('EPSG:3067', 'WGS84', [maxX, maxY]);
             map.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], { maxZoom: 16, padding: [50, 50] });
 
-            // Select the parcel
-            selectParcel(parcel);
+            // Select all parcel parts
+            selectParcels(parcels);
         } else {
             errorEl.textContent = 'Kiinteistöä ei löytynyt';
             errorEl.classList.remove('hidden');
@@ -484,9 +499,34 @@ function addParcelLabel(feature) {
 }
 
 /**
- * Select a parcel and load its forest data
+ * Select a parcel and load its forest data (fetches all parts with same reference)
  */
 async function selectParcel(parcel) {
+    const reference = parcel.properties?.nationalCadastralReference;
+
+    // If we have a reference, fetch all parts of this parcel
+    if (reference) {
+        try {
+            const allParts = await fetchParcelsByReference(reference);
+            if (allParts.length > 1) {
+                // Multiple parts found, select them all
+                selectParcels(allParts);
+                return;
+            }
+        } catch (error) {
+            console.warn('Failed to fetch additional parcel parts:', error);
+            // Continue with single parcel selection
+        }
+    }
+
+    // Single parcel selection
+    selectParcels([parcel]);
+}
+
+/**
+ * Select multiple parcels (parcel parts) and load their forest data
+ */
+async function selectParcels(parcels) {
     const panel = document.getElementById('info-panel');
     const loading = document.getElementById('loading');
     const content = document.getElementById('info-content');
@@ -499,19 +539,32 @@ async function selectParcel(parcel) {
     selectedParcelLayer.clearLayers();
     forestLayer.clearLayers();
 
-    // Highlight selected parcel
-    selectedParcelLayer.addData(parcel);
-    currentParcel = parcel;
+    // Highlight all selected parcels
+    parcels.forEach(parcel => selectedParcelLayer.addData(parcel));
+    currentParcel = parcels.length === 1 ? parcels[0] : {
+        // Create a combined parcel object for display
+        properties: parcels[0].properties,
+        parts: parcels
+    };
 
     try {
-        // Get parcel bounds for forest data query
-        const bounds = getGeometryBounds3067(parcel.geometry);
+        // Calculate combined bounds for all parcel parts
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        parcels.forEach(parcel => {
+            const bounds = getGeometryBounds3067(parcel.geometry);
+            minX = Math.min(minX, bounds.minX);
+            minY = Math.min(minY, bounds.minY);
+            maxX = Math.max(maxX, bounds.maxX);
+            maxY = Math.max(maxY, bounds.maxY);
+        });
 
-        // Fetch forest data within the parcel's bounding box
-        const features = await fetchForestDataByBounds(bounds);
+        const combinedBounds = { minX, minY, maxX, maxY };
 
-        // Filter features that belong to the parcel
-        const filteredFeatures = filterFeaturesByParcel(features, parcel);
+        // Fetch forest data within the combined bounding box
+        const features = await fetchForestDataByBounds(combinedBounds);
+
+        // Filter features that belong to any of the parcel parts
+        const filteredFeatures = filterFeaturesByParcels(features, parcels);
         currentFeatures = filteredFeatures;
 
         loading.classList.add('hidden');
@@ -521,8 +574,8 @@ async function selectParcel(parcel) {
             filteredFeatures.forEach(f => forestLayer.addData(f));
         }
 
-        // Show summary with parcel info
-        showSummary(filteredFeatures, parcel);
+        // Show summary with parcel info (include part count if multi-part)
+        showSummary(filteredFeatures, currentParcel, parcels.length);
 
     } catch (error) {
         loading.classList.add('hidden');
@@ -679,6 +732,26 @@ function filterFeaturesByParcel(features, parcel) {
 }
 
 /**
+ * Filter forest features - only include stands whose centroid is inside any of the parcels
+ */
+function filterFeaturesByParcels(features, parcels) {
+    if (!parcels || parcels.length === 0) return features;
+
+    return features.filter(feature => {
+        if (!feature.geometry) return false;
+        try {
+            // Check if feature belongs to any of the parcel parts
+            return parcels.some(parcel =>
+                parcel.geometry && featureBelongsToParcel(feature.geometry, parcel.geometry)
+            );
+        } catch (e) {
+            console.warn('Error checking feature:', e);
+            return false;
+        }
+    });
+}
+
+/**
  * Check if a forest stand belongs to a parcel (centroid must be inside)
  */
 function featureBelongsToParcel(featureGeom, parcelGeom) {
@@ -714,12 +787,13 @@ function formatCadastralReference(ref) {
 /**
  * Show summary of forest features and parcel info
  */
-function showSummary(features, parcel) {
+function showSummary(features, parcel, partCount = 1) {
     const content = document.getElementById('info-content');
     const stats = calculateStatistics(features);
 
     const parcelProps = parcel ? parcel.properties : null;
     const parcelLabel = parcelProps?.label || formatCadastralReference(parcelProps?.nationalCadastralReference) || '-';
+    const partsInfo = partCount > 1 ? `<div class="parcel-parts">${partCount} palstaa</div>` : '';
 
     content.innerHTML = `
         ${parcel ? `
@@ -727,7 +801,7 @@ function showSummary(features, parcel) {
             <h3>Kiinteistö</h3>
             <div class="parcel-info">
                 <div class="parcel-id">${parcelLabel}</div>
-                <div class="parcel-details">Kiinteistötunnus</div>
+                <div class="parcel-details">Kiinteistötunnus${partsInfo}</div>
             </div>
         </div>
         ` : ''}
@@ -775,18 +849,22 @@ function showSummary(features, parcel) {
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgAge, 0)}</div>
                     <div class="stat-label">Keski-ikä (v)</div>
+                    <div class="stat-range">${formatNumber(stats.minAge, 0)} – ${formatNumber(stats.maxAge, 0)}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgHeight, 1)}</div>
                     <div class="stat-label">Keskipituus (m)</div>
+                    <div class="stat-range">${formatNumber(stats.minHeight, 1)} – ${formatNumber(stats.maxHeight, 1)}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgDiameter, 1)}</div>
                     <div class="stat-label">Keskiläpimitta (cm)</div>
+                    <div class="stat-range">${formatNumber(stats.minDiameter, 1)} – ${formatNumber(stats.maxDiameter, 1)}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgGrowth, 1)}</div>
                     <div class="stat-label">Kasvu (m³/ha/v)</div>
+                    <div class="stat-range">${formatNumber(stats.minGrowth, 1)} – ${formatNumber(stats.maxGrowth, 1)}</div>
                 </div>
             </div>
         </div>
@@ -1099,6 +1177,12 @@ function calculateStatistics(features) {
         totalPulpwood: 0,
         avgBasalArea: 0,
         avgStemCount: 0,
+        // Min/max values
+        minAge: null, maxAge: null,
+        minHeight: null, maxHeight: null,
+        minDiameter: null, maxDiameter: null,
+        minVolume: null, maxVolume: null,
+        minGrowth: null, maxGrowth: null,
         speciesPercent: { pine: 0, spruce: 0, birch: 0, other: 0 },
         cuttingRecommendations: [],
         silvicultureRecommendations: [],
@@ -1129,10 +1213,36 @@ function calculateStatistics(features) {
         stats.totalSawlog += (p.SAWLOGVOLUME || 0) * area;
         stats.totalPulpwood += (p.PULPWOODVOLUME || 0) * area;
 
-        if (p.MEANAGE) { stats.avgAge += p.MEANAGE; validAgeCount++; }
-        if (p.MEANHEIGHT) { stats.avgHeight += p.MEANHEIGHT; validHeightCount++; }
-        if (p.MEANDIAMETER) { stats.avgDiameter += p.MEANDIAMETER; validDiameterCount++; }
-        if (p.VOLUMEGROWTH) { stats.avgGrowth += p.VOLUMEGROWTH; validGrowthCount++; }
+        // Track min/max for volume
+        if (p.VOLUME != null) {
+            if (stats.minVolume === null || p.VOLUME < stats.minVolume) stats.minVolume = p.VOLUME;
+            if (stats.maxVolume === null || p.VOLUME > stats.maxVolume) stats.maxVolume = p.VOLUME;
+        }
+
+        if (p.MEANAGE) {
+            stats.avgAge += p.MEANAGE;
+            validAgeCount++;
+            if (stats.minAge === null || p.MEANAGE < stats.minAge) stats.minAge = p.MEANAGE;
+            if (stats.maxAge === null || p.MEANAGE > stats.maxAge) stats.maxAge = p.MEANAGE;
+        }
+        if (p.MEANHEIGHT) {
+            stats.avgHeight += p.MEANHEIGHT;
+            validHeightCount++;
+            if (stats.minHeight === null || p.MEANHEIGHT < stats.minHeight) stats.minHeight = p.MEANHEIGHT;
+            if (stats.maxHeight === null || p.MEANHEIGHT > stats.maxHeight) stats.maxHeight = p.MEANHEIGHT;
+        }
+        if (p.MEANDIAMETER) {
+            stats.avgDiameter += p.MEANDIAMETER;
+            validDiameterCount++;
+            if (stats.minDiameter === null || p.MEANDIAMETER < stats.minDiameter) stats.minDiameter = p.MEANDIAMETER;
+            if (stats.maxDiameter === null || p.MEANDIAMETER > stats.maxDiameter) stats.maxDiameter = p.MEANDIAMETER;
+        }
+        if (p.VOLUMEGROWTH) {
+            stats.avgGrowth += p.VOLUMEGROWTH;
+            validGrowthCount++;
+            if (stats.minGrowth === null || p.VOLUMEGROWTH < stats.minGrowth) stats.minGrowth = p.VOLUMEGROWTH;
+            if (stats.maxGrowth === null || p.VOLUMEGROWTH > stats.maxGrowth) stats.maxGrowth = p.VOLUMEGROWTH;
+        }
         if (p.SAWLOGVOLUME) { stats.avgSawlog += p.SAWLOGVOLUME; validSawlogCount++; }
         if (p.PULPWOODVOLUME) { stats.avgPulpwood += p.PULPWOODVOLUME; validPulpwoodCount++; }
         if (p.BASALAREA) { stats.avgBasalArea += p.BASALAREA; validBasalAreaCount++; }

@@ -274,6 +274,13 @@ body {
     margin-top: 4px;
 }
 
+.stat-range {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 2px;
+    font-style: italic;
+}
+
 /* Tree species bar */
 .species-bar {
     display: flex;
@@ -389,6 +396,17 @@ body {
 .parcel-details {
     font-size: 0.8rem;
     color: #888;
+}
+
+.parcel-parts {
+    display: inline-block;
+    background: #c0392b;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 8px;
 }
 
 /* Footer */
