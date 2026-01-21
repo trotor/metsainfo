@@ -803,6 +803,11 @@ function showSummary(features, parcel, partCount = 1) {
                 <div class="parcel-id">${parcelLabel}</div>
                 <div class="parcel-details">Kiinteistötunnus${partsInfo}</div>
             </div>
+            ${features.length > 0 ? `
+            <button class="download-btn" onclick="downloadCSV()">
+                <span class="download-icon">⬇</span> Lataa CSV
+            </button>
+            ` : ''}
         </div>
         ` : ''}
 
@@ -1367,6 +1372,85 @@ function formatNumber(value, decimals = 0) {
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals
     });
+}
+
+/**
+ * Download forest stand data as CSV file
+ */
+function downloadCSV() {
+    if (!currentFeatures || currentFeatures.length === 0) {
+        alert('Ei ladattavia metsäkuviotietoja.');
+        return;
+    }
+
+    const parcelId = currentParcel?.properties?.nationalCadastralReference ||
+                     currentParcel?.properties?.label || 'tuntematon';
+
+    // CSV headers
+    const headers = [
+        'Kuvio', 'Pinta-ala (ha)', 'Pääpuulaji', 'Kehitysluokka', 'Kasvupaikka',
+        'Maalaji', 'Ikä (v)', 'Pituus (m)', 'Läpimitta (cm)', 'Pohjapinta-ala (m²/ha)',
+        'Runkoluku (kpl/ha)', 'Tilavuus (m³/ha)', 'Kasvu (m³/ha/v)', 'Tukkipuu (m³/ha)',
+        'Kuitupuu (m³/ha)', 'Mänty (%)', 'Kuusi (%)', 'Lehtipuut (%)',
+        'Hakkuuehdotus', 'Hakkuuvuosi', 'Hoitoehdotus', 'Hoitovuosi', 'Mittauspäivä'
+    ];
+
+    // Generate CSV rows
+    const rows = currentFeatures.map((f, idx) => {
+        const p = f.properties;
+        return [
+            p.STANDNUMBER || (idx + 1),
+            p.AREA || '',
+            CODES.treeSpecies[p.MAINTREESPECIES] || '',
+            CODES.developmentClass[p.DEVELOPMENTCLASS] || p.DEVELOPMENTCLASS || '',
+            CODES.fertilityClass[p.FERTILITYCLASS] || '',
+            CODES.soilType[p.SOILTYPE] || '',
+            p.MEANAGE || '',
+            p.MEANHEIGHT || '',
+            p.MEANDIAMETER || '',
+            p.BASALAREA || '',
+            p.STEMCOUNT || '',
+            p.VOLUME || '',
+            p.VOLUMEGROWTH || '',
+            p.SAWLOGVOLUME || '',
+            p.PULPWOODVOLUME || '',
+            Math.round((p.PROPORTIONPINE || 0) * 100),
+            Math.round((p.PROPORTIONSPRUCE || 0) * 100),
+            Math.round((p.PROPORTIONOTHER || 0) * 100),
+            CODES.cuttingType[p.CUTTINGTYPE] || '',
+            p.CUTTINGPROPOSALYEAR || '',
+            CODES.silvicultureType[p.SILVICULTURETYPE] || '',
+            p.SILVICULTUREPROPOSALYEAR || '',
+            p.MEASUREMENTDATE ? new Date(p.MEASUREMENTDATE).toLocaleDateString('fi-FI') : ''
+        ];
+    });
+
+    // Escape CSV field (handle commas, quotes, newlines)
+    const escapeCSV = (field) => {
+        const str = String(field ?? '');
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            return '"' + str.replace(/"/g, '""') + '"';
+        }
+        return str;
+    };
+
+    // Build CSV content with BOM for Excel UTF-8 compatibility
+    const BOM = '\uFEFF';
+    const csvContent = BOM +
+        headers.map(escapeCSV).join(';') + '\n' +
+        rows.map(row => row.map(escapeCSV).join(';')).join('\n');
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `metsavaratiedot_${parcelId.replace(/[^a-zA-Z0-9-]/g, '_')}.csv`);
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
 // Initialize when DOM is ready
