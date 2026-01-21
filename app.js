@@ -1248,13 +1248,16 @@ function calculateStatistics(features) {
         if (p.BASALAREA) { stats.avgBasalArea += p.BASALAREA; validBasalAreaCount++; }
         if (p.STEMCOUNT) { stats.avgStemCount += p.STEMCOUNT; validStemCountCount++; }
 
-        let pine = p.PROPORTIONPINE || 0;
-        let spruce = p.PROPORTIONSPRUCE || 0;
-        let deciduous = p.PROPORTIONOTHER || 0;
+        // PROPORTION fields come as decimals (0.0-1.0), convert to percentages
+        let pine = (p.PROPORTIONPINE || 0) * 100;
+        let spruce = (p.PROPORTIONSPRUCE || 0) * 100;
+        let deciduous = (p.PROPORTIONOTHER || 0) * 100;
 
+        // Fallback: if no proportion data, use main tree species
         if ((pine + spruce + deciduous) === 0 && p.MAINTREESPECIES) {
-            if (p.MAINTREESPECIES === 1) pine = 100;
-            else if (p.MAINTREESPECIES === 2) spruce = 100;
+            const species = Number(p.MAINTREESPECIES);
+            if (species === 1) pine = 100;
+            else if (species === 2) spruce = 100;
             else deciduous = 100;
         }
 
