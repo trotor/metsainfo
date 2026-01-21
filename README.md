@@ -60,8 +60,19 @@ python3 -m http.server 8080
 
 Avaa selaimessa: http://localhost:8080
 
+### Tekoälyavusteinen kehitys
+
+Tämä sovellus on kehitetty kokonaan [Claude Code](https://claude.ai/code) -työkalulla. Claude Code on Anthropicin CLI-työkalu tekoälyavusteiseen ohjelmistokehitykseen.
+
+Katso [CLAUDE-HOWTO.md](CLAUDE-HOWTO.md) jossa on:
+- Kuvaus kehitysprosessista
+- Esimerkkiprompteja sovelluksen jatkokehittämiseen
+- Ideoita tekoälyominaisuuksien lisäämiseen sovellukseen
+- Ohjeet Claude API:n integrointiin
+
 ## Versiohistoria
 
+- **v1.3.0** (2026-01-21) - Moniosaisten kiinteistöjen tuki, min/max-tilastot
 - **v1.1.0** (2026-01-20) - Kiinteistöhaku, kuviokohtaiset tiedot, karttakorostukset
 - **v1.0.0** (2026-01-19) - Ensimmäinen julkaisu
 
