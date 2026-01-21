@@ -1,5 +1,7 @@
 # Metsäinfo ja tekoäly
 
+**[Kokeile sovellusta](https://trotor.github.io/metsainfo/)** | [README](README.md) | [Lähdekoodi](https://github.com/trotor/metsainfo)
+
 Tämä dokumentti kuvaa miten Metsäinfo-sovellus on kehitetty tekoälyn avulla, ja miten tekoälyä voidaan hyödyntää sekä sovelluksen kehittämisessä että metsätiedon ymmärtämisessä.
 
 ## Miten sovellus on luotu
