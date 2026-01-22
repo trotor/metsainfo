@@ -16,6 +16,9 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <!-- Proj4Leaflet for EPSG:3067 support -->
+    <script src="https://unpkg.com/proj4leaflet@1.0.2/src/proj4leaflet.js"></script>
+
     <!-- Version info -->
     <script src="version.js"></script>
 
@@ -46,25 +49,21 @@
 
         <!-- Search control -->
         <div id="search-control">
-            <input type="text" id="search-input" placeholder="Hae kiinteistötunnuksella (esim. 91-416-1-123)">
-            <button id="search-button">Hae</button>
-            <div id="search-error" class="hidden"></div>
+            <button id="search-toggle" title="Hae kiinteistötunnuksella">&#128269;</button>
+            <div id="search-form" class="hidden">
+                <input type="text" id="search-input" placeholder="esim. 91-416-1-123">
+                <button id="search-button">Hae</button>
+                <div id="search-error" class="hidden"></div>
+            </div>
         </div>
 
-        <!-- Layer controls -->
-        <div id="layer-controls">
-            <label>
-                <input type="checkbox" id="toggle-forest" checked>
-                Metsäkuviot
-            </label>
-        </div>
 
         <!-- Footer -->
         <footer id="footer">
             <p>
-                <span id="author-info"></span> |
+                <span id="author-info"></span> <a href="mailto:tero.ronkko@gmail.com">tero.ronkko@gmail.com</a> |
                 Metsätiedot: <a href="https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto" target="_blank">Metsäkeskus</a> |
-                Kartta: <a href="https://www.openstreetmap.org/copyright" target="_blank">OSM</a> |
+                Kartta: <a href="https://kartat.kapsi.fi/" target="_blank">Kapsi</a> / <a href="https://www.maanmittauslaitos.fi/" target="_blank">MML</a> |
                 Kiinteistöt: <a href="https://www.maanmittauslaitos.fi/" target="_blank">MML</a>
             </p>
         </footer>

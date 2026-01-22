@@ -9,12 +9,23 @@
 // Define EPSG:3067 (ETRS-TM35FIN) projection for Proj4 (used for coordinate conversion)
 proj4.defs('EPSG:3067', '+proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
 
+// EPSG:3067 CRS for Leaflet (MML/Kapsi tile grid)
+const crsEPSG3067 = new L.Proj.CRS(
+    'EPSG:3067',
+    '+proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
+    {
+        origin: [-548576, 8388608],
+        resolutions: [8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25],
+        bounds: L.bounds([-548576, 8388608], [1548576, 6291456])
+    }
+);
+
 // Configuration
 const CONFIG = {
-    // Default center in WGS84 (lat, lng) - central Finland
-    defaultCenter: [64.0, 26.0],
-    defaultZoom: 6,
-    minZoomForParcels: 12, // Minimum zoom level to load parcels
+    // Default center in WGS84 (lat, lng) - Suolahti
+    defaultCenter: [62.57, 25.85],
+    defaultZoom: 5,
+    minZoomForParcels: 10, // Minimum zoom level to load parcels (adjusted for EPSG:3067)
 
     // WFS endpoint for forest data
     wfsUrl: 'https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows',
@@ -22,9 +33,11 @@ const CONFIG = {
     // MML INSPIRE WFS for cadastral parcels
     cadastralWfsUrl: 'https://inspire-wfs.maanmittauslaitos.fi/inspire-wfs/cp/ows',
 
-    // Map layers
+    // Map layers (Kapsi EPSG:3067)
     layers: {
-        osm: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        taustakartta: 'https://tiles.kartat.kapsi.fi/taustakartta_3067/{z}/{x}/{y}.jpg',
+        peruskartta: 'https://tiles.kartat.kapsi.fi/peruskartta_3067/{z}/{x}/{y}.jpg',
+        ortokuva: 'https://tiles.kartat.kapsi.fi/ortokuva_3067/{z}/{x}/{y}.jpg'
     }
 };
 
@@ -110,21 +123,50 @@ function init() {
 }
 
 /**
- * Initialize the Leaflet map with standard Web Mercator CRS
+ * Initialize the Leaflet map with EPSG:3067 CRS for Finnish maps
  */
 function initMap() {
     map = L.map('map', {
+        crs: crsEPSG3067,
         center: CONFIG.defaultCenter,
         zoom: CONFIG.defaultZoom,
-        zoomControl: true
+        zoomControl: true,
+        minZoom: 1,
+        maxZoom: 15
     });
 
-    // Add OpenStreetMap as base layer
-    L.tileLayer(CONFIG.layers.osm, {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-        minZoom: 2
-    }).addTo(map);
+    const attribution = 'Kartta: <a href="https://www.maanmittauslaitos.fi/" target="_blank">MML</a> / <a href="https://kartat.kapsi.fi/" target="_blank">Kapsi</a>';
+
+    // Base layers
+    const taustakartta = L.tileLayer(CONFIG.layers.taustakartta, {
+        attribution: attribution,
+        maxZoom: 15,
+        minZoom: 1
+    });
+
+    const peruskartta = L.tileLayer(CONFIG.layers.peruskartta, {
+        attribution: attribution,
+        maxZoom: 15,
+        minZoom: 1
+    });
+
+    const ortokuva = L.tileLayer(CONFIG.layers.ortokuva, {
+        attribution: attribution,
+        maxZoom: 15,
+        minZoom: 1
+    });
+
+    // Add default layer
+    peruskartta.addTo(map);
+
+    // Layer control
+    const baseLayers = {
+        'Taustakartta': taustakartta,
+        'Peruskartta': peruskartta,
+        'Ortokuva': ortokuva
+    };
+
+    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
 }
 
 /**
@@ -270,16 +312,26 @@ function showFeaturePopup(feature, layer) {
 }
 
 /**
- * Initialize layer controls
+ * Initialize controls
  */
 function initControls() {
-    const toggleForest = document.getElementById('toggle-forest');
+    // Search toggle
+    const searchToggle = document.getElementById('search-toggle');
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.getElementById('search-input');
 
-    toggleForest.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            forestLayer.addTo(map);
-        } else {
-            map.removeLayer(forestLayer);
+    searchToggle.addEventListener('click', () => {
+        searchForm.classList.toggle('hidden');
+        if (!searchForm.classList.contains('hidden')) {
+            searchInput.focus();
+        }
+    });
+
+    // Close search when clicking outside
+    document.addEventListener('click', (e) => {
+        const searchControl = document.getElementById('search-control');
+        if (!searchControl.contains(e.target) && !searchForm.classList.contains('hidden')) {
+            searchForm.classList.add('hidden');
         }
     });
 }
