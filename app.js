@@ -32,41 +32,57 @@ const CONFIG = {
 const CODES = {
     treeSpecies: {
         1: 'Mänty', 2: 'Kuusi', 3: 'Rauduskoivu', 4: 'Hieskoivu', 5: 'Haapa',
-        6: 'Harmaaleppä', 7: 'Tervaleppä', 8: 'Muu havupuu', 9: 'Muu lehtipuu'
+        6: 'Harmaaleppä', 7: 'Tervaleppä', 8: 'Muu havupuu', 9: 'Muu lehtipuu',
+        10: 'Douglaskuusi', 11: 'Kataja', 12: 'Kontortamänty', 13: 'Kynäjalava',
+        14: 'Lehtikuusi', 15: 'Metsälehmus', 16: 'Mustakuusi', 17: 'Paju',
+        18: 'Pihlaja', 19: 'Pihta', 20: 'Raita', 21: 'Saarni', 22: 'Sembramänty',
+        23: 'Serbiankuusi', 24: 'Tammi', 25: 'Tuomi', 26: 'Vaahtera', 27: 'Visakoivu',
+        28: 'Vuorijalava', 29: 'Lehtipuu', 30: 'Havupuu'
     },
     cuttingType: {
-        1: 'Avohakkuu', 2: 'Siemenpuuhakkuu', 3: 'Suojuspuuhakkuu', 4: 'Ylispuiden poisto',
-        5: 'Ensiharvennus', 6: 'Harvennushakkuu', 7: 'Kaistalehakkuu', 8: 'Poimintahakkuu',
-        9: 'Pienaukkohakkuu', 10: 'Erikoishakkuu'
+        0: 'Määräaikainen lepo', 1: 'Ylispuiden poisto', 2: 'Ensiharvennus',
+        3: 'Harvennus', 4: 'Kaistalehakkuu', 5: 'Avohakkuu', 6: 'Verhopuuhakkuu',
+        7: 'Suojuspuuhakkuu', 8: 'Siemenpuuhakkuu', 9: 'Erikoishakkuu',
+        11: 'Yläharvennus', 12: 'Väljennyshakkuu', 13: 'Kunnostushakkuu',
+        14: 'Poimintahakkuu', 15: 'Pienaukkohakkuu', 20: 'Energiapuuharvennus',
+        90: 'Maankäyttömuodon muutoshakkuu', 91: 'Erityishakkuu (6§)',
+        92: 'Muu hakkuu', 93: 'Uudistushakkuu tuhoalueella', 94: 'Kasvatushakkuu tuhoalueella'
     },
     silvicultureType: {
-        1: 'Raivaus', 2: 'Maanmuokkaus', 3: 'Kylvö', 4: 'Istutus', 5: 'Täydennysviljely',
-        6: 'Taimikonhoito', 7: 'Nuoren metsän kunnostus', 8: 'Pystykarsinta', 9: 'Lannoitus',
-        10: 'Kunnostusojitus', 11: 'Metsätien rakentaminen', 12: 'Metsätien perusparannus'
+        1: 'Taimikon perustaminen', 2: 'Taimikon varhaishoito', 3: 'Taimikon hoito',
+        4: 'Nuoren metsän hoito', 5: 'Muut hoitotyöt'
     },
     fertilityClass: {
         1: 'Lehto', 2: 'Lehtomainen kangas', 3: 'Tuore kangas', 4: 'Kuivahko kangas',
         5: 'Kuiva kangas', 6: 'Karukkokangas', 7: 'Kalliomaa/hietikko', 8: 'Lakimetsä/tunturi'
     },
     soilType: {
-        1: 'Kallio', 2: 'Kivikko', 3: 'Louhikko', 4: 'Sora', 5: 'Hieno hiekka',
-        6: 'Karkea hieta', 7: 'Hieno hieta', 8: 'Hiesu', 9: 'Savi', 10: 'Liejusavi',
-        11: 'Lieju', 12: 'Saraturve', 13: 'Rahkaturve', 21: 'Moreeni'
+        10: 'Keskikarkea/karkea kangasmaa', 11: 'Karkea moreeni', 12: 'Karkea lajittunut',
+        20: 'Hienojakoinen kangasmaa', 21: 'Hienoainesmoreeni', 22: 'Hienojakoinen lajittunut',
+        23: 'Silttipitoinen maalaji', 24: 'Savimaa', 30: 'Kivinen keskikarkea kangasmaa',
+        31: 'Kivinen karkea moreeni', 32: 'Kivinen karkea lajittunut',
+        40: 'Kivinen hienojakoinen kangasmaa', 50: 'Kallio/kivikko',
+        60: 'Turvemaa', 61: 'Saraturve', 62: 'Rahkaturve', 63: 'Puuvaltainen turve',
+        64: 'Eroosioherkkä saraturve', 65: 'Eroosioherkkä rahkaturve',
+        66: 'Maatumaton saraturve', 67: 'Maatumaton rahkaturve', 70: 'Multamaa', 80: 'Liejumaa'
     },
     developmentClass: {
         'A0': 'Aukea', 'S0': 'Siemenpuumetsikkö', 'Y1': 'Ylispuustoinen taimikko',
-        '02': 'Pieni taimikko', '03': 'Varttunut taimikko', '04': 'Nuori kasvatusmetsikkö',
-        '05': 'Varttunut kasvatusmetsikkö', '06': 'Uudistuskypsä metsikkö', '07': 'Suojuspuumetsikkö',
-        'T1': 'Taimikko', 'T2': 'Nuori metsä', 'ER': 'Eri-ikäisrakenteinen'
+        '02': 'Nuori kasvatusmetsikkö', '03': 'Varttunut kasvatusmetsikkö',
+        '04': 'Uudistuskypsä metsikkö', '05': 'Suojuspuumetsikkö',
+        'T1': 'Taimikko (alle 1,3 m)', 'T2': 'Taimikko (yli 1,3 m)', 'ER': 'Eri-ikäisrakenteinen'
     },
     drainageState: {
-        1: 'Ojittamaton kangas', 2: 'Ojitettu kangas', 3: 'Ojikko', 4: 'Muuttuma', 5: 'Turvekangas'
+        1: 'Ojittamaton kangas', 2: 'Soistunut kangas', 3: 'Ojitettu kangas',
+        6: 'Luonnontilainen suo', 7: 'Ojikko', 8: 'Muuttuma', 9: 'Turvekangas'
     },
     accessibility: {
-        1: 'Ympärivuotinen', 2: 'Kelirikkokaudella rajoitettu', 3: 'Talvikorjuu', 4: 'Ei korjuukelpoinen'
+        1: 'Ympärivuotinen', 2: 'Sulan maan (ei kelirikko)', 3: 'Kuivana kautena',
+        4: 'Vain maa jäässä', 5: 'Ei määritelty'
     },
     mainGroup: {
-        1: 'Metsämaa', 2: 'Kitumaa', 3: 'Joutomaa', 4: 'Muu metsätalousmaa'
+        1: 'Metsämaa', 2: 'Kitumaa', 3: 'Joutomaa', 4: 'Muu metsätalousmaa',
+        5: 'Tontti', 6: 'Maatalousmaa', 7: 'Muu maa', 8: 'Vesistö'
     }
 };
 
