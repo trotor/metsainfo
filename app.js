@@ -22,8 +22,8 @@ const crsEPSG3067 = new L.Proj.CRS(
 
 // Configuration
 const CONFIG = {
-    // Default center in WGS84 (lat, lng) - Suolahti
-    defaultCenter: [62.57, 25.85],
+    // Default center in WGS84 (lat, lng) - 2km east of Suolahti
+    defaultCenter: [62.57, 25.90],
     defaultZoom: 5,
     minZoomForParcels: 10, // Minimum zoom level to load parcels (adjusted for EPSG:3067)
 
