@@ -47,22 +47,34 @@ No build step, package manager, or dependencies to install. All libraries are lo
 ### Coordinate Handling
 All external data uses EPSG:3067 (Finnish national projection). Leaflet uses WGS84. The `coordsEPSG3067ToLatLng()` function handles conversion. Geometry operations (`pointInPolygon3067`, `getGeometryBounds3067`) work in EPSG:3067.
 
-### Code Mappings
-The `CODES` object maps numeric IDs to Finnish names:
-- `treeSpecies` - Pine (1), Spruce (2), Birch varieties (3-4), etc.
-- `cuttingType` - Logging recommendations (1-10)
-- `silvicultureType` - Forest management recommendations (1-12)
+### Code Mappings (CODES object)
+
+**IMPORTANT:** All code mappings must match the official Metsäkeskus WFS specification:
+- **Official source:** https://www.metsakeskus.fi/sites/default/files/document/avoin-metsatieto-wfs-stand-habitat-koodisto-ja-tietokantakuvaus.xlsx
+- **Local reference:** [KOODISTO.md](KOODISTO.md)
+
+The `CODES` object in `app.js` maps numeric IDs to Finnish names. When modifying or adding codes, always verify against the official Metsäkeskus documentation. Key mappings:
+- `treeSpecies` - Tree species (1-30)
+- `cuttingType` - Cutting/logging types (0-94)
+- `silvicultureType` - Silviculture operations (1-5)
+- `developmentClass` - Forest development stages (A0, S0, T1, T2, 02-05, Y1, ER)
+- `drainageState` - Drainage status (1-3, 6-9)
+- `soilType` - Soil types (10-80)
+- `fertilityClass` - Site fertility (1-8)
+- `accessibility` - Harvesting accessibility (1-5)
+- `mainGroup` - Land use category (1-8)
 
 ## File Structure
 
 ```
-├── index.html    # Entry point, CDN imports
-├── app.js        # All application logic (~1370 lines)
-├── style.css     # Styling
-├── version.js    # Version information
-├── CLAUDE.md     # Developer instructions (this file)
+├── index.html      # Entry point, CDN imports
+├── app.js          # All application logic (~1400 lines)
+├── style.css       # Styling
+├── version.js      # Version information
+├── CLAUDE.md       # Developer instructions (this file)
 ├── CLAUDE-HOWTO.md # AI usage guide and development history
-└── README.md     # Finnish documentation
+├── KOODISTO.md     # Official code mappings reference
+└── README.md       # Finnish documentation
 ```
 
 ## Notes
