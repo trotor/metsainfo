@@ -23,8 +23,9 @@ No build step, package manager, or dependencies to install. All libraries are lo
 ### Tech Stack
 - Vanilla JavaScript (ES6+)
 - Leaflet.js - Map rendering
-- Proj4js - Coordinate transformation between EPSG:3067 (Finnish national) and WGS84 (web maps)
-- OpenStreetMap - Base tiles
+- Proj4js - Coordinate transformation between EPSG:3067 (Finnish national) and WGS84
+- Proj4Leaflet - EPSG:3067 CRS support for Leaflet
+- Kapsi/MML - Finnish base map tiles (taustakartta, peruskartta, ortokuva)
 
 ### Data Sources (WFS)
 - **Metsäkeskus** (`avoin.metsakeskus.fi`) - Forest stand data (`v1:stand`)
@@ -45,7 +46,15 @@ No build step, package manager, or dependencies to install. All libraries are lo
 - `loadedParcels` - Cache of loaded parcels by ID
 
 ### Coordinate Handling
-All external data uses EPSG:3067 (Finnish national projection). Leaflet uses WGS84. The `coordsEPSG3067ToLatLng()` function handles conversion. Geometry operations (`pointInPolygon3067`, `getGeometryBounds3067`) work in EPSG:3067.
+The map uses EPSG:3067 (Finnish national projection) natively via Proj4Leaflet CRS. Base map tiles from Kapsi use EPSG:3067 tile grid. WFS data also uses EPSG:3067. The `coordsEPSG3067ToLatLng()` function converts coordinates to WGS84 LatLng for Leaflet's internal use. Geometry operations (`pointInPolygon3067`, `getGeometryBounds3067`) work in EPSG:3067.
+
+### Map Layers
+Base map layers are served from Kapsi (kartat.kapsi.fi) in EPSG:3067 projection:
+- **Peruskartta** (default) - Basic topographic map
+- **Taustakartta** - Background map with less detail
+- **Ortokuva** - Aerial/satellite imagery
+
+Layer switching is handled by Leaflet's built-in layer control (top right corner).
 
 ### Code Mappings (CODES object)
 
@@ -80,8 +89,9 @@ The `CODES` object in `app.js` maps numeric IDs to Finnish names. When modifying
 ## Notes
 
 - UI is in Finnish (Suomi)
-- Parcels only load at zoom level ≥14 for performance
+- Parcels only load at zoom level ≥10 for performance (EPSG:3067 zoom levels)
 - Forest volume colors: darker green = higher m³/ha
+- Default center: Suolahti, Finland (62.57°N, 25.85°E)
 
 ## Version Management
 
