@@ -38,7 +38,8 @@ Sovellus toimii kokonaan selaimessa ilman backendiä.
 
 - **Leaflet.js** - Karttakirjasto
 - **Proj4js** - Koordinaatistomuunnokset (EPSG:3067 ↔ WGS84)
-- **OpenStreetMap** - Taustakartta
+- **Proj4Leaflet** - EPSG:3067 natiivituki Leafletille
+- **Kapsi/MML** - Suomalaiset taustakartat (peruskartta, taustakartta, ortokuva)
 
 ## Datalähteet
 
@@ -46,7 +47,7 @@ Sovellus toimii kokonaan selaimessa ilman backendiä.
 |------|-------|-----------|
 | Metsävaratiedot | [Metsäkeskus](https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto) | WFS |
 | Kiinteistörajat | [MML INSPIRE](https://www.maanmittauslaitos.fi/) | WFS |
-| Taustakartta | [OpenStreetMap](https://www.openstreetmap.org/) | TMS |
+| Taustakartat | [Kapsi](https://kartat.kapsi.fi/) / [MML](https://www.maanmittauslaitos.fi/) | TMS (EPSG:3067) |
 
 ## Kehitys
 
@@ -72,6 +73,9 @@ Katso [CLAUDE-HOWTO.md](CLAUDE-HOWTO.md) jossa on:
 
 ## Versiohistoria
 
+- **v1.6.0** (2026-01-22) - EPSG:3067 projektio, Kapsi/MML taustakartat, karttatasojen valitsin
+- **v1.5.0** (2026-01-22) - Koodistojen korjaus Metsäkeskuksen virallisen määrityksen mukaiseksi
+- **v1.4.0** (2026-01-22) - CSV-lataus metsäkuviotiedoille
 - **v1.3.0** (2026-01-21) - Moniosaisten kiinteistöjen tuki, min/max-tilastot
 - **v1.1.0** (2026-01-20) - Kiinteistöhaku, kuviokohtaiset tiedot, karttakorostukset
 - **v1.0.0** (2026-01-19) - Ensimmäinen julkaisu
