@@ -853,6 +853,75 @@ function formatCadastralReference(ref) {
 }
 
 /**
+ * Calculate polygon area using shoelace formula (in square meters for EPSG:3067)
+ */
+function calculatePolygonArea(coordinates) {
+    if (!coordinates || coordinates.length < 3) return 0;
+
+    let area = 0;
+    const n = coordinates.length;
+    for (let i = 0; i < n; i++) {
+        const [x1, y1] = coordinates[i];
+        const [x2, y2] = coordinates[(i + 1) % n];
+        area += x1 * y2 - x2 * y1;
+    }
+    return Math.abs(area) / 2;
+}
+
+/**
+ * Calculate total area from geometry (Polygon or MultiPolygon)
+ */
+function calculateGeometryArea(geometry) {
+    if (!geometry || !geometry.coordinates) return 0;
+
+    if (geometry.type === 'Polygon') {
+        // Outer ring is first, subtract holes
+        let area = calculatePolygonArea(geometry.coordinates[0]);
+        for (let i = 1; i < geometry.coordinates.length; i++) {
+            area -= calculatePolygonArea(geometry.coordinates[i]);
+        }
+        return area;
+    } else if (geometry.type === 'MultiPolygon') {
+        let totalArea = 0;
+        geometry.coordinates.forEach(polygon => {
+            let area = calculatePolygonArea(polygon[0]);
+            for (let i = 1; i < polygon.length; i++) {
+                area -= calculatePolygonArea(polygon[i]);
+            }
+            totalArea += area;
+        });
+        return totalArea;
+    }
+    return 0;
+}
+
+/**
+ * Calculate total parcel area from parcel object (single or multi-part)
+ */
+function calculateParcelArea(parcel, partCount) {
+    if (!parcel) return null;
+
+    // Multi-part parcel with parts array
+    if (parcel.parts && parcel.parts.length > 0) {
+        let totalArea = 0;
+        parcel.parts.forEach(part => {
+            if (part.geometry) {
+                totalArea += calculateGeometryArea(part.geometry);
+            }
+        });
+        return totalArea > 0 ? totalArea : null;
+    }
+
+    // Single parcel - calculate from geometry
+    if (parcel.geometry) {
+        const area = calculateGeometryArea(parcel.geometry);
+        return area > 0 ? area : null;
+    }
+
+    return null;
+}
+
+/**
  * Show summary of forest features and parcel info
  */
 function showSummary(features, parcel, partCount = 1) {
@@ -861,7 +930,9 @@ function showSummary(features, parcel, partCount = 1) {
 
     const parcelProps = parcel ? parcel.properties : null;
     const parcelLabel = parcelProps?.label || formatCadastralReference(parcelProps?.nationalCadastralReference) || '-';
-    const partsInfo = partCount > 1 ? `<div class="parcel-parts">${partCount} palstaa</div>` : '';
+    const parcelArea = calculateParcelArea(parcel, partCount);
+    const parcelAreaText = parcelArea ? `${formatNumber(parcelArea / 10000, 2)} ha` : '';
+    const partsInfo = partCount > 1 ? ` (${partCount} palstaa)` : '';
 
     content.innerHTML = `
         ${parcel ? `
@@ -869,7 +940,7 @@ function showSummary(features, parcel, partCount = 1) {
             <h3>Kiinteistö</h3>
             <div class="parcel-info">
                 <div class="parcel-id">${parcelLabel}</div>
-                <div class="parcel-details">Kiinteistötunnus${partsInfo}</div>
+                <div class="parcel-details">${parcelAreaText}${partsInfo}</div>
             </div>
             ${features.length > 0 ? `
             <button class="download-btn" onclick="downloadCSV()">
