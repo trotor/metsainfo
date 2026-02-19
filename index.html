@@ -47,6 +47,19 @@
             <div id="info-content"></div>
         </div>
 
+        <!-- Color mode selector -->
+        <div id="color-mode-control" class="hidden">
+            <select id="color-mode-select" onchange="setColorMode(this.value)">
+                <option value="volume">Tilavuus (m³/ha)</option>
+                <option value="age">Ikä (v)</option>
+                <option value="species">Pääpuulaji</option>
+                <option value="devclass">Kehitysluokka</option>
+            </select>
+        </div>
+
+        <!-- Color legend -->
+        <div id="color-legend" class="hidden"></div>
+
         <!-- Search control -->
         <div id="search-control">
             <button id="search-toggle" title="Hae kiinteistötunnuksella">&#128269;</button>

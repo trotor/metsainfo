@@ -111,6 +111,7 @@ let currentFeatures = [];
 let currentParcel = null;
 let selectedStandIndex = null;  // Currently selected stand index
 let loadedParcels = new Map();  // Cache loaded parcels by ID
+let currentColorMode = 'volume'; // Color mode: volume, age, species, devclass
 
 // Tooltip explanations for forestry terms
 const TOOLTIPS = {
@@ -337,25 +338,147 @@ function coordsEPSG3067ToLatLng(coords) {
 }
 
 /**
- * Style function for forest features
+ * Color configurations for each mode
+ */
+const COLOR_MODES = {
+    volume: {
+        label: 'Tilavuus (m³/ha)',
+        getColor: (p) => {
+            const v = p.VOLUME || 0;
+            if (v > 200) return '#1e7d1e';
+            if (v > 150) return '#3cb043';
+            if (v > 100) return '#6cc66c';
+            if (v > 50) return '#8cd98c';
+            return '#a8d5a2';
+        },
+        border: '#2d5a27',
+        legend: [
+            { color: '#a8d5a2', label: '0–50' },
+            { color: '#8cd98c', label: '50–100' },
+            { color: '#6cc66c', label: '100–150' },
+            { color: '#3cb043', label: '150–200' },
+            { color: '#1e7d1e', label: '200+' }
+        ]
+    },
+    age: {
+        label: 'Ikä (v)',
+        getColor: (p) => {
+            const a = p.MEANAGE || 0;
+            if (a > 100) return '#4a1486';
+            if (a > 80) return '#8b5cf6';
+            if (a > 60) return '#c084fc';
+            if (a > 40) return '#e9d5ff';
+            if (a > 20) return '#fef3c7';
+            return '#fef9c3';
+        },
+        border: '#4a1486',
+        legend: [
+            { color: '#fef9c3', label: '0–20' },
+            { color: '#fef3c7', label: '20–40' },
+            { color: '#e9d5ff', label: '40–60' },
+            { color: '#c084fc', label: '60–80' },
+            { color: '#8b5cf6', label: '80–100' },
+            { color: '#4a1486', label: '100+' }
+        ]
+    },
+    species: {
+        label: 'Pääpuulaji',
+        getColor: (p) => {
+            const s = Number(p.MAINTREESPECIES);
+            if (s === 1) return '#3498db';  // Mänty
+            if (s === 2) return '#27ae60';  // Kuusi
+            if (s === 3 || s === 4) return '#f1c40f'; // Koivut
+            if (s >= 5) return '#e67e22';   // Muut lehtipuut
+            return '#bdc3c7';
+        },
+        border: '#555',
+        legend: [
+            { color: '#3498db', label: 'Mänty' },
+            { color: '#27ae60', label: 'Kuusi' },
+            { color: '#f1c40f', label: 'Koivu' },
+            { color: '#e67e22', label: 'Muu lehtipuu' }
+        ]
+    },
+    devclass: {
+        label: 'Kehitysluokka',
+        getColor: (p) => {
+            const d = String(p.DEVELOPMENTCLASS);
+            if (d === 'A0') return '#fef9c3'; // Aukea
+            if (d === 'S0' || d === 'T1') return '#bbf7d0'; // Siemenpuu/taimikko
+            if (d === 'T2') return '#86efac'; // Pieni taimikko
+            if (d === '02') return '#4ade80'; // Nuori kasvatusmetsä
+            if (d === '03') return '#22c55e'; // Varttunut kasvatusmetsä
+            if (d === '04') return '#16a34a'; // Uudistuskypsä
+            if (d === '05') return '#15803d'; // Suojuspuumetsä
+            if (d === 'Y1') return '#a78bfa'; // Ylispuustoinen
+            if (d === 'ER') return '#94a3b8'; // Eri-ikäisrakenteinen
+            return '#e2e8f0';
+        },
+        border: '#555',
+        legend: [
+            { color: '#fef9c3', label: 'Aukea' },
+            { color: '#bbf7d0', label: 'Taimikko' },
+            { color: '#4ade80', label: 'Nuori kasvatus' },
+            { color: '#22c55e', label: 'Varttunut' },
+            { color: '#16a34a', label: 'Uudistuskypsä' },
+            { color: '#a78bfa', label: 'Ylispuust./eri-ik.' }
+        ]
+    }
+};
+
+/**
+ * Style function for forest features (uses currentColorMode)
  */
 function featureStyle(feature) {
-    const props = feature.properties;
-    const volume = props.VOLUME || 0;
-
-    let fillColor = '#a8d5a2';
-    if (volume > 200) fillColor = '#1e7d1e';
-    else if (volume > 150) fillColor = '#3cb043';
-    else if (volume > 100) fillColor = '#6cc66c';
-    else if (volume > 50) fillColor = '#8cd98c';
-
+    const mode = COLOR_MODES[currentColorMode] || COLOR_MODES.volume;
     return {
-        fillColor: fillColor,
+        fillColor: mode.getColor(feature.properties),
         weight: 2,
         opacity: 0.9,
-        color: '#2d5a27',
+        color: mode.border,
         fillOpacity: 0.6
     };
+}
+
+/**
+ * Change color mode and refresh forest layer styling + legend
+ */
+function setColorMode(mode) {
+    if (!COLOR_MODES[mode]) return;
+    currentColorMode = mode;
+
+    // Re-style all features in the forest layer
+    forestLayer.eachLayer(layer => {
+        if (layer.feature) {
+            layer.setStyle(featureStyle(layer.feature));
+        }
+    });
+
+    updateLegend();
+}
+
+/**
+ * Update the color legend display
+ */
+function updateLegend() {
+    const legendEl = document.getElementById('color-legend');
+    if (!legendEl) return;
+
+    const mode = COLOR_MODES[currentColorMode];
+    if (!mode || !forestLayer || forestLayer.getLayers().length === 0) {
+        legendEl.classList.add('hidden');
+        return;
+    }
+
+    legendEl.classList.remove('hidden');
+    legendEl.innerHTML = `
+        <div class="legend-title">${mode.label}</div>
+        <div class="legend-items">
+            ${mode.legend.map(item =>
+                `<div class="legend-item"><span class="legend-color" style="background:${item.color}"></span>${item.label}</div>`
+            ).join('')}
+        </div>
+    `;
 }
 
 /**
@@ -426,6 +549,8 @@ function initEventListeners() {
         forestLayer.clearLayers();
         currentParcel = null;
         updateUrlParam(null);
+        document.getElementById('color-mode-control').classList.add('hidden');
+        document.getElementById('color-legend').classList.add('hidden');
     });
 
     // Search functionality
@@ -722,6 +847,16 @@ async function selectParcels(parcels) {
         // Add forest features to map
         if (filteredFeatures.length > 0) {
             filteredFeatures.forEach(f => forestLayer.addData(f));
+        }
+
+        // Show/hide color mode controls
+        const colorControl = document.getElementById('color-mode-control');
+        if (filteredFeatures.length > 0) {
+            colorControl.classList.remove('hidden');
+            updateLegend();
+        } else {
+            colorControl.classList.add('hidden');
+            document.getElementById('color-legend').classList.add('hidden');
         }
 
         // Show summary with parcel info (include part count if multi-part)
