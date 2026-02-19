@@ -711,6 +711,192 @@ h3 .info-tip-icon {
     background: #95a5a6;
 }
 
+/* Help button */
+#help-toggle {
+    width: 22px;
+    height: 22px;
+    background: rgba(255,255,255,0.25);
+    color: white;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    transition: background 0.2s;
+    vertical-align: middle;
+}
+
+#help-toggle:hover {
+    background: rgba(255,255,255,0.4);
+}
+
+/* Help modal */
+#help-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+}
+
+#help-overlay.hidden {
+    display: none;
+}
+
+#help-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 520px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 64px);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    z-index: 2001;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#help-modal.hidden {
+    display: none;
+}
+
+#help-modal h2 {
+    background: #2d5a27;
+    color: white;
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+#close-help {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.8;
+    line-height: 1;
+    z-index: 1;
+}
+
+#close-help:hover {
+    opacity: 1;
+}
+
+#help-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.help-section {
+    margin-bottom: 20px;
+}
+
+.help-section:last-child {
+    margin-bottom: 0;
+}
+
+.help-section h3 {
+    font-size: 0.9rem;
+    color: #2d5a27;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e8f5e9;
+}
+
+.help-section ol,
+.help-section ul {
+    margin-left: 20px;
+    font-size: 0.85rem;
+    color: #444;
+    line-height: 1.7;
+}
+
+.help-section p {
+    font-size: 0.85rem;
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 4px;
+}
+
+.help-section a {
+    color: #2d5a27;
+    font-weight: 500;
+}
+
+.help-footer {
+    background: #f8f9fa;
+    margin: 20px -20px -20px;
+    padding: 16px 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.help-footer p {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.help-footer p:last-child {
+    margin-bottom: 0;
+}
+
+/* Changelog */
+.changelog {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.changelog-entry {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 0.82rem;
+    padding: 4px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.changelog-entry:last-child {
+    border-bottom: none;
+}
+
+.changelog-version {
+    background: #e8f5e9;
+    color: #2d5a27;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.changelog-date {
+    color: #999;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.changelog-entry p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #555;
+}
+
 /* Footer */
 #footer {
     background: #333;
@@ -744,6 +930,11 @@ h3 .info-tip-icon {
     #search-control {
         top: 80px;
         right: 54px;
+    }
+
+    #help-modal {
+        width: calc(100vw - 24px);
+        max-height: calc(100vh - 32px);
     }
 
     #search-form {
@@ -1065,6 +1256,7 @@ h3 .info-tip-icon {
     /* Hide everything except info panel content */
     #header, #map, #footer, #search-control, #close-panel,
     #color-mode-control, #color-legend,
+    #help-modal, #help-overlay,
     .parcel-actions, .info-tip,
     .leaflet-control-container {
         display: none !important;

@@ -29,7 +29,7 @@
     <div id="app">
         <!-- Header -->
         <header id="header">
-            <h1>Metsäinfo <span id="version-badge"></span></h1>
+            <h1>Metsäinfo <span id="version-badge"></span> <button id="help-toggle" onclick="toggleHelp()" title="Käyttöohje">?</button></h1>
             <p>Suomen metsävaratiedot kartalla - hae kiinteistötunnuksella tai klikkaa karttaa</p>
         </header>
 
@@ -70,6 +70,99 @@
             </div>
         </div>
 
+
+        <!-- Help modal -->
+        <div id="help-overlay" class="hidden" onclick="toggleHelp()"></div>
+        <div id="help-modal" class="hidden">
+            <button id="close-help" onclick="toggleHelp()">&times;</button>
+            <h2>Metsäinfo — Käyttöohje</h2>
+            <div id="help-content">
+                <div class="help-section">
+                    <h3>Miten käytän sovellusta?</h3>
+                    <ol>
+                        <li><strong>Zoomaa karttaa</strong> haluamallesi alueelle — kiinteistörajat ilmestyvät lähemmäs zoomattaessa.</li>
+                        <li><strong>Klikkaa kiinteistöä</strong> kartalla tai <strong>hae kiinteistötunnuksella</strong> oikeasta yläkulmasta (🔍).</li>
+                        <li>Sivupaneeliin avautuu <strong>yhteenveto</strong> kiinteistön metsävaratiedoista.</li>
+                        <li>Klikkaa kuvion otsikkoa listassa nähdäksesi <strong>yksityiskohdat</strong> ja korostaaksesi kuvion kartalla.</li>
+                    </ol>
+                </div>
+
+                <div class="help-section">
+                    <h3>Ominaisuudet</h3>
+                    <ul>
+                        <li><strong>Kiinteistöhaku</strong> — Hae tunnuksella esim. 91-416-1-123</li>
+                        <li><strong>Metsävarat</strong> — Puuston tilavuus, ikä, puulajit, kasvu, tukki/kuitu</li>
+                        <li><strong>Väritysvaihtoehdot</strong> — Vaihda kuvioiden väritys tilavuuden, iän, puulajin tai kehitysluokan mukaan (vasemman alareunan valikko)</li>
+                        <li><strong>Luontokohteet</strong> — Metsälain erityisen tärkeät elinympäristöt (karttatasovalikko oikeassa yläkulmassa)</li>
+                        <li><strong>Sanasto-tooltipit</strong> — (i)-kuvake termin vieressä näyttää selityksen</li>
+                        <li><strong>CSV-lataus</strong> — Lataa kuviotiedot taulukkolaskentaohjelmaan</li>
+                        <li><strong>Tulostus</strong> — Tulosta yhteenveto paperille</li>
+                        <li><strong>Linkki</strong> — Kopioi suora linkki kiinteistöön jaettavaksi</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>Karttatasot</h3>
+                    <p>Oikeasta yläkulmasta voit vaihtaa taustakarttaa:</p>
+                    <ul>
+                        <li><strong>Peruskartta</strong> — Yksityiskohtainen maastokartta (oletus)</li>
+                        <li><strong>Taustakartta</strong> — Pelkistetympi pohjakartta</li>
+                        <li><strong>Ortokuva</strong> — Ilmakuva / satelliittikuva</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>Tietolähteet</h3>
+                    <p>Sovellus käyttää avointa dataa suoraan rajapinnoista:</p>
+                    <ul>
+                        <li><strong>Metsävaratiedot:</strong> <a href="https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto" target="_blank">Metsäkeskus</a></li>
+                        <li><strong>Kiinteistörajat:</strong> <a href="https://www.maanmittauslaitos.fi/" target="_blank">Maanmittauslaitos</a> (INSPIRE WFS)</li>
+                        <li><strong>Taustakartat:</strong> <a href="https://kartat.kapsi.fi/" target="_blank">Kapsi</a> / <a href="https://www.maanmittauslaitos.fi/" target="_blank">MML</a></li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>Uutta versiossa</h3>
+                    <div class="changelog">
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v2.1.0</span>
+                            <span class="changelog-date">2026-02-19</span>
+                            <p>Käyttöohjeet (tämä ikkuna)</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v2.0.0</span>
+                            <span class="changelog-date">2026-02-19</span>
+                            <p>Koodin modularisointi ES6-moduuleiksi</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v1.9.0</span>
+                            <span class="changelog-date">2026-02-19</span>
+                            <p>Luontotietokerros, sanasto-tooltipit, väritysvaihtoehdot, tulostustuki</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v1.8.0</span>
+                            <span class="changelog-date">2026-02-19</span>
+                            <p>URL-jako ja mittausvuosi-indikaattori</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v1.6.0</span>
+                            <span class="changelog-date">2026-01-22</span>
+                            <p>EPSG:3067 projektio, suomalaiset taustakartat</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v1.0.0</span>
+                            <span class="changelog-date">2026-01-19</span>
+                            <p>Ensimmäinen julkaisu</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-section help-footer">
+                    <p>Metsäinfo on avoimen datan opetuksellinen katselusovellus. Tiedot eivät korvaa metsäammattilaisen arviota.</p>
+                    <p>Henkilökohtaiset hoitosuositukset: <a href="https://www.metsaan.fi" target="_blank">metsään.fi</a></p>
+                </div>
+            </div>
+        </div>
 
         <!-- Footer -->
         <footer id="footer">

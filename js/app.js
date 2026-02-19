@@ -9,12 +9,13 @@ import * as state from './state.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle } from './styles.js';
 import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels } from './data.js';
-import { onEachFeature, onEachHabitat, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, copyParcelLink, downloadCSV } from './ui.js';
+import { onEachFeature, onEachHabitat, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, copyParcelLink, downloadCSV, toggleHelp } from './ui.js';
 
 // Expose functions for HTML onclick handlers
 window.copyParcelLink = copyParcelLink;
 window.downloadCSV = downloadCSV;
 window.setColorMode = setColorMode;
+window.toggleHelp = toggleHelp;
 
 /**
  * Initialize the application
