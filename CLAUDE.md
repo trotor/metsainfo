@@ -73,11 +73,42 @@ The `CODES` object in `app.js` maps numeric IDs to Finnish names. When modifying
 - `accessibility` - Harvesting accessibility (1-5)
 - `mainGroup` - Land use category (1-8)
 
+## WFS API Details
+
+### Metsäkeskus – Forest Stand Data
+
+- **Endpoint**: `https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows`
+- **Version**: WFS 2.0.0
+- **Feature type**: `v1:stand`
+- **Request**: GET with URL parameters: `service=WFS&version=2.0.0&request=GetFeature&typeName=v1:stand&outputFormat=application/json&srsName=EPSG:3067&bbox={minX},{minY},{maxX},{maxY},EPSG:3067`
+- **Response**: GeoJSON FeatureCollection with stand polygons
+- **Limits**: Max ~2000 features per query. Too large bbox → missing features without error.
+- **Error behavior**: HTTP 200 with empty FeatureCollection = no data in area (not an error)
+- **Key properties**: `MAINSPECIES`, `MEANDIAM`, `MEANHEIGHT`, `MEANAGE`, `VOLUME`, `DEVELOPMENTCLASS`, `FERTILITYCLASS`, `SOILTYPE`, `DRAINAGESTATE`, `ACCESSIBILITY`, `MEASUREMENTDATE`, plus cutting/silviculture recommendation arrays
+
+### MML INSPIRE – Cadastral Parcels
+
+- **Endpoint**: `https://inspire-wfs.maanmittauslaitos.fi/inspire-wfs/cp/ows`
+- **Version**: WFS 2.0.0
+- **Feature type**: `cp:CadastralParcel`
+- **Request (by area)**: GET with `bbox={minX},{minY},{maxX},{maxY},EPSG:3067`
+- **Request (by reference)**: GET with `CQL_FILTER=nationalCadastralReference='09141600010123'`
+- **Response**: GeoJSON FeatureCollection with parcel polygons
+- **Key properties**: `nationalCadastralReference` (14-digit ID), `label`, `referencePoint`
+- **Note**: Multi-part parcels return multiple features with the same `nationalCadastralReference`
+
+### General WFS Notes
+
+- All bbox values must be in EPSG:3067 coordinates (meters), not WGS84 (degrees)
+- Both APIs support CORS (direct browser access works)
+- OutputFormat is always `application/json` (GeoJSON)
+- Requests are GET with URL parameters (no POST/XML needed)
+
 ## File Structure
 
 ```
 ├── index.html      # Entry point, CDN imports
-├── app.js          # All application logic (~1400 lines)
+├── app.js          # All application logic (~1600 lines)
 ├── style.css       # Styling
 ├── version.js      # Version information
 ├── CLAUDE.md       # Developer instructions (this file)
@@ -85,6 +116,102 @@ The `CODES` object in `app.js` maps numeric IDs to Finnish names. When modifying
 ├── KOODISTO.md     # Official code mappings reference
 └── README.md       # Finnish documentation
 ```
+
+## Extension Points
+
+Where to add new functionality in `app.js`:
+
+### New map layer
+1. `initLayers()` (line ~175) – create new `L.geoJSON` layer
+2. `initMap()` (line ~128) – add to Leaflet layer control (`overlayMaps`)
+3. `initEventListeners()` (line ~342) – add load trigger (e.g., on `moveend`)
+
+### New statistic
+1. `calculateStatistics()` (line ~1308) – add calculation logic
+2. `showSummary()` (line ~927) – add HTML rendering in side panel
+
+### New search mode
+1. `normalizeParcelId()` (line ~370) – add input validation/parsing
+2. `searchParcel()` (line ~418) – add search logic branch
+
+### New code mapping
+1. `CODES` object (line ~45) in `app.js` – add new category
+2. `KOODISTO.md` – document the codes with official source
+3. **Both must be updated together!**
+
+### New color mode for stands
+1. `featureStyle()` (line ~268) – add color logic based on selected mode
+2. Add UI control (dropdown) for mode selection
+
+### New WFS data source
+1. Add endpoint URL to `CONFIG` object (line ~24)
+2. Create fetch function (use `fetchForestDataByBounds` as template)
+3. Add coordinate handling (all WFS uses EPSG:3067)
+4. Create filter and render functions
+
+## Common Pitfalls
+
+### Coordinates – most common source of bugs
+- WFS returns EPSG:3067 (meters). Leaflet uses WGS84 (degrees) internally.
+- **Never mix them.** Use `coordsEPSG3067ToLatLng()` when converting WFS data → Leaflet LatLng.
+- Geometry operations (`pointInPolygon3067`, `getGeometryBounds3067`) work in EPSG:3067. Do NOT convert to WGS84 first.
+- WFS bbox parameters must be EPSG:3067 coordinates. Converting map bounds: `proj4('WGS84', 'EPSG:3067', [lng, lat])`.
+
+### CODES object
+- All codes come from official Metsäkeskus xlsx specification. Never invent codes.
+- If WFS returns an unknown code, display the raw number (don't hide data).
+- Always verify against [KOODISTO.md](KOODISTO.md) and the [official source](https://www.metsakeskus.fi/sites/default/files/document/avoin-metsatieto-wfs-stand-habitat-koodisto-ja-tietokantakuvaus.xlsx).
+
+### WFS requests
+- Metsäkeskus WFS returns max ~2000 features per request.
+- Too large bbox → silently missing features (no error, just incomplete data).
+- HTTP 200 + empty FeatureCollection = no data in area, not an error.
+- 10m buffer is added to bbox in `fetchForestDataByBounds()` to catch edge features.
+
+### HTML rendering
+- `showSummary()` and `renderStandItem()` build HTML as template strings.
+- WFS data is generally safe, but always sanitize any user input before inserting into HTML.
+- Use `formatNumber()` for all numeric display (handles fi-FI locale, comma as decimal separator).
+
+### Multi-part parcels
+- A single cadastral reference (e.g., 091-416-0001-0123) can have multiple geometry parts.
+- `fetchParcelsByReference()` returns an array — always handle multiple features.
+- `selectParcels()` combines all parts. `filterFeaturesByParcels()` checks against all parts.
+
+## Testing
+
+No automated test framework. Verify changes manually:
+
+### Basic flow
+1. Start server: `python3 -m http.server 8080`
+2. Open http://localhost:8080
+3. Map loads, centered on Suolahti area
+4. Zoom in → parcel boundaries appear (zoom ≥10)
+5. Click a parcel → side panel shows statistics, stands appear on map with green coloring
+
+### Search
+6. Enter a cadastral reference in search box (format: `91-416-1-123`)
+7. Map zooms to parcel, statistics load in side panel
+8. Try invalid input → error message appears
+
+### Stand interaction
+9. Click a stand header in the list → stand expands, highlights on map
+10. Click a cutting recommendation → matching stands highlight in orange
+11. Click another stand → previous highlight clears
+
+### CSV export
+12. With a parcel selected, click "Lataa CSV"
+13. File downloads, opens in Excel with correct Finnish characters (ääkköset)
+14. Semicolon-delimited, comma as decimal separator
+
+### Mobile
+15. Resize browser to ≤768px width → panel moves to bottom
+16. Search form accessible, map interactive with touch
+
+### Edge cases
+- Zoom out past level 10 → parcels disappear (expected)
+- Click area with no forest data → panel shows "Ei metsävaratietoja"
+- Search for non-existent parcel → "Kiinteistöä ei löytynyt"
 
 ## Notes
 
