@@ -49,7 +49,7 @@
 
         <!-- Color mode selector -->
         <div id="color-mode-control" class="hidden">
-            <select id="color-mode-select" onchange="setColorMode(this.value)">
+            <select id="color-mode-select">
                 <option value="volume">Tilavuus (m³/ha)</option>
                 <option value="age">Ikä (v)</option>
                 <option value="species">Pääpuulaji</option>
@@ -83,7 +83,7 @@
     </div>
 
     <!-- Application script -->
-    <script src="app.js"></script>
+    <script type="module" src="js/app.js"></script>
     <script>
         // Display version info
         document.getElementById('version-badge').textContent = 'v' + VERSION.number;

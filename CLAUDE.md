@@ -62,7 +62,7 @@ Layer switching is handled by Leaflet's built-in layer control (top right corner
 - **Official source:** https://www.metsakeskus.fi/sites/default/files/document/avoin-metsatieto-wfs-stand-habitat-koodisto-ja-tietokantakuvaus.xlsx
 - **Local reference:** [KOODISTO.md](KOODISTO.md)
 
-The `CODES` object in `app.js` maps numeric IDs to Finnish names. When modifying or adding codes, always verify against the official Metsäkeskus documentation. Key mappings:
+The `CODES` object in `js/config.js` maps numeric IDs to Finnish names. When modifying or adding codes, always verify against the official Metsäkeskus documentation. Key mappings:
 - `treeSpecies` - Tree species (1-30)
 - `cuttingType` - Cutting/logging types (0-94)
 - `silvicultureType` - Silviculture operations (1-5)
@@ -107,47 +107,75 @@ The `CODES` object in `app.js` maps numeric IDs to Finnish names. When modifying
 ## File Structure
 
 ```
-├── index.html      # Entry point, CDN imports
-├── app.js          # All application logic (~1600 lines)
-├── style.css       # Styling
-├── version.js      # Version information
-├── CLAUDE.md       # Developer instructions (this file)
-├── CLAUDE-HOWTO.md # AI usage guide and development history
-├── KOODISTO.md     # Official code mappings reference
-└── README.md       # Finnish documentation
+├── index.html          # Entry point, CDN imports
+├── js/
+│   ├── app.js          # Main module: init, map setup, event wiring (~310 lines)
+│   ├── config.js       # CONFIG, CODES, TOOLTIPS, COLOR_MODES, CRS (~170 lines)
+│   ├── state.js        # Shared mutable state (~35 lines)
+│   ├── utils.js        # Coordinates, geometry, formatting (~140 lines)
+│   ├── styles.js       # Leaflet layer style functions (~60 lines)
+│   ├── data.js         # WFS fetch and geometry filtering (~140 lines)
+│   ├── statistics.js   # calculateStatistics (~200 lines)
+│   └── ui.js           # DOM rendering and interactions (~490 lines)
+├── style.css           # Styling
+├── version.js          # Version information (non-module, global)
+├── CLAUDE.md           # Developer instructions (this file)
+├── CLAUDE-HOWTO.md     # AI usage guide and development history
+├── KOODISTO.md         # Official code mappings reference
+└── README.md           # Finnish documentation
 ```
+
+### Module Dependencies
+```
+config.js ← (no deps, uses global proj4/L from CDN)
+state.js  ← (no deps)
+utils.js  ← (no deps, uses global proj4/L)
+styles.js ← config, state
+data.js   ← config, utils
+statistics.js ← config, utils
+ui.js     ← config, state, styles, statistics, utils
+app.js    ← config, state, utils, styles, data, ui
+```
+
+Note: `version.js` is loaded as a regular `<script>` (not a module) so `VERSION` is available globally for the inline script in `index.html`.
 
 ## Extension Points
 
-Where to add new functionality in `app.js`:
-
 ### New map layer
-1. `initLayers()` (line ~175) – create new `L.geoJSON` layer
-2. `initMap()` (line ~128) – add to Leaflet layer control (`overlayMaps`)
-3. `initEventListeners()` (line ~342) – add load trigger (e.g., on `moveend`)
+1. `js/app.js` `initLayers()` – create new `L.geoJSON` layer, register in state
+2. `js/app.js` `initMap()` – add to Leaflet layer control
+3. `js/app.js` `initEventListeners()` – add load trigger on `moveend`
+4. `js/styles.js` – add style function
+5. `js/ui.js` – add popup/interaction handler
 
 ### New statistic
-1. `calculateStatistics()` (line ~1308) – add calculation logic
-2. `showSummary()` (line ~927) – add HTML rendering in side panel
+1. `js/statistics.js` `calculateStatistics()` – add calculation logic
+2. `js/ui.js` `showSummary()` – add HTML rendering in side panel
 
 ### New search mode
-1. `normalizeParcelId()` (line ~370) – add input validation/parsing
-2. `searchParcel()` (line ~418) – add search logic branch
+1. `js/utils.js` `normalizeParcelId()` – add input validation/parsing
+2. `js/app.js` `searchParcel()` – add search logic branch
 
 ### New code mapping
-1. `CODES` object (line ~45) in `app.js` – add new category
+1. `js/config.js` `CODES` object – add new category
 2. `KOODISTO.md` – document the codes with official source
 3. **Both must be updated together!**
 
 ### New color mode for stands
-1. `featureStyle()` (line ~268) – add color logic based on selected mode
-2. Add UI control (dropdown) for mode selection
+1. `js/config.js` `COLOR_MODES` – add new mode configuration
+2. `index.html` – add `<option>` to `#color-mode-select`
 
 ### New WFS data source
-1. Add endpoint URL to `CONFIG` object (line ~24)
-2. Create fetch function (use `fetchForestDataByBounds` as template)
-3. Add coordinate handling (all WFS uses EPSG:3067)
-4. Create filter and render functions
+1. `js/config.js` `CONFIG` – add endpoint URL
+2. `js/data.js` – create fetch function (use `fetchForestDataByBounds` as template)
+3. All WFS uses EPSG:3067 coordinates
+4. `js/ui.js` – create render functions
+
+### Global scope for onclick handlers
+Functions used in HTML template strings (`onclick="..."`) must be exposed on `window` in `js/app.js`:
+```javascript
+window.myFunction = myFunction;
+```
 
 ## Common Pitfalls
 
