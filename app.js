@@ -112,6 +112,37 @@ let currentParcel = null;
 let selectedStandIndex = null;  // Currently selected stand index
 let loadedParcels = new Map();  // Cache loaded parcels by ID
 
+// Tooltip explanations for forestry terms
+const TOOLTIPS = {
+    kuvio: 'Metsikkökuvio on yhtenäinen metsäalue, jolla puusto ja kasvupaikka ovat samankaltaisia.',
+    tilavuus: 'Puuston tilavuus hehtaarilla (m³/ha). Sisältää kaikki puutavaralajit.',
+    puulajijakauma: 'Puulajien osuudet pinta-alalla painotettuna. Perustuu laserkeilaukseen.',
+    keskiIka: 'Puuston pohjapinta-alalla painotettu keski-ikä vuosina.',
+    keskipituus: 'Puuston pohjapinta-alalla painotettu keskipituus metreinä.',
+    keskilapimitta: 'Puuston pohjapinta-alalla painotettu keskiläpimitta rinnankorkeudelta (1,3 m) senttimetreinä.',
+    kasvu: 'Puuston vuotuinen tilavuuskasvu hehtaarilla (m³/ha/v).',
+    tukkipuu: 'Sahateollisuuden raaka-aine. Tyvilläpimitta yleensä yli 15 cm (mänty) tai 16 cm (kuusi).',
+    kuitupuu: 'Sellu- ja paperiteollisuuden raaka-aine. Pienempiläpimittaista puuta kuin tukkipuu.',
+    pohjapintaAla: 'Puunrunkojen yhteenlaskettu poikkileikkauspinta-ala rinnankorkeudella (1,3 m), yksikkö m²/ha.',
+    runkoluku: 'Puiden lukumäärä hehtaarilla.',
+    kehitysluokka: 'Metsikön kehitysvaihe: aukea, taimikko, kasvatusmetsä, uudistuskypsä jne.',
+    kasvupaikka: 'Maaperän ravinteisuuteen perustuva luokitus. Lehto on ravinteikkain, karukkokangas karujen.',
+    maalaji: 'Maaperän laatu: kivennäismaa (hiekka, moreeni) tai turvemaa (rahka, sara).',
+    ojitustilanne: 'Metsämaan kuivatustilanne: ojittamaton, ojitettu tai ojikko.',
+    kulkukelpoisuus: 'Metsäkoneiden kulkumahdollisuus: ympärivuotinen, kesä/talvi, tai vain jäätynyt maa.',
+    hakkuuehdotus: 'Metsäkeskuksen laskennallinen ehdotus hakkuutarpeesta. Ei korvaa metsäammattilaisen arviota.',
+    metsanhoitoehdotus: 'Metsäkeskuksen laskennallinen ehdotus hoitotarpeesta, esim. taimikonhoito tai pystykarsinta.'
+};
+
+/**
+ * Generate tooltip HTML for a term
+ */
+function tip(key) {
+    const text = TOOLTIPS[key];
+    if (!text) return '';
+    return `<span class="info-tip" tabindex="0" aria-label="${text}"><span class="info-tip-icon">i</span><span class="info-tip-text">${text}</span></span>`;
+}
+
 /**
  * Initialize the application
  */
@@ -1019,7 +1050,7 @@ function showSummary(features, parcel, partCount = 1) {
             <div class="stat-grid">
                 <div class="stat-item">
                     <div class="stat-value">${stats.count}</div>
-                    <div class="stat-label">Kuviota</div>
+                    <div class="stat-label">Kuviota ${tip('kuvio')}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.totalArea, 2)}</div>
@@ -1027,7 +1058,7 @@ function showSummary(features, parcel, partCount = 1) {
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgVolume, 0)}</div>
-                    <div class="stat-label">m³/ha keskiarvo</div>
+                    <div class="stat-label">m³/ha keskiarvo ${tip('tilavuus')}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.totalVolume, 0)}</div>
@@ -1037,7 +1068,7 @@ function showSummary(features, parcel, partCount = 1) {
         </div>
 
         <div class="summary-section">
-            <h3>Puulajijakauma</h3>
+            <h3>Puulajijakauma ${tip('puulajijakauma')}</h3>
             <div class="species-bar">
                 ${stats.speciesPercent.pine > 0 ? `<div class="pine" style="width: ${stats.speciesPercent.pine}%"></div>` : ''}
                 ${stats.speciesPercent.spruce > 0 ? `<div class="spruce" style="width: ${stats.speciesPercent.spruce}%"></div>` : ''}
@@ -1055,22 +1086,22 @@ function showSummary(features, parcel, partCount = 1) {
             <div class="stat-grid">
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgAge, 0)}</div>
-                    <div class="stat-label">Keski-ikä (v)</div>
+                    <div class="stat-label">Keski-ikä (v) ${tip('keskiIka')}</div>
                     <div class="stat-range">${formatNumber(stats.minAge, 0)} – ${formatNumber(stats.maxAge, 0)}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgHeight, 1)}</div>
-                    <div class="stat-label">Keskipituus (m)</div>
+                    <div class="stat-label">Keskipituus (m) ${tip('keskipituus')}</div>
                     <div class="stat-range">${formatNumber(stats.minHeight, 1)} – ${formatNumber(stats.maxHeight, 1)}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgDiameter, 1)}</div>
-                    <div class="stat-label">Keskiläpimitta (cm)</div>
+                    <div class="stat-label">Keskiläpimitta (cm) ${tip('keskilapimitta')}</div>
                     <div class="stat-range">${formatNumber(stats.minDiameter, 1)} – ${formatNumber(stats.maxDiameter, 1)}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgGrowth, 1)}</div>
-                    <div class="stat-label">Kasvu (m³/ha/v)</div>
+                    <div class="stat-label">Kasvu (m³/ha/v) ${tip('kasvu')}</div>
                     <div class="stat-range">${formatNumber(stats.minGrowth, 1)} – ${formatNumber(stats.maxGrowth, 1)}</div>
                 </div>
             </div>
@@ -1081,11 +1112,11 @@ function showSummary(features, parcel, partCount = 1) {
             <div class="stat-grid">
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgSawlog, 0)}</div>
-                    <div class="stat-label">Tukkia (m³/ha)</div>
+                    <div class="stat-label">Tukkia (m³/ha) ${tip('tukkipuu')}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgPulpwood, 0)}</div>
-                    <div class="stat-label">Kuitua (m³/ha)</div>
+                    <div class="stat-label">Kuitua (m³/ha) ${tip('kuitupuu')}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.totalSawlog, 0)}</div>
@@ -1103,11 +1134,11 @@ function showSummary(features, parcel, partCount = 1) {
             <div class="stat-grid">
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgBasalArea, 1)}</div>
-                    <div class="stat-label">Pohjapinta-ala (m²/ha)</div>
+                    <div class="stat-label">Pohjapinta-ala (m²/ha) ${tip('pohjapintaAla')}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-value">${formatNumber(stats.avgStemCount, 0)}</div>
-                    <div class="stat-label">Runkoluku (kpl/ha)</div>
+                    <div class="stat-label">Runkoluku (kpl/ha) ${tip('runkoluku')}</div>
                 </div>
             </div>
             ${stats.fertilityDistribution.length > 0 ? `
@@ -1126,7 +1157,7 @@ function showSummary(features, parcel, partCount = 1) {
 
         ${stats.cuttingRecommendations.length > 0 ? `
         <div class="summary-section">
-            <h3>Hakkuuehdotukset</h3>
+            <h3>Hakkuuehdotukset ${tip('hakkuuehdotus')}</h3>
             <ul class="recommendations-list clickable">
                 ${stats.cuttingRecommendations.map(r => `
                     <li data-filter="cutting" data-value="${r.code}">
@@ -1143,7 +1174,7 @@ function showSummary(features, parcel, partCount = 1) {
 
         ${stats.silvicultureRecommendations.length > 0 ? `
         <div class="summary-section">
-            <h3>Metsänhoitoehdotukset</h3>
+            <h3>Metsänhoitoehdotukset ${tip('metsanhoitoehdotus')}</h3>
             <ul class="recommendations-list clickable">
                 ${stats.silvicultureRecommendations.map(r => `
                     <li data-filter="silviculture" data-value="${r.code}">
@@ -1214,11 +1245,11 @@ function renderStandItem(feature, index) {
                 <div class="detail-group">
                     <div class="detail-title">Perustiedot</div>
                     <div class="detail-grid">
-                        <div class="detail-row"><span>Kehitysluokka:</span><span>${devClass}</span></div>
-                        <div class="detail-row"><span>Kasvupaikka:</span><span>${fertility}</span></div>
-                        <div class="detail-row"><span>Maalaji:</span><span>${soil}</span></div>
-                        <div class="detail-row"><span>Ojitustilanne:</span><span>${drainage}</span></div>
-                        <div class="detail-row"><span>Kulkukelpoisuus:</span><span>${accessibility}</span></div>
+                        <div class="detail-row"><span>Kehitysluokka ${tip('kehitysluokka')}:</span><span>${devClass}</span></div>
+                        <div class="detail-row"><span>Kasvupaikka ${tip('kasvupaikka')}:</span><span>${fertility}</span></div>
+                        <div class="detail-row"><span>Maalaji ${tip('maalaji')}:</span><span>${soil}</span></div>
+                        <div class="detail-row"><span>Ojitustilanne ${tip('ojitustilanne')}:</span><span>${drainage}</span></div>
+                        <div class="detail-row"><span>Kulkukelpoisuus ${tip('kulkukelpoisuus')}:</span><span>${accessibility}</span></div>
                     </div>
                 </div>
                 <div class="detail-group">
