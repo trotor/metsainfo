@@ -854,6 +854,12 @@ h3 .info-tip-icon {
     margin-bottom: 0;
 }
 
+.help-contact {
+    margin-top: 8px;
+    font-weight: 600;
+    color: #444 !important;
+}
+
 /* Changelog */
 .changelog {
     display: flex;
