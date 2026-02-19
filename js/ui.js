@@ -9,6 +9,17 @@ import { formatNumber, formatCadastralReference, calculateParcelArea, getGeometr
 import { featureStyle } from './styles.js';
 
 /**
+ * Toggle the help modal
+ */
+export function toggleHelp() {
+    const modal = document.getElementById('help-modal');
+    const overlay = document.getElementById('help-overlay');
+    const isHidden = modal.classList.contains('hidden');
+    modal.classList.toggle('hidden', !isHidden);
+    overlay.classList.toggle('hidden', !isHidden);
+}
+
+/**
  * Generate tooltip HTML for a term
  */
 export function tip(key) {
