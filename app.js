@@ -120,6 +120,49 @@ function init() {
     initLayers();
     initControls();
     initEventListeners();
+    checkUrlParams();
+}
+
+/**
+ * Check URL parameters for parcel deep link (?parcel=091-416-0001-0123)
+ */
+function checkUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    const parcelParam = params.get('parcel');
+    if (parcelParam) {
+        const normalizedId = normalizeParcelId(parcelParam);
+        if (normalizedId) {
+            // Set search input and trigger search
+            document.getElementById('search-input').value = parcelParam;
+            searchParcel();
+        }
+    }
+}
+
+/**
+ * Update URL parameter with current parcel reference (without page reload)
+ */
+function updateUrlParam(reference) {
+    const url = new URL(window.location);
+    if (reference) {
+        url.searchParams.set('parcel', formatCadastralReference(reference));
+    } else {
+        url.searchParams.delete('parcel');
+    }
+    history.replaceState(null, '', url);
+}
+
+/**
+ * Copy shareable link to clipboard
+ */
+function copyParcelLink() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('copy-link-btn');
+        const originalText = btn.textContent;
+        btn.textContent = 'Kopioitu!';
+        setTimeout(() => { btn.textContent = originalText; }, 2000);
+    });
 }
 
 /**
@@ -351,6 +394,7 @@ function initEventListeners() {
         selectedParcelLayer.clearLayers();
         forestLayer.clearLayers();
         currentParcel = null;
+        updateUrlParam(null);
     });
 
     // Search functionality
@@ -609,6 +653,13 @@ async function selectParcels(parcels) {
 
     // Highlight all selected parcels
     parcels.forEach(parcel => selectedParcelLayer.addData(parcel));
+
+    // Update URL with parcel reference for sharing
+    const reference = parcels[0]?.properties?.nationalCadastralReference;
+    if (reference) {
+        updateUrlParam(reference);
+    }
+
     currentParcel = parcels.length === 1 ? parcels[0] : {
         // Create a combined parcel object for display
         properties: parcels[0].properties,
@@ -942,11 +993,23 @@ function showSummary(features, parcel, partCount = 1) {
                 <div class="parcel-id">${parcelLabel}</div>
                 <div class="parcel-details">${parcelAreaText}${partsInfo}</div>
             </div>
-            ${features.length > 0 ? `
-            <button class="download-btn" onclick="downloadCSV()">
-                <span class="download-icon">⬇</span> Lataa CSV
-            </button>
-            ` : ''}
+            <div class="parcel-actions">
+                <button class="action-btn copy-link-btn" id="copy-link-btn" onclick="copyParcelLink()">
+                    <span class="action-icon">🔗</span> Kopioi linkki
+                </button>
+                ${features.length > 0 ? `
+                <button class="action-btn download-btn" onclick="downloadCSV()">
+                    <span class="action-icon">⬇</span> Lataa CSV
+                </button>
+                ` : ''}
+            </div>
+        </div>
+        ` : ''}
+
+        ${features.length > 0 && stats.measurementYearMin ? `
+        <div class="measurement-info${(new Date().getFullYear() - stats.measurementYearMax) >= 5 ? ' measurement-old' : ''}">
+            <span class="measurement-label">Aineiston mittausvuosi: ${stats.measurementYearMin === stats.measurementYearMax ? stats.measurementYearMin : `${stats.measurementYearMin}–${stats.measurementYearMax}`}</span>
+            ${(new Date().getFullYear() - stats.measurementYearMax) >= 5 ? '<span class="measurement-warning">Tiedot voivat olla vanhentuneita</span>' : ''}
         </div>
         ` : ''}
 
@@ -1331,7 +1394,9 @@ function calculateStatistics(features) {
         cuttingRecommendations: [],
         silvicultureRecommendations: [],
         fertilityDistribution: [],
-        developmentDistribution: []
+        developmentDistribution: [],
+        measurementYearMin: null,
+        measurementYearMax: null
     };
 
     if (features.length === 0) return stats;
@@ -1356,6 +1421,15 @@ function calculateStatistics(features) {
         stats.avgVolume += p.VOLUME || 0;
         stats.totalSawlog += (p.SAWLOGVOLUME || 0) * area;
         stats.totalPulpwood += (p.PULPWOODVOLUME || 0) * area;
+
+        // Track measurement years
+        if (p.MEASUREMENTDATE) {
+            const year = new Date(p.MEASUREMENTDATE).getFullYear();
+            if (!isNaN(year)) {
+                if (stats.measurementYearMin === null || year < stats.measurementYearMin) stats.measurementYearMin = year;
+                if (stats.measurementYearMax === null || year > stats.measurementYearMax) stats.measurementYearMax = year;
+            }
+        }
 
         // Track min/max for volume
         if (p.VOLUME != null) {

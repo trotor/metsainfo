@@ -441,16 +441,20 @@ body {
     margin-left: 8px;
 }
 
-/* Download button */
-.download-btn {
+/* Parcel action buttons */
+.parcel-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.action-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    width: 100%;
-    margin-top: 12px;
+    flex: 1;
     padding: 10px 16px;
-    background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
     color: white;
     border: none;
     border-radius: 6px;
@@ -458,22 +462,67 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+.action-icon {
+    font-size: 1rem;
+}
+
+.download-btn {
+    background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
     box-shadow: 0 2px 4px rgba(39, 174, 96, 0.3);
 }
 
 .download-btn:hover {
     background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-    transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(39, 174, 96, 0.4);
 }
 
-.download-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(39, 174, 96, 0.3);
+.copy-link-btn {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
 }
 
-.download-icon {
-    font-size: 1rem;
+.copy-link-btn:hover {
+    background: linear-gradient(135deg, #5dade2 0%, #3498db 100%);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+}
+
+/* Measurement year indicator */
+.measurement-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    margin: 0 12px 8px 12px;
+    background: #f0f7f0;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: #555;
+}
+
+.measurement-info.measurement-old {
+    background: #fef9e7;
+    border-left: 3px solid #f39c12;
+}
+
+.measurement-label {
+    font-weight: 500;
+}
+
+.measurement-warning {
+    color: #e67e22;
+    font-weight: 600;
+    font-size: 0.75rem;
 }
 
 /* Footer */
