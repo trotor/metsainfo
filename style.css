@@ -150,6 +150,78 @@ body {
     display: none;
 }
 
+/* Color mode selector */
+#color-mode-control {
+    position: absolute;
+    bottom: 40px;
+    left: 10px;
+    z-index: 1000;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    padding: 6px;
+}
+
+#color-mode-control.hidden {
+    display: none;
+}
+
+#color-mode-select {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    background: white;
+    color: #333;
+}
+
+/* Color legend */
+#color-legend {
+    position: absolute;
+    bottom: 40px;
+    left: 180px;
+    z-index: 1000;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    padding: 8px 10px;
+    font-size: 0.75rem;
+}
+
+#color-legend.hidden {
+    display: none;
+}
+
+.legend-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
+    font-size: 0.72rem;
+}
+
+.legend-items {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    color: #555;
+    white-space: nowrap;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    border: 1px solid rgba(0,0,0,0.15);
+}
+
 /* Layer controls */
 #layer-controls {
     position: absolute;
