@@ -30,6 +30,9 @@ const CONFIG = {
     // WFS endpoint for forest data
     wfsUrl: 'https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows',
 
+    // WFS endpoint for habitat data (metsälain erityisen tärkeät elinympäristöt)
+    habitatWfsUrl: 'https://avoin.metsakeskus.fi/rajapinnat/v1/habitat/ows',
+
     // MML INSPIRE WFS for cadastral parcels
     cadastralWfsUrl: 'https://inspire-wfs.maanmittauslaitos.fi/inspire-wfs/cp/ows',
 
@@ -96,6 +99,14 @@ const CODES = {
     mainGroup: {
         1: 'Metsämaa', 2: 'Kitumaa', 3: 'Joutomaa', 4: 'Muu metsätalousmaa',
         5: 'Tontti', 6: 'Maatalousmaa', 7: 'Muu maa', 8: 'Vesistö'
+    },
+    habitatType: {
+        530: 'Jyrkänne', 540: 'Kallio', 543: 'Kallio', 545: 'Louhikko/kivikko',
+        570: 'Kuiva lehto', 571: 'Tuore lehto', 572: 'Kostea lehto',
+        577: 'Letto', 578: 'Rehevä korpi',
+        600: 'Metsäsaareke', 602: 'Vähäpuustoinen suo',
+        613: 'Lampi', 614: 'Lähde', 615: 'Lähteikkö',
+        618: 'Puro', 620: 'Luhta', 623: 'Noro', 624: 'Tihkupinta', 625: 'Vesistö'
     }
 };
 
@@ -106,6 +117,7 @@ let cadastralLayer = null;      // All parcels in view
 let selectedParcelLayer = null; // Selected/highlighted parcel
 let parcelLabelsLayer = null;   // Labels for parcel IDs
 let highlightedStandLayer = null; // Highlighted individual stand
+let habitatLayer = null;         // METE habitat overlay
 let clickMarker = null;
 let currentFeatures = [];
 let currentParcel = null;
@@ -242,6 +254,8 @@ function initMap() {
     };
 
     L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
+
+    // Habitat layer will be added in initLayers() after creation
 }
 
 /**
@@ -276,6 +290,22 @@ function initLayers() {
         style: highlightedStandStyle,
         coordsToLatLng: coordsEPSG3067ToLatLng
     }).addTo(map);
+
+    // Habitat overlay layer (METE sites, off by default)
+    habitatLayer = L.geoJSON(null, {
+        style: habitatStyle,
+        onEachFeature: onEachHabitat,
+        coordsToLatLng: coordsEPSG3067ToLatLng
+    });
+
+    // Add habitat to Leaflet overlay control
+    const overlayControl = L.control.layers(null, { 'Luontokohteet': habitatLayer }, { position: 'topright' });
+    overlayControl.addTo(map);
+
+    // Load habitats when layer is toggled on
+    map.on('overlayadd', (e) => {
+        if (e.layer === habitatLayer) loadHabitatsInView();
+    });
 }
 
 /**
@@ -509,6 +539,77 @@ function showFeaturePopup(feature, layer) {
 }
 
 /**
+ * Style for habitat overlay features (METE sites)
+ */
+function habitatStyle(feature) {
+    return {
+        fillColor: '#e74c3c',
+        weight: 2,
+        opacity: 0.9,
+        color: '#c0392b',
+        fillOpacity: 0.3,
+        dashArray: '5, 5'
+    };
+}
+
+/**
+ * Attach popup to each habitat feature
+ */
+function onEachHabitat(feature, layer) {
+    const p = feature.properties;
+    const typeName = CODES.habitatType[p.SPECIALFEATURECODE] || `Tyyppi ${p.SPECIALFEATURECODE || '-'}`;
+    const area = formatNumber(p.AREA, 2);
+
+    layer.bindPopup(`
+        <strong>Luontokohde</strong><br>
+        <span style="color:#c0392b;font-weight:600">${typeName}</span><br>
+        Pinta-ala: ${area} ha<br>
+        <span style="font-size:0.8em;color:#888">Metsälain 10 § erityisen tärkeä elinympäristö</span>
+    `);
+}
+
+/**
+ * Load habitat features in the current map view
+ */
+async function loadHabitatsInView() {
+    const zoom = map.getZoom();
+    if (zoom < CONFIG.minZoomForParcels) {
+        habitatLayer.clearLayers();
+        return;
+    }
+
+    const bounds = map.getBounds();
+    const sw = proj4('WGS84', 'EPSG:3067', [bounds.getWest(), bounds.getSouth()]);
+    const ne = proj4('WGS84', 'EPSG:3067', [bounds.getEast(), bounds.getNorth()]);
+
+    const bbox = `${sw[0]},${sw[1]},${ne[0]},${ne[1]},EPSG:3067`;
+
+    const params = new URLSearchParams({
+        service: 'WFS',
+        version: '2.0.0',
+        request: 'GetFeature',
+        typeName: 'v1:habitat',
+        outputFormat: 'application/json',
+        srsName: 'EPSG:3067',
+        bbox: bbox
+    });
+
+    try {
+        const response = await fetch(`${CONFIG.habitatWfsUrl}?${params}`);
+        if (!response.ok) return;
+
+        const data = await response.json();
+        habitatLayer.clearLayers();
+
+        if (data.features) {
+            data.features.forEach(feature => habitatLayer.addData(feature));
+        }
+    } catch (error) {
+        console.warn('Failed to load habitats:', error);
+    }
+}
+
+/**
  * Initialize controls
  */
 function initControls() {
@@ -538,7 +639,10 @@ function initControls() {
  */
 function initEventListeners() {
     // Load parcels when map view changes
-    map.on('moveend', loadParcelsInView);
+    map.on('moveend', () => {
+        loadParcelsInView();
+        if (map.hasLayer(habitatLayer)) loadHabitatsInView();
+    });
 
     // Initial load of parcels
     loadParcelsInView();
