@@ -1167,6 +1167,9 @@ function showSummary(features, parcel, partCount = 1) {
                 <button class="action-btn download-btn" onclick="downloadCSV()">
                     <span class="action-icon">⬇</span> Lataa CSV
                 </button>
+                <button class="action-btn print-btn" onclick="window.print()">
+                    <span class="action-icon">🖨</span> Tulosta
+                </button>
                 ` : ''}
             </div>
         </div>
