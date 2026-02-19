@@ -568,6 +568,16 @@ body {
     box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
 }
 
+.print-btn {
+    background: linear-gradient(135deg, #8e44ad 0%, #6c3483 100%);
+    box-shadow: 0 2px 4px rgba(142, 68, 173, 0.3);
+}
+
+.print-btn:hover {
+    background: linear-gradient(135deg, #a569bd 0%, #8e44ad 100%);
+    box-shadow: 0 4px 8px rgba(142, 68, 173, 0.4);
+}
+
 /* Measurement year indicator */
 .measurement-info {
     display: flex;
@@ -1048,4 +1058,100 @@ h3 .info-tip-icon {
     font-size: 0.7rem;
     color: #999;
     font-style: italic;
+}
+
+/* Print styles */
+@media print {
+    /* Hide everything except info panel content */
+    #header, #map, #footer, #search-control, #close-panel,
+    #color-mode-control, #color-legend,
+    .parcel-actions, .info-tip,
+    .leaflet-control-container {
+        display: none !important;
+    }
+
+    body, #app {
+        background: white;
+        margin: 0;
+        padding: 0;
+    }
+
+    #info-panel {
+        position: static !important;
+        width: 100% !important;
+        max-width: none !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+    }
+
+    #info-panel.hidden {
+        display: block !important;
+    }
+
+    #info-panel h2 {
+        font-size: 1.2rem;
+        margin-bottom: 4px;
+        padding: 0;
+    }
+
+    #info-panel h2::after {
+        content: ' — ' attr(data-parcel);
+    }
+
+    .summary-section {
+        break-inside: avoid;
+        padding: 8px 0 !important;
+        margin: 0 !important;
+    }
+
+    .parcel-section {
+        border: none !important;
+        background: none !important;
+    }
+
+    .parcel-id {
+        font-size: 1.1rem !important;
+    }
+
+    .stat-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+
+    .stand-details {
+        display: block !important;
+        max-height: none !important;
+    }
+
+    .stand-item {
+        break-inside: avoid;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+    }
+
+    .stand-toggle {
+        display: none !important;
+    }
+
+    .measurement-info {
+        margin: 4px 0 !important;
+    }
+
+    .species-bar, .mini-species-bar {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .pine, .spruce, .birch {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .dist-item {
+        border: 1px solid #ccc;
+        background: none !important;
+    }
 }
