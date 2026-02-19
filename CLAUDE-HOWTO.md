@@ -2,7 +2,20 @@
 
 **[Kokeile sovellusta](https://trotor.github.io/metsainfo/)** | [README](README.md) | [Lähdekoodi](https://github.com/trotor/metsainfo)
 
-Tämä dokumentti kuvaa miten Metsäinfo-sovellus on kehitetty tekoälyn avulla, ja miten tekoälyä voidaan hyödyntää sekä sovelluksen kehittämisessä että metsätiedon ymmärtämisessä.
+Tämä dokumentti kuvaa miten Metsäinfo-sovellus on kehitetty tekoälyn avulla, ja miten tekoälyä voidaan hyödyntää sovelluksen kehittämisessä ja metsätiedon ymmärtämisessä.
+
+## Positiointi
+
+Metsäinfo on **avoimen datan opetuksellinen katselusovellus**. Se täydentää virallista [metsään.fi](https://www.metsaan.fi)-palvelua, mutta **ei kilpaile** sen kanssa.
+
+Sovellus **EI tarjoa**:
+- Henkilökohtaisia hoitosuosituksia tai kustannusarvioita
+- Metsän arvon laskentaa
+- Puukauppa- tai asiointipalveluja
+- Kirjautumista vaativaa toiminnallisuutta
+- Viranomaisasiointia (metsänkäyttöilmoitukset, METKA-tuet)
+
+Sovelluksen tarkoitus on **auttaa ymmärtämään avointa metsätietoa** — kuka tahansa voi katsoa minkä tahansa alueen metsävaratietoja ilman kirjautumista.
 
 ## Miten sovellus on luotu
 
@@ -36,15 +49,15 @@ listan suosikeistaan erillisessä valikossa.
 ```
 
 ```
-Toteuta hakkuusuunnitelma-näkymä, joka näyttää ehdotetut hakkuut
-aikajärjestyksessä seuraavalle 10 vuodelle. Ryhmittele kuviot
-hakkuuvuoden mukaan.
+Lisää metsäkuvioiden väritysvaihtoehdot: käyttäjä voi valita
+pudotusvalikosta väritetäänkö kuviot tilavuuden (oletus), iän,
+pääpuulajin vai kehitysluokan mukaan. Päivitä myös legenda.
 ```
 
 ```
-Lisää mahdollisuus verrata kahta kiinteistöä rinnakkain. Käyttäjä
-voi valita kaksi kiinteistöä ja nähdä niiden metsävaratilastot
-vierekkäin.
+Lisää URL-parametrituki: kun käyttäjä valitsee kiinteistön, päivitä
+URL muotoon ?parcel=091-416-0001-0123. Sivun latautuessa tarkista
+parametri ja hae kiinteistö automaattisesti.
 ```
 
 ### Käyttöliittymän parantaminen
@@ -58,6 +71,12 @@ pienille näytöille.
 ```
 Lisää tumma teema (dark mode) sovellukseen. Käytä CSS-muuttujia
 väreille ja tallenna käyttäjän valinta localStorageen.
+```
+
+```
+Lisää sanasto-tooltipit sivupaneeliin: jokaisen metsätermin
+(kehitysluokka, kasvupaikkatyyppi, pohjapinta-ala) viereen
+(i)-ikoni, joka näyttää selkokielisen selityksen.
 ```
 
 ### Datan visualisointi
@@ -87,29 +106,22 @@ Tutki ongelma ja korjaa se.
 
 ## Tekoälyn hyödyntäminen metsätiedon ymmärtämisessä
 
-Tekoäly voi auttaa käyttäjiä ymmärtämään metsävaratietoja paremmin. Tässä ideoita:
+Tekoäly voi auttaa käyttäjiä **ymmärtämään** metsävaratietoja paremmin. Huom: kyse on termien ja käsitteiden selittämisestä, ei henkilökohtaisesta neuvonnasta.
 
-### Chatbot-integraatio
+### Sanastoselitykset
 
-Sovellukseen voisi lisätä tekoälychatbotin, joka vastaa metsänhoitoon liittyviin kysymyksiin:
+Sovellukseen voisi lisätä tekoälypohjaisen sanastoselittäjän, joka vastaa käsitteisiin liittyviin kysymyksiin:
 
 - "Mitä tarkoittaa harvennushakkuu?"
-- "Miksi tällä kuviolla suositellaan taimikonhoitoa?"
-- "Milloin tämä metsä on hakkuukypsä?"
 - "Mikä on tukkipuun ja kuitupuun ero?"
+- "Mitä kehitysluokka 02 tarkoittaa?"
+- "Mikä on pohjapinta-ala?"
 
-### Henkilökohtaiset suositukset
-
-Tekoäly voisi analysoida kiinteistön metsätietoja ja antaa:
-
-- Priorisoituja hoitoehdotuksia
-- Arvioita puuston arvosta
-- Suosituksia optimaalisesta hakkuuajankohdasta
-- Varoituksia mahdollisista riskeistä (tuholaiset, myrskytuhot)
+**Huom:** Selittäjä ei anna hoitosuosituksia, ei arvioi metsän arvoa eikä neuvo hakkuuajankohdasta — nämä kuuluvat [metsään.fi](https://www.metsaan.fi)-palveluun ja metsäammattilaisille.
 
 ## Tekoälybackendin integrointi
 
-Jos haluat lisätä sovellukseen tekoälytoiminnallisuuksia, voit integroida esimerkiksi Claude API:n.
+Jos haluat lisätä sovellukseen tekoälypohjaisen sanastoselittäjän, voit integroida esimerkiksi Claude API:n.
 
 ### API-avaimen käyttö (client-side)
 
@@ -123,8 +135,8 @@ const ANTHROPIC_API_KEY = 'your-api-key-here';
 ```
 
 ```javascript
-// app.js - Tekoälyfunktio
-async function askForestAI(question, forestData) {
+// app.js - Sanastoselitysfunktio
+async function askForestTerms(question, forestData) {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -136,11 +148,15 @@ async function askForestAI(question, forestData) {
         body: JSON.stringify({
             model: 'claude-sonnet-4-20250514',
             max_tokens: 1024,
-            system: `Olet metsäasiantuntija. Vastaa käyttäjän kysymyksiin
-                     suomeksi perustuen annettuihin metsävaratietoihin.`,
+            system: `Olet metsäalan sanastoselittäjä. Selitä metsäalan termejä
+                     ja käsitteitä selkokielellä suomeksi. Voit viitata annettuihin
+                     metsävaratietoihin esimerkkeinä.
+                     ÄLÄ anna hoitosuosituksia, älä arvioi metsän arvoa,
+                     älä neuvo hakkuuajankohdasta. Ohjaa käyttäjä metsään.fi-palveluun
+                     henkilökohtaista neuvontaa varten.`,
             messages: [{
                 role: 'user',
-                content: `Metsätiedot: ${JSON.stringify(forestData)}
+                content: `Metsätiedot kontekstina: ${JSON.stringify(forestData)}
 
                 Kysymys: ${question}`
             }]
@@ -171,7 +187,7 @@ export default async function handler(request) {
         body: JSON.stringify({
             model: 'claude-sonnet-4-20250514',
             max_tokens: 1024,
-            system: 'Olet metsäasiantuntija...',
+            system: 'Olet metsäalan sanastoselittäjä. Selitä termejä selkokielellä...',
             messages: [{ role: 'user', content: `...` }]
         })
     });
@@ -184,21 +200,21 @@ export default async function handler(request) {
 
 ```html
 <!-- Lisää sivupaneeliin -->
-<div class="ai-assistant">
-    <h3>Metsäneuvoja</h3>
+<div class="ai-glossary">
+    <h3>Sanastoselitykset</h3>
     <div class="ai-chat"></div>
-    <input type="text" placeholder="Kysy metsästäsi..." id="ai-input">
-    <button id="ai-ask">Kysy</button>
+    <input type="text" placeholder="Kysy metsätermistä..." id="ai-input">
+    <button id="ai-ask">Selitä</button>
 </div>
 ```
 
 ## Jatkokehitysideoita
 
-1. **Metsän arvon laskenta** - Tekoäly laskee puuston arvon nykyhinnoilla
-2. **Hoitosuunnitelman generointi** - PDF-raportti suosituksista
-3. **Vertailu naapurikiinteistöihin** - Anonyymi vertailu alueen keskiarvoihin
-4. **Säätietojen integrointi** - Varoitukset myrskyistä ja kuivuudesta
-5. **Puukauppa-avustaja** - Tekoäly auttaa tarjousten vertailussa
+1. **Aluevertailu** - Anonyymi vertailu kunnan/alueen keskiarvoihin (avoin ruutuaineisto)
+2. **Luontotietokerros** - Metsälain erityisen tärkeät elinympäristöt kartalle (avoin data)
+3. **Mittausvuosi-indikaattori** - Näytä selkeästi milloin aineisto on mitattu ja varoita vanhasta datasta
+4. **Sanasto-tooltipit** - Jokaisen termin vieressä selkokielinen selitys ilman tekoälyä
+5. **Väritysvaihtoehdot** - Kuvioiden väritys iän, puulajin tai kehitysluokan mukaan
 
 ## Resurssit
 
@@ -206,3 +222,4 @@ export default async function handler(request) {
 - [Claude API dokumentaatio](https://docs.anthropic.com/)
 - [Metsäkeskuksen avoin data](https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto)
 - [MML:n rajapinnat](https://www.maanmittauslaitos.fi/rajapinnat)
+- [Metsään.fi](https://www.metsaan.fi) - Metsäkeskuksen virallinen palvelu metsänomistajille
