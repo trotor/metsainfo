@@ -525,6 +525,110 @@ body {
     font-size: 0.75rem;
 }
 
+/* Info tooltips */
+.info-tip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 14px;
+    height: 14px;
+    margin-left: 3px;
+    cursor: help;
+    vertical-align: middle;
+}
+
+.info-tip-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    background: #bdc3c7;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.6rem;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1;
+}
+
+.info-tip-text {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    padding: 8px 10px;
+    background: #2c3e50;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.4;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.info-tip-text::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #2c3e50;
+}
+
+.info-tip:hover .info-tip-text,
+.info-tip:focus .info-tip-text {
+    display: block;
+}
+
+/* Prevent tooltip overflow on left/right edges */
+.stat-item:first-child .info-tip-text {
+    left: 0;
+    transform: none;
+}
+
+.stat-item:first-child .info-tip-text::after {
+    left: 12px;
+    transform: none;
+}
+
+.stat-item:last-child .info-tip-text {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+.stat-item:last-child .info-tip-text::after {
+    left: auto;
+    right: 12px;
+    transform: none;
+}
+
+/* Tooltip in detail rows - show below instead of above */
+.detail-row .info-tip-text {
+    bottom: auto;
+    top: calc(100% + 6px);
+}
+
+.detail-row .info-tip-text::after {
+    top: auto;
+    bottom: 100%;
+    border-top-color: transparent;
+    border-bottom-color: #2c3e50;
+}
+
+/* Tooltip in section headers */
+h3 .info-tip-icon {
+    background: #95a5a6;
+}
+
 /* Footer */
 #footer {
     background: #333;
