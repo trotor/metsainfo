@@ -31,6 +31,17 @@ No build step, package manager, or dependencies to install. All libraries are lo
 - **Metsäkeskus** (`avoin.metsakeskus.fi`) - Forest stand data (`v1:stand`)
 - **MML INSPIRE** (`inspire-wfs.maanmittauslaitos.fi`) - Cadastral parcel boundaries (`cp:CadastralParcel`)
 
+### MCP Server
+
+The `mcp-server/` directory provides a FastMCP Python server that exposes forest data lookup as an MCP tool for AI assistants (Claude Code, Claude Desktop, etc.).
+
+- **Tools**: `hae_metsavaratieto(kiinteistotunnus)` — human-readable summary; `hae_raakadata(kiinteistotunnus)` — raw JSON data for AI analysis
+- **Framework**: FastMCP Python (part of official MCP SDK)
+- **Run**: `uv run --with fastmcp --with certifi fastmcp run mcp-server/server.py`
+- **Config**: `.mcp.json` in project root (Claude Code auto-discovers this)
+- **Pipeline**: `pipeline.py` is a port of the browser-side JS (`data.js`, `utils.js`, `statistics.js`). Keep them in sync when modifying WFS queries, geometry logic, or statistics calculation.
+- **Dependencies**: `fastmcp`, `certifi` (installed automatically via `uv run --with`)
+
 ### Application Flow
 1. `init()` → `initMap()` → `initLayers()` → `initControls()` → `initEventListeners()`
 2. User zooms to level ≥14 → `loadParcelsInView()` fetches cadastral parcels in viewport
@@ -117,6 +128,11 @@ The `CODES` object in `js/config.js` maps numeric IDs to Finnish names. When mod
 │   ├── data.js         # WFS fetch and geometry filtering (~140 lines)
 │   ├── statistics.js   # calculateStatistics (~200 lines)
 │   └── ui.js           # DOM rendering and interactions (~490 lines)
+├── mcp-server/
+│   ├── server.py       # MCP server: hae_metsavaratieto tool + formatting (~120 lines)
+│   ├── pipeline.py     # WFS fetch, geometry, statistics — port of JS modules (~290 lines)
+│   └── codes.py        # CODES mappings — port of js/config.js (~70 lines)
+├── .mcp.json           # Claude Code MCP server configuration
 ├── style.css           # Styling
 ├── version.js          # Version information (non-module, global)
 ├── CLAUDE.md           # Developer instructions (this file)
