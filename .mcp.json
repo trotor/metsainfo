@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "metsainfo": {
+      "command": "uv",
+      "args": ["run", "--with", "fastmcp", "--with", "certifi", "fastmcp", "run", "mcp-server/server.py"]
+    }
+  }
+}
