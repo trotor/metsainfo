@@ -9,6 +9,8 @@ export let selectedParcelLayer = null;
 export let parcelLabelsLayer = null;
 export let highlightedStandLayer = null;
 export let habitatLayer = null;
+export let mkiLayer = null;
+export let mkiColorMode = 'year';
 export let clickMarker = null;
 export let currentFeatures = [];
 export let currentParcel = null;
@@ -25,6 +27,8 @@ export function setState(key, value) {
         case 'parcelLabelsLayer': parcelLabelsLayer = value; break;
         case 'highlightedStandLayer': highlightedStandLayer = value; break;
         case 'habitatLayer': habitatLayer = value; break;
+        case 'mkiLayer': mkiLayer = value; break;
+        case 'mkiColorMode': mkiColorMode = value; break;
         case 'clickMarker': clickMarker = value; break;
         case 'currentFeatures': currentFeatures = value; break;
         case 'currentParcel': currentParcel = value; break;

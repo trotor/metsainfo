@@ -168,6 +168,19 @@ Viralliset koodiarvot Metsäkeskuksen WFS-rajapinnalle.
 | 7 | Muu maa |
 | 8 | Vesistö |
 
+## Hakkuutarkoitus (CUTTINGPURPOSE) — Metsänkäyttöilmoitus
+
+| Koodi | Nimi |
+|-------|------|
+| 1 | Kasvatushakkuu |
+| 2 | Uudistushakkuu |
+| 3 | Muu hakkuu |
+| 4 | Erityishakkuu (Metsälain 6§) |
+| 5 | Maankäyttömuodon muutos |
+| 6 | Metsätuhoalue |
+
+**Huom:** Hakkuutapa (CUTTINGREALIZATIONPRACTICE) käyttää samaa koodistoa kuin hakkuutavat (CUTTINGTYPE).
+
 ---
 
 ## JavaScript-muoto

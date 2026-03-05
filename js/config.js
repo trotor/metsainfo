@@ -22,6 +22,7 @@ export const CONFIG = {
     minZoomForParcels: 10,
     wfsUrl: 'https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows',
     habitatWfsUrl: 'https://avoin.metsakeskus.fi/rajapinnat/v1/habitat/ows',
+    mkiWfsUrl: 'https://avoin.metsakeskus.fi/rajapinnat/v1/forestusedeclaration/ows',
     cadastralWfsUrl: 'https://inspire-wfs.maanmittauslaitos.fi/inspire-wfs/cp/ows',
     layers: {
         taustakartta: 'https://tiles.kartat.kapsi.fi/taustakartta_3067/{z}/{x}/{y}.jpg',
@@ -84,6 +85,14 @@ export const CODES = {
     mainGroup: {
         1: 'Metsämaa', 2: 'Kitumaa', 3: 'Joutomaa', 4: 'Muu metsätalousmaa',
         5: 'Tontti', 6: 'Maatalousmaa', 7: 'Muu maa', 8: 'Vesistö'
+    },
+    cuttingPurpose: {
+        1: 'Kasvatushakkuu',
+        2: 'Uudistushakkuu',
+        3: 'Muu hakkuu',
+        4: 'Erityishakkuu (6§)',
+        5: 'Maankäyttömuodon muutos',
+        6: 'Metsätuhoalue'
     },
     habitatType: {
         530: 'Jyrkänne', 540: 'Kallio', 543: 'Kallio', 545: 'Louhikko/kivikko',
@@ -198,6 +207,52 @@ export const COLOR_MODES = {
             { color: '#22c55e', label: 'Varttunut' },
             { color: '#16a34a', label: 'Uudistuskypsä' },
             { color: '#a78bfa', label: 'Ylispuust./eri-ik.' }
+        ]
+    }
+};
+
+export const MKI_COLOR_MODES = {
+    year: {
+        label: 'Vuoden mukaan',
+        getColor: (p) => {
+            const year = parseInt(p.DECLARATIONARRIVALYEAR) || 0;
+            const currentYear = new Date().getFullYear();
+            const age = currentYear - year;
+            if (age <= 0) return '#e74c3c';
+            if (age <= 1) return '#e67e22';
+            if (age <= 2) return '#f39c12';
+            if (age <= 3) return '#f1c40f';
+            return '#fad7a0';
+        },
+        border: '#c0392b',
+        legend: [
+            { color: '#e74c3c', label: 'Tänä vuonna' },
+            { color: '#e67e22', label: '1 v sitten' },
+            { color: '#f39c12', label: '2 v sitten' },
+            { color: '#f1c40f', label: '3 v sitten' },
+            { color: '#fad7a0', label: '4–5 v sitten' }
+        ]
+    },
+    purpose: {
+        label: 'Hakkuutarkoitus',
+        getColor: (p) => {
+            const c = Number(p.CUTTINGPURPOSE);
+            if (c === 1) return '#3498db';
+            if (c === 2) return '#e74c3c';
+            if (c === 3) return '#f39c12';
+            if (c === 4) return '#9b59b6';
+            if (c === 5) return '#1abc9c';
+            if (c === 6) return '#e67e22';
+            return '#95a5a6';
+        },
+        border: '#555',
+        legend: [
+            { color: '#3498db', label: 'Kasvatushakkuu' },
+            { color: '#e74c3c', label: 'Uudistushakkuu' },
+            { color: '#f39c12', label: 'Muu hakkuu' },
+            { color: '#9b59b6', label: 'Erityishakkuu' },
+            { color: '#1abc9c', label: 'Maankäytön muutos' },
+            { color: '#e67e22', label: 'Metsätuhoalue' }
         ]
     }
 };

@@ -99,6 +99,39 @@ export async function fetchCadastralParcel(x, y) {
 }
 
 /**
+ * Fetch forest use declarations by bounding box (EPSG:3067)
+ * Filtered to last 5 years
+ */
+export async function fetchForestUseDeclarations(bounds) {
+    const minYear = new Date().getFullYear() - 5;
+
+    // bbox and CQL_FILTER can't be used as separate params on this WFS — combine into CQL_FILTER
+    const cqlFilter = `BBOX(GEOMETRY,${bounds.minX},${bounds.minY},${bounds.maxX},${bounds.maxY},'EPSG:3067') AND DECLARATIONARRIVALYEAR >= '${minYear}'`;
+
+    const params = new URLSearchParams({
+        service: 'WFS',
+        version: '2.0.0',
+        request: 'GetFeature',
+        typeName: 'v1:forestusedeclaration',
+        outputFormat: 'application/json',
+        srsName: 'EPSG:3067',
+        CQL_FILTER: cqlFilter
+    });
+
+    const url = `${CONFIG.mkiWfsUrl}?${params}`;
+    console.log('Fetching MKI data:', url);
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.features || [];
+}
+
+/**
  * Filter forest features - only include stands whose centroid is inside the parcel
  */
 export function filterFeaturesByParcel(features, parcel) {
