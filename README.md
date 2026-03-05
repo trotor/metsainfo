@@ -30,6 +30,7 @@ Interaktiivinen karttasovellus Suomen metsävaratietojen tarkasteluun. Hae kiint
 - **Karttakorostukset** - Klikkaa kuviota tai ehdotusta korostaaksesi sen kartalla
 - **Väritysvaihtoehdot** - Kuvioiden väritys tilavuuden, iän, puulajin tai kehitysluokan mukaan
 - **Luontotietokerros** - Metsälain erityisen tärkeät elinympäristöt (METE-kohteet)
+- **Metsänkäyttöilmoitukset** - Ilmoitetut hakkuualueet kartalla, väritys vuoden tai hakkuutarkoituksen mukaan
 - **Sanasto-tooltipit** - (i)-kuvake selittää metsäalan termit selkokielellä
 - **URL-jako** - Kopioi suora linkki kiinteistöön jaettavaksi
 - **Mittausvuosi-indikaattori** - Näyttää aineiston mittausvuoden ja varoittaa vanhasta datasta
@@ -133,6 +134,7 @@ Sovellus toimii kokonaan selaimessa ilman backendiä. Koodi on jaettu ES6-moduul
 |------|-------|-----------|
 | Metsävaratiedot | [Metsäkeskus](https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto) | WFS |
 | Luontokohteet | [Metsäkeskus](https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto) | WFS |
+| Metsänkäyttöilmoitukset | [Metsäkeskus](https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto) | WFS |
 | Kiinteistörajat | [MML INSPIRE](https://www.maanmittauslaitos.fi/) | WFS |
 | Taustakartat | [Kapsi](https://kartat.kapsi.fi/) / [MML](https://www.maanmittauslaitos.fi/) | TMS (EPSG:3067) |
 
@@ -162,6 +164,7 @@ Katso [CLAUDE-HOWTO.md](CLAUDE-HOWTO.md) jossa on:
 
 ## Versiohistoria
 
+- **v3.0.0** (2026-03-05) - Metsänkäyttöilmoitukset karttataso
 - **v2.3.0** (2026-02-21) - MCP-palvelimen dokumentaatio
 - **v2.1.0** (2026-02-19) - Käyttöohjeet ja versiohistoria sovelluksessa
 - **v2.0.0** (2026-02-19) - Koodin modularisointi ES6-moduuleiksi
