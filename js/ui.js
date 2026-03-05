@@ -2,11 +2,11 @@
  * UI rendering, interactions, and DOM manipulation
  */
 
-import { CODES, TOOLTIPS, COLOR_MODES } from './config.js';
+import { CODES, TOOLTIPS, COLOR_MODES, MKI_COLOR_MODES } from './config.js';
 import * as state from './state.js';
 import { calculateStatistics } from './statistics.js';
 import { formatNumber, formatCadastralReference, calculateParcelArea, getGeometryBounds3067 } from './utils.js';
-import { featureStyle } from './styles.js';
+import { featureStyle, mkiStyle } from './styles.js';
 
 /**
  * Toggle the help modal
@@ -72,6 +72,33 @@ export function onEachHabitat(feature, layer) {
 }
 
 /**
+ * Attach popup and tooltip to each MKI feature
+ */
+export function onEachMkiFeature(feature, layer) {
+    const p = feature.properties;
+    const purpose = CODES.cuttingPurpose[p.CUTTINGPURPOSE] || `Koodi ${p.CUTTINGPURPOSE || '-'}`;
+    const practice = CODES.cuttingType[p.CUTTINGREALIZATIONPRACTICE] || `Koodi ${p.CUTTINGREALIZATIONPRACTICE || '-'}`;
+    const species = CODES.treeSpecies[p.DECLARATIONMAINTREESPECIES] || '-';
+    const area = formatNumber(p.AREA, 2);
+    const year = p.DECLARATIONARRIVALYEAR || '-';
+
+    layer.bindPopup(
+        '<strong>Metsänkäyttöilmoitus</strong><br>' +
+        '<span style="color:#c0392b;font-weight:600">' + purpose + '</span><br>' +
+        'Hakkuutapa: ' + practice + '<br>' +
+        'Pinta-ala: ' + area + ' ha<br>' +
+        'Vuosi: ' + year + '<br>' +
+        'Puulaji: ' + species
+    );
+
+    layer.bindTooltip(year + ' – ' + purpose, {
+        sticky: true,
+        direction: 'top',
+        opacity: 0.9
+    });
+}
+
+/**
  * Attach click handler to each parcel
  */
 export function onEachParcel(feature, layer, selectParcelFn) {
@@ -131,6 +158,24 @@ export function setColorMode(mode) {
 }
 
 /**
+ * Change MKI color mode and refresh layer styling + legend
+ */
+export function setMkiColorMode(mode) {
+    if (!MKI_COLOR_MODES[mode]) return;
+    state.setState('mkiColorMode', mode);
+
+    if (state.mkiLayer) {
+        state.mkiLayer.eachLayer(layer => {
+            if (layer.feature) {
+                layer.setStyle(mkiStyle(layer.feature));
+            }
+        });
+    }
+
+    updateMkiLegend();
+}
+
+/**
  * Update the color legend display
  */
 export function updateLegend() {
@@ -152,6 +197,41 @@ export function updateLegend() {
             ).join('')}
         </div>
     `;
+}
+
+/**
+ * Update the MKI color legend display
+ */
+export function updateMkiLegend() {
+    const legendEl = document.getElementById('mki-legend');
+    if (!legendEl) return;
+
+    const mode = MKI_COLOR_MODES[state.mkiColorMode];
+    if (!mode || !state.mkiLayer || state.mkiLayer.getLayers().length === 0) {
+        legendEl.classList.add('hidden');
+        return;
+    }
+
+    legendEl.classList.remove('hidden');
+
+    const title = document.createElement('div');
+    title.className = 'legend-title';
+    title.textContent = mode.label;
+
+    const items = document.createElement('div');
+    items.className = 'legend-items';
+    mode.legend.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'legend-item';
+        const color = document.createElement('span');
+        color.className = 'legend-color';
+        color.style.background = item.color;
+        el.appendChild(color);
+        el.appendChild(document.createTextNode(item.label));
+        items.appendChild(el);
+    });
+
+    legendEl.replaceChildren(title, items);
 }
 
 /**

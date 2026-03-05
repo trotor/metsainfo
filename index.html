@@ -60,6 +60,17 @@
         <!-- Color legend -->
         <div id="color-legend" class="hidden"></div>
 
+        <!-- MKI color mode selector -->
+        <div id="mki-color-mode-control" class="hidden">
+            <select id="mki-color-mode-select">
+                <option value="year">Vuoden mukaan</option>
+                <option value="purpose">Hakkuutarkoitus</option>
+            </select>
+        </div>
+
+        <!-- MKI color legend -->
+        <div id="mki-legend" class="hidden"></div>
+
         <!-- Search control -->
         <div id="search-control">
             <button id="search-toggle" title="Hae kiinteistötunnuksella">&#128269;</button>
@@ -94,6 +105,7 @@
                         <li><strong>Metsävarat</strong> — Puuston tilavuus, ikä, puulajit, kasvu, tukki/kuitu</li>
                         <li><strong>Väritysvaihtoehdot</strong> — Vaihda kuvioiden väritys tilavuuden, iän, puulajin tai kehitysluokan mukaan (vasemman alareunan valikko)</li>
                         <li><strong>Luontokohteet</strong> — Metsälain erityisen tärkeät elinympäristöt (karttatasovalikko oikeassa yläkulmassa)</li>
+                        <li><strong>Metsänkäyttöilmoitukset</strong> — Ilmoitetut hakkuualueet kartalla värikoodattuina (karttatasovalikko oikeassa yläkulmassa)</li>
                         <li><strong>Sanasto-tooltipit</strong> — (i)-kuvake termin vieressä näyttää selityksen</li>
                         <li><strong>CSV-lataus</strong> — Lataa kuviotiedot taulukkolaskentaohjelmaan</li>
                         <li><strong>Tulostus</strong> — Tulosta yhteenveto paperille</li>
@@ -135,6 +147,11 @@
                 <div class="help-section">
                     <h3>Uutta versiossa</h3>
                     <div class="changelog">
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v3.0.0</span>
+                            <span class="changelog-date">2026-03-05</span>
+                            <p>Metsänkäyttöilmoitukset karttataso</p>
+                        </div>
                         <div class="changelog-entry">
                             <span class="changelog-version">v2.3.0</span>
                             <span class="changelog-date">2026-02-21</span>

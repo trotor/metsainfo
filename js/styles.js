@@ -2,8 +2,8 @@
  * Leaflet layer style functions
  */
 
-import { COLOR_MODES } from './config.js';
-import { currentColorMode } from './state.js';
+import { COLOR_MODES, MKI_COLOR_MODES } from './config.js';
+import { currentColorMode, mkiColorMode } from './state.js';
 
 export function featureStyle(feature) {
     const mode = COLOR_MODES[currentColorMode] || COLOR_MODES.volume;
@@ -55,5 +55,17 @@ export function habitatStyle() {
         color: '#c0392b',
         fillOpacity: 0.3,
         dashArray: '5, 5'
+    };
+}
+
+export function mkiStyle(feature) {
+    const mode = MKI_COLOR_MODES[mkiColorMode] || MKI_COLOR_MODES.year;
+    return {
+        fillColor: mode.getColor(feature.properties),
+        weight: 2,
+        opacity: 0.8,
+        color: mode.border,
+        fillOpacity: 0.5,
+        dashArray: '4, 4'
     };
 }

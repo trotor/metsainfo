@@ -7,14 +7,15 @@
 import { CONFIG, crsEPSG3067 } from './config.js';
 import * as state from './state.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
-import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle } from './styles.js';
-import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels } from './data.js';
-import { onEachFeature, onEachHabitat, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, copyParcelLink, downloadCSV, toggleHelp } from './ui.js';
+import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
+import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels, fetchForestUseDeclarations } from './data.js';
+import { onEachFeature, onEachHabitat, onEachMkiFeature, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, setMkiColorMode, updateMkiLegend, copyParcelLink, downloadCSV, toggleHelp } from './ui.js';
 
 // Expose functions for HTML onclick handlers
 window.copyParcelLink = copyParcelLink;
 window.downloadCSV = downloadCSV;
 window.setColorMode = setColorMode;
+window.setMkiColorMode = setMkiColorMode;
 window.toggleHelp = toggleHelp;
 
 /**
@@ -132,11 +133,31 @@ function initLayers() {
         coordsToLatLng: coordsEPSG3067ToLatLng
     }));
 
-    const overlayControl = L.control.layers(null, { 'Luontokohteet': state.habitatLayer }, { position: 'topright' });
+    state.setState('mkiLayer', L.geoJSON(null, {
+        style: mkiStyle,
+        onEachFeature: onEachMkiFeature,
+        coordsToLatLng: coordsEPSG3067ToLatLng
+    }));
+
+    const overlayControl = L.control.layers(null, {
+        'Luontokohteet': state.habitatLayer,
+        'Metsänkäyttöilmoitukset': state.mkiLayer
+    }, { position: 'topright' });
     overlayControl.addTo(map);
 
     map.on('overlayadd', (e) => {
         if (e.layer === state.habitatLayer) loadHabitatsInView();
+        if (e.layer === state.mkiLayer) {
+            loadMkiInView();
+            document.getElementById('mki-color-mode-control').classList.remove('hidden');
+        }
+    });
+
+    map.on('overlayremove', (e) => {
+        if (e.layer === state.mkiLayer) {
+            document.getElementById('mki-color-mode-control').classList.add('hidden');
+            document.getElementById('mki-legend').classList.add('hidden');
+        }
     });
 }
 
@@ -167,6 +188,11 @@ function initControls() {
     if (colorModeSelect) {
         colorModeSelect.addEventListener('change', (e) => setColorMode(e.target.value));
     }
+
+    const mkiColorModeSelect = document.getElementById('mki-color-mode-select');
+    if (mkiColorModeSelect) {
+        mkiColorModeSelect.addEventListener('change', (e) => setMkiColorMode(e.target.value));
+    }
 }
 
 /**
@@ -178,6 +204,7 @@ function initEventListeners() {
     map.on('moveend', () => {
         loadParcelsInView();
         if (map.hasLayer(state.habitatLayer)) loadHabitatsInView();
+        if (map.hasLayer(state.mkiLayer)) loadMkiInView();
     });
 
     loadParcelsInView();
@@ -355,6 +382,39 @@ async function loadHabitatsInView() {
         }
     } catch (error) {
         console.warn('Failed to load habitats:', error);
+    }
+}
+
+/**
+ * Load forest use declarations in the current map view
+ */
+async function loadMkiInView() {
+    const map = state.map;
+    const zoom = map.getZoom();
+
+    if (zoom < CONFIG.minZoomForParcels) {
+        state.mkiLayer.clearLayers();
+        document.getElementById('mki-legend').classList.add('hidden');
+        return;
+    }
+
+    const bounds = map.getBounds();
+    const sw = proj4('WGS84', 'EPSG:3067', [bounds.getWest(), bounds.getSouth()]);
+    const ne = proj4('WGS84', 'EPSG:3067', [bounds.getEast(), bounds.getNorth()]);
+
+    try {
+        const features = await fetchForestUseDeclarations({
+            minX: sw[0], minY: sw[1], maxX: ne[0], maxY: ne[1]
+        });
+        state.mkiLayer.clearLayers();
+
+        if (features.length > 0) {
+            features.forEach(feature => state.mkiLayer.addData(feature));
+        }
+
+        updateMkiLegend();
+    } catch (error) {
+        console.warn('Failed to load MKI data:', error);
     }
 }
 

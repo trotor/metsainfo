@@ -193,6 +193,49 @@ body {
     display: none;
 }
 
+/* MKI color mode selector */
+#mki-color-mode-control {
+    position: absolute;
+    bottom: 80px;
+    left: 10px;
+    z-index: 1000;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    padding: 6px;
+}
+
+#mki-color-mode-control.hidden {
+    display: none;
+}
+
+#mki-color-mode-select {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    background: white;
+    color: #333;
+}
+
+/* MKI legend */
+#mki-legend {
+    position: absolute;
+    bottom: 80px;
+    left: 180px;
+    z-index: 1000;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    padding: 8px 10px;
+    font-size: 0.75rem;
+}
+
+#mki-legend.hidden {
+    display: none;
+}
+
 .legend-title {
     font-weight: 600;
     margin-bottom: 4px;
@@ -1262,6 +1305,7 @@ h3 .info-tip-icon {
     /* Hide everything except info panel content */
     #header, #map, #footer, #search-control, #close-panel,
     #color-mode-control, #color-legend,
+    #mki-color-mode-control, #mki-legend,
     #help-modal, #help-overlay,
     .parcel-actions, .info-tip,
     .leaflet-control-container {
