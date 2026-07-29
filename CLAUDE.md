@@ -20,13 +20,6 @@ No build step, package manager, or dependencies to install. All libraries are lo
 
 ## Architecture
 
-### Tech Stack
-- Vanilla JavaScript (ES6+)
-- Leaflet.js - Map rendering
-- Proj4js - Coordinate transformation between EPSG:3067 (Finnish national) and WGS84
-- Proj4Leaflet - EPSG:3067 CRS support for Leaflet
-- Kapsi/MML - Finnish base map tiles (taustakartta, peruskartta, ortokuva)
-
 ### Data Sources (WFS)
 - **Metsäkeskus** (`avoin.metsakeskus.fi`) - Forest stand data (`v1:stand`), forest use declarations (`v1:forestusedeclaration`)
 - **MML INSPIRE** (`inspire-wfs.maanmittauslaitos.fi`) - Cadastral parcel boundaries (`cp:CadastralParcel`)
@@ -42,32 +35,8 @@ The `mcp-server/` directory provides a FastMCP Python server that exposes forest
 - **Pipeline**: `pipeline.py` is a port of the browser-side JS (`data.js`, `utils.js`, `statistics.js`). Keep them in sync when modifying WFS queries, geometry logic, or statistics calculation.
 - **Dependencies**: `fastmcp`, `certifi` (installed automatically via `uv run --with`)
 
-### Application Flow
-1. `init()` → `initMap()` → `initLayers()` → `initControls()` → `initEventListeners()`
-2. User zooms to level ≥14 → `loadParcelsInView()` fetches cadastral parcels in viewport
-3. User clicks parcel → `selectParcel()` queries forest data within parcel bounds
-4. `filterFeaturesByParcel()` filters stands whose centroid is inside the clicked parcel
-5. `showSummary()` renders aggregated statistics in side panel
-
-### Key State
-- `map` - Leaflet map instance
-- `cadastralLayer` - Parcel boundaries (GeoJSON)
-- `selectedParcelLayer` - Currently selected parcel highlight
-- `forestLayer` - Forest stands in selected parcel
-- `mkiLayer` - Forest use declarations overlay (GeoJSON)
-- `mkiColorMode` - Current MKI color mode ('year' or 'purpose')
-- `loadedParcels` - Cache of loaded parcels by ID
-
 ### Coordinate Handling
 The map uses EPSG:3067 (Finnish national projection) natively via Proj4Leaflet CRS. Base map tiles from Kapsi use EPSG:3067 tile grid. WFS data also uses EPSG:3067. The `coordsEPSG3067ToLatLng()` function converts coordinates to WGS84 LatLng for Leaflet's internal use. Geometry operations (`pointInPolygon3067`, `getGeometryBounds3067`) work in EPSG:3067.
-
-### Map Layers
-Base map layers are served from Kapsi (kartat.kapsi.fi) in EPSG:3067 projection:
-- **Peruskartta** (default) - Basic topographic map
-- **Taustakartta** - Background map with less detail
-- **Ortokuva** - Aerial/satellite imagery
-
-Layer switching is handled by Leaflet's built-in layer control (top right corner).
 
 ### Code Mappings (CODES object)
 
@@ -87,124 +56,13 @@ The `CODES` object in `js/config.js` maps numeric IDs to Finnish names. When mod
 - `mainGroup` - Land use category (1-8)
 - `cuttingPurpose` - Forest use declaration cutting purpose (1-6)
 
-## WFS API Details
+## Reference (loaded on demand)
 
-### Metsäkeskus – Forest Stand Data
+These live as skills in `.claude/skills/` so they don't sit in context every session:
 
-- **Endpoint**: `https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows`
-- **Version**: WFS 2.0.0
-- **Feature type**: `v1:stand`
-- **Request**: GET with URL parameters: `service=WFS&version=2.0.0&request=GetFeature&typeName=v1:stand&outputFormat=application/json&srsName=EPSG:3067&bbox={minX},{minY},{maxX},{maxY},EPSG:3067`
-- **Response**: GeoJSON FeatureCollection with stand polygons
-- **Limits**: Max ~2000 features per query. Too large bbox → missing features without error.
-- **Error behavior**: HTTP 200 with empty FeatureCollection = no data in area (not an error)
-- **Key properties**: `MAINSPECIES`, `MEANDIAM`, `MEANHEIGHT`, `MEANAGE`, `VOLUME`, `DEVELOPMENTCLASS`, `FERTILITYCLASS`, `SOILTYPE`, `DRAINAGESTATE`, `ACCESSIBILITY`, `MEASUREMENTDATE`, plus cutting/silviculture recommendation arrays
-
-### Metsäkeskus – Forest Use Declarations (MKI)
-
-- **Endpoint**: `https://avoin.metsakeskus.fi/rajapinnat/v1/forestusedeclaration/ows`
-- **Version**: WFS 2.0.0
-- **Feature type**: `v1:forestusedeclaration`
-- **Request**: GET with URL parameters using CQL_FILTER that combines BBOX and year filter
-- **IMPORTANT**: This WFS does NOT support separate `bbox` and `CQL_FILTER` parameters simultaneously (returns HTTP 500). Must combine into a single `CQL_FILTER`: `BBOX(GEOMETRY,minX,minY,maxX,maxY,'EPSG:3067') AND DECLARATIONARRIVALYEAR >= 'year'`
-- **Response**: GeoJSON FeatureCollection with declaration polygons
-- **Key properties**: `CUTTINGPURPOSE`, `CUTTINGREALIZATIONPRACTICE`, `STANDAREA`, `DECLARATIONARRIVALYEAR`, `MAINTREESPECIES`
-
-### MML INSPIRE – Cadastral Parcels
-
-- **Endpoint**: `https://inspire-wfs.maanmittauslaitos.fi/inspire-wfs/cp/ows`
-- **Version**: WFS 2.0.0
-- **Feature type**: `cp:CadastralParcel`
-- **Request (by area)**: GET with `bbox={minX},{minY},{maxX},{maxY},EPSG:3067`
-- **Request (by reference)**: GET with `CQL_FILTER=nationalCadastralReference='09141600010123'`
-- **Response**: GeoJSON FeatureCollection with parcel polygons
-- **Key properties**: `nationalCadastralReference` (14-digit ID), `label`, `referencePoint`
-- **Note**: Multi-part parcels return multiple features with the same `nationalCadastralReference`
-
-### General WFS Notes
-
-- All bbox values must be in EPSG:3067 coordinates (meters), not WGS84 (degrees)
-- Both APIs support CORS (direct browser access works)
-- OutputFormat is always `application/json` (GeoJSON)
-- Requests are GET with URL parameters (no POST/XML needed)
-
-## File Structure
-
-```
-├── index.html          # Entry point, CDN imports
-├── js/
-│   ├── app.js          # Main module: init, map setup, event wiring (~310 lines)
-│   ├── config.js       # CONFIG, CODES, TOOLTIPS, COLOR_MODES, CRS (~170 lines)
-│   ├── state.js        # Shared mutable state (~35 lines)
-│   ├── utils.js        # Coordinates, geometry, formatting (~140 lines)
-│   ├── styles.js       # Leaflet layer style functions (~60 lines)
-│   ├── data.js         # WFS fetch and geometry filtering (~140 lines)
-│   ├── statistics.js   # calculateStatistics (~200 lines)
-│   └── ui.js           # DOM rendering and interactions (~490 lines)
-├── mcp-server/
-│   ├── server.py       # MCP server: hae_metsavaratieto tool + formatting (~120 lines)
-│   ├── pipeline.py     # WFS fetch, geometry, statistics — port of JS modules (~290 lines)
-│   └── codes.py        # CODES mappings — port of js/config.js (~70 lines)
-├── .mcp.json           # Claude Code MCP server configuration
-├── style.css           # Styling
-├── version.js          # Version information (non-module, global)
-├── CLAUDE.md           # Developer instructions (this file)
-├── CLAUDE-HOWTO.md     # AI usage guide and development history
-├── KOODISTO.md         # Official code mappings reference
-└── README.md           # Finnish documentation
-```
-
-### Module Dependencies
-```
-config.js ← (no deps, uses global proj4/L from CDN)
-state.js  ← (no deps)
-utils.js  ← (no deps, uses global proj4/L)
-styles.js ← config, state
-data.js   ← config, utils
-statistics.js ← config, utils
-ui.js     ← config, state, styles, statistics, utils
-app.js    ← config, state, utils, styles, data, ui
-```
-
-Note: `version.js` is loaded as a regular `<script>` (not a module) so `VERSION` is available globally for the inline script in `index.html`.
-
-## Extension Points
-
-### New map layer
-1. `js/app.js` `initLayers()` – create new `L.geoJSON` layer, register in state
-2. `js/app.js` `initMap()` – add to Leaflet layer control
-3. `js/app.js` `initEventListeners()` – add load trigger on `moveend`
-4. `js/styles.js` – add style function
-5. `js/ui.js` – add popup/interaction handler
-
-### New statistic
-1. `js/statistics.js` `calculateStatistics()` – add calculation logic
-2. `js/ui.js` `showSummary()` – add HTML rendering in side panel
-
-### New search mode
-1. `js/utils.js` `normalizeParcelId()` – add input validation/parsing
-2. `js/app.js` `searchParcel()` – add search logic branch
-
-### New code mapping
-1. `js/config.js` `CODES` object – add new category
-2. `KOODISTO.md` – document the codes with official source
-3. **Both must be updated together!**
-
-### New color mode for stands
-1. `js/config.js` `COLOR_MODES` – add new mode configuration
-2. `index.html` – add `<option>` to `#color-mode-select`
-
-### New WFS data source
-1. `js/config.js` `CONFIG` – add endpoint URL
-2. `js/data.js` – create fetch function (use `fetchForestDataByBounds` as template)
-3. All WFS uses EPSG:3067 coordinates
-4. `js/ui.js` – create render functions
-
-### Global scope for onclick handlers
-Functions used in HTML template strings (`onclick="..."`) must be exposed on `window` in `js/app.js`:
-```javascript
-window.myFunction = myFunction;
-```
+- **`wfs-rajapinnat`** – WFS endpoints, request formats, response shapes and known quirks for all three data sources
+- **`laajennuspisteet`** – which files to touch when adding a map layer, statistic, search mode, code mapping, color mode, or WFS source
+- **`manuaalinen-testaus`** – manual verification checklist (there is no automated test framework)
 
 ## Common Pitfalls
 
@@ -230,6 +88,9 @@ window.myFunction = myFunction;
 - WFS data is generally safe, but always sanitize any user input before inserting into HTML.
 - Use `formatNumber()` for all numeric display (handles fi-FI locale, comma as decimal separator).
 
+### version.js is not a module
+`version.js` is loaded as a regular `<script>`, not an ES module, so `VERSION` is available globally for the inline script in `index.html`. Don't convert it to a module.
+
 ### Multi-part parcels
 - A single cadastral reference (e.g., 091-416-0001-0123) can have multiple geometry parts.
 - `fetchParcelsByReference()` returns an array — always handle multiple features.
@@ -237,38 +98,7 @@ window.myFunction = myFunction;
 
 ## Testing
 
-No automated test framework. Verify changes manually:
-
-### Basic flow
-1. Start server: `python3 -m http.server 8080`
-2. Open http://localhost:8080
-3. Map loads, centered on Suolahti area
-4. Zoom in → parcel boundaries appear (zoom ≥10)
-5. Click a parcel → side panel shows statistics, stands appear on map with green coloring
-
-### Search
-6. Enter a cadastral reference in search box (format: `91-416-1-123`)
-7. Map zooms to parcel, statistics load in side panel
-8. Try invalid input → error message appears
-
-### Stand interaction
-9. Click a stand header in the list → stand expands, highlights on map
-10. Click a cutting recommendation → matching stands highlight in orange
-11. Click another stand → previous highlight clears
-
-### CSV export
-12. With a parcel selected, click "Lataa CSV"
-13. File downloads, opens in Excel with correct Finnish characters (ääkköset)
-14. Semicolon-delimited, comma as decimal separator
-
-### Mobile
-15. Resize browser to ≤768px width → panel moves to bottom
-16. Search form accessible, map interactive with touch
-
-### Edge cases
-- Zoom out past level 10 → parcels disappear (expected)
-- Click area with no forest data → panel shows "Ei metsävaratietoja"
-- Search for non-existent parcel → "Kiinteistöä ei löytynyt"
+No automated test framework. Verify changes manually — see the `manuaalinen-testaus` skill for the checklist.
 
 ## Notes
 
