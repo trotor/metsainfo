@@ -16,7 +16,7 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 |---------|--------|-----------|
 | Kunnianhimo | Maastokäyttöön optimoitu | Todellinen lisäarvo puhelimessa, ei täyttä uudelleenkirjoitusta |
 | Julkaisukanavat | Google Play + Apple App Store | Koko yleisö tavoitetaan |
-| Julkaisija | Henkilökohtainen kehittäjätili | Harrasteprojekti; edellyttää suljettua testiä (ks. vaihe 8) |
+| Julkaisija | Oman yrityksen organisaatiotili | Tilit ovat jo olemassa molempiin kauppoihin; organisaatiotili vapauttaa Playn suljetun testin vaatimuksesta |
 | Tekninen ratkaisu | Capacitor 8, jaettu koodikanta | Ainoa vaihtoehto, joka täyttää ominaisuustavoitteet ilman koodikannan kahdentumista |
 | Build | Vite + npm, verkkosovellus buildataan `dist/`-hakemistoon | Offline vaatii paikalliset kirjastot; CDN ei kelpaa natiivissa |
 | Offline-kartat | Ei esiladata karttalaattoja | Kapsi on vapaaehtoispalvelu; massalataus olisi väärinkäyttöä. Vain vektoridata offline. |
@@ -40,7 +40,7 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 | Android Studio | 2025.2.1+ |
 | Node | 20 LTS+ |
 
-**Kustannukset**: Google Play Console 25 $ kertamaksu, Apple Developer Program 99 $/vuosi.
+**Kustannukset**: ei uusia. Google Play Console- ja Apple Developer Program -tilit ovat jo olemassa oman yrityksen nimissä.
 
 ## 2. Repositorion rakenne
 
@@ -74,7 +74,7 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 │   │   └── notes-ui.js     #   UUSI
 │   └── ...                 # app, config, state, utils, styles, data, statistics
 ├── public/                 # UUSI: Vite kopioi sellaisenaan dist/-hakemistoon
-│   ├── tietosuoja.html     #   tietosuojaseloste (kauppojen vaatima URL)
+│   ├── tietosuoja.html     #   siirretään juuresta; osoite ei saa muuttua
 │   └── .well-known/
 │       ├── assetlinks.json #   Android App Links
 │       └── apple-app-site-association
@@ -222,9 +222,11 @@ Skripti ajetaan `npm run build` -vaiheen osana.
 
 ### Tietosuoja
 
-Molemmat kaupat vaativat julkisen tietosuojaselosteen URL:n. Toteutetaan `public/tietosuoja.html`, jonka Vite kopioi buildissa `dist/`-hakemistoon ja joka päätyy siten GitHub Pagesiin osoitteeseen `https://trotor.github.io/metsainfo/tietosuoja.html`. Sisältö on suoraviivainen: sovellus ei kerää käyttäjätietoja, ei sisällä analytiikkaa eikä mainoksia, ja sijainti sekä valokuvat käsitellään ja säilytetään ainoastaan käyttäjän laitteella. Kolmansien osapuolten palvelut rajoittuvat Metsäkeskuksen ja Maanmittauslaitoksen avoimiin rajapintoihin sekä karttalaattoihin.
+Molemmat kaupat vaativat julkisen tietosuojaselosteen URL:n. Seloste on **jo kirjoitettu ja repossa**: `tietosuoja.html` juuressa, julkaistuna osoitteessa `https://trotor.github.io/metsainfo/tietosuoja.html`. Vaiheessa 0 se siirtyy `public/`-hakemistoon, josta Vite kopioi sen buildiin — **osoite ei muutu**, mikä on olennaista, koska osoite on jo annettu kauppalomakkeissa.
 
-Playn **Data Safety** -lomake ja Applen **tietosuojatarrat** täytetään vastaavasti: sijainti ja kuvat kerätään, mutta niitä ei siirretä laitteelta pois.
+Sisältö: sovellus ei kerää käyttäjätietoja, ei sisällä analytiikkaa eikä mainoksia, ja sijainti, valokuvat sekä muistiinpanot käsitellään ja säilytetään ainoastaan käyttäjän laitteella. Seloste kertoo avoimesti myös sen, että avointen rajapintojen haut paljastavat kolmansille osapuolille käyttäjän IP-osoitteen ja haetun alueen.
+
+Playn **Data Safety** -lomake ja Applen **tietosuojatarrat** täytetään vastaavasti. Molempien perusvastaus on **ei kerättyä tietoa**, koska kummankin kaupan määritelmässä "kerääminen" tarkoittaa tiedon siirtymistä pois laitteelta — eikä Metsäinfossa mikään lähde. Valmiit lomakevastaukset perusteluineen: [docs/kauppa/tietosuojalomakkeet.md](../kauppa/tietosuojalomakkeet.md).
 
 ### Lupaperustelut
 
@@ -242,13 +244,15 @@ Playn **Data Safety** -lomake ja Applen **tietosuojatarrat** täytetään vastaa
 
 Apple hylkää sovellukset, jotka ovat käytännössä verkkosivun kuori. Riski on todellinen, koska sovellus perustuu olemassa olevaan verkkosovellukseen. Torjunta: offline-vektoridata, GPS-seuranta ja kamerahavainnot ovat toimintoja, joita verkkoversiossa ei ole. Nämä kirjataan eksplisiittisesti App Review -muistiinpanoihin, ja katselmoijalle annetaan esimerkkikiinteistötunnus, jolla offline-lataus voidaan testata.
 
-### Nimi, brändi ja työnantajasuhde
+### Nimi, brändi ja sivutoimi
 
-Sovellus julkaistaan henkilökohtaisella tilillä, käyttää työnantajan (Suomen metsäkeskus) avointa dataa ja kantaa nimeä "Metsäinfo". Tämä edellyttää kolme toimenpidettä ennen kauppatilin avaamista:
+Sovellus julkaistaan oman yrityksen nimissä, käyttää Suomen metsäkeskuksen avointa dataa ja kantaa nimeä "Metsäinfo". Aineisto on CC BY 4.0 -lisensoitua ja vapaasti käytettävää, joten kyse ei ole datan käyttöoikeudesta. Kolme toimenpidettä silti:
 
-1. **Selkeä erottautuminen.** Sekä kauppakuvaukseen että sovelluksen ohjenäkymään lisätään maininta: sovellus on itsenäinen harrasteprojekti, joka hyödyntää Suomen metsäkeskuksen ja Maanmittauslaitoksen avoimia aineistoja, eikä ole näiden organisaatioiden virallinen tuote tai palvelu.
+1. **Selkeä erottautuminen.** Sekä kauppakuvaukseen että sovelluksen ohjenäkymään lisätään maininta: sovellus on itsenäinen tuote, joka hyödyntää Suomen metsäkeskuksen ja Maanmittauslaitoksen avoimia aineistoja, eikä ole näiden organisaatioiden virallinen tuote tai palvelu.
 2. **Lähdeviittaukset.** CC BY 4.0 -attribuutiot molemmille tietolähteille sovelluksen tietonäkymässä.
-3. **Varmistukset.** Asia kannattaa varmistaa esihenkilöltä ennen julkaisua, ja nimi "Metsäinfo" tarkistaa PRH:n tavaramerkkirekisteristä.
+3. **Varmistukset.** Nimi "Metsäinfo" tarkistetaan PRH:n tavaramerkkirekisteristä, ja oman yrityksen kautta tapahtuva julkaisu suhteessa työsuhteeseen Suomen metsäkeskukseen tarkistetaan organisaation sivutoimikäytäntöä vasten.
+
+Valmiit tekstit näihin: [docs/kauppa/](../kauppa/).
 
 ### Muut kauppavaatimukset
 
@@ -300,19 +304,21 @@ Jokainen vaihe on oma pull requestinsa. Vaiheet 0–1 ovat riskialttiimmat, kosk
 | **4** | Offline-välimuisti: lataus, tarjoilu, hallintanäkymä, offline-indikaattori. | 1 |
 | **5** | Muistiinpanot ja valokuvat: tallennus, kartan markkerit, GeoJSON- ja CSV-vienti. | 3, 4 |
 | **6** | Suosikit, natiivi jako, syvälinkit (App Links, Universal Links, custom scheme). | 1 |
-| **7** | Kauppavalmius: kuvakkeet, splash, tietosuojaseloste, kauppametadata, kuvakaappaukset, allekirjoitusavaimet, versionsynkronointi. | 2–6 |
-| **8** | Julkaisu: Play suljettu testi (12 testaajaa / 14 vrk) → tuotanto; iOS TestFlight → App Review. | 7 |
+| **7** | Kauppavalmius: kuvakkeet, splash, kuvakaappaukset, allekirjoitusavaimet, versionsynkronointi. Tekstit, tietosuojaseloste ja lomakevastaukset ovat jo valmiina kansiossa `docs/kauppa/`. | 2–6 |
+| **8** | Julkaisu: Play internal testing → tuotanto porrastettuna; iOS TestFlight → App Review. | 7 |
 
 ### Kriittinen polku
 
-Vaihe 8 on aikataulun pullonkaula. Henkilökohtaisen kehittäjätilin on ajettava suljettu testi, jossa **12 testaajaa on opt-in-tilassa 14 peräkkäisen vuorokauden ajan**, ennen kuin tuotantojulkaisua voi edes hakea. Laskuri käynnistyy vasta kun Google on hyväksynyt julkaisun *ja* 12 testaajaa on asentanut sovelluksen omalla Google-tilillään — pelkkä kutsun lähettäminen ei riitä.
+Organisaatiotilillä julkaisu **ei ole enää aikataulun pullonkaula**. Playn 12 testaajan ja 14 vuorokauden suljettu testi koskee vain henkilökohtaisia tilejä, jotka on avattu 13.11.2023 jälkeen — yrityksen organisaatiotililtä voi julkaista suoraan tuotantoon. Kaksi viikkoa odotusta ja testaajien värvääminen poistuvat suunnitelmasta kokonaan.
 
 Käytännön seuraukset:
 
-- Testaajien kokoaminen kannattaa aloittaa jo vaiheessa 5, ei vaiheessa 8.
-- Suljettu testi käynnistetään heti vaiheen 7 valmistuttua.
-- iOS:n App Review -kierros ajetaan rinnakkain, ei peräkkäin. App Review kestää tyypillisesti päiviä, joten iOS voi hyvinkin päästä kauppaan ensin.
-- Realistinen kokonaisaikataulu vaiheesta 7 julkaisuun: **3–5 viikkoa**, josta 14 vrk on pelkkää odotusta.
+- Pullonkaulaksi jää **vaihe 7** eli kauppavalmius: kuvakkeet, kuvakaappaukset ja metadata syntyvät vasta kun sovellus on ajettavissa laitteella.
+- Molemmat kaupat ajetaan rinnakkain, ei peräkkäin. Play on tyypillisesti nopeampi; App Review vie päiviä ja voi vaatia useamman kierroksen.
+- Ensimmäinen Play-tuotantojulkaisu porrastettuna (20 % → 100 %), jotta kaatumiset näkyvät ennen kuin koko käyttäjäkunta saa version.
+- Realistinen kokonaisaikataulu vaiheesta 7 julkaisuun: **1–2 viikkoa**, käytännössä App Review -kierrosten määrä.
+
+Kauppatekstit, lomakevastaukset ja katselmointimuistiinpanot ovat valmiina: [docs/kauppa/](../kauppa/).
 
 ## 10. Riskit
 
@@ -321,8 +327,8 @@ Käytännön seuraukset:
 | Applen 4.2-hylkäys | iOS-julkaisu viivästyy | Offline, GPS ja kamera perusteluina katselmointimuistiinpanoissa; testikiinteistötunnus katselmoijalle |
 | WFS-kutsut kaatuvat natiivissa CORS-tarkastukseen | Sovellus ei toimi lainkaan | `CapacitorHttp`-silta käyttöön jo vaiheessa 1; varmistetaan laitteella heti |
 | Vaihe 0 rikkoo verkkosovelluksen | Nykyinen demo hajoaa | Ei toiminnallisia muutoksia; manuaalinen läpikäynti ennen mergeä; Pages-julkaisu vasta kun `dist/` todettu toimivaksi |
-| 12 testaajaa ei löydy | Play-julkaisu blokkautuu | Kokoaminen aloitetaan vaiheessa 5; varasuunnitelmana organisaatiotilin harkinta |
-| Nimi- tai brändiristiriita työnantajan kanssa | Julkaisu estyy tai vaatii uudelleennimeämisen | Varmistus esihenkilöltä ja PRH-tarkistus ennen kauppatilin avaamista |
+| Nimi- tai tavaramerkkiristiriita | Julkaisu estyy tai vaatii uudelleennimeämisen | PRH-tarkistus ennen kuin nimi lyödään lukkoon ikoneihin ja kauppametadataan |
+| Sivutoimikäytäntö estää julkaisun | Koko projekti pysähtyy | Tarkistetaan organisaation sivutoimikäytäntö ennen vaihetta 7 |
 | Kapsi-laattojen kuormitus mobiilikäytöstä | Palvelun väärinkäyttö | Ei esilatausta; normaali selauskäyttö vain. Jos kuormitus nousee, siirrytään MML:n rajapintaan API-avaimella |
 | Metsäkeskuksen WFS:n ~2000 kuvion raja offline-latauksessa | Puutteellinen data ilman virheilmoitusta | Lataus tehdään kiinteistö kerrallaan, ei laajalta alueelta; kuviomäärä tarkistetaan ja käyttäjää varoitetaan rajan lähestyessä |
 
