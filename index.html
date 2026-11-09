@@ -12,6 +12,7 @@
 
 </head>
 <body>
+    <div id="safe-area-probe" aria-hidden="true"></div>
     <div id="app">
         <!-- Header -->
         <header id="header">
@@ -24,6 +25,14 @@
 
         <!-- Info panel -->
         <div id="info-panel" class="hidden">
+            <div id="sheet-handle" role="button" tabindex="0" aria-label="Muuta tietopaneelin kokoa"></div>
+            <div id="sheet-peek"></div>
+            <div id="sheet-menu" role="menu" hidden>
+                <button role="menuitem" data-action="copy">Kopioi linkki</button>
+                <button role="menuitem" data-action="csv">Lataa CSV</button>
+                <button role="menuitem" data-action="print">Tulosta</button>
+                <button role="menuitem" data-action="clear">Poista valinta</button>
+            </div>
             <button id="close-panel" aria-label="Sulje">&times;</button>
             <h2>Metsävaratiedot</h2>
             <div id="loading" class="hidden">
