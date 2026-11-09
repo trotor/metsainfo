@@ -8,7 +8,9 @@
 
 **Arkkitehtuuri:** Vite ottaa `index.html`:n entrypointiksi ja rakentaa `dist/`-hakemistoon. CDN-tagit korvataan npm-riippuvuuksilla, jotka tarjoillaan sovelluskoodille globaaleina `window.L` ja `window.proj4` — nykyinen koodi käyttää niitä globaaleina eikä sitä kirjoiteta tässä vaiheessa uusiksi. GitHub Actions rakentaa ja julkaisee `dist/`-sisällön `gh-pages`-haaraan, joka on jo Pagesin lähde.
 
-**Teknologiat:** Vite 8, Vitest 4, Leaflet 1.9.4, Proj4js 2.9.0, Proj4Leaflet 1.0.2, Node 20.19+ (kehityskoneella 24.13.0)
+**Teknologiat:** Vite 8, Vitest 4, Leaflet 1.9.4, Proj4js 2.9.0, Proj4Leaflet 1.0.2, Node 24 LTS, vähintään 24.15 (`.nvmrc`; jsdom 30 vaatii `^22.22.2 || ^24.15.0`, Capacitor 8 vähintään Node 22)
+
+> **Päivitetty 9.11.2026:** suunnitelma tarkistettu ennen toteutusta. Muutokset: Node-vaatimus (yllä), `.nvmrc` (tehtävä 1), `version.js` siirtyy `public/`-hakemistoon (tehtävä 3 — Vite ei kopioi tavallista `<script>`-tagia buildiin, todennettu Vite 8.3.7:llä), Actions-versiot v4 → v7 ja Node-versio `.nvmrc`:stä (tehtävä 4), dokumentaation `version.js`-polut (tehtävä 5).
 
 ## Globaalit rajoitteet
 
@@ -38,16 +40,18 @@ Nämä koskevat jokaista tehtävää.
 | `package.json` | npm-projekti, riippuvuudet, skriptit | 1 |
 | `vite.config.js` | Build- ja testikonfiguraatio | 1 |
 | `.gitignore` | `node_modules/` ja `dist/` pois versionhallinnasta | 1 |
+| `.nvmrc` | Node-versio kehityskoneelle ja CI:lle | 1 |
 | `js/vendor/globals.js` | Tuo Leaflet ja proj4, asettaa ne globaaleiksi | 2 |
 | `js/vendor/index.js` | Takaa latausjärjestyksen: globaalit ennen Proj4Leafletia | 2 |
 | `js/app.js` | Lisätään vendor-tuonti ensimmäiseksi (muuten ennallaan) | 2 |
 | `index.html` | CDN-tagit pois, Leafletin CSS tuonniksi | 2 |
 | `tests/utils.test.js` | Koordinaattimuunnosten ja geometrian testit | 2 |
 | `public/tietosuoja.html` | Siirretään juuresta; Vite kopioi buildiin | 3 |
+| `public/version.js` | Siirretään juuresta; Vite kopioi buildiin, polku `version.js` säilyy | 3 |
 | `.github/workflows/deploy.yml` | Build ja julkaisu gh-pages-haaraan | 4 |
 | `README.md`, `CLAUDE.md` | Kehitysohjeet vastaamaan todellisuutta | 5 |
 
-`js/`-moduuleihin ei kosketa `app.js`:n yhtä tuontiriviä lukuun ottamatta. `style.css`, `version.js` ja `mcp-server/` säilyvät ennallaan.
+`js/`-moduuleihin ei kosketa `app.js`:n yhtä tuontiriviä lukuun ottamatta. `style.css` ja `mcp-server/` säilyvät ennallaan. `version.js`:n sisältö säilyy, mutta tiedosto siirtyy `public/`-hakemistoon (tehtävä 3).
 
 ---
 
@@ -57,11 +61,22 @@ Nämä koskevat jokaista tehtävää.
 - Luo: `package.json`
 - Luo: `vite.config.js`
 - Muokkaa: `.gitignore`
+- Luo: `.nvmrc`
 
 **Rajapinnat:**
 - Tuottaa: npm-skriptit `dev`, `build`, `preview`, `test`; Viten `base: './'` ja `outDir: 'dist'`.
 
 Tässä tehtävässä **CDN-tagit jäävät paikoilleen**. Tarkoitus on todentaa, että Vite tarjoilee nykyisen sovelluksen muuttumattomana ennen kuin riippuvuuksiin kosketaan. Jos jokin menee rikki myöhemmin, tiedät sen johtuvan tehtävästä 2, ei työkaluketjusta.
+
+- [ ] **Vaihe 0: Luo `.nvmrc` ja ota Node-versio käyttöön**
+
+```bash
+echo 24 > .nvmrc
+nvm use
+node -v
+```
+
+Odotettu: `v24.15.0` tai uudempi. Vanhemmalla 24-versiolla jsdom ei asennu tehtävässä 2 (`EBADENGINE`). Korjaus: `nvm install 24`.
 
 - [ ] **Vaihe 1: Luo `package.json`**
 
@@ -143,7 +158,7 @@ Odotettu: sovellus toimii samalla tavalla kuin kehityspalvelimella. Sammuta (Ctr
 - [ ] **Vaihe 7: Commit**
 
 ```bash
-git add package.json package-lock.json vite.config.js .gitignore
+git add package.json package-lock.json vite.config.js .gitignore .nvmrc
 git commit -m "build: lisää Vite-build-vaihe (#20)"
 ```
 
@@ -376,30 +391,36 @@ git commit -m "build: siirrä CDN-kirjastot npm-riippuvuuksiksi (#20)"
 
 ---
 
-## Tehtävä 3: Tietosuojaseloste buildiin ja tuotantobuildin todennus
+## Tehtävä 3: Tietosuojaseloste ja versiotiedosto buildiin, tuotantobuildin todennus
 
 **Tiedostot:**
 - Siirrä: `tietosuoja.html` → `public/tietosuoja.html`
+- Siirrä: `version.js` → `public/version.js`
 
 **Rajapinnat:**
 - Kuluttaa: tehtävän 1 `outDir: 'dist'`.
-- Tuottaa: `dist/tietosuoja.html`, joka vastaa osoitetta `https://trotor.github.io/metsainfo/tietosuoja.html`.
+- Tuottaa: `dist/tietosuoja.html`, joka vastaa osoitetta `https://trotor.github.io/metsainfo/tietosuoja.html`, ja `dist/version.js`.
 
 Vite kopioi `public/`-hakemiston sisällön sellaisenaan buildin juureen. Ilman tätä siirtoa tietosuojaseloste katoaisi julkaisusta, ja kauppalomakkeisiin annettu osoite lakkaisi toimimasta.
 
-- [ ] **Vaihe 1: Siirrä tiedosto**
+**Miksi myös `version.js`:** Vite jättää `<script src="version.js">`-tagin (ilman `type="module"`) koskematta `index.html`:ään, mutta **ei kopioi tiedostoa `dist/`-hakemistoon**. Tuotannossa tagi osoittaisi olemattomaan tiedostoon ja inline-skripti kaatuisi virheeseen `VERSION is not defined`. Kehityspalvelimella vika ei näy, koska se tarjoilee repon juuren. `public/`-hakemistossa polku säilyy samana (`version.js`), joten `index.html`:ää ei tarvitse muuttaa. Todennettu Vite 8.3.7:llä 9.11.2026.
+
+- [ ] **Vaihe 1: Siirrä tiedostot**
 
 ```bash
 mkdir -p public
 git mv tietosuoja.html public/tietosuoja.html
+git mv version.js public/version.js
 ```
+
+Build tulostaa tämän jälkeen varoituksen `<script src="version.js"> in "/index.html" can't be bundled without type="module" attribute`. Varoitus on odotettu ja harmiton: tiedostoa ei ole tarkoituskaan niputtaa.
 
 - [ ] **Vaihe 2: Rakenna ja todenna hakemistorakenne**
 
 Aja: `npm run build`
 
 Aja: `ls dist/`
-Odotettu: hakemisto sisältää vähintään `index.html`, `tietosuoja.html` ja `assets/`.
+Odotettu: hakemisto sisältää vähintään `index.html`, `tietosuoja.html`, `version.js` ja `assets/`.
 
 Aja: `ls dist/ | grep -c "CLAUDE\|mcp-server\|docs"`
 Odotettu: `0` — lähdekoodi ja dokumentaatio eivät päädy julkaistavaan sisältöön.
@@ -419,13 +440,13 @@ Sammuta palvelin.
 - [ ] **Vaihe 4: Todenna suhteelliset polut**
 
 Aja: `grep -o 'src="[^"]*"' dist/index.html`
-Odotettu: polut alkavat `./`-merkinnällä, eivät `/`-merkillä. Absoluuttinen polku rikkoisi sekä `/metsainfo/`-alipolun että Capacitorin.
+Odotettu: `src="version.js"` sekä `./assets/`-alkuiset polut. Mikään polku ei saa alkaa `/`-merkillä — absoluuttinen polku rikkoisi sekä `/metsainfo/`-alipolun että Capacitorin.
 
 - [ ] **Vaihe 5: Commit**
 
 ```bash
-git add public/ tietosuoja.html
-git commit -m "build: siirrä tietosuojaseloste public-hakemistoon (#20)"
+git add public/ tietosuoja.html version.js
+git commit -m "build: siirrä tietosuojaseloste ja versiotiedosto public-hakemistoon (#20)"
 ```
 
 ---
@@ -465,12 +486,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Hae lähdekoodi
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Asenna Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Asenna riippuvuudet
@@ -513,8 +534,9 @@ Aja:
 ```bash
 curl -sS -o /dev/null -w "%{http_code}\n" https://trotor.github.io/metsainfo/
 curl -sS -o /dev/null -w "%{http_code}\n" https://trotor.github.io/metsainfo/tietosuoja.html
+curl -sS -o /dev/null -w "%{http_code}\n" https://trotor.github.io/metsainfo/version.js
 ```
-Odotettu: molemmat `200`.
+Odotettu: kaikki kolme `200`.
 
 Avaa `https://trotor.github.io/metsainfo/` selaimessa ja käy läpi tehtävän 2 vaiheen 10 tarkistuslista. **Tämä on koko vaiheen tärkein todennus** — tuotantosivuston on toimittava identtisesti entiseen verrattuna.
 
@@ -535,9 +557,9 @@ Actions julkaisee edellisen toimivan buildin. Älä yritä korjata tuotantoa ete
 ## Tehtävä 5: Dokumentaation päivitys
 
 **Tiedostot:**
-- Muokkaa: `README.md` (kehitysohjeet)
-- Muokkaa: `CLAUDE.md` (Development-osio)
-- Muokkaa: `version.js`
+- Muokkaa: `README.md` (kehitysohjeet, hakemistopuu)
+- Muokkaa: `CLAUDE.md` (Development-osio, `version.js`-polut)
+- Muokkaa: `public/version.js`
 
 **Rajapinnat:**
 - Kuluttaa: tehtävien 1–4 komennot.
@@ -569,7 +591,7 @@ koska sovelluskoodi käyttää `L`- ja `proj4`-tunnisteita globaaleina.
 
 - [ ] **Vaihe 2: Päivitä `README.md`**
 
-Osio `## Kehitys` on riveillä 141–152. Korvaa rivit 143–151 (johdantolause, komentolohko ja avausohje) tällä:
+Osio `## Kehitys` alkaa rivillä 141. Korvaa rivit 143–153 (johdantolause, komentolohko, avausohje ja lause "Ei build-vaihetta, ei riippuvuuksia asennettavaksi.") tällä:
 
 ````
 Kloonaa repositorio, asenna riippuvuudet ja käynnistä kehityspalvelin:
@@ -587,18 +609,29 @@ Muut komennot: `npm test` ajaa yksikkötestit, `npm run build` rakentaa
 tuotantoversion `dist/`-hakemistoon ja `npm run preview` esikatselee sen.
 ````
 
+Päivitä lisäksi hakemistopuu (rivi 124): `├── version.js          # Versiotiedot` → `├── public/             # Sellaisenaan buildiin kopioitavat (version.js, tietosuoja.html)`.
+
+- [ ] **Vaihe 2b: Päivitä `CLAUDE.md`:n `version.js`-viittaukset**
+
+Tiedosto on nyt `public/version.js`. Muuta polku kahdessa kohdassa:
+- Otsikko `### version.js is not a module` ja sen kappale: lisää loppuun lause *"It lives in `public/` so Vite copies it to `dist/` unchanged — a classic `<script>` tag is not bundled."*
+- Version Management -osion `update the version number in \`version.js\`` → `public/version.js`.
+
+Aja lopuksi: `grep -rn 'version\.js' CLAUDE.md README.md .claude/`
+Odotettu: jokainen osuma joko viittaa `public/version.js`:ään tai on `<script src="version.js">`-tagin kuvaus.
+
 - [ ] **Vaihe 3: Päivitä `manuaalinen-testaus`-skilli**
 
 Tiedostossa `.claude/skills/manuaalinen-testaus/SKILL.md` kohta "Start server: `python3 -m http.server 8080`" korvataan komennolla `npm run dev`, ja portti `8080` muutetaan portiksi `5173`.
 
 - [ ] **Vaihe 4: Nosta versionumero**
 
-Muokkaa `version.js`:
+Muokkaa `public/version.js` (päivämääräksi toteutuspäivä):
 
 ```javascript
 const VERSION = {
     number: '3.1.0',
-    date: '2026-07-30',
+    date: 'VVVV-KK-PP',
     author: 'Tero Rönkkö'
 };
 ```
@@ -611,7 +644,7 @@ Aja: `npm run build && npm run preview`
 Tarkista: versiomerkki näyttää `v3.1.0`.
 
 ```bash
-git add CLAUDE.md README.md .claude/skills/manuaalinen-testaus/SKILL.md version.js
+git add CLAUDE.md README.md .claude/skills/manuaalinen-testaus/SKILL.md public/version.js
 git commit -m "docs: päivitä kehitysohjeet vastaamaan build-vaihetta (#20)"
 git push origin main
 ```
@@ -640,5 +673,6 @@ Aja: `gh run watch`, ja tarkista sitten että `https://trotor.github.io/metsainf
 | `proj4 is not defined` moduulin latauksessa | Vendor-tuonti ei ole `app.js`:n ensimmäinen | Siirrä `import './vendor/index.js'` ennen kaikkia muita tuonteja |
 | Kartta latautuu, mutta kontrollit näyttävät tyylittömiltä | Leafletin CSS puuttuu | Varmista `import 'leaflet/dist/leaflet.css'` tiedostossa `globals.js` |
 | Sivusto 404 GitHub Pagesissa | Absoluuttiset polut | `base: './'` puuttuu `vite.config.js`:stä |
-| `VERSION is not defined` | Vite käsitteli `version.js`:n moduulina | Varmista että tagi on `<script src="version.js">` ilman `type="module"` |
+| `VERSION is not defined` vain tuotannossa / previewssä | `version.js` ei ole `public/`-hakemistossa, joten Vite ei kopioinut sitä `dist/`-hakemistoon | `git mv version.js public/version.js` (tehtävä 3). Tagin on myös oltava `<script src="version.js">` ilman `type="module"` |
+| `npm install` antaa `EBADENGINE` jsdomista | Node on vanhempi kuin 24.15 | `nvm install 24 && nvm use` |
 | Actions epäonnistuu `npm ci` -vaiheessa | `package-lock.json` puuttuu versionhallinnasta | `git add package-lock.json` |

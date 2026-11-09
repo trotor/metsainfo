@@ -38,7 +38,20 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 | Xcode | 26.0+ (vaatii macOS) |
 | Android-kohde | API 24+ (compile/target uusin Playn vaatima) |
 | Android Studio | 2025.2.1+ |
-| Node | 20 LTS+ |
+| Node | 24 LTS, vähintään 24.15 (`.nvmrc`; jsdom 30 ja Capacitor CLI 8 eivät tue Node 20:tä) |
+| JDK | 21 (Capacitor 8 / Android Gradle Plugin) |
+
+**Kehityskoneen tila 9.11.2026** (tarkistettu ennen vaihetta 0):
+
+| Kohde | Tila | Toimenpide ennen vaihetta 1 |
+|-------|------|------------------------------|
+| Node | 24.22.2 (nvm, oletus `24`) | — |
+| Xcode | 27.2 | — |
+| CocoaPods | asennettu (`/opt/homebrew/bin/pod`) | — |
+| Android SDK | platforms 34–37, build-tools 37.0.0 | — |
+| JDK | Ei `JAVA_HOME`-muuttujaa; Android Studion JBR 21.0.10 löytyy | `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"` shellin profiiliin |
+| `adb` | Ei PATHissa | `export PATH="$HOME/Library/Android/sdk/platform-tools:$PATH"` |
+| Capacitor | Uusin 8.6.0 | — |
 
 **Kustannukset**: ei uusia. Google Play Console- ja Apple Developer Program -tilit ovat jo olemassa oman yrityksen nimissä.
 
@@ -49,7 +62,9 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 ├── vite.config.js          # UUSI: build dist/-hakemistoon
 ├── capacitor.config.ts     # UUSI: sovellustunnus, nimi, plugin-asetukset
 ├── index.html              # Vite-entry (CDN-tagit poistuvat)
-├── version.js              # Säilyy versionumeron lähteenä
+├── public/
+│   ├── version.js          # Säilyy versionumeron lähteenä (siirtyy public/:iin vaiheessa 0)
+│   └── tietosuoja.html     # Tietosuojaseloste
 ├── android/                # UUSI: Capacitorin generoima, versionhallinnassa
 ├── ios/                    # UUSI: Capacitorin generoima, versionhallinnassa
 ├── js/
@@ -207,7 +222,7 @@ Tietue:
 
 ## 6. Versionhallinta ja allekirjoitus
 
-`version.js` säilyy versionumeron ainoana lähteenä. `scripts/sync-version.mjs` lukee sen ja kirjoittaa:
+`public/version.js` säilyy versionumeron ainoana lähteenä. `scripts/sync-version.mjs` lukee sen ja kirjoittaa:
 
 - `android/app/build.gradle`: `versionName` (esim. `4.0.0`) ja `versionCode` (monotoninen kokonaisluku)
 - `ios/App/App/Info.plist`: `CFBundleShortVersionString` ja `CFBundleVersion`
