@@ -51,7 +51,8 @@ jobs:
   # Pull requestissa vain testit ja build; julkaisu vasta mainiin
   deploy:
     needs: build
-    if: github.event_name != 'pull_request'
+    # Vain main-haarasta: myös käsin käynnistetty ajo muusta haarasta ohittaa julkaisun
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: write
