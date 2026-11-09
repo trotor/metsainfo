@@ -331,6 +331,12 @@ body {
     display: none;
 }
 
+/* iOS-sovellus: WKWebView ei tue tulostusta */
+.is-native .print-btn,
+.is-native #sheet-menu [data-action="print"] {
+    display: none;
+}
+
 /* Nauhakääre ei vaikuta työpöydän asetteluun */
 #map-strip {
     display: contents;

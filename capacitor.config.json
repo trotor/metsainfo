@@ -1,0 +1,9 @@
+{
+  "appId": "fi.inetor.metsainfo",
+  "appName": "Metsäinfo",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#f3f6f1"
+  }
+}

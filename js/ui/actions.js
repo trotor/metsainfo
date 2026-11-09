@@ -4,6 +4,8 @@
 
 import { CODES } from '../config.js';
 import * as state from '../state.js';
+import { isNative, shareableParcelUrl, csvFileName } from '../platform/index.js';
+import { shareLink, shareTextFile } from '../platform/share.js';
 
 /**
  * Toggle the help modal
@@ -20,6 +22,13 @@ export function toggleHelp() {
  * Copy shareable link to clipboard
  */
 export function copyParcelLink(btn = document.getElementById('copy-link-btn')) {
+    if (isNative()) {
+        // Sovelluksessa jakonäkymä ja julkinen verkko-osoite
+        shareLink({ title: 'Metsäinfo', url: shareableParcelUrl(window.location.href) })
+            .catch(error => console.error('Jako epäonnistui:', error));
+        return;
+    }
+
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
         if (!btn) return;
@@ -98,11 +107,20 @@ export function downloadCSV() {
 
     const csvContent = buildCSV(state.currentFeatures);
 
+    if (isNative()) {
+        shareTextFile(csvFileName(parcelId), csvContent)
+            .catch(error => {
+                console.error('CSV:n jako epäonnistui:', error);
+                alert('CSV-tiedoston jako epäonnistui.');
+            });
+        return;
+    }
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `metsavaratiedot_${parcelId.replace(/[^a-zA-Z0-9-]/g, '_')}.csv`);
+    link.setAttribute('download', csvFileName(parcelId));
     link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
