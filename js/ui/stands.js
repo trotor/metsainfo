@@ -6,6 +6,8 @@ import { CODES } from '../config.js';
 import * as state from '../state.js';
 import { formatNumber, getGeometryBounds3067 } from '../utils.js';
 import { tip } from './tips.js';
+import { isMobileLayout, visibleCenterOffset, topInset } from './layout.js';
+import { setActiveTab, getSheet, mapFitOptions } from './panel.js';
 
 /**
  * Highlight a single stand on the map
@@ -22,7 +24,16 @@ export function highlightStand(index, highlight) {
         const centerX = (bounds.minX + bounds.maxX) / 2;
         const centerY = (bounds.minY + bounds.maxY) / 2;
         const [lng, lat] = proj4('EPSG:3067', 'WGS84', [centerX, centerY]);
-        state.map.panTo([lat, lng]);
+
+        if (isMobileLayout()) {
+            // Keskitä näkyvään alueeseen hakupalkin ja tietopaneelin väliin
+            const sheet = getSheet();
+            const offset = visibleCenterOffset(sheet ? sheet.targetHeight() : 0, topInset());
+            const point = state.map.project(L.latLng(lat, lng)).add(offset);
+            state.map.panTo(state.map.unproject(point));
+        } else {
+            state.map.panTo([lat, lng]);
+        }
 
         state.setState('selectedStandIndex', index);
     } else {
@@ -51,9 +62,39 @@ export function highlightFilteredStands(filterType, filterValue) {
     if (matchingFeatures.length > 0) {
         const bounds = state.highlightedStandLayer.getBounds();
         if (bounds.isValid()) {
-            state.map.fitBounds(bounds, { padding: [50, 50], maxZoom: state.map.getZoom() });
+            state.map.fitBounds(bounds, mapFitOptions({ maxZoom: state.map.getZoom() }));
         }
     }
+}
+
+/**
+ * Avaa kuvion kuviolistassa (kartan napautus mobiilissa): Kuviot-välilehti,
+ * paneeli vähintään puolikkaaksi, muut kuviot kiinni, kuvio näkyviin.
+ * Palauttaa false, jos kuviota ei ole listassa.
+ */
+export function openStand(index, { win = window } = {}) {
+    if (!Number.isInteger(index) || index < 0 || index >= state.currentFeatures.length) return false;
+    const item = document.querySelector(`.stand-item[data-index="${index}"]`);
+    if (!item) return false;
+
+    setActiveTab('stands');
+
+    const sheet = getSheet();
+    if (sheet && isMobileLayout(win) && sheet.getSnap() === 'peek') {
+        sheet.setSnap('half');
+    }
+
+    document.querySelectorAll('.stand-item.expanded').forEach(other => {
+        if (other === item) return;
+        other.classList.remove('expanded');
+        other.querySelector('.stand-toggle').textContent = '▼';
+    });
+    item.classList.add('expanded');
+    item.querySelector('.stand-toggle').textContent = '▲';
+
+    highlightStand(index, true);
+    item.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+    return true;
 }
 
 /**
