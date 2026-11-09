@@ -11,12 +11,21 @@ Metsäinfo is a client-side web application for viewing Finnish forest data (met
 ## Development
 
 ```bash
-# Start local server
-python3 -m http.server 8080
-# Access at http://localhost:8080
+npm install          # ensimmäisellä kerralla
+npm run dev          # kehityspalvelin, oletuksena http://localhost:5173
+npm test             # yksikkötestit (Vitest)
+npm run build        # tuotantobuild dist/-hakemistoon
+npm run preview      # tuotantobuildin esikatselu
 ```
 
-No build step, package manager, or dependencies to install. All libraries are loaded from CDN.
+Verkkosovellus julkaistaan automaattisesti GitHub Actionsilla `gh-pages`-haaraan
+jokaisella `main`-pushilla. Älä päivitä `gh-pages`-haaraa käsin.
+
+Kirjastot (Leaflet, Proj4js, Proj4Leaflet) ovat npm-riippuvuuksia ja pinnattu
+täsmällisiin versioihin. Ne asetetaan globaaleiksi `js/vendor/`-moduuleissa,
+koska sovelluskoodi käyttää `L`- ja `proj4`-tunnisteita globaaleina.
+`style.css` tuodaan `js/app.js`:ssä vendorin jälkeen, jotta omat tyylit
+ohittavat Leafletin oletukset.
 
 ## Architecture
 
@@ -62,7 +71,7 @@ These live as skills in `.claude/skills/` so they don't sit in context every ses
 
 - **`wfs-rajapinnat`** – WFS endpoints, request formats, response shapes and known quirks for all three data sources
 - **`laajennuspisteet`** – which files to touch when adding a map layer, statistic, search mode, code mapping, color mode, or WFS source
-- **`manuaalinen-testaus`** – manual verification checklist (there is no automated test framework)
+- **`manuaalinen-testaus`** – manual verification checklist (UI has no automated tests)
 
 ## Common Pitfalls
 
@@ -89,7 +98,7 @@ These live as skills in `.claude/skills/` so they don't sit in context every ses
 - Use `formatNumber()` for all numeric display (handles fi-FI locale, comma as decimal separator).
 
 ### version.js is not a module
-`version.js` is loaded as a regular `<script>`, not an ES module, so `VERSION` is available globally for the inline script in `index.html`. Don't convert it to a module.
+`version.js` is loaded as a regular `<script>`, not an ES module, so `VERSION` is available globally for the inline script in `index.html`. Don't convert it to a module. It lives in `public/` so Vite copies it to `dist/` unchanged — a classic `<script>` tag is not bundled.
 
 ### Multi-part parcels
 - A single cadastral reference (e.g., 091-416-0001-0123) can have multiple geometry parts.
@@ -98,7 +107,7 @@ These live as skills in `.claude/skills/` so they don't sit in context every ses
 
 ## Testing
 
-No automated test framework. Verify changes manually — see the `manuaalinen-testaus` skill for the checklist.
+`npm test` runs Vitest unit tests (`tests/`, jsdom) for pure logic: coordinate conversion, geometry, parcel IDs. UI has no automated tests — verify it manually with the `manuaalinen-testaus` skill checklist. CI runs the tests before every deploy.
 
 ## Notes
 
@@ -109,7 +118,7 @@ No automated test framework. Verify changes manually — see the `manuaalinen-te
 
 ## Version Management
 
-When making changes to the application, remember to update the version number in `version.js`:
+When making changes to the application, remember to update the version number in `public/version.js`:
 - **Patch** (1.x.Y): Bug fixes, minor tweaks
 - **Minor** (1.X.0): New features, enhancements
 - **Major** (X.0.0): Breaking changes, major rewrites
