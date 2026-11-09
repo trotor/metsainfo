@@ -2,7 +2,7 @@ import '../js/vendor/index.js';
 import '../js/config.js';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { showSummary } from '../js/ui/summary.js';
-import { setActiveTab, getActiveTab, initTabs } from '../js/ui/panel.js';
+import { setActiveTab, getActiveTab, initTabs, setPeekMessage } from '../js/ui/panel.js';
 import { STANDS } from './fixtures/stands.js';
 
 beforeEach(() => {
@@ -36,5 +36,13 @@ describe('välilehdet', () => {
         initTabs(document.getElementById('info-content'));
         document.querySelector('.tabbar [data-tab="stands"]').click();
         expect(getActiveTab()).toBe('stands');
+    });
+});
+
+describe('kurkistusrivin viesti', () => {
+    it('setPeekMessage säilyttää toimintovalikon painikkeen', () => {
+        setPeekMessage('Metsätietojen haku epäonnistui.');
+        expect(document.getElementById('sheet-menu-btn')).not.toBeNull();
+        expect(document.getElementById('sheet-peek').textContent).toContain('Metsätietojen haku epäonnistui.');
     });
 });

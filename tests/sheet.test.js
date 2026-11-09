@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { computeSnapHeights, resolveRelease, nextSnapOnTap, createSheet } from '../js/ui/sheet.js';
+import { computeSnapHeights, resolveRelease, nextSnapOnTap, createSheet, sheetHeightForFit } from '../js/ui/sheet.js';
 
 const H = computeSnapHeights(844, 64, 34);
 
@@ -29,6 +29,17 @@ describe('sheetin laskenta', () => {
 
     it('nopea pyyhkäisy alas palaa peekiin', () => {
         expect(resolveRelease(780, 150, 3, H)).toBe('peek');
+    });
+
+    it('kartan sovitus ei käytä full-korkeutta', () => {
+        expect(sheetHeightForFit(H, 'full', false)).toBe(422);
+        expect(sheetHeightForFit(H, 'half', false)).toBe(422);
+        expect(sheetHeightForFit(H, 'peek', false)).toBe(174);
+    });
+
+    it('uusi valinta ja piilotettu paneeli sovittavat peek-korkeudella', () => {
+        expect(sheetHeightForFit(H, 'full', false, true)).toBe(174);
+        expect(sheetHeightForFit(H, 'full', true)).toBe(174);
     });
 
     it('napautussykli', () => {

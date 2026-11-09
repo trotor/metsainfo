@@ -279,7 +279,7 @@ async function searchParcel() {
 
             const sw = proj4('EPSG:3067', 'WGS84', [minX, minY]);
             const ne = proj4('EPSG:3067', 'WGS84', [maxX, maxY]);
-            state.map.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], mapFitOptions({ maxZoom: 16 }));
+            state.map.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], mapFitOptions({ maxZoom: 16 }, { newSelection: true }));
 
             selectParcels(parcels);
         } else {

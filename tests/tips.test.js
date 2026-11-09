@@ -59,9 +59,9 @@ describe('selitteet mobiilissa', () => {
 describe('selitteet työpöydällä', () => {
     beforeEach(() => setup(false));
 
-    it('työpöydällä ei lisätä riviä', () => {
+    it('työpöydällä napautus ei jätä vihjettä auki', () => {
         tips()[0].click();
-        expect(tips()[0].classList.contains('open')).toBe(true);
+        expect(tips()[0].classList.contains('open')).toBe(false);
         expect(inline()).toHaveLength(0);
     });
 });

@@ -60,6 +60,9 @@ export function highlightFilteredStands(filterType, filterValue) {
     matchingFeatures.forEach(f => state.highlightedStandLayer.addData(f));
 
     if (matchingFeatures.length > 0) {
+        // Full-tilassa kartasta ei näkyisi mitään: lasketaan paneeli puolikkaaksi
+        const sheet = getSheet();
+        if (sheet && isMobileLayout() && sheet.getSnap() === 'full') sheet.setSnap('half');
         const bounds = state.highlightedStandLayer.getBounds();
         if (bounds.isValid()) {
             state.map.fitBounds(bounds, mapFitOptions({ maxZoom: state.map.getZoom() }));
