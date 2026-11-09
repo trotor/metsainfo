@@ -1,0 +1,17 @@
+{
+  "name": "metsainfo",
+  "version": "3.0.0",
+  "description": "Suomen metsävaratiedot kartalla",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vite": "^8.1.5"
+  }
+}

@@ -19,3 +19,10 @@ __pycache__/
 
 # Logs
 *.log
+
+# Node ja build
+node_modules/
+dist/
+
+# Superpowers-työtila
+.superpowers/
