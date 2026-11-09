@@ -2,7 +2,7 @@
 <html lang="fi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Metsäinfo - Suomen metsävaratiedot kartalla</title>
     <meta name="description" content="Interaktiivinen karttasovellus Suomen metsävaratietojen tarkasteluun. Hae kiinteistötunnuksella tai klikkaa kartalta.">
     <meta name="author" content="Tero Rönkkö">
@@ -61,10 +61,11 @@
         <div id="search-control">
             <button id="search-toggle" title="Hae kiinteistötunnuksella">&#128269;</button>
             <div id="search-form" class="hidden">
-                <input type="text" id="search-input" placeholder="esim. 91-416-1-123">
+                <input type="text" id="search-input" placeholder="esim. 91-416-1-123" enterkeyhint="search" autocomplete="off">
                 <button id="search-button">Hae</button>
                 <div id="search-error" class="hidden"></div>
             </div>
+            <button id="mobile-help-toggle" aria-label="Käyttöohje" onclick="toggleHelp()">?</button>
         </div>
 
 

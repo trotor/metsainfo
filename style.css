@@ -1,3 +1,13 @@
+/* Maastopaletti (mobiilinäkymä, luku 5.4) */
+:root {
+    --havu: #2d5a27;
+    --kuusikko: #1a3518;
+    --jakala: #f3f6f1;
+    --kaarna: #3b3a36;
+    --sammal: #6b7a63;
+    --sijainti: #1a73e8;
+}
+
 /* Reset and base styles */
 * {
     margin: 0;
@@ -15,6 +25,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    height: 100dvh;
 }
 
 /* Header */
@@ -80,6 +91,10 @@ body {
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#mobile-help-toggle {
+    display: none;
 }
 
 #search-toggle:hover {
@@ -965,65 +980,119 @@ h3 .info-tip-icon {
     text-decoration: underline;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Mobiiliasettelu. Kysely on sama kuin MOBILE_QUERY tiedostossa
+   js/ui/layout.js — pidä ne samoina. Työpöytä (kysely ei täsmää) säilyy
+   ennallaan. */
+@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+    body {
+        font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: var(--kaarna);
+    }
+
+    #header,
+    #footer {
+        display: none;
+    }
+
+    /* Kelluva hakupalkki yläreunassa */
+    #search-control {
+        position: fixed;
+        top: calc(env(safe-area-inset-top) + 8px);
+        left: calc(env(safe-area-inset-left) + 8px);
+        right: calc(env(safe-area-inset-right) + 8px);
+        z-index: 1002;
+        gap: 6px;
+    }
+
+    #search-toggle {
+        display: none;
+    }
+
+    #search-form,
+    #search-form.hidden {
+        display: flex;
+        flex: 1;
+        min-width: 0;
+        padding: 6px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    #search-input {
+        flex: 1;
+        min-width: 0;
+        width: auto;
+        height: 44px;
+        font-size: 16px;
+        border-radius: 10px;
+        border-color: #d5dbd2;
+    }
+
+    #search-input:focus {
+        border-color: var(--havu);
+    }
+
+    #search-button {
+        min-width: 44px;
+        height: 44px;
+        font-size: 16px;
+        border-radius: 10px;
+        background: var(--havu);
+    }
+
+    #search-error {
+        left: 0;
+        right: auto;
+        font-size: 14px;
+        border-radius: 10px;
+        margin-top: 4px;
+        white-space: normal;
+    }
+
+    #mobile-help-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        align-self: flex-start;
+        margin-top: 6px;
+        background: white;
+        color: var(--havu);
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    /* Leafletin kontrollit hakupalkin alle */
+    .leaflet-top {
+        margin-top: calc(env(safe-area-inset-top) + 60px);
+    }
+
+    /* Tietopaneeli väliaikaisesti alareunassa, kunnes bottom sheet korvaa sen */
     #info-panel {
         left: 10px;
         right: 10px;
         width: auto;
         max-height: 50vh;
-        bottom: 60px;
+        bottom: calc(env(safe-area-inset-bottom) + 10px);
         top: auto;
-    }
-
-    #search-control {
-        top: 80px;
-        right: 54px;
     }
 
     #help-modal {
         width: calc(100vw - 24px);
-        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);
     }
 
-    #search-form {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        flex-direction: column;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        z-index: 2000;
-    }
-
-    #search-form::before {
-        content: 'Hae kiinteistötunnuksella';
-        font-weight: 600;
-        color: #2d5a27;
-        margin-bottom: 10px;
-    }
-
-    #search-form #search-input {
-        width: 250px;
-    }
-
-    #search-form #search-button {
-        width: 100%;
-        padding: 10px;
-    }
-
-    /* Overlay behind search form */
-    #search-form:not(.hidden)::after {
-        content: '';
-        position: fixed;
-        top: -100vh;
-        left: -100vw;
-        right: -100vw;
-        bottom: -100vh;
-        background: rgba(0,0,0,0.4);
-        z-index: -1;
+    #close-help {
+        width: 44px;
+        height: 44px;
+        top: 2px;
+        right: 4px;
     }
 }
 
