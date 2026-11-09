@@ -31,7 +31,7 @@ Metsäinfo on kehitetty kokonaan **Claude Code** -työkalulla (claude.ai/code). 
 
 ### Käytetyt tekniikat
 
-- Vanilla JavaScript (ES6+) - ei build-vaihetta
+- Vanilla JavaScript (ES6+) ilman kehystä, Vite-build ja Vitest-testit
 - Leaflet.js karttoihin
 - Proj4js koordinaattimuunnoksiin
 - WFS-rajapinnat avoimeen dataan
