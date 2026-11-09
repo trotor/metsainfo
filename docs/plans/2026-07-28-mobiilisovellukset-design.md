@@ -153,7 +153,7 @@ Muita vaiheessa 2 huomioitavia: `.info-tip:hover`-työkaluvihjeet eivät aukea k
 
 ### ui.js:n pilkkominen
 
-`js/ui.js` on 710 riviä. Mobiilikäyttöliittymä lisäisi siihen bottom sheetin, muistiinpanonäkymän ja sijaintikontrollit — tiedosto kasvaisi yli hallittavan. Pilkotaan vaiheessa 1 samalla kun moduulirakenne muutenkin liikkuu: `summary.js` (yhteenvedon renderöinti), `stands.js` (kuviolista ja korostukset), `panel.js` (paneelin tilanhallinta ja tapahtumat). Julkinen rajapinta säilyy, `app.js`:n tuonnit päivittyvät.
+`js/ui.js` on 710 riviä. Mobiilikäyttöliittymä lisäisi siihen bottom sheetin, muistiinpanonäkymän ja sijaintikontrollit — tiedosto kasvaisi yli hallittavan. Pilkotaan **vaiheessa 2** (päätetty 9.11.2026; alun perin vaihe 1), koska bottom sheet kirjoittaa paneelin tilanhallinnan joka tapauksessa uusiksi: `summary.js` (yhteenvedon renderöinti), `stands.js` (kuviolista ja korostukset), `panel.js` (paneelin tilanhallinta ja tapahtumat). Julkinen rajapinta säilyy, `app.js`:n tuonnit päivittyvät.
 
 ## 4. Offline-malli
 
@@ -191,12 +191,17 @@ Tyypillinen kiinteistö noin 20–80 kuviota, GeoJSON pakkaamattomana arviolta 5
 
 ### 5.1 Sijainti ja seuranta
 
-- GPS-piste kartalla tarkkuusympyrällä, päivittyy `watchPosition`-virrasta.
+**Toteutetaan ensin verkkosovellukseen** (`js/platform/location.js`, selaintoteutus `navigator.geolocation`). Capacitor-toteutus lisätään vaiheessa 1 saman rajapinnan taakse. Verkkoversiossa sijainti vaatii HTTPS:n, ja GitHub Pages täyttää sen.
+
+- GPS-piste kartalla tarkkuusympyrällä, päivittyy `watchPosition`-virrasta. Piste on sininen, koska kaikki karttasovellukset käyttävät sitä omalle sijainnille ja käyttäjä tunnistaa sen heti. Yli 30 sekuntia vanha sijainti näytetään harmaana.
 - **"Keskitä minuun"** -painike, jolla kolme tilaa: pois, keskitys, keskitys + suunta.
 - Kompassisuunta `DeviceOrientation`-tapahtumasta (`webkitCompassHeading`). Capacitor 8:n iOS-WebView myöntää liike- ja suuntaluvan automaattisesti ilman järjestelmädialogia (`WebViewDelegationHandler`), mutta `requestPermission()` kutsutaan silti napin painalluksesta. **Varmistetaan oikealla iPhonella heti vaiheen 3 alussa**, ennen kuin kompassi luvataan kauppakuvauksessa. Varasuunnitelma on CoreLocationin suuntatietoa käyttävä plugin, esimerkiksi `@capgo/capacitor-compass`.
-- **"Olet kuviolla"** -indikaattori: nykyinen `pointInPolygon3067` ratkaisee, minkä kuvion sisällä sijainti on, ja paneeli hyppää kyseisen kuvion tietoihin.
+- **"Olet kuviolla"** -indikaattori: nykyinen `pointInPolygon3067` ratkaisee, minkä kuvion sisällä sijainti on (`state.currentFeatures`). Kuvio korostetaan kartalla, ja sheetin yläreunaan tulee kompakti rivi: kuvionumero, pääpuulaji, m³/ha ja kehitysluokka. Rivin napautus avaa kuvion tiedot. Kun kuvio vaihtuu, rivi päivittyy, mutta sheetin sisältö ei hyppää itsestään, jotta luettava kohta ei katoa kesken lukemisen.
+- **Kun kiinteistöä ei ole valittu** (oma ratkaisu): ensimmäisellä paikannuksella valitaan automaattisesti kiinteistö, jonka sisällä sijainti on. Haku tehdään ladatuista kiinteistörajoista (`state.loadedParcels`) `pointInPolygon3067`:lla, ja tarvittaessa zoomataan ensin tasolle 10, jolla rajat latautuvat. Tämän jälkeen kuviotieto toimii normaalisti. Automaattivalinta tehdään vain kerran per paikannuksen käynnistys, ei joka sijaintipäivityksellä.
+- **Kiinteistön rajan ylitys** ei vaihda valintaa automaattisesti. Rivi näyttää "Valitun kiinteistön ulkopuolella", ja napautus valitsee uuden kiinteistön.
 - **Vain etualan sijainti.** Taustasijaintia ei pyydetä. Perustelu: `ACCESS_BACKGROUND_LOCATION` laukaisisi Google Playn erillisen taustasijainti-ilmoituslomakkeen ja videokatselmoinnin, mikä hidastaisi julkaisua merkittävästi ilman todellista hyötyä.
 - Luvan epääminen ei estä sovelluksen käyttöä: kartta toimii normaalisti, sijaintipainike näyttää ohjeen asetuksiin.
+- Kompassi toimii verkkoversiossa iOS Safarissa `DeviceOrientationEvent.requestPermission()`illa. Jos suuntatietoa ei saada (työpöytä, Android-selain ilman `webkitCompassHeading`ia), kolmas tila jätetään pois eikä painike näytä sitä.
 
 ### 5.2 Muistiinpanot ja valokuvat
 
@@ -232,11 +237,77 @@ Tietue:
 
 ### 5.4 Mobiilikäyttöliittymä
 
-- Sivupaneeli korvautuu **bottom sheetillä**: kolme pysäytyskohtaa (kahva, puolikas, koko näyttö), vedettävissä, ei estä kartan käyttöä.
-- Kosketuskohteet vähintään 44×44 pt, hover-riippuvaiset vuorovaikutukset korvataan.
-- `env(safe-area-inset-*)` huomioidaan ylä- ja alareunassa.
-- Karttakontrollit siirtyvät peukalon ulottuville näytön alaosaan.
-- Nykyinen `@media (max-width: 768px)` -tyylittely toimii pohjana; sheet-ohjain on uusi `ui/sheet.js`.
+**Toteutetaan ensin verkkosovellukseen**, ja muutos näkyy myös mobiiliselaimen käyttäjille. **Työpöytänäkymä (leveys > 768 px) säilyy toiminnallisesti ennallaan**: nykyisellä demolla on käyttäjiä, eikä pyyntö "mobiiliin sopivaksi" oikeuta työpöydän uudistamiseen. Molemmat ovat omia ratkaisujani 9.11.2026.
+
+**Mobiilinäkymän tunnistus:** `@media (max-width: 768px), (max-height: 500px) and (pointer: coarse)`. Jälkimmäinen ehto kattaa vaakasuuntaisen puhelimen, joka nykyisin saa työpöytäasettelun 390 px korkeaan ikkunaan.
+
+#### Nykytilan ongelmat (tarkistettu 390×844 px:n näkymässä 9.11.2026)
+
+| # | Ongelma | Missä |
+|---|---------|-------|
+| 1 | Valittu kuvio jää paneelin alle. Kartta keskittää kuvion koko karttaelementin keskelle, mutta paneeli peittää alaosan. | `panTo` `js/ui.js:339`, `fitBounds` `js/ui.js:368` ja `js/app.js:272` |
+| 2 | Paneelin sulkeminen poistaa myös valinnan, eikä paneelia saa takaisin ilman uutta hakua. | `js/app.js:212` |
+| 3 | Tiedot eivät mahdu näytölle: `#info-content` on 2 910 px korkea ja näkyvissä on 369 px:n ikkuna (50vh − otsikot). | `style.css:969–977` |
+| 4 | 19 selitettä (`.info-tip`) aukeaa vain hoverilla, eli kosketuslaitteella tilastojen selitykset ovat saavuttamattomissa. Kohteet ovat 14×14 px. | `style.css:654–711`, `tip()` `js/ui.js:25` |
+| 5 | Pieniä kosketuskohteita: sulje-painike 14×24, ohje 22×22, zoom 30×30, värivalinta 126×28, haku 34×34. Ehdotuslistan rivit ovat 35–36 px. | 31 kohdetta alle 44 px |
+| 6 | Hakukentän ja valikoiden fonttikoko on 12,8 px, jolloin iOS zoomaa sivua kenttään napautettaessa (raja 16 px). | `#search-input`, `#color-mode-select` |
+| 7 | `height: 100vh` ei huomioi iOS Safarin osoiteriviä, ja `viewport-fit=cover` sekä safe-area puuttuvat. | `style.css:17`, `index.html:5` |
+| 8 | Hakupainike on osittain karttatasovalitsimen alla, ja kaksi tasovalitsinta on päällekkäin oikeassa yläkulmassa. | `#search-control` `style.css:980` |
+| 9 | Otsikko (89 px) ja alapalkki (44 px) vievät 16 % näytöstä. Alapalkin tiedot ovat jo Leafletin attribuutiossa ja ohjeessa. | `#header`, `footer` |
+| 10 | Värivalinta ja selite jäävät paneelin taakse. | `#color-mode-control`, `#color-legend` |
+| 11 | Kuvion napautus kartalla avaa pienen Leaflet-popupin, joka ei kytkeydy paneelin kuviolistaan. | `onEachFeature` `js/ui.js:51` |
+| 12 | Ohjeteksti puhuu klikkaamisesta, sivupaneelista ja "vasemman alareunan valikosta", mikä ei vastaa mobiiliasettelua. | `index.html` ohjeikkuna |
+
+#### Rakenne (omat ratkaisuni, perusteltu)
+
+```
+┌──────────────────────────────┐
+│ [🔍 Hae kiinteistötunnus ][?]│  ← kelluva hakukenttä, safe-area-top
+│                         [≡]  │  ← yksi tasopainike (pohjakartta + tasot)
+│                         [+]  │
+│          KARTTA         [−]  │
+│     (koko näyttö)       [◎]  │  ← paikannus: pois / seuraa / seuraa+suunta
+│ ▓▓▓ tilavuus 0 ── 200+ ▓▓▓   │  ← selite kapeana nauhana sheetin yllä
+├──────────────────────────────┤
+│ ━━━  (kahva)                 │
+│ 592-404-1-32    27,6 ha   ⋯  │  ← kurkistus: tunnus + 4 avainlukua
+│ 19 kuviota · 148 m³/ha · ... │
+│ ⦿ Olet kuviolla 7 · Kuusi    │  ← vain kun paikannus päällä
+├──────────────────────────────┤
+│ [Yhteenveto|Kuviot|Ehdotukset]│  ← puolikas / koko: segmentoitu valitsin
+│ ...                          │
+└──────────────────────────────┘
+```
+
+- **Koko näytön kartta.** Otsikko ja alapalkki piilotetaan mobiilissa. Hakukenttä kelluu yläreunassa, ja sen napautus avaa haun suoraan ilman erillistä modaalia. Lähdeviitteet säilyvät Leafletin attribuutiossa ja ohjeessa (CC BY 4.0 -vaatimus täyttyy).
+- **Bottom sheet**, kolme pysäytyskohtaa: *kurkistus* (noin 140 px: tunnus ja avainluvut), *puolikas* (50 %) ja *koko* (näyttö − hakukenttä). Vedettävissä kahvasta, ja kahvan napautus vaihtaa tilaa. Sulkeminen pienentää kurkistukseen. Valinnan poistaa erillinen "Poista valinta" -toiminto (`⋯`-valikko), mikä korjaa ongelman 2.
+- **Sisältö välilehdiksi** (Yhteenveto / Kuviot / Ehdotukset) segmentoidulla valitsimella. Valitsin tabit enkä oletuksena suljettuja osioita, koska kuviolista (20–80 riviä) ja yhteenveto kilpailevat samasta tilasta. Välilehti pitää kunkin näkymän lyhyenä, ja Kuviot-välilehti on se, johon kartan napautus vie. Työpöydällä paneeli säilyy yhtenä vierityksenä.
+- **Kartan ja sheetin yhteys.** Kuvion napautus kartalla avaa Kuviot-välilehden, avaa kyseisen kuvion ja vierittää sen näkyviin. Mobiilissa ei käytetä Leaflet-popupia (ongelma 11). Kaikki `panTo`/`fitBounds`-kutsut saavat alareunan täytteen sheetin senhetkisestä korkeudesta, jolloin kuvio jää näkyvään karttaan (ongelma 1).
+- **Selitteet napautuksella.** `.info-tip` avautuu napautuksella termin alle tekstiriviksi, ei kelluvaksi tooltipiksi, ja vain yksi on auki kerrallaan. Kosketusalue on 44×44 px, vaikka kuvake pysyy pienenä.
+- **Kosketuskohteet vähintään 44×44 px.** Fonttikoko vähintään 16 px kaikissa syöttökentissä.
+- **Karttakontrollit yhteen pystypinoon oikealle:** tasot, zoom ja paikannus. Kaksi tasovalitsinta yhdistetään yhdeksi paneeliksi (pohjakartta ja päälle kytkettävät tasot).
+- **Värivalinta ja selite** siirtyvät sheetin yläpuolelle kapeaksi nauhaksi. Värivalinnan napautus avaa valinnan, ja nauha liikkuu sheetin mukana.
+- **`100dvh`, `viewport-fit=cover` ja `env(safe-area-inset-*)`.**
+
+#### Visuaalinen suunta (oma ratkaisuni)
+
+Maastokäyttö määrää suunnan: luettava auringonvalossa, käytettävissä yhdellä kädellä ja hanskat kädessä, kartta pääosassa. Nykyinen vihreä identiteetti säilyy, ja se uudistetaan rauhallisemmaksi, ei vaihdeta.
+
+| Rooli | Arvo | Käyttö |
+|-------|------|--------|
+| Havu | `#2d5a27` | Pääväri: aktiivinen välilehti, painikkeet, otsikot. Nykyinen brändiväri. |
+| Kuusikko | `#1a3518` | Teksti tummalla taustalla, painettu tila |
+| Jäkälä | `#f3f6f1` | Sheetin ja korttien pohja (lievästi vihertävä, ei puhdas valkoinen, mikä vähentää häikäisyä) |
+| Kaarna | `#3b3a36` | Leipäteksti (kontrasti jäkälää vasten yli 10:1) |
+| Sammal | `#6b7a63` | Toissijainen teksti ja yksiköt |
+| Sijainti | `#1a73e8` | Vain oma sijainti ja paikannuspainikkeen aktiivitila |
+
+- **Fontti:** järjestelmäfontti (`-apple-system, system-ui`), joka näkyy iPhonella SF Prona. Ratkaisu on tietoinen: se ei vaadi latausta (toimii offline), näyttää natiivilta Capacitor-sovelluksessa, ja numeroille saadaan `font-variant-numeric: tabular-nums`, jolloin luvut asettuvat sarakkeisiin.
+- **Numerot ovat sisältö.** Avainluvut isolla ja painavalla (puolilihava, 22–28 px), yksikkö pienempänä samalla rivillä. Ei korttiruudukkoa jokaiselle luvulle: yhteenveto on tiivis kahden sarakkeen luettelo ilman varjoja. Nykyiset erilliset laatikot ("19 kuviota", "27,31 ha") yhdistetään yhdeksi riviksi.
+- **Yksi muistettava elementti:** "Olet kuviolla" -rivi. Se on ainoa kohta, jossa käytetään vahvaa väriä (havu-taustaa ja valkoista tekstiä), koska se on maastokäytön ydin. Kaikki muu pysyy hillittynä.
+- **Pyöristykset hierarkian mukaan:** sheetin yläkulmat 16 px, painikkeet 10 px, sisäiset rivit 0 (erottimena hiusviiva). Ei samaa pyöristystä kaikkialla.
+- **Liike:** sheetin siirtymä ja välilehden vaihto (enintään 200 ms) vastauksena käyttäjän toimintoon. Ei sisääntuloanimaatioita. `prefers-reduced-motion` poistaa siirtymät.
+- **Tekstit:** "napauta" eikä "klikkaa" mobiilissa. Ohjeikkuna kirjoitetaan uudelleen mobiiliasettelua vastaavaksi.
 
 ## 6. Versionhallinta ja allekirjoitus
 
@@ -346,14 +417,16 @@ Testaus tehdään fyysisillä laitteilla, ei pelkällä emulaattorilla — GPS j
 
 ## 9. Vaiheistus
 
-Jokainen vaihe on oma pull requestinsa. iOS julkaistaan ensin (vaiheet 1–8), Android seuraa (vaihe 9). Vaiheet 0–1 ovat riskialttiimmat, koska ne koskevat olemassa olevaa verkkosovellusta.
+Jokainen vaihe on oma pull requestinsa. iOS julkaistaan ensin (vaiheet 1–8), Android seuraa (vaihe 9).
+
+**Toteutusjärjestys (päätetty 9.11.2026): 0 → 2 → 3 → 1 → 4 → 5 → 6 → 7 → 8.** Mobiilikäyttöliittymä ja paikannus tehdään verkkosovellukseen ennen Capacitoria. Niitä voi testata iPhonen Safarilla heti, kun vaiheen 0 automaattinen julkaisu toimii, ja ne siirtyvät natiivisovellukseen sellaisinaan. Vaihe 1 lisää natiivitoteutukset samojen `js/platform/`-rajapintojen taakse. Vaihe 0 tehdään ensin, koska ilman sitä muutokset eivät päädy Pagesiin ilman käsityötä. Vaiheet 0–1 ovat riskialttiimmat, koska ne koskevat olemassa olevaa verkkosovellusta.
 
 | Vaihe | Sisältö | Riippuu |
 |-------|---------|---------|
 | **0** | Build-vaihe: `package.json`, Vite, CDN-kirjastot npm-riippuvuuksiksi, GitHub Actions julkaisee `dist/` Pagesiin. **Ei toiminnallista muutosta** — verkkosovelluksen on toimittava identtisesti. | — |
-| **1** | Alusta-abstraktio `js/platform/`, `ui.js`:n pilkkominen, Capacitor-runko ja `ios/`-projekti (SPM, vain iPhone, privacy manifest). WKWebView-korjaukset: CSV-jako, jaettava linkki, tulostuksen piilotus. Sovellus käynnistyy iPhonella ja näyttää nykyisen sovelluksen. | 0 |
-| **2** | Mobiilikäyttöliittymä: bottom sheet, kosketuskohteet, safe-area, kontrollien sijoittelu. | 1 |
-| **3** | Sijainti ja seuranta: GPS-piste, keskitys, kompassi, "olet kuviolla". | 1 |
+| **1** | Capacitor-runko ja `ios/`-projekti (SPM, vain iPhone, privacy manifest). WKWebView-korjaukset: CSV-jako, jaettava linkki, tulostuksen piilotus. Sovellus käynnistyy iPhonella ja näyttää nykyisen sovelluksen. | 0 |
+| **2** | Mobiilikäyttöliittymä **verkkosovellukseen**: `ui.js`:n pilkkominen, bottom sheet, välilehdet, kosketuskohteet, safe-area, kontrollien sijoittelu, kartan ja sheetin yhteys (luku 5.4). Versio 3.2.0. | 0 |
+| **3** | Sijainti ja seuranta **verkkosovellukseen**: `js/platform/location.js` (selain), GPS-piste, keskitys, kompassi, "olet kuviolla", automaattinen kiinteistövalinta (luku 5.1). Versio 3.3.0. | 2 |
 | **4** | Offline-välimuisti: lataus, tarjoilu, hallintanäkymä, offline-indikaattori. | 1 |
 | **5** | Muistiinpanot ja valokuvat: tallennus, kartan markkerit, GeoJSON- ja CSV-vienti. | 3, 4 |
 | **6** | Suosikit, natiivi jako, syvälinkit (custom scheme; Universal Links vain jos verkkotunnus on ratkaistu). | 1 |
