@@ -5,6 +5,8 @@
 import { CODES } from '../config.js';
 import * as state from '../state.js';
 import { formatNumber, formatCadastralReference, getGeometryBounds3067 } from '../utils.js';
+import { isMobileLayout } from './layout.js';
+import { openStand } from './stands.js';
 
 /**
  * Show popup for a single feature
@@ -29,7 +31,12 @@ export function showFeaturePopup(feature, layer) {
 export function onEachFeature(feature, layer) {
     layer.on('click', (e) => {
         L.DomEvent.stopPropagation(e);
-        showFeaturePopup(feature, layer);
+        if (isMobileLayout()) {
+            // Mobiilissa ei popupia: kuvio avautuu tietopaneelin listaan
+            openStand(state.currentFeatures.indexOf(feature));
+        } else {
+            showFeaturePopup(feature, layer);
+        }
     });
 }
 

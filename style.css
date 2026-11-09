@@ -1406,6 +1406,11 @@ h3 .info-tip-icon {
         min-height: 44px;
     }
 
+    /* Avattu kuvio jää näkyviin tarttuvan välilehtirivin alle */
+    .stand-item {
+        scroll-margin-top: 72px;
+    }
+
     .stands-section h3 {
         display: none;
     }

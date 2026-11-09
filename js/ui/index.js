@@ -6,7 +6,7 @@ export { showFeaturePopup, onEachFeature, onEachHabitat, onEachMkiFeature, onEac
 export { setColorMode, setMkiColorMode, updateLegend, updateMkiLegend } from './legend.js';
 export { toggleHelp, copyParcelLink, downloadCSV, buildCSV } from './actions.js';
 export { tip } from './tips.js';
-export { renderStandItem, highlightStand, highlightFilteredStands, attachStandEventListeners, attachFilterEventListeners } from './stands.js';
+export { renderStandItem, highlightStand, highlightFilteredStands, attachStandEventListeners, attachFilterEventListeners, openStand } from './stands.js';
 export { showSummary, renderPeek } from './summary.js';
 export { MOBILE_QUERY, isMobileLayout, onLayoutChange, topInset, fitPadding, visibleCenterOffset } from './layout.js';
 export { initPanel, openPanelForSelection, setPeekMessage, getSheet, mapFitOptions, setActiveTab, getActiveTab, initTabs } from './panel.js';
