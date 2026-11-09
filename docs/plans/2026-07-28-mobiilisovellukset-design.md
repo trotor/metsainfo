@@ -62,9 +62,6 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 ├── vite.config.js          # UUSI: build dist/-hakemistoon
 ├── capacitor.config.ts     # UUSI: sovellustunnus, nimi, plugin-asetukset
 ├── index.html              # Vite-entry (CDN-tagit poistuvat)
-├── public/
-│   ├── version.js          # Säilyy versionumeron lähteenä (siirtyy public/:iin vaiheessa 0)
-│   └── tietosuoja.html     # Tietosuojaseloste
 ├── android/                # UUSI: Capacitorin generoima, versionhallinnassa
 ├── ios/                    # UUSI: Capacitorin generoima, versionhallinnassa
 ├── js/
@@ -89,12 +86,13 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 │   │   └── notes-ui.js     #   UUSI
 │   └── ...                 # app, config, state, utils, styles, data, statistics
 ├── public/                 # UUSI: Vite kopioi sellaisenaan dist/-hakemistoon
+│   ├── version.js          #   siirretään juuresta; versionumeron ainoa lähde
 │   ├── tietosuoja.html     #   siirretään juuresta; osoite ei saa muuttua
 │   └── .well-known/
 │       ├── assetlinks.json #   Android App Links
 │       └── apple-app-site-association
 └── scripts/
-    └── sync-version.mjs    # UUSI: version.js → natiiviprojektien versiokentät
+    └── sync-version.mjs    # UUSI: public/version.js → natiiviprojektien versiokentät
 ```
 
 `mcp-server/` säilyy ennallaan.
