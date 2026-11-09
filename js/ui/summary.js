@@ -6,6 +6,33 @@ import { calculateStatistics } from '../statistics.js';
 import { formatNumber, formatCadastralReference, calculateParcelArea } from '../utils.js';
 import { tip } from './tips.js';
 import { renderStandItem, attachStandEventListeners, attachFilterEventListeners } from './stands.js';
+import { setActiveTab } from './panel.js';
+
+/**
+ * Mobiilin kurkistusrivi: tunnus, toimintovalikko ja neljä avainlukua
+ */
+export function renderPeek({ label, areaHa, partsInfo, stats, featureCount }) {
+    const stat = (value, unit) =>
+        `<div class="peek-stat"><span class="peek-value">${value}</span> <span class="peek-unit">${unit}</span></div>`;
+
+    return `
+        <div class="peek-head">
+            <span class="peek-id">${label}</span>
+            ${partsInfo ? `<span class="peek-parts">${partsInfo}</span>` : ''}
+            <button type="button" id="sheet-menu-btn" aria-label="Toiminnot" aria-haspopup="menu">⋯</button>
+        </div>
+        ${featureCount > 0 ? `
+        <div class="peek-stats">
+            ${stat(formatNumber(areaHa, 2), 'ha')}
+            ${stat(featureCount, 'kuviota')}
+            ${stat(formatNumber(stats.avgVolume, 0), 'm³/ha')}
+            ${stat(formatNumber(stats.totalVolume, 0), 'm³')}
+        </div>
+        ` : `
+        <div class="peek-empty">Ei metsävaratietoja</div>
+        `}
+    `;
+}
 
 /**
  * Show summary of forest features and parcel info
@@ -19,8 +46,29 @@ export function showSummary(features, parcel, partCount = 1) {
     const parcelArea = calculateParcelArea(parcel, partCount);
     const parcelAreaText = parcelArea ? `${formatNumber(parcelArea / 10000, 2)} ha` : '';
     const partsInfo = partCount > 1 ? ` (${partCount} palstaa)` : '';
+    const hasRecs = stats.cuttingRecommendations.length > 0 || stats.silvicultureRecommendations.length > 0;
+
+    const peek = document.getElementById('sheet-peek');
+    if (peek) {
+        peek.innerHTML = renderPeek({
+            label: parcelLabel,
+            areaHa: parcelArea ? parcelArea / 10000 : stats.totalArea,
+            partsInfo: partCount > 1 ? `${partCount} palstaa` : '',
+            stats,
+            featureCount: features.length
+        });
+    }
 
     content.innerHTML = `
+        ${features.length > 0 ? `
+        <div class="tabbar" role="tablist">
+            <button type="button" role="tab" data-tab="summary">Yhteenveto</button>
+            <button type="button" role="tab" data-tab="stands">Kuviot (${features.length})</button>
+            ${hasRecs ? '<button type="button" role="tab" data-tab="recs">Ehdotukset</button>' : ''}
+        </div>
+        ` : ''}
+
+        <section class="tab-panel" data-tab="summary">
         ${parcel ? `
         <div class="summary-section parcel-section">
             <h3>Kiinteistö</h3>
@@ -161,7 +209,9 @@ export function showSummary(features, parcel, partCount = 1) {
             </div>
             ` : ''}
         </div>
+        </section>
 
+        ${hasRecs ? '<section class="tab-panel" data-tab="recs">' : ''}
         ${stats.cuttingRecommendations.length > 0 ? `
         <div class="summary-section">
             <h3>Hakkuuehdotukset ${tip('hakkuuehdotus')}</h3>
@@ -195,21 +245,26 @@ export function showSummary(features, parcel, partCount = 1) {
             </ul>
         </div>
         ` : ''}
+        ${hasRecs ? '</section>' : ''}
 
+        <section class="tab-panel" data-tab="stands">
         <div class="summary-section stands-section">
             <h3>Kuviot <span class="stands-count">(${features.length} kpl)</span></h3>
             <div class="stands-list">
                 ${features.map((f, idx) => renderStandItem(f, idx)).join('')}
             </div>
         </div>
+        </section>
         ` : `
         <div class="no-data">
             <div class="no-data-icon">🌲</div>
             <p>Ei metsävaratietoja tällä kiinteistöllä.</p>
         </div>
+        </section>
         `}
     `;
 
     attachStandEventListeners(content);
     attachFilterEventListeners(content);
+    setActiveTab('summary');
 }

@@ -23,4 +23,24 @@ describe('showSummary', () => {
         showSummary([], null);
         expect(document.querySelector('.no-data')).not.toBeNull();
     });
+
+    it('luo kolme välilehteä kun ehdotuksia on', () => {
+        showSummary(STANDS, null);
+        const tabs = [...document.querySelectorAll('.tabbar [data-tab]')].map(b => b.dataset.tab);
+        const panels = [...document.querySelectorAll('section.tab-panel')].map(s => s.dataset.tab);
+        expect(tabs).toEqual(['summary', 'stands', 'recs']);
+        expect(panels).toEqual(['summary', 'recs', 'stands']);
+    });
+
+    it('ei välilehtiä ilman kuvioita', () => {
+        showSummary([], null);
+        expect(document.querySelector('.tabbar')).toBeNull();
+        expect(document.getElementById('sheet-peek').textContent).toContain('Ei metsävaratietoja');
+    });
+
+    it('peek näyttää kuvioiden määrän', () => {
+        showSummary(STANDS, null);
+        const peek = document.getElementById('sheet-peek').textContent.replace(/\s+/g, ' ');
+        expect(peek).toMatch(/\b3 kuviota\b/);
+    });
 });

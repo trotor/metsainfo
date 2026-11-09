@@ -7,6 +7,6 @@ export { setColorMode, setMkiColorMode, updateLegend, updateMkiLegend } from './
 export { toggleHelp, copyParcelLink, downloadCSV, buildCSV } from './actions.js';
 export { tip } from './tips.js';
 export { renderStandItem, highlightStand, highlightFilteredStands, attachStandEventListeners, attachFilterEventListeners } from './stands.js';
-export { showSummary } from './summary.js';
+export { showSummary, renderPeek } from './summary.js';
 export { MOBILE_QUERY, isMobileLayout, onLayoutChange, topInset, fitPadding, visibleCenterOffset } from './layout.js';
-export { initPanel, openPanelForSelection, setPeekMessage, getSheet, mapFitOptions } from './panel.js';
+export { initPanel, openPanelForSelection, setPeekMessage, getSheet, mapFitOptions, setActiveTab, getActiveTab, initTabs } from './panel.js';
