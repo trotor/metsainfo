@@ -7,19 +7,24 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Oletuksena vain lukuoikeus. Kirjoitusoikeus annetaan ainoastaan
+# julkaisujobille, joka ei aja npm:ää eikä muuta kolmannen osapuolen koodia
+# kuin julkaisuactionin.
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: pages-deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Hae lähdekoodi
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Asenna Node
         uses: actions/setup-node@v7
@@ -36,10 +41,30 @@ jobs:
       - name: Rakenna
         run: npm run build
 
-      # Pull requestissa vain testit ja build; julkaisu vasta mainiin
+      - name: Tallenna build
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  # Pull requestissa vain testit ja build; julkaisu vasta mainiin
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Hae build
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+
       - name: Julkaise gh-pages-haaraan
-        if: github.event_name != 'pull_request'
-        uses: peaceiris/actions-gh-pages@v4
+        # peaceiris/actions-gh-pages v4.1.0, pinnattu committiin
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
