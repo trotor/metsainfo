@@ -7,7 +7,7 @@ Metsäinfon Android- ja iOS-julkaisuun tarvittavat tekstit, lomakevastaukset ja 
 | [kauppatekstit.md](kauppatekstit.md) | Kauppalistausten tekstit molempiin kauppoihin, lupatekstit, vastuuvapauslauseke, kuvakaappaussuunnitelma |
 | [tietosuojalomakkeet.md](tietosuojalomakkeet.md) | Play Data Safety- ja Apple App Privacy -vastaukset perusteluineen |
 | [app-review.md](app-review.md) | Applen katselmointimuistiinpanot, hylkäysriskit ja molempien kauppojen julkaisupolut |
-| [../../tietosuoja.html](../../tietosuoja.html) | Tietosuojaseloste, julkaistaan GitHub Pagesiin |
+| [../../tietosuoja.html](../../public/tietosuoja.html) | Tietosuojaseloste, julkaistaan GitHub Pagesiin |
 
 ## Julkaisijan tiedot
 
@@ -28,7 +28,7 @@ grep -rn "TÄYTÄ" docs/kauppa/ public/tietosuoja.html
 |-------|-----------------|
 | Yrityksen virallinen nimi | ✅ Inetor Oy (PRH, tarkistettu 9.11.2026) |
 | Y-tunnus | ✅ 3130000-6 |
-| Tukisähköposti | **Puuttuu**: tietosuojaseloste, kauppalistaukset, App Review -yhteystiedot |
+| Tukisähköposti | ✅ inetoroy@gmail.com (tietosuojaseloste, ohjenäkymä, App Review, kauppojen tukiyhteys) |
 | Yhteyshenkilön nimi ja puhelin | **Puuttuu**: Applen App Review Information |
 | Copyright-vuosi | ✅ 2026 |
 
@@ -37,9 +37,9 @@ grep -rn "TÄYTÄ" docs/kauppa/ public/tietosuoja.html
 - [ ] **Nimen tarkistus.** "Metsäinfo" PRH:n tavaramerkkirekisteristä ennen kuin nimi lyödään lukkoon ikoneihin ja kauppametadataan.
 - [ ] **Sivutoimi.** Työsuhde Suomen metsäkeskukseen ja oman yrityksen kautta julkaistava sovellus, joka käyttää työnantajan avointa dataa — tarkista organisaatiosi sivutoimikäytäntö. Aineisto on avointa ja vapaasti käytettävää, joten kyse ei ole datan käyttöoikeudesta vaan sivutoimen ilmoittamisesta.
 - [ ] **Vastuuvapauslauseke näkyviin.** Kauppakuvauksessa, sovelluksen ohjenäkymässä ja tietosuojaselosteessa — kaikissa kolmessa.
-- [ ] **Tietosuojaselosteen URL elossa.** Kaupat tarkistavat, että osoite aukeaa. 9.11.2026 osoite vastaa `404`: seloste julkaistaan vasta vaiheen 0 Actions-julkaisussa (`public/tietosuoja.html`), ja `[TÄYTÄ]`-kohdat on täytettävä ennen sitä.
+- [ ] **Tietosuojaselosteen URL elossa.** Kaupat tarkistavat, että osoite aukeaa. 9.11.2026 osoite vastaa `404`: seloste julkaistaan vasta vaiheen 0 Actions-julkaisussa (`public/tietosuoja.html`, PR #21). Selosteen tiedot on täytetty.
 - [ ] **Verkkotunnus päätetty.** Jos Universal Links tai yrityksen oma osoite halutaan, Pagesille on otettava oma verkkotunnus **ennen** kuin tietosuoja- ja tukiosoitteet annetaan App Store Connectiin. Muuten osoitteet joudutaan vaihtamaan myöhemmin (ks. suunnitelman luku 5.3).
-- [ ] **Ohjenäkymän yhteystieto.** `index.html` näyttää henkilökohtaisen gmail-osoitteen. Vaihda se samaan tukisähköpostiin, jota kauppalistaus ja tietosuojaseloste käyttävät.
+- [x] **Ohjenäkymän yhteystieto.** `index.html` käyttää tukisähköpostia inetoroy@gmail.com, samaa kuin kauppalistaus ja tietosuojaseloste.
 
 ## Tila
 

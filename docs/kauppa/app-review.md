@@ -62,7 +62,7 @@ Sovellus on itsenäinen tuote eikä näiden organisaatioiden virallinen palvelu.
 |--------|------|
 | Etunimi / Sukunimi | [TÄYTÄ] |
 | Puhelinnumero | [TÄYTÄ] |
-| Sähköposti | [TÄYTÄ: tukisähköposti] |
+| Sähköposti | inetoroy@gmail.com |
 
 ---
 
