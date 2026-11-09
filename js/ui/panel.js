@@ -6,6 +6,7 @@
 import { isMobileLayout, onLayoutChange, topInset, fitPadding } from './layout.js';
 import { createSheet, resolveRelease, nextSnapOnTap } from './sheet.js';
 import { copyParcelLink, downloadCSV } from './actions.js';
+import { initTips } from './tips.js';
 
 let sheet = null;
 let panelEl = null;
@@ -135,6 +136,7 @@ export function initPanel({ onClearSelection }) {
     const menu = document.getElementById('sheet-menu');
 
     initTabs(document.getElementById('info-content'));
+    initTips(document.getElementById('info-content'));
     attachDrag(handle);
     attachDrag(peek);
 
