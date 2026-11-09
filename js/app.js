@@ -13,6 +13,7 @@ import './vendor/index.js';
 import '../style.css';
 
 import { CONFIG, crsEPSG3067 } from './config.js';
+import { isNative, PUBLIC_BASE_URL } from './platform/index.js';
 import * as state from './state.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
@@ -30,12 +31,27 @@ window.toggleHelp = toggleHelp;
  * Initialize the application
  */
 function init() {
+    if (isNative()) initNative();
     initMap();
     initLayers();
     initControls();
     initPanel({ onClearSelection: clearSelection });
     initEventListeners();
     checkUrlParams();
+}
+
+/**
+ * iOS-sovelluksen erot verkkoversioon: tulostus piiloon (WKWebView ei tue
+ * window.print()), linkki jaetaan jakonäkymällä, ja tietosuojaseloste
+ * avataan julkisesta osoitteesta Safariin.
+ */
+function initNative() {
+    document.documentElement.classList.add('is-native');
+    const copyItem = document.querySelector('#sheet-menu [data-action="copy"]');
+    if (copyItem) copyItem.textContent = 'Jaa linkki';
+    document.querySelectorAll('a[href="tietosuoja.html"]').forEach(a => {
+        a.href = new URL('tietosuoja.html', PUBLIC_BASE_URL).href;
+    });
 }
 
 /**

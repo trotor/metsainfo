@@ -16,7 +16,15 @@ npm run dev          # kehityspalvelin, oletuksena http://localhost:5173
 npm test             # yksikkötestit (Vitest)
 npm run build        # tuotantobuild dist/-hakemistoon
 npm run preview      # tuotantobuildin esikatselu
+npm run ios:sync     # build + versio iOS-projektiin + cap sync ios
+npm run ios:open     # avaa ios/App/App.xcodeproj Xcodessa
 ```
+
+### iOS-sovellus (Capacitor 8)
+- `capacitor.config.json`: appId `fi.inetor.metsainfo`, webDir `dist`. `ios/` on versionhallinnassa (SPM, ei CocoaPodsia), vain iPhone, tiimi Inetor oy `TTND84D98U`.
+- Sovelluskoodi ei kutsu Capacitor-plugineja suoraan vaan `js/platform/`-moduuleja. `isNative()` erottaa sovelluksen verkkoversiosta; sovelluksessa linkki ja CSV jaetaan iOS:n jakonäkymällä, tulostus on piilotettu ja jaettavat linkit osoittavat julkiseen verkkoversioon.
+- Versio: `scripts/sync-version.mjs` kirjoittaa `public/version.js`:n numeron `MARKETING_VERSION`iksi ja git-committien määrän build-numeroksi. Aja `npm run ios:sync` ennen jokaista iOS-buildia.
+- `ios/App/App/PrivacyInfo.xcprivacy`: tarkista aina, kun lisäät pluginin.
 
 Verkkosovellus julkaistaan automaattisesti GitHub Actionsilla `gh-pages`-haaraan
 jokaisella `main`-pushilla. Älä päivitä `gh-pages`-haaraa käsin.
