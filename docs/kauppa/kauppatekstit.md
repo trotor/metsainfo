@@ -2,7 +2,7 @@
 
 **Päivitetty**: 2026-07-29
 **Sovelluksen nimi kaupoissa**: Metsäinfo
-**Julkaisija**: [TÄYTÄ: yrityksen nimi]
+**Julkaisija**: Inetor Oy (y-tunnus 3130000-6)
 
 Kaikki tekstit ovat suomeksi. Englanninkielistä lokalisointia ei tehdä ensimmäiseen julkaisuun — aineisto, käyttöliittymä ja kohdeyleisö ovat suomalaisia, ja englanninkielinen listaus toisi vain ylläpidettävää.
 
@@ -134,7 +134,7 @@ otsikkoina samalla tavalla, mutta luettelomerkit (•) toimivat.
 | Tukisivu (Support URL) | https://trotor.github.io/metsainfo/tietosuoja.html — sääntö 1.5 vaatii, että tukisivulla on yhteystieto. Etusivu näyttää yhteystiedon vain ohjeikkunassa. |
 | Markkinointisivu (Marketing URL) | https://trotor.github.io/metsainfo/ |
 | Tietosuojaseloste (Privacy Policy URL) | https://trotor.github.io/metsainfo/tietosuoja.html |
-| Copyright | © [TÄYTÄ: vuosi] [TÄYTÄ: yrityksen nimi] |
+| Copyright | © 2026 Inetor Oy |
 
 ---
 

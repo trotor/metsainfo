@@ -21,16 +21,16 @@ Julkaisu tapahtuu **oman yrityksen organisaatiotilillä**, ei henkilökohtaisell
 Dokumenteissa on merkintä `[TÄYTÄ: ...]` kohdissa, joihin tarvitaan tieto jota ei voi päätellä repositoriosta. Löydät ne komennolla:
 
 ```bash
-grep -rn "TÄYTÄ" docs/kauppa/ tietosuoja.html
+grep -rn "TÄYTÄ" docs/kauppa/ public/tietosuoja.html
 ```
 
 | Tieto | Missä tarvitaan |
 |-------|-----------------|
-| Yrityksen virallinen nimi | Tietosuojaseloste, kauppatekstit, copyright |
-| Y-tunnus | Tietosuojaseloste |
-| Tukisähköposti | Tietosuojaseloste, kauppalistaukset, App Review -yhteystiedot |
-| Yhteyshenkilön nimi ja puhelin | Applen App Review Information |
-| Copyright-vuosi | App Store -listaus |
+| Yrityksen virallinen nimi | ✅ Inetor Oy (PRH, tarkistettu 9.11.2026) |
+| Y-tunnus | ✅ 3130000-6 |
+| Tukisähköposti | **Puuttuu**: tietosuojaseloste, kauppalistaukset, App Review -yhteystiedot |
+| Yhteyshenkilön nimi ja puhelin | **Puuttuu**: Applen App Review Information |
+| Copyright-vuosi | ✅ 2026 |
 
 ## Ennen julkaisua varmistettavat asiat
 
