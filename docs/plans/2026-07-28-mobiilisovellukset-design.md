@@ -39,7 +39,7 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 | Android-kohde | API 24+ (compile/target uusin Playn vaatima) |
 | Android Studio | 2025.2.1+ |
 | Node | 24 LTS, vähintään 24.15 (`.nvmrc`; jsdom 30 ja Capacitor CLI 8 eivät tue Node 20:tä) |
-| JDK | 21 (Capacitor 8 / Android Gradle Plugin) |
+| JDK | Android Studion mukana tuleva JBR (Capacitor 8 ei vaadi erillistä asennusta). Komentorivibuildit (`npx cap run android`, Gradle) tarvitsevat `JAVA_HOME`-muuttujan, joka osoittaa siihen. |
 
 **Kehityskoneen tila 9.11.2026** (tarkistettu ennen vaihetta 0):
 
