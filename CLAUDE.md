@@ -29,6 +29,10 @@ ohittavat Leafletin oletukset.
 
 ## Architecture
 
+### UI modules (`js/ui/`)
+- `summary.js` renders the panel (tab panels `summary` / `recs` / `stands` + mobile peek row), `stands.js` the stand list and map highlights, `panel.js` panel state (tabs, ⋯ menu, sheet wiring, `mapFitOptions()`), `sheet.js` the mobile bottom sheet (peek / half / full), `layout.js` layout detection, `tips.js` tap-to-open term explanations, `map-features.js` popups, `legend.js` colour modes, `actions.js` help / link / CSV. `index.js` re-exports them.
+- **Mobile layout** is selected by `MOBILE_QUERY` in `js/ui/layout.js`, identical to the mobile media query in `style.css` — keep them the same. Desktop (> 768 px) must stay functionally unchanged; mobile-only styles go inside that media query.
+
 ### Data Sources (WFS)
 - **Metsäkeskus** (`avoin.metsakeskus.fi`) - Forest stand data (`v1:stand`), forest use declarations (`v1:forestusedeclaration`)
 - **MML INSPIRE** (`inspire-wfs.maanmittauslaitos.fi`) - Cadastral parcel boundaries (`cp:CadastralParcel`)

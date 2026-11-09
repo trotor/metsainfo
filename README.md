@@ -119,7 +119,17 @@ Sovellus toimii kokonaan selaimessa ilman backendiä. Koodi on jaettu ES6-moduul
 │   ├── styles.js       # Karttatasojen tyylit
 │   ├── data.js         # WFS-haut ja suodatus
 │   ├── statistics.js   # Tilastolaskenta
-│   └── ui.js           # Käyttöliittymän renderöinti
+│   └── ui/             # Käyttöliittymä
+│       ├── index.js        # Julkinen rajapinta
+│       ├── summary.js      # Yhteenveto ja kurkistusrivi
+│       ├── stands.js       # Kuviolista ja korostukset
+│       ├── panel.js        # Tietopaneeli, välilehdet, valikko
+│       ├── sheet.js        # Mobiilin bottom sheet
+│       ├── layout.js       # Mobiiliasettelun tunnistus, kartan täytteet
+│       ├── tips.js         # Termien selitteet
+│       ├── map-features.js # Karttakohteiden popupit
+│       ├── legend.js       # Väritys ja selitteet
+│       └── actions.js      # Ohje, linkki, CSV
 ├── style.css           # Tyylit
 ├── public/             # Sellaisenaan buildiin kopioitavat (version.js, tietosuoja.html)
 └── mcp-server/
