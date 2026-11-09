@@ -4,6 +4,14 @@
  * Main application module: initialization, map setup, event handling
  */
 
+// Vendor-kirjastot globaaleiksi — tämän on oltava ensimmäinen tuonti,
+// koska config.js käyttää proj4:ää ja L:ää latausaikana
+import './vendor/index.js';
+
+// Omat tyylit vendorin jälkeen, jotta ne ohittavat Leafletin oletukset
+// samalla tavalla kuin CDN-aikana (leaflet.css ennen style.css:ää)
+import '../style.css';
+
 import { CONFIG, crsEPSG3067 } from './config.js';
 import * as state from './state.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
