@@ -37,7 +37,9 @@ grep -rn "TÄYTÄ" docs/kauppa/ tietosuoja.html
 - [ ] **Nimen tarkistus.** "Metsäinfo" PRH:n tavaramerkkirekisteristä ennen kuin nimi lyödään lukkoon ikoneihin ja kauppametadataan.
 - [ ] **Sivutoimi.** Työsuhde Suomen metsäkeskukseen ja oman yrityksen kautta julkaistava sovellus, joka käyttää työnantajan avointa dataa — tarkista organisaatiosi sivutoimikäytäntö. Aineisto on avointa ja vapaasti käytettävää, joten kyse ei ole datan käyttöoikeudesta vaan sivutoimen ilmoittamisesta.
 - [ ] **Vastuuvapauslauseke näkyviin.** Kauppakuvauksessa, sovelluksen ohjenäkymässä ja tietosuojaselosteessa — kaikissa kolmessa.
-- [ ] **Tietosuojaselosteen URL elossa.** Kaupat tarkistavat, että osoite aukeaa. Vaatii että `tietosuoja.html` on pushattu ja GitHub Pages on päivittynyt.
+- [ ] **Tietosuojaselosteen URL elossa.** Kaupat tarkistavat, että osoite aukeaa. 9.11.2026 osoite vastaa `404`: seloste julkaistaan vasta vaiheen 0 Actions-julkaisussa (`public/tietosuoja.html`), ja `[TÄYTÄ]`-kohdat on täytettävä ennen sitä.
+- [ ] **Verkkotunnus päätetty.** Jos Universal Links tai yrityksen oma osoite halutaan, Pagesille on otettava oma verkkotunnus **ennen** kuin tietosuoja- ja tukiosoitteet annetaan App Store Connectiin. Muuten osoitteet joudutaan vaihtamaan myöhemmin (ks. suunnitelman luku 5.3).
+- [ ] **Ohjenäkymän yhteystieto.** `index.html` näyttää henkilökohtaisen gmail-osoitteen. Vaihda se samaan tukisähköpostiin, jota kauppalistaus ja tietosuojaseloste käyttävät.
 
 ## Tila
 

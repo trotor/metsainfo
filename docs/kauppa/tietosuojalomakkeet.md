@@ -1,6 +1,6 @@
 # Tietosuojalomakkeet — Play Data Safety ja Apple Privacy Labels
 
-**Päivitetty**: 2026-07-29
+**Päivitetty**: 2026-11-09
 
 Molemmat kaupat vaativat julkaisijan ilmoituksen siitä, mitä tietoja sovellus kerää. Ilmoitus on **sitova**: väärä ilmoitus voi johtaa sovelluksen poistoon kaupasta. Alla suositellut vastaukset perusteluineen, mutta lopullisen ilmoituksen antaa julkaisija ja vastuu on hänen.
 
@@ -67,6 +67,16 @@ Tämä tuottaa App Storeen merkinnän "Kehittäjä ei kerää tietoja tästä so
 ### Perustelu, jos katselmoija kysyy
 
 Sijainti ja valokuvat käsitellään laitteella eikä niitä siirretä kehittäjälle, palvelimelle eikä kolmannelle osapuolelle. Sovelluksessa ei ole taustapalvelinta, käyttäjätilejä, analytiikkaa, mainos-SDK:ita eikä kaatumisraportointia. Verkkoliikenne rajoittuu julkisten avointen rajapintojen hakuihin, joissa ei välitetä käyttäjää yksilöiviä tietoja.
+
+### Avoin kysymys: sijainnista johdettu hakualue
+
+Kun käyttäjä keskittää kartan omaan sijaintiinsa, sovellus hakee kuviot kartan näkyvälle alueelle. Silloin WFS-palvelimille (Metsäkeskus, MML) lähtevä hakulaatikko on johdettu sijainnista. Applen määritelmässä "kerääminen" tarkoittaa tiedon siirtämistä pois laitteelta niin, että kehittäjä tai sen *kumppani* pääsee siihen käsiksi pidempään kuin pyynnön palveleminen vaatii.
+
+Suositus: **"Data Not Collected" on perusteltavissa.** Hakulaatikko on karttanäkymän alue eikä laitteen koordinaatti, kehittäjä ei saa sitä, ja vastaanottajat ovat julkisia avoimen datan rajapintoja eivätkä sovellukseen integroituja kumppaneita. Varovaisempi vaihtoehto on ilmoittaa *Coarse Location — App Functionality, ei linkitetty käyttäjään, ei seurantaa*. Julkaisija tekee lopullisen päätöksen ennen lähetystä. Valinnan on vastattava tietosuojaselosteen kappaletta "Yhteydet ulkopuolisiin palveluihin".
+
+### Privacy manifest
+
+App Privacy -lomake on eri asia kuin sovellukseen käännettävä `PrivacyInfo.xcprivacy`. Manifestin sisältö on kuvattu suunnitelman luvussa 7 (UserDefaults `CA92.1`, FileTimestamp `C617.1`, `NSPrivacyTracking = false`).
 
 ### Tracking
 

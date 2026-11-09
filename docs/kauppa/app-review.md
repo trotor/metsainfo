@@ -1,6 +1,6 @@
 # App Review -muistiinpanot ja julkaisun tarkistuslista
 
-**Päivitetty**: 2026-07-29
+**Päivitetty**: 2026-11-09
 
 ---
 
@@ -111,19 +111,23 @@ Ensimmäisessä julkaisussa kannattaa käyttää **porrastettua julkaisua** (esi
 ### Vaaditut App Store Connect -tiedot
 
 - [ ] Kauppalistaus: nimi, alaotsikko, avainsanat, kuvaus, mainosteksti
-- [ ] Kuvakaappaukset 6,9" iPhone ja 13" iPad
+- [ ] Kuvakaappaukset iPhone: Dynamic Island medium (1206×2622) ja large (1320×2868). Ei iPad-kuvia, koska sovellus on vain iPhonelle (`TARGETED_DEVICE_FAMILY = 1`).
 - [ ] Sovelluskuvake 1024×1024, ei läpinäkyvyyttä, ei pyöristettyjä kulmia
 - [ ] App Privacy -tiedot (ks. `tietosuojalomakkeet.md`)
-- [ ] Ikäraja 4+
+- [ ] `PrivacyInfo.xcprivacy` sovellustasolla: UserDefaults `CA92.1`, FileTimestamp `C617.1`, `NSPrivacyTracking = false`
+- [ ] Ikäluokituskysely (pakollinen 31.1.2026 alkaen) → 4+. Vastaukset: ei käyttäjäsisältöä, ei viestintää, ei mainoksia, ei lapsilukko- tai ikävarmennusta, **Unrestricted Web Access: ei**. Viimeinen edellyttää, että ulkolinkit avautuvat Safariin eikä sovelluksen sisälle. Varmista tämä laitteella.
+- [ ] **EU DSA -kauppiasilmoitus** vahvistettu (yritysasiakirja). D-U-N-S-osoite, puhelin ja sähköposti näkyvät tuotesivulla julkisesti. Aloita heti, koska vahvistus voi kestää.
+- [ ] Tietosuojaselosteen linkki myös sovelluksen sisällä (sääntö 5.1.1(i)), ohjenäkymässä
 - [ ] Tuki- ja markkinointi-URL
 - [ ] App Review Information -muistiinpanot (yllä)
-- [ ] Export Compliance: sovellus käyttää vain standardia HTTPS:ää → vapautettu, mutta kysymykseen on vastattava
+- [ ] Export Compliance: `ITSAppUsesNonExemptEncryption = NO` Info.plistissä (vain käyttöjärjestelmän HTTPS), jolloin kysymystä ei esitetä jokaisella lähetyksellä
+- [ ] Build tehty Xcode 26:lla tai uudemmalla (iOS 26 SDK). Huhtikuusta 2027 alkaen vaaditaan iOS 27 SDK, ja Xcode 27 täyttää jo sen.
 
 ---
 
 ## Julkaisujärjestys
 
-Aja molemmat rinnakkain, älä peräkkäin.
+**Päivitetty 9.11.2026: iOS ensin.** App Store -julkaisu tehdään ensin, ja Android ja Play seuraavat sen jälkeen (suunnitelman vaihe 9). Alla oleva rinnakkaiskaavio koskee tilannetta, jossa molemmat ovat valmiina.
 
 ```
 Vaihe 7 valmis

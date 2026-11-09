@@ -130,8 +130,8 @@ otsikkoina samalla tavalla, mutta luettelomerkit (•) toimivat.
 |--------|------|
 | Ensisijainen kategoria | Navigointi |
 | Toissijainen kategoria | Apuohjelmat |
-| Ikäraja | 4+ |
-| Tukisivu (Support URL) | https://trotor.github.io/metsainfo/ |
+| Ikäraja | 4+ (uusi ikäluokituskysely, pakollinen 31.1.2026 alkaen; ks. `app-review.md`) |
+| Tukisivu (Support URL) | https://trotor.github.io/metsainfo/tietosuoja.html — sääntö 1.5 vaatii, että tukisivulla on yhteystieto. Etusivu näyttää yhteystiedon vain ohjeikkunassa. |
 | Markkinointisivu (Marketing URL) | https://trotor.github.io/metsainfo/ |
 | Tietosuojaseloste (Privacy Policy URL) | https://trotor.github.io/metsainfo/tietosuoja.html |
 | Copyright | © [TÄYTÄ: vuosi] [TÄYTÄ: yrityksen nimi] |
@@ -154,7 +154,7 @@ kiinteistöltä, jossa on riittävästi kuvioita — tyhjä kartta myy huonosti.
 **Vaaditut koot**
 
 - Play: vähintään 2 puhelinkuvaa (min 1080 px lyhyt sivu), lisäksi 7" ja 10" tabletti jos tuetaan
-- App Store: 6,9" iPhone ja 13" iPad -kuvat riittävät nykyisin muille koille skaalattaviksi
+- App Store (tarkistettu 9.11.2026): sovellus on vain iPhonelle (`TARGETED_DEVICE_FAMILY = 1`), joten iPad-kuvia ei tarvita. Lataa sekä Dynamic Island -koon *medium* (1206×2622) että *large* (1320×2868) kuvat. Applen ohjesivu on näistä ristiriitainen, ja molemmilla kooilla vaatimus täyttyy varmasti.
 - Play vaatii lisäksi sovelluskuvakkeen (512×512 PNG) ja esittelykuvan (1024×500)
 
 ---

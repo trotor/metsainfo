@@ -1,7 +1,7 @@
 # Android- ja iOS-mobiilisovellukset — Design
 
 **Issue**: #20 Android- ja iOS-mobiilisovellukset kauppoihin
-**Päivämäärä**: 2026-07-28
+**Päivämäärä**: 2026-07-28 · **Katselmoitu**: 2026-11-09 (iOS ensin, App Store -vaatimukset marraskuu 2026, koodivertailu)
 **Tavoite**: Julkaista Metsäinfo natiivisovelluksena Google Play -kauppaan ja Apple App Storeen, maastokäyttöön optimoiduilla lisäominaisuuksilla.
 
 ## Yleiskuvaus
@@ -15,7 +15,7 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 | Kysymys | Päätös | Perustelu |
 |---------|--------|-----------|
 | Kunnianhimo | Maastokäyttöön optimoitu | Todellinen lisäarvo puhelimessa, ei täyttä uudelleenkirjoitusta |
-| Julkaisukanavat | Google Play + Apple App Store | Koko yleisö tavoitetaan |
+| Julkaisukanavat | Apple App Store ensin, Google Play sen jälkeen | Päätetty 9.11.2026: iPhone ja App Store julkaistaan ensin, Android-projekti ja Play-julkaisu tehdään vasta sen jälkeen. Koodikanta pysyy alustariippumattomana, joten Android ei vaadi uudelleentyötä. |
 | Julkaisija | Oman yrityksen organisaatiotili | Tilit ovat jo olemassa molempiin kauppoihin; organisaatiotili vapauttaa Playn suljetun testin vaatimuksesta |
 | Tekninen ratkaisu | Capacitor 8, jaettu koodikanta | Ainoa vaihtoehto, joka täyttää ominaisuustavoitteet ilman koodikannan kahdentumista |
 | Build | Vite + npm, verkkosovellus buildataan `dist/`-hakemistoon | Offline vaatii paikalliset kirjastot; CDN ei kelpaa natiivissa |
@@ -33,9 +33,10 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 
 | Kohde | Vaatimus |
 |-------|----------|
-| Capacitor | 8.x |
-| iOS-kohde | 15.0+ |
-| Xcode | 26.0+ (vaatii macOS) |
+| Capacitor | 8.x (9.11.2026: core/cli/ios 8.6.0) |
+| iOS-kohde | 15.0+ (Capacitor 8:n minimi; Apple vaatii saman huhtikuusta 2027) |
+| Xcode | Käytetään Xcode 27:ää. App Store Connect vaatii 28.4.2026 alkaen Xcode 26:n ja iOS 26 SDK:n, huhtikuusta 2027 alkaen iOS 27 SDK:n. |
+| iOS-riippuvuudet | Swift Package Manager (Capacitor 8:n oletus `npx cap add ios`:lle). CocoaPodsia ei tarvita. |
 | Android-kohde | API 24+ (compile/target uusin Playn vaatima) |
 | Android Studio | 2025.2.1+ |
 | Node | 24 LTS, vähintään 24.15 (`.nvmrc`; jsdom 30 ja Capacitor CLI 8 eivät tue Node 20:tä) |
@@ -47,7 +48,7 @@ Nämä lisäominaisuudet eivät ole pelkkää kuorrutusta — ne ovat myös se p
 |-------|------|------------------------------|
 | Node | 24.22.2 (nvm, oletus `24`) | — |
 | Xcode | 27.2 | — |
-| CocoaPods | asennettu (`/opt/homebrew/bin/pod`) | — |
+| CocoaPods | asennettu, mutta ei tarvita (SPM) | — |
 | Android SDK | platforms 34–37, build-tools 37.0.0 | — |
 | JDK | Ei `JAVA_HOME`-muuttujaa; Android Studion JBR 21.0.10 löytyy | `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"` shellin profiiliin |
 | `adb` | Ei PATHissa | `export PATH="$HOME/Library/Android/sdk/platform-tools:$PATH"` |
@@ -126,11 +127,29 @@ shareText({title, text, url}) -> Promise<void>
 shareFile({uri, mimeType, title}) -> Promise<void>
 ```
 
+Capacitor-pluginit (versiot 9.11.2026): `@capacitor/geolocation` 8.2, `@capacitor/camera` 8.2, `@capacitor/filesystem` 8.1, `@capacitor/share` 8.0, `@capacitor/app` 8.1 (`appUrlOpen`) ja `@capacitor/preferences` 8.0. Sijainti haetaan aina `@capacitor/geolocation`-pluginilla eikä `navigator.geolocation`illa, koska WKWebView'n oma kysely voi tuottaa toisen, WebKitin oman lupadialogin.
+
 **Miksi näin**: `app.js` ja `ui/`-moduulit pysyvät alustatietämättöminä, jokainen rajapinta on testattavissa valeobjektilla ilman laitetta, ja verkkosovellus saa samat ominaisuudet siinä laajuudessa kuin selain sallii.
 
 ### WFS-kutsut natiivissa
 
-Natiivissa WebViewssä origin on `capacitor://localhost`, mikä voi kaataa WFS-kutsut CORS-tarkastukseen. Ratkaisu: `CapacitorHttp`-silta otetaan käyttöön `capacitor.config.ts`:ssä, jolloin `fetch()`-kutsut ohjataan natiivin HTTP-pinon läpi eikä CORS-tarkastusta tehdä lainkaan. `js/data.js` ei muutu.
+Natiivissa WebViewssä origin on `capacitor://localhost`. **Tarkistettu 9.11.2026:** kaikki kolme lähdettä vastaavat tällä originilla otsakkeella `Access-Control-Allow-Origin: *` (Metsäkeskuksen WFS, MML:n INSPIRE-WFS ja Kapsin laatat). Kaikki haut ovat lisäksi GET-pyyntöjä ilman omia otsakkeita, joten preflight-pyyntöä ei synny. CORS ei siis estä hakuja.
+
+Päätös: **`CapacitorHttp` jätetään pois päältä.** Se korvaisi `fetch()`-toteutuksen globaalisti natiivilla HTTP-pinolla, jolloin natiivi ja web käyttäytyisivät eri tavoin ilman todellista tarvetta. `js/data.js` ei muutu. Silta otetaan käyttöön vain, jos laitetestauksessa vaiheessa 1 ilmenee ongelma. Lähteet voivat muuttaa CORS-otsakkeitaan, joten tarkistus toistetaan ennen App Store -lähetystä.
+
+### Verkkosovelluksen toiminnot, jotka eivät toimi WKWebView'ssä
+
+Nykyisessä koodissa on kolme toimintoa, jotka toimivat selaimessa mutta eivät iOS-sovelluksessa sellaisenaan. Ne korjataan vaiheessa 1 `js/platform/`-rajapintojen kautta.
+
+| Toiminto | Nykyinen toteutus | Ongelma natiivissa | Ratkaisu |
+|----------|-------------------|--------------------|----------|
+| CSV-lataus (`downloadCSV`, `js/ui.js`) | `Blob` + `<a download>` + `link.click()` | WKWebView ei tue `download`-attribuuttia, eikä mitään tapahdu | Natiivissa tiedosto kirjoitetaan Filesystem-pluginilla väliaikaishakemistoon ja avataan jakonäkymä (`share.shareFile`) |
+| Linkin kopiointi (`copyParcelLink`, `js/ui.js`) | `window.location.href` leikepöydälle | Osoite on `capacitor://localhost/?parcel=...`, eikä se toimi kenelläkään muulla | Jaettava linkki muodostetaan julkisesta perusosoitteesta (`https://trotor.github.io/metsainfo/?parcel=...`), ja natiivissa käytetään jakonäkymää |
+| Tulostus (`window.print()`, `js/ui.js`) | Selaimen tulostusdialogi | WKWebView'ssä `window.print()` ei tee mitään | Tulostuspainike piilotetaan natiivissa. CSV-jako korvaa sen maastokäytössä. |
+
+Muita vaiheessa 2 huomioitavia: `.info-tip:hover`-työkaluvihjeet eivät aukea kosketuksella, ja `target="_blank"`-ulkolinkkien on avauduttava Safariin eikä sovelluksen sisään (varmistetaan laitteella).
+
+**Ohjenäkymän yhteystieto:** `index.html` näyttää henkilökohtaisen gmail-osoitteen. Kun sovellus julkaistaan yrityksen nimissä, ohjenäkymässä on syytä käyttää samaa tukisähköpostia kuin kauppalistauksessa ja tietosuojaselosteessa.
 
 ### ui.js:n pilkkominen
 
@@ -174,7 +193,7 @@ Tyypillinen kiinteistö noin 20–80 kuviota, GeoJSON pakkaamattomana arviolta 5
 
 - GPS-piste kartalla tarkkuusympyrällä, päivittyy `watchPosition`-virrasta.
 - **"Keskitä minuun"** -painike, jolla kolme tilaa: pois, keskitys, keskitys + suunta.
-- Kompassisuunta `DeviceOrientation`-tapahtumasta. iOS vaatii erillisen käyttäjän eleestä käynnistetyn lupapyynnön (`requestPermission`) — toteutetaan napin painalluksen yhteydessä.
+- Kompassisuunta `DeviceOrientation`-tapahtumasta (`webkitCompassHeading`). Capacitor 8:n iOS-WebView myöntää liike- ja suuntaluvan automaattisesti ilman järjestelmädialogia (`WebViewDelegationHandler`), mutta `requestPermission()` kutsutaan silti napin painalluksesta. **Varmistetaan oikealla iPhonella heti vaiheen 3 alussa**, ennen kuin kompassi luvataan kauppakuvauksessa. Varasuunnitelma on CoreLocationin suuntatietoa käyttävä plugin, esimerkiksi `@capgo/capacitor-compass`.
 - **"Olet kuviolla"** -indikaattori: nykyinen `pointInPolygon3067` ratkaisee, minkä kuvion sisällä sijainti on, ja paneeli hyppää kyseisen kuvion tietoihin.
 - **Vain etualan sijainti.** Taustasijaintia ei pyydetä. Perustelu: `ACCESS_BACKGROUND_LOCATION` laukaisisi Google Playn erillisen taustasijainti-ilmoituslomakkeen ja videokatselmoinnin, mikä hidastaisi julkaisua merkittävästi ilman todellista hyötyä.
 - Luvan epääminen ei estä sovelluksen käyttöä: kartta toimii normaalisti, sijaintipainike näyttää ohjeen asetuksiin.
@@ -204,10 +223,11 @@ Tietue:
 ### 5.3 Suosikit ja jako
 
 - Suosikkikiinteistöt `platform/storage`-avaimessa `favorites`, järjestys viimeksi käytetty ensin.
-- Natiivi jakonäkymä `share`-rajapinnan kautta; jaettava sisältö on nykyinen URL-jako-ominaisuuden tuottama linkki.
-- **Syvälinkit** kahdella mekanismilla:
-  - Android App Links / iOS Universal Links osoitteeseen `https://trotor.github.io/metsainfo/?kiinteisto=...`. Vaatii `assetlinks.json`- ja `apple-app-site-association`-tiedostot polussa `public/.well-known/`, josta ne päätyvät buildissa Pagesiin. Huom: Universal Links vaatii tiedoston polusta `/.well-known/` sivuston juuressa — koska Pages tarjoilee sovelluksen alipolussa `/metsainfo/`, tämä täytyy varmistaa laitteella vaiheessa 6, ja tarvittaessa turvaudutaan pelkkään custom scheme -mekanismiin iOS:llä.
-  - `metsainfo://kiinteisto/<tunnus>` varamekanismina.
+- Natiivi jakonäkymä `share`-rajapinnan kautta. Jaettava sisältö on nykyisen URL-jako-ominaisuuden muotoinen linkki `https://trotor.github.io/metsainfo/?parcel=<tunnus>`, mutta muodostettuna julkisesta perusosoitteesta eikä `window.location`ista (ks. luku 3).
+- **Syvälinkit**:
+  - **Universal Links / App Links eivät ole nykyisellä osoitteella mahdollisia.** Apple ja Google hakevat varmennustiedoston verkkotunnuksen juuresta (`https://trotor.github.io/.well-known/...`), eikä Pagesin projektisivusto `/metsainfo/` voi tarjoilla sitä. Tarkistettu 9.11.2026: käyttäjäsivustorepoa `trotor.github.io` ei ole, eikä Pagesilla ole omaa verkkotunnusta. Vaihtoehdot ovat (a) oma verkkotunnus Pagesille, esimerkiksi yrityksen aliverkkotunnus, tai (b) käyttäjäsivustorepo `trotor.github.io`, joka tarjoilee vain `.well-known/`-tiedostot. Vaihtoehto (a) muuttaisi myös tietosuojaselosteen osoitteen, joten se on päätettävä **ennen** kuin osoite annetaan App Store Connectiin.
+  - `metsainfo://parcel/<tunnus>` custom scheme toimii ilman verkkotunnusta, ja se toteutetaan joka tapauksessa.
+  - Ensimmäisessä iOS-versiossa riittää custom scheme. Universal Links on parannus, ei julkaisun edellytys.
 - Sovellus käsittelee saapuvan linkin `appUrlOpen`-tapahtumassa ja avaa kiinteistön suoraan.
 
 ### 5.4 Mobiilikäyttöliittymä
@@ -247,11 +267,28 @@ Playn **Data Safety** -lomake ja Applen **tietosuojatarrat** täytetään vastaa
 |--------|-------|--------|
 | iOS | `NSLocationWhenInUseUsageDescription` | Sijaintia käytetään oman paikan näyttämiseen kartalla ja sen tunnistamiseen, millä metsikkökuviolla olet. |
 | iOS | `NSCameraUsageDescription` | Kameraa käytetään maastohavaintojen valokuvaamiseen muistiinpanoihin. |
-| iOS | `NSPhotoLibraryAddUsageDescription` | Tarvitaan, jos käyttäjä tallentaa kuvan laitteen kuvakirjastoon. |
+| iOS | `NSPhotoLibraryAddUsageDescription` | Vain jos kuvan tallennus kuvakirjastoon toteutetaan. Muuten avain jätetään pois. |
 | Android | `ACCESS_FINE_LOCATION` | — (perustelu näytetään sovelluksen omassa dialogissa ennen järjestelmäkyselyä) |
 | Android | `CAMERA` | — |
 
-`ACCESS_BACKGROUND_LOCATION` **ei** ole mukana.
+`ACCESS_BACKGROUND_LOCATION` **ei** ole mukana. iOS:llä `NSLocationAlwaysAndWhenInUseUsageDescription` jätetään myös pois. Geolocation-pluginin dokumentti listaa sen, mutta sovellus pyytää vain käytönaikaista sijaintia. Jos Xcode tai App Store Connect vaatii avaimen, sille annetaan sama teksti.
+
+### Privacy manifest (`PrivacyInfo.xcprivacy`)
+
+Apple vaatii manifestin "required reason" -rajapinnoille. Capacitorin coren manifesti on tyhjä, eikä yksikään käytetyistä plugineista (geolocation, camera, filesystem, share, app, preferences) tuo omaansa. Tarkistettu Capacitor 8.6.0:n lähdekoodista. Sovellustason manifestiin tulevat siksi:
+
+| Kenttä | Arvo | Syy |
+|--------|------|-----|
+| `NSPrivacyTracking` | `false` | Ei seurantaa |
+| `NSPrivacyCollectedDataTypes` | tyhjä | Ei kerättyä tietoa |
+| `NSPrivacyAccessedAPICategoryUserDefaults` | `CA92.1` | `@capacitor/preferences` käyttää UserDefaultsia |
+| `NSPrivacyAccessedAPICategoryFileTimestamp` | `C617.1` | `@capacitor/filesystem` lukee tiedostojen luonti- ja muokkausajat |
+
+Manifesti luodaan vaiheessa 1 samalla kun `ios/`-projekti syntyy, ja se tarkistetaan uudelleen aina, kun lisätään plugin.
+
+### Tietosuojaselosteen linkki sovelluksessa
+
+Sääntö 5.1.1(i) vaatii tietosuojaselosteen linkin sekä App Store Connectiin **että sovelluksen sisälle**. Linkki lisätään ohjenäkymään. Sääntö 1.5 vaatii lisäksi tuki-URL:n, jolta löytyy yhteystieto. Nykyinen tuki-URL (sovelluksen etusivu) näyttää yhteystiedon vain ohjeikkunassa, joten tukiosoitteeksi kannattaa vaihtaa tietosuojaseloste tai erillinen tukisivu.
 
 ### Applen sääntö 4.2 (minimum functionality)
 
@@ -269,9 +306,12 @@ Valmiit tekstit näihin: [docs/kauppa/](../kauppa/).
 
 ### Muut kauppavaatimukset
 
-- Sisältöluokitus: kummallakin alustalla alin ikäluokka (ei käyttäjäsisältöä, ei ostoksia, ei mainoksia).
+- Sisältöluokitus: kummallakin alustalla alin ikäluokka (ei käyttäjäsisältöä, ei ostoksia, ei mainoksia). Applen uusi ikäluokituskysely on ollut pakollinen 31.1.2026 alkaen (luokat 4+, 9+, 13+, 16+ ja 18+). 4+ edellyttää vastausta "ei" kohtaan *Unrestricted Web Access*, joten kaikkien ulkolinkkien on avauduttava Safariin eikä sovelluksen WebView'hun.
+- **Vain iPhone.** Capacitorin iOS-pohja tukee oletuksena myös iPadia (`TARGETED_DEVICE_FAMILY = "1,2"`). Ensimmäinen versio rajataan iPhoneen (`1`), jolloin iPadin 13" kuvakaappauksia ja iPad-asettelun katselmointia ei tarvita.
+- **EU:n DSA-kauppiasilmoitus** (trader status). Ilman vahvistettua kauppiasstatusta sovellusta ei jaella EU:ssa. Organisaatiolla D-U-N-S-osoite näkyy tuotesivulla automaattisesti, ja lisäksi näkyvät vahvistettu puhelinnumero ja sähköposti, joten niiden on oltava yrityksen yhteystietoja.
+- Export compliance: `ITSAppUsesNonExemptEncryption = NO` Info.plistiin. Sovellus käyttää vain käyttöjärjestelmän HTTPS:ää.
 - Tilin poisto -vaatimus ei koske sovellusta, koska tilejä ei ole.
-- Kuvakkeet ja splash-näytöt generoidaan `@capacitor/assets`-työkalulla yhdestä lähdekuvasta.
+- Kuvakkeet ja splash-näytöt generoidaan `@capacitor/assets`-työkalulla (4.0.0) yhdestä lähdekuvasta.
 - Kuvakaappaukset molempiin kauppoihin vaadituilla laitekoilla, suomeksi.
 - Kauppakuvaus, avainsanat ja lyhyt kuvaus suomeksi; englanninkielinen versio valinnainen.
 
@@ -306,30 +346,32 @@ Testaus tehdään fyysisillä laitteilla, ei pelkällä emulaattorilla — GPS j
 
 ## 9. Vaiheistus
 
-Jokainen vaihe on oma pull requestinsa. Vaiheet 0–1 ovat riskialttiimmat, koska ne koskevat olemassa olevaa verkkosovellusta.
+Jokainen vaihe on oma pull requestinsa. iOS julkaistaan ensin (vaiheet 1–8), Android seuraa (vaihe 9). Vaiheet 0–1 ovat riskialttiimmat, koska ne koskevat olemassa olevaa verkkosovellusta.
 
 | Vaihe | Sisältö | Riippuu |
 |-------|---------|---------|
 | **0** | Build-vaihe: `package.json`, Vite, CDN-kirjastot npm-riippuvuuksiksi, GitHub Actions julkaisee `dist/` Pagesiin. **Ei toiminnallista muutosta** — verkkosovelluksen on toimittava identtisesti. | — |
-| **1** | Alusta-abstraktio `js/platform/`, `ui.js`:n pilkkominen, Capacitor-runko, `android/`- ja `ios/`-projektit. Molemmat alustat käynnistyvät ja näyttävät nykyisen sovelluksen. | 0 |
+| **1** | Alusta-abstraktio `js/platform/`, `ui.js`:n pilkkominen, Capacitor-runko ja `ios/`-projekti (SPM, vain iPhone, privacy manifest). WKWebView-korjaukset: CSV-jako, jaettava linkki, tulostuksen piilotus. Sovellus käynnistyy iPhonella ja näyttää nykyisen sovelluksen. | 0 |
 | **2** | Mobiilikäyttöliittymä: bottom sheet, kosketuskohteet, safe-area, kontrollien sijoittelu. | 1 |
 | **3** | Sijainti ja seuranta: GPS-piste, keskitys, kompassi, "olet kuviolla". | 1 |
 | **4** | Offline-välimuisti: lataus, tarjoilu, hallintanäkymä, offline-indikaattori. | 1 |
 | **5** | Muistiinpanot ja valokuvat: tallennus, kartan markkerit, GeoJSON- ja CSV-vienti. | 3, 4 |
-| **6** | Suosikit, natiivi jako, syvälinkit (App Links, Universal Links, custom scheme). | 1 |
-| **7** | Kauppavalmius: kuvakkeet, splash, kuvakaappaukset, allekirjoitusavaimet, versionsynkronointi. Tekstit, tietosuojaseloste ja lomakevastaukset ovat jo valmiina kansiossa `docs/kauppa/`. | 2–6 |
-| **8** | Julkaisu: Play internal testing → tuotanto porrastettuna; iOS TestFlight → App Review. | 7 |
+| **6** | Suosikit, natiivi jako, syvälinkit (custom scheme; Universal Links vain jos verkkotunnus on ratkaistu). | 1 |
+| **7** | iOS-kauppavalmius: kuvakkeet, splash, kuvakaappaukset (iPhone), versionsynkronointi, DSA-kauppiasilmoitus, ikäluokituskysely. Tekstit, tietosuojaseloste ja lomakevastaukset ovat jo valmiina kansiossa `docs/kauppa/`. | 2–6 |
+| **8** | App Store -julkaisu: TestFlight (sisäinen) → App Review → julkaisu. | 7 |
+| **9** | Android: `android/`-projekti, Android-erityiset korjaukset, Play-kauppavalmius (allekirjoitusavain, Data Safety, kuvakaappaukset) ja Play-julkaisu (internal testing → porrastettu tuotanto). | 8 |
 
 ### Kriittinen polku
 
 Organisaatiotilillä julkaisu **ei ole enää aikataulun pullonkaula**. Playn 12 testaajan ja 14 vuorokauden suljettu testi koskee vain henkilökohtaisia tilejä, jotka on avattu 13.11.2023 jälkeen — yrityksen organisaatiotililtä voi julkaista suoraan tuotantoon. Kaksi viikkoa odotusta ja testaajien värvääminen poistuvat suunnitelmasta kokonaan.
 
-Käytännön seuraukset:
+Käytännön seuraukset (iOS ensin, päätetty 9.11.2026):
 
 - Pullonkaulaksi jää **vaihe 7** eli kauppavalmius: kuvakkeet, kuvakaappaukset ja metadata syntyvät vasta kun sovellus on ajettavissa laitteella.
-- Molemmat kaupat ajetaan rinnakkain, ei peräkkäin. Play on tyypillisesti nopeampi; App Review vie päiviä ja voi vaatia useamman kierroksen.
-- Ensimmäinen Play-tuotantojulkaisu porrastettuna (20 % → 100 %), jotta kaatumiset näkyvät ennen kuin koko käyttäjäkunta saa version.
-- Realistinen kokonaisaikataulu vaiheesta 7 julkaisuun: **1–2 viikkoa**, käytännössä App Review -kierrosten määrä.
+- **Pitkät hallinnolliset asiat aloitetaan heti, ei vaiheessa 7**: DSA-kauppiasstatuksen vahvistus (vaatii yritysasiakirjan), PRH-nimitarkistus, sivutoimi-ilmoitus, verkkotunnuspäätös ja tietosuojaselosteen täyttäminen. Ne eivät riipu koodista.
+- TestFlight-sisäinen jakelu otetaan käyttöön heti vaiheen 1 jälkeen, jotta maastotestaus omalla iPhonella alkaa varhain.
+- App Review vie päiviä ja voi vaatia useamman kierroksen. Realistinen aika vaiheesta 7 App Store -julkaisuun: **1–2 viikkoa**.
+- Android (vaihe 9) seuraa iOS-julkaisua. Organisaatiotililtä Playhin voi julkaista suoraan tuotantoon porrastettuna (20 % → 100 %).
 
 Kauppatekstit, lomakevastaukset ja katselmointimuistiinpanot ovat valmiina: [docs/kauppa/](../kauppa/).
 
@@ -338,7 +380,9 @@ Kauppatekstit, lomakevastaukset ja katselmointimuistiinpanot ovat valmiina: [doc
 | Riski | Vaikutus | Torjunta |
 |-------|----------|----------|
 | Applen 4.2-hylkäys | iOS-julkaisu viivästyy | Offline, GPS ja kamera perusteluina katselmointimuistiinpanoissa; testikiinteistötunnus katselmoijalle |
-| WFS-kutsut kaatuvat natiivissa CORS-tarkastukseen | Sovellus ei toimi lainkaan | `CapacitorHttp`-silta käyttöön jo vaiheessa 1; varmistetaan laitteella heti |
+| WFS-kutsut kaatuvat natiivissa CORS-tarkastukseen | Sovellus ei toimi lainkaan | Pieni riski: kaikki lähteet palauttavat `Access-Control-Allow-Origin: *` (tarkistettu 9.11.2026). Varmistetaan laitteella vaiheessa 1. `CapacitorHttp` on varasuunnitelma. |
+| Selaintoiminnot (CSV-lataus, tulostus, linkin kopiointi) eivät toimi WKWebView'ssä | Katselmoija painaa nappia, eikä mitään tapahdu (hylkäysperuste 2.1) | Korjataan vaiheessa 1, ks. luku 3 |
+| Tietosuojaseloste julkaistaan täyttämättömänä | Selosteeseen jää `[TÄYTÄ]`-merkintöjä julkiseen osoitteeseen | Vaiheen 0 Actions-julkaisu vie `public/tietosuoja.html`:n Pagesiin. Täytä yrityksen tiedot ennen vaihetta 0 tai viimeistään ennen URL:n antamista kauppaan. |
 | Vaihe 0 rikkoo verkkosovelluksen | Nykyinen demo hajoaa | Ei toiminnallisia muutoksia; manuaalinen läpikäynti ennen mergeä; Pages-julkaisu vasta kun `dist/` todettu toimivaksi |
 | Nimi- tai tavaramerkkiristiriita | Julkaisu estyy tai vaatii uudelleennimeämisen | PRH-tarkistus ennen kuin nimi lyödään lukkoon ikoneihin ja kauppametadataan |
 | Sivutoimikäytäntö estää julkaisun | Koko projekti pysähtyy | Tarkistetaan organisaation sivutoimikäytäntö ennen vaihetta 7 |

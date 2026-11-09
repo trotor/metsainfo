@@ -30,7 +30,7 @@ Nämä koskevat jokaista tehtävää.
 - `js/config.js` kutsuu `proj4.defs()` ja `new L.Proj.CRS()` **moduulin latausaikana** (rivit 6 ja 9). Latausjärjestys on siksi kriittinen: proj4 ja Leaflet on oltava globaaleina ennen kuin `config.js` evaluoituu.
 - `js/app.js` on ainoa moduuli-entrypoint (`<script type="module" src="js/app.js">`, rivi 213), ja sen ensimmäinen tuonti on `./config.js`.
 - Sovelluksessa **ei ole** Leafletin oletusmarkkereita — `js/ui.js:133` käyttää `L.divIcon()`. Niputtajien klassinen markkerikuvaongelma ei siis koske tätä projektia.
-- `main` ja `gh-pages` osoittavat tällä hetkellä samaan committiin: sivusto tarjoillaan repon juuresta sellaisenaan, mukaan lukien `CLAUDE.md`, `docs/` ja `mcp-server/`.
+- `gh-pages`-haaraa päivitetään käsin `main`in kopioksi: sivusto tarjoillaan repon juuresta sellaisenaan, mukaan lukien `CLAUDE.md`, `docs/` ja `mcp-server/`. 9.11.2026 `gh-pages` on committissa `2ad3e38`, joten tietosuojaseloste ei ole vielä julkaistu.
 - Testikehystä ei ole.
 
 ## Tiedostorakenne
@@ -460,7 +460,15 @@ git commit -m "build: siirrä tietosuojaseloste ja versiotiedosto public-hakemis
 - Kuluttaa: tehtävän 1 `npm run build` ja tehtävän 3 `dist/`-rakenne.
 - Tuottaa: julkaisuputki, joka kirjoittaa `dist/`-sisällön `gh-pages`-haaraan jokaisella `main`-pushilla.
 
-**Tausta:** GitHub Pages on jo konfiguroitu tarjoilemaan `gh-pages`-haaran juuresta. Tällä hetkellä haara osoittaa samaan committiin kuin `main`, eli sivusto tarjoillaan lähdekoodihakemistosta. Muutoksen jälkeen haaraan kirjoitetaan vain buildin tulos. **Pagesin asetuksia ei tarvitse muuttaa.**
+**Tausta:** GitHub Pages on jo konfiguroitu tarjoilemaan `gh-pages`-haaran juuresta. Haaraa on tähän asti päivitetty käsin samaan committiin kuin `main`, eli sivusto tarjoillaan lähdekoodihakemistosta. Muutoksen jälkeen haaraan kirjoitetaan vain buildin tulos. **Pagesin asetuksia ei tarvitse muuttaa.**
+
+**Ennakkoehto: tietosuojaseloste.** Tämä tehtävä julkaisee `public/tietosuoja.html`:n ensimmäistä kertaa. 9.11.2026 osoite vastaa `404`, koska `gh-pages` on jäänyt committiin `2ad3e38`, joka edeltää selostetta. Aja ennen pushia:
+
+```bash
+grep -n "TÄYTÄ" public/tietosuoja.html
+```
+
+Jos tulosteessa on rivejä, yrityksen nimi, y-tunnus ja tukisähköposti puuttuvat. Täytä ne ensin, tai hyväksy tietoisesti, että keskeneräinen seloste on hetken julkisena. Osoitetta ei saa antaa App Store Connectiin ennen kuin seloste on täytetty.
 
 - [ ] **Vaihe 1: Luo työnkulku**
 
