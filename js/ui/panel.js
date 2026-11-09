@@ -49,20 +49,30 @@ export function getSheet() {
 /**
  * Leafletin fitBounds-asetukset, jotka huomioivat hakupalkin ja paneelin
  */
-export function mapFitOptions(extra = {}) {
+export function mapFitOptions(extra = {}, { newSelection = false } = {}) {
     return {
         ...fitPadding({
             mobile: isMobileLayout(),
-            sheetHeight: sheet ? sheet.targetHeight() : 0,
+            sheetHeight: sheet ? sheet.fitHeight({ newSelection }) : 0,
             topInset: topInset()
         }),
         ...extra
     };
 }
 
+/**
+ * Kurkistusrivin viesti (haku käynnissä, virhe). ⋯-painike säilyy, jotta
+ * valinnan voi poistaa myös virhetilanteessa.
+ */
 export function setPeekMessage(text) {
     const peek = document.getElementById('sheet-peek');
-    if (peek) peek.textContent = text;
+    if (!peek) return;
+    peek.innerHTML = `
+        <div class="peek-head">
+            <span class="peek-message"></span>
+            <button type="button" id="sheet-menu-btn" aria-label="Toiminnot" aria-haspopup="menu">⋯</button>
+        </div>`;
+    peek.querySelector('.peek-message').textContent = text;
 }
 
 /**

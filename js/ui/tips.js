@@ -22,11 +22,9 @@ export function closeTips(root) {
     root.querySelectorAll('.tip-inline').forEach(el => el.remove());
 }
 
-function openTip(tipEl, root, mobile) {
-    tipEl.classList.add('open');
-    if (!mobile) return; // työpöydällä näkyy kelluva vihje .open-luokalla
-
+function openTip(tipEl) {
     // Mobiilissa selite avautuu tekstiriviksi termin alle
+    tipEl.classList.add('open');
     const anchor = tipEl.closest('.detail-row, .stat-item, h3') || tipEl;
     const line = document.createElement('div');
     line.className = 'tip-inline';
@@ -42,10 +40,12 @@ export function initTips(root, { win = window } = {}) {
     root.addEventListener('click', (e) => {
         const tipEl = e.target.closest('.info-tip');
         if (!tipEl || !root.contains(tipEl)) return;
+        // Työpöydällä vihje näkyy hoverilla ja fokuksella kuten ennenkin
+        if (!isMobileLayout(win)) return;
         e.stopPropagation();
         const wasOpen = tipEl.classList.contains('open');
         closeTips(root);
-        if (!wasOpen) openTip(tipEl, root, isMobileLayout(win));
+        if (!wasOpen) openTip(tipEl);
     });
 
     root.addEventListener('keydown', (e) => {

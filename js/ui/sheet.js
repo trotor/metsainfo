@@ -41,6 +41,16 @@ export function nextSnapOnTap(snap) {
     return SNAPS[(i + 1) % SNAPS.length];
 }
 
+/**
+ * Paneelin korkeus kartan sovitusta varten. Full-tilassa kartasta näkyisi
+ * vain kaistale, joten sovitus tehdään enintään half-korkeudelle. Uusi
+ * valinta avautuu peek-tilaan, joten sille käytetään peek-korkeutta.
+ */
+export function sheetHeightForFit(heights, snap, hidden, newSelection = false) {
+    if (hidden || newSelection) return heights.peek;
+    return Math.min(heights[snap], heights.half);
+}
+
 export function readSafeBottom(doc = document) {
     const probe = doc.getElementById('safe-area-probe');
     if (!probe) return 0;
@@ -86,6 +96,7 @@ export function createSheet(panelEl, { win = window, doc = document, onChange, s
         getSnap: () => snap,
         getHeights: () => heights,
         targetHeight: () => (isHidden() ? heights.peek : heights[snap]),
+        fitHeight: ({ newSelection = false } = {}) => sheetHeightForFit(heights, snap, isHidden(), newSelection),
         /** Vedon aikainen korkeus ilman pysäytyskohtaa */
         setDragHeight(px) {
             const h = Math.min(Math.max(px, heights.peek), heights.full);
