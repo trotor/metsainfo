@@ -110,7 +110,7 @@ Sovellus toimii kokonaan selaimessa ilman backendiä. Koodi on jaettu ES6-moduul
 ### Tiedostorakenne
 
 ```
-├── index.html          # HTML-runko, CDN-importit
+├── index.html          # HTML-runko (Vite-entry)
 ├── js/
 │   ├── app.js          # Päämoduuli: alustus, tapahtumat
 │   ├── config.js       # Asetukset, koodistot, värimoodit
@@ -121,7 +121,7 @@ Sovellus toimii kokonaan selaimessa ilman backendiä. Koodi on jaettu ES6-moduul
 │   ├── statistics.js   # Tilastolaskenta
 │   └── ui.js           # Käyttöliittymän renderöinti
 ├── style.css           # Tyylit
-├── version.js          # Versiotiedot
+├── public/             # Sellaisenaan buildiin kopioitavat (version.js, tietosuoja.html)
 └── mcp-server/
     ├── server.py       # MCP-palvelin (FastMCP)
     ├── pipeline.py     # WFS-haut ja tilastolaskenta
@@ -140,17 +140,19 @@ Sovellus toimii kokonaan selaimessa ilman backendiä. Koodi on jaettu ES6-moduul
 
 ## Kehitys
 
-Kloonaa repositorio ja käynnistä paikallinen palvelin:
+Kloonaa repositorio, asenna riippuvuudet ja käynnistä kehityspalvelin:
 
 ```bash
 git clone git@github.com:trotor/metsainfo.git
 cd metsainfo
-python3 -m http.server 8080
+npm install
+npm run dev
 ```
 
-Avaa selaimessa: http://localhost:8080
+Avaa selaimessa osoite, jonka Vite tulostaa (oletuksena http://localhost:5173).
 
-Ei build-vaihetta, ei riippuvuuksia asennettavaksi.
+Muut komennot: `npm test` ajaa yksikkötestit, `npm run build` rakentaa
+tuotantoversion `dist/`-hakemistoon ja `npm run preview` esikatselee sen.
 
 ### Tekoälyavusteinen kehitys
 

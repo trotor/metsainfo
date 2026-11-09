@@ -1,15 +1,15 @@
 ---
 name: manuaalinen-testaus
-description: Manual verification checklist for Metsäinfo — basic flow, cadastral search, stand interaction, CSV export, mobile layout, and edge cases. There is no automated test framework, so use this whenever verifying a change before commit or release.
+description: Manual verification checklist for Metsäinfo — basic flow, cadastral search, stand interaction, CSV export, mobile layout, and edge cases. UI has no automated tests (only `npm test` for pure logic), so use this whenever verifying a change before commit or release.
 ---
 
 # Testing
 
-No automated test framework. Verify changes manually:
+Run `npm test` for logic. UI has no automated tests — verify it manually:
 
 ## Basic flow
-1. Start server: `python3 -m http.server 8080`
-2. Open http://localhost:8080
+1. Start server: `npm run dev`
+2. Open http://localhost:5173
 3. Map loads, centered on Suolahti area
 4. Zoom in → parcel boundaries appear (zoom ≥10)
 5. Click a parcel → side panel shows statistics, stands appear on map with green coloring

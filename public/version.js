@@ -3,7 +3,7 @@
  * Updated with each release
  */
 const VERSION = {
-    number: '3.0.0',
-    date: '2026-03-05',
+    number: '3.1.0',
+    date: '2026-11-09',
     author: 'Tero Rönkkö'
 };
