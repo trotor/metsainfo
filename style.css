@@ -331,6 +331,11 @@ body {
     display: none;
 }
 
+/* Nauhakääre ei vaikuta työpöydän asetteluun */
+#map-strip {
+    display: contents;
+}
+
 /* Välilehdet vain mobiilissa: työpöydällä paneeli on yksi vieritys */
 .tabbar {
     display: none;
@@ -1407,6 +1412,103 @@ h3 .info-tip-icon {
         min-height: 44px;
     }
 
+    /* Karttakontrollit: 44 px kohteet oikean reunan pinossa */
+    .leaflet-bar a,
+    .leaflet-touch .leaflet-bar a {
+        width: 44px;
+        height: 44px;
+        line-height: 44px;
+        font-size: 22px;
+    }
+
+    .leaflet-control-layers-toggle,
+    .leaflet-touch .leaflet-control-layers-toggle {
+        width: 44px;
+        height: 44px;
+    }
+
+    .leaflet-control-layers-expanded label {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+    }
+
+    /* Attribuutio (CC BY 4.0) ja muut alakontrollit tietopaneelin yläpuolelle */
+    .leaflet-bottom {
+        bottom: var(--sheet-offset, 0px);
+    }
+
+    /* Värivalinnat ja selitteet nauhana paneelin yllä */
+    #map-strip {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 6px;
+        position: fixed;
+        left: calc(env(safe-area-inset-left) + 8px);
+        /* Oikea reuna jää karttakontrollien pinolle (vaakasuunnassa pino ulottuu tänne) */
+        right: calc(env(safe-area-inset-right) + 62px);
+        bottom: calc(var(--sheet-offset, 0px) + env(safe-area-inset-bottom) + 26px);
+        z-index: 1000;
+        pointer-events: none;
+        transition: bottom 200ms ease;
+    }
+
+    #info-panel:not(.hidden) ~ #map-strip {
+        bottom: calc(var(--sheet-offset, 0px) + 26px);
+    }
+
+    #info-panel.dragging ~ #map-strip {
+        transition: none;
+    }
+
+    #info-panel[data-snap="full"]:not(.hidden) ~ #map-strip {
+        display: none;
+    }
+
+    #map-strip > * {
+        position: static;
+        pointer-events: auto;
+        border-radius: 10px;
+    }
+
+    #mki-color-mode-control { order: 1; }
+    #mki-legend { order: 2; }
+    #color-mode-control { order: 3; }
+    #color-legend { order: 4; }
+
+    #color-mode-control,
+    #mki-color-mode-control {
+        padding: 0;
+    }
+
+    #color-mode-select,
+    #mki-color-mode-select {
+        height: 44px;
+        font-size: 16px;
+        border: none;
+        border-radius: 10px;
+        padding: 0 10px;
+    }
+
+    #color-legend,
+    #mki-legend {
+        min-width: 0;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+    #map-strip .legend-title {
+        display: none;
+    }
+
+    #map-strip .legend-items {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
     /* Selitteet napautuksella: 44 px kosketusalue, teksti termin alle */
     .info-tip::before {
         content: '';
@@ -1463,6 +1565,10 @@ h3 .info-tip-icon {
 @media (prefers-reduced-motion: reduce) {
     .tab-panel {
         animation: none !important;
+    }
+
+    #map-strip {
+        transition: none !important;
     }
 }
 
@@ -1743,7 +1849,7 @@ h3 .info-tip-icon {
 @media print {
     /* Hide everything except info panel content */
     #header, #map, #footer, #search-control, #close-panel,
-    #sheet-handle, #sheet-peek, #sheet-menu, .tabbar,
+    #sheet-handle, #sheet-peek, #sheet-menu, .tabbar, #map-strip,
     #color-mode-control, #color-legend,
     #mki-color-mode-control, #mki-legend,
     #help-modal, #help-overlay,
