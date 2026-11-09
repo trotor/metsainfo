@@ -756,7 +756,8 @@ body {
 }
 
 .info-tip:hover .info-tip-text,
-.info-tip:focus .info-tip-text {
+.info-tip:focus .info-tip-text,
+.info-tip.open .info-tip-text {
     display: block;
 }
 
@@ -1404,6 +1405,38 @@ h3 .info-tip-icon {
 
     .stand-header {
         min-height: 44px;
+    }
+
+    /* Selitteet napautuksella: 44 px kosketusalue, teksti termin alle */
+    .info-tip::before {
+        content: '';
+        position: absolute;
+        inset: -15px;
+    }
+
+    .info-tip .info-tip-text,
+    .info-tip:hover .info-tip-text,
+    .info-tip:focus .info-tip-text,
+    .info-tip.open .info-tip-text {
+        display: none;
+    }
+
+    .info-tip.open .info-tip-icon {
+        background: var(--havu);
+    }
+
+    .tip-inline {
+        grid-column: 1 / -1;
+        margin: 4px 0 8px;
+        padding: 8px 10px;
+        border-left: 3px solid var(--havu);
+        background: white;
+        color: var(--kaarna);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.45;
+        text-transform: none;
+        letter-spacing: 0;
     }
 
     /* Avattu kuvio jää näkyviin tarttuvan välilehtirivin alle */

@@ -4,7 +4,7 @@
 
 import { calculateStatistics } from '../statistics.js';
 import { formatNumber, formatCadastralReference, calculateParcelArea } from '../utils.js';
-import { tip } from './tips.js';
+import { tip, closeTips } from './tips.js';
 import { renderStandItem, attachStandEventListeners, attachFilterEventListeners } from './stands.js';
 import { setActiveTab } from './panel.js';
 
@@ -47,6 +47,8 @@ export function showSummary(features, parcel, partCount = 1) {
     const parcelAreaText = parcelArea ? `${formatNumber(parcelArea / 10000, 2)} ha` : '';
     const partsInfo = partCount > 1 ? ` (${partCount} palstaa)` : '';
     const hasRecs = stats.cuttingRecommendations.length > 0 || stats.silvicultureRecommendations.length > 0;
+
+    closeTips(content);
 
     const peek = document.getElementById('sheet-peek');
     if (peek) {
