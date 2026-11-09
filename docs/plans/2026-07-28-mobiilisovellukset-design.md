@@ -317,7 +317,7 @@ Valmiit tekstit näihin: [docs/kauppa/](../kauppa/).
 
 ## 8. Testaus
 
-Projektissa ei ole tällä hetkellä testikehystä. Otetaan käyttöön **Vitest** ainoastaan puhtaalle logiikalle, jossa hyötysuhde on paras eikä DOM:ia tarvita:
+Projektissa ei ole tällä hetkellä testikehystä. Otetaan käyttöön **Vitest** ainoastaan puhtaalle logiikalle, jossa hyötysuhde on paras. Testit ajetaan jsdom-ympäristössä, koska `coordsEPSG3067ToLatLng` palauttaa Leafletin `LatLng`-olion, mutta käyttöliittymää ei testata:
 
 - `utils.js` — koordinaattimuunnokset, `pointInPolygon3067`, `getGeometryBounds3067`, `normalizeParcelId`
 - `statistics.js` — tilastolaskenta tunnetulla kuviojoukolla
