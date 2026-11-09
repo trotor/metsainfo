@@ -17,7 +17,7 @@ import * as state from './state.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
 import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels, fetchForestUseDeclarations } from './data.js';
-import { onEachFeature, onEachHabitat, onEachMkiFeature, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, setMkiColorMode, updateMkiLegend, copyParcelLink, downloadCSV, toggleHelp } from './ui/index.js';
+import { onEachFeature, onEachHabitat, onEachMkiFeature, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, setMkiColorMode, updateMkiLegend, copyParcelLink, downloadCSV, toggleHelp, initPanel, openPanelForSelection, setPeekMessage, mapFitOptions } from './ui/index.js';
 
 // Expose functions for HTML onclick handlers
 window.copyParcelLink = copyParcelLink;
@@ -33,6 +33,7 @@ function init() {
     initMap();
     initLayers();
     initControls();
+    initPanel({ onClearSelection: clearSelection });
     initEventListeners();
     checkUrlParams();
 }
@@ -217,16 +218,6 @@ function initEventListeners() {
 
     loadParcelsInView();
 
-    document.getElementById('close-panel').addEventListener('click', () => {
-        document.getElementById('info-panel').classList.add('hidden');
-        state.selectedParcelLayer.clearLayers();
-        state.forestLayer.clearLayers();
-        state.setState('currentParcel', null);
-        updateUrlParam(null);
-        document.getElementById('color-mode-control').classList.add('hidden');
-        document.getElementById('color-legend').classList.add('hidden');
-    });
-
     const searchInput = document.getElementById('search-input');
     const searchButton = document.getElementById('search-button');
 
@@ -234,6 +225,19 @@ function initEventListeners() {
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') searchParcel();
     });
+}
+
+/**
+ * Clear the parcel selection: hide panel, map highlights and URL parameter
+ */
+function clearSelection() {
+    document.getElementById('info-panel').classList.add('hidden');
+    state.selectedParcelLayer.clearLayers();
+    state.forestLayer.clearLayers();
+    state.setState('currentParcel', null);
+    updateUrlParam(null);
+    document.getElementById('color-mode-control').classList.add('hidden');
+    document.getElementById('color-legend').classList.add('hidden');
 }
 
 /**
@@ -277,7 +281,7 @@ async function searchParcel() {
 
             const sw = proj4('EPSG:3067', 'WGS84', [minX, minY]);
             const ne = proj4('EPSG:3067', 'WGS84', [maxX, maxY]);
-            state.map.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], { maxZoom: 16, padding: [50, 50] });
+            state.map.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], mapFitOptions({ maxZoom: 16 }));
 
             selectParcels(parcels);
         } else {
@@ -451,11 +455,10 @@ async function selectParcel(parcel) {
  * Select multiple parcels (parcel parts) and load their forest data
  */
 async function selectParcels(parcels) {
-    const panel = document.getElementById('info-panel');
     const loading = document.getElementById('loading');
     const content = document.getElementById('info-content');
 
-    panel.classList.remove('hidden');
+    openPanelForSelection();
     loading.classList.remove('hidden');
     content.innerHTML = '';
 
@@ -511,6 +514,7 @@ async function selectParcels(parcels) {
 
     } catch (error) {
         loading.classList.add('hidden');
+        setPeekMessage('Metsätietojen haku epäonnistui.');
         console.error('Error fetching forest data:', error);
         content.innerHTML = `
             <div class="no-data">
