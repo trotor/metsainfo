@@ -7,6 +7,7 @@ import { isMobileLayout, onLayoutChange, topInset, fitPadding } from './layout.j
 import { createSheet, resolveRelease, nextSnapOnTap } from './sheet.js';
 import { copyParcelLink, downloadCSV } from './actions.js';
 import { initTips } from './tips.js';
+import * as state from '../state.js';
 
 let sheet = null;
 let panelEl = null;
@@ -182,6 +183,13 @@ export function initPanel({ onClearSelection }) {
         if (!menu.hidden && !e.target.closest('#sheet-menu, #sheet-menu-btn')) closeMenu();
     });
 
-    onLayoutChange(() => sheet.recompute());
+    // Mobiilissa zoom oikean reunan pinoon tasovalitsimen alle
+    const placeZoom = (mobile) => state.map?.zoomControl?.setPosition(mobile ? 'topright' : 'topleft');
+    placeZoom(isMobileLayout());
+
+    onLayoutChange((mobile) => {
+        sheet.recompute();
+        placeZoom(mobile);
+    });
     window.addEventListener('resize', () => sheet.recompute());
 }

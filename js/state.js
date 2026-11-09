@@ -17,6 +17,7 @@ export let currentParcel = null;
 export let selectedStandIndex = null;
 export let loadedParcels = new Map();
 export let currentColorMode = 'volume';
+export let layersControl = null;
 
 export function setState(key, value) {
     switch (key) {
@@ -35,5 +36,6 @@ export function setState(key, value) {
         case 'selectedStandIndex': selectedStandIndex = value; break;
         case 'loadedParcels': loadedParcels = value; break;
         case 'currentColorMode': currentColorMode = value; break;
+        case 'layersControl': layersControl = value; break;
     }
 }

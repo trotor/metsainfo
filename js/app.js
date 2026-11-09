@@ -103,7 +103,8 @@ function initMap() {
         'Ortokuva': ortokuva
     };
 
-    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
+    // Yksi tasovalitsin: pohjakartat tässä, päälle kytkettävät tasot initLayersissa
+    state.setState('layersControl', L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map));
 }
 
 /**
@@ -148,11 +149,8 @@ function initLayers() {
         coordsToLatLng: coordsEPSG3067ToLatLng
     }));
 
-    const overlayControl = L.control.layers(null, {
-        'Luontokohteet': state.habitatLayer,
-        'Metsänkäyttöilmoitukset': state.mkiLayer
-    }, { position: 'topright' });
-    overlayControl.addTo(map);
+    state.layersControl.addOverlay(state.habitatLayer, 'Luontokohteet');
+    state.layersControl.addOverlay(state.mkiLayer, 'Metsänkäyttöilmoitukset');
 
     map.on('overlayadd', (e) => {
         if (e.layer === state.habitatLayer) loadHabitatsInView();
