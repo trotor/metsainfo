@@ -1,0 +1,46 @@
+name: Julkaise GitHub Pagesiin
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hae lähdekoodi
+        uses: actions/checkout@v7
+
+      - name: Asenna Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Asenna riippuvuudet
+        run: npm ci
+
+      - name: Aja testit
+        run: npm test
+
+      - name: Rakenna
+        run: npm run build
+
+      # Pull requestissa vain testit ja build; julkaisu vasta mainiin
+      - name: Julkaise gh-pages-haaraan
+        if: github.event_name != 'pull_request'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
