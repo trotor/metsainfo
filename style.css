@@ -331,6 +331,15 @@ body {
     display: none;
 }
 
+/* Välilehdet vain mobiilissa: työpöydällä paneeli on yksi vieritys */
+.tabbar {
+    display: none;
+}
+
+.tab-panel {
+    display: block;
+}
+
 /* Bottom sheetin osat näkyvät vain mobiilissa */
 #sheet-handle,
 #sheet-peek,
@@ -1219,6 +1228,204 @@ h3 .info-tip-icon {
         top: 2px;
         right: 4px;
     }
+
+    /* Kurkistusrivi: tunnus ja avainluvut */
+    .peek-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 44px;
+    }
+
+    .peek-id {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--kuusikko);
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .peek-parts {
+        font-size: 13px;
+        color: var(--sammal);
+        white-space: nowrap;
+    }
+
+    #sheet-menu-btn {
+        margin-left: auto;
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        border: none;
+        border-radius: 10px;
+        background: none;
+        color: var(--kaarna);
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    #sheet-menu-btn:active {
+        background: #e3e8e0;
+    }
+
+    .peek-stats {
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        justify-content: space-between;
+        column-gap: 8px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .peek-value {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--kuusikko);
+    }
+
+    .peek-unit {
+        font-size: 13px;
+        color: var(--sammal);
+    }
+
+    .peek-empty {
+        color: var(--sammal);
+        padding: 8px 0;
+    }
+
+    /* Välilehdet */
+    #info-content {
+        padding: 0 16px 16px;
+        background: var(--jakala);
+        color: var(--kaarna);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .tabbar {
+        display: flex;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        gap: 4px;
+        margin: 0 -16px 12px;
+        padding: 8px 16px;
+        background: var(--jakala);
+        border-bottom: 1px solid #dde3d9;
+    }
+
+    .tabbar button {
+        flex: 1;
+        min-height: 44px;
+        border: none;
+        border-radius: 10px;
+        background: #e3e8e0;
+        color: var(--kaarna);
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .tabbar button[aria-selected="true"] {
+        background: var(--havu);
+        color: white;
+    }
+
+    .tab-panel {
+        display: none;
+    }
+
+    #info-content[data-active-tab="summary"] .tab-panel[data-tab="summary"],
+    #info-content[data-active-tab="stands"] .tab-panel[data-tab="stands"],
+    #info-content[data-active-tab="recs"] .tab-panel[data-tab="recs"] {
+        display: block;
+        animation: tab-in 150ms ease;
+    }
+
+    /* Tunnus ja toiminnot ovat kurkistusrivillä ja valikossa */
+    .tab-panel .parcel-section {
+        display: none;
+    }
+
+    .measurement-info {
+        margin: 0 0 12px;
+    }
+
+    /* Tiivis yhteenveto: kaksi saraketta, ei laatikoita */
+    .summary-section {
+        margin-bottom: 18px;
+    }
+
+    .summary-section h3 {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--sammal);
+        text-transform: none;
+        letter-spacing: 0;
+        margin-bottom: 4px;
+        padding-bottom: 6px;
+        border-bottom-color: #dde3d9;
+    }
+
+    .stat-grid {
+        gap: 0 16px;
+    }
+
+    .stat-item {
+        background: none;
+        border-radius: 0;
+        padding: 10px 0;
+        border-bottom: 1px solid #e3e8e0;
+    }
+
+    .stat-value {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--kuusikko);
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: var(--sammal);
+    }
+
+    .stat-range {
+        font-size: 12px;
+        font-style: normal;
+        color: var(--sammal);
+    }
+
+    .recommendations-list li,
+    .recommendations-list.clickable li {
+        min-height: 44px;
+        align-items: center;
+    }
+
+    .stand-header {
+        min-height: 44px;
+    }
+
+    .stands-section h3 {
+        display: none;
+    }
+}
+
+@keyframes tab-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 359px) {
+    .peek-stats {
+        grid-template-columns: repeat(2, auto);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tab-panel {
+        animation: none !important;
+    }
 }
 
 /* Custom Leaflet popup styles */
@@ -1498,7 +1705,7 @@ h3 .info-tip-icon {
 @media print {
     /* Hide everything except info panel content */
     #header, #map, #footer, #search-control, #close-panel,
-    #sheet-handle, #sheet-peek, #sheet-menu,
+    #sheet-handle, #sheet-peek, #sheet-menu, .tabbar,
     #color-mode-control, #color-legend,
     #mki-color-mode-control, #mki-legend,
     #help-modal, #help-overlay,
@@ -1538,6 +1745,12 @@ h3 .info-tip-icon {
 
     #info-panel h2::after {
         content: ' — ' attr(data-parcel);
+    }
+
+    .tab-panel,
+    .tab-panel .parcel-section,
+    .stands-section h3 {
+        display: block !important;
     }
 
     .summary-section {

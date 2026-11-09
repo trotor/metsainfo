@@ -10,6 +10,36 @@ import { copyParcelLink, downloadCSV } from './actions.js';
 let sheet = null;
 let panelEl = null;
 
+const TABS = ['summary', 'stands', 'recs'];
+
+/**
+ * Aktivoi välilehden. Jos välilehteä ei ole (esim. ei ehdotuksia),
+ * palataan yhteenvetoon.
+ */
+export function setActiveTab(name) {
+    const content = document.getElementById('info-content');
+    if (!content) return;
+    const exists = TABS.includes(name) && content.querySelector(`.tab-panel[data-tab="${name}"]`);
+    const tab = exists ? name : 'summary';
+    content.dataset.activeTab = tab;
+    content.querySelectorAll('.tabbar [data-tab]').forEach(btn => {
+        btn.setAttribute('aria-selected', btn.dataset.tab === tab ? 'true' : 'false');
+    });
+}
+
+export function getActiveTab() {
+    return document.getElementById('info-content')?.dataset.activeTab || 'summary';
+}
+
+export function initTabs(contentEl) {
+    contentEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tabbar [data-tab]');
+        if (!btn) return;
+        setActiveTab(btn.dataset.tab);
+        contentEl.scrollTop = 0;
+    });
+}
+
 export function getSheet() {
     return sheet;
 }
@@ -104,6 +134,7 @@ export function initPanel({ onClearSelection }) {
     const peek = document.getElementById('sheet-peek');
     const menu = document.getElementById('sheet-menu');
 
+    initTabs(document.getElementById('info-content'));
     attachDrag(handle);
     attachDrag(peek);
 
