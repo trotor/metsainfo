@@ -10,13 +10,18 @@ const PBX = `
 `;
 
 describe('sync-version', () => {
-    it('lukee versionumeron version.js:stä', () => {
-        const src = "const VERSION = {\n    number: '3.2.0',\n    date: '2026-11-09',\n};";
-        expect(parseVersionJs(src)).toBe('3.2.0');
+    it('lukee sovelluksen version app-kentästä, ei verkkoversiota', () => {
+        const src = "const VERSION = {\n    number: '3.3.0',\n    app: '1.0',\n    date: '2026-11-10',\n};";
+        expect(parseVersionJs(src)).toBe('1.0');
     });
 
-    it('hylkää muun kuin x.y.z-muotoisen version', () => {
-        expect(() => parseVersionJs("number: '4.0.0-alpha.1'")).toThrow();
+    it('hyväksyy x.y- ja x.y.z-muodot', () => {
+        expect(parseVersionJs("app: '1.0.1'")).toBe('1.0.1');
+    });
+
+    it('hylkää puuttuvan tai virheellisen sovellusversion', () => {
+        expect(() => parseVersionJs("number: '3.3.0'")).toThrow();
+        expect(() => parseVersionJs("app: '1.0-beta'")).toThrow();
     });
 
     it('päivittää kaikki versiokentät', () => {
