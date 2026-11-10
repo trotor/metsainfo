@@ -1,0 +1,134 @@
+# Metsäinfo iOS -julkaisu.
+#
+# API-avain luetaan ympäristömuuttujista, ei koskaan reposta:
+#   source ~/code/appstoreconnect.env
+#   fastlane ios metadata      # kauppatekstit (fastlane/metadata/fi)
+#   fastlane ios screenshots   # kuvakaappaukset (fastlane/screenshots/fi)
+#   fastlane ios beta          # build TestFlightiin
+#   fastlane ios check         # tarkistaa yhteyden ja nykyiset tiedot
+
+default_platform(:ios)
+
+platform :ios do
+  def asc_key
+    app_store_connect_api_key(
+      key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_ID"),
+      issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+      key_filepath: File.expand_path(ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_FILEPATH"))
+    )
+  end
+
+  desc "Tarkistaa API-yhteyden ja näyttää sovelluksen tiedot"
+  lane :check do
+    asc_key
+    app = Spaceship::ConnectAPI::App.find("fi.inetor.metsainfo")
+    UI.user_error!("Sovellusta ei löydy App Store Connectista") unless app
+    UI.message("Sovellus: #{app.name} (#{app.bundle_id}), id #{app.id}, ensisijainen kieli #{app.primary_locale}")
+    version = app.get_edit_app_store_version(platform: Spaceship::ConnectAPI::Platform::IOS)
+    UI.message("Muokattava versio: #{version&.version_string || '-'} (#{version&.app_store_state || '-'})")
+    builds = Spaceship::ConnectAPI::Build.all(app_id: app.id, sort: "-uploadedDate", limit: 5)
+    builds.each { |b| UI.message("Build #{b.version} (#{b.app_version}): #{b.processing_state}") }
+  end
+
+  desc "Päivittää kauppatekstit (fastlane/metadata)"
+  lane :metadata do
+    asc_key
+    deliver(
+      app_version: app_version,
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      skip_app_version_update: false,
+      force: true,
+      precheck_include_in_app_purchases: false,
+      submit_for_review: false,
+      # Yhteystiedot ympäristöstä (~/code/appstoreconnect.env), eivät repossa
+      app_review_information: {
+        first_name: ENV.fetch("ASC_REVIEW_FIRST_NAME"),
+        last_name: ENV.fetch("ASC_REVIEW_LAST_NAME"),
+        email_address: ENV.fetch("ASC_REVIEW_EMAIL"),
+        phone_number: ENV.fetch("ASC_REVIEW_PHONE"),
+        demo_required: false,
+        notes: File.read(File.expand_path("metadata/review_information/notes.txt", __dir__))
+      }
+    )
+  end
+
+  desc "Lataa kuvakaappaukset (fastlane/screenshots/fi)"
+  lane :screenshots do
+    asc_key
+    deliver(
+      app_version: app_version,
+      skip_binary_upload: true,
+      skip_metadata: true,
+      overwrite_screenshots: true,
+      force: true,
+      precheck_include_in_app_purchases: false,
+      submit_for_review: false
+    )
+  end
+
+  desc "Rajaa jakelun pelkkään Suomeen (FIN), uusiin maihin ei automaattisesti"
+  lane :availability do
+    asc_key
+    app = Spaceship::ConnectAPI::App.find("fi.inetor.metsainfo")
+    client = Spaceship::ConnectAPI.client.tunes_request_client
+
+    existing = begin
+      client.get("v1/apps/#{app.id}/appAvailabilityV2").body["data"]
+    rescue StandardError
+      nil
+    end
+
+    if existing
+      rows = client.get("v2/appAvailabilities/#{existing['id']}/territoryAvailabilities?limit=200&include=territory").body["data"]
+      available = rows.select { |r| r.dig("attributes", "available") }
+                      .map { |r| r.dig("relationships", "territory", "data", "id") }
+      UI.message("Saatavuus on jo asetettu: #{available.join(', ')}")
+      UI.important("Muuta alueita App Store Connectissa (Pricing and Availability), jos lista ei ole pelkkä FIN.") unless available == ["FIN"]
+    else
+      # Rajapinta vaatii kaikki alueet: FIN saatavilla, muut eivät
+      territories = []
+      path = "v1/territories?limit=200"
+      while path
+        page = client.get(path).body
+        territories.concat(page["data"].map { |t| t["id"] })
+        next_url = page.dig("links", "next")
+        path = next_url && next_url.sub(%r{\Ahttps://[^/]+/}, "")
+      end
+      UI.user_error!("Aluetta FIN ei löytynyt") unless territories.include?("FIN")
+      body = {
+        data: {
+          type: "appAvailabilities",
+          attributes: { availableInNewTerritories: false },
+          relationships: {
+            app: { data: { type: "apps", id: app.id } },
+            territoryAvailabilities: {
+              data: territories.map { |t| { type: "territoryAvailabilities", id: "${#{t}}" } }
+            }
+          }
+        },
+        included: territories.map do |t|
+          {
+            type: "territoryAvailabilities",
+            id: "${#{t}}",
+            attributes: { available: t == "FIN" },
+            relationships: { territory: { data: { type: "territories", id: t } } }
+          }
+        end
+      }
+      response = client.post("v2/appAvailabilities", body)
+      UI.user_error!("Saatavuuden asetus epäonnistui: #{response.status} #{response.body}") if response.status >= 300
+      UI.success("Jakelu rajattu Suomeen (FIN)")
+    end
+
+    version = app.get_edit_app_store_version(platform: Spaceship::ConnectAPI::Platform::IOS)
+    loc = version.get_app_store_version_localizations.first
+    info = app.fetch_edit_app_info.get_app_info_localizations.first
+    UI.message("Tarkistus: kieli #{loc.locale}, nimi '#{info.name}', alaotsikko '#{info.subtitle}', avainsanat #{loc.keywords.to_s.length}/100, kuvaus #{loc.description.to_s.length} merkkiä")
+  end
+
+  # App Storen versio public/version.js:n app-kentästä
+  def app_version
+    File.read(File.expand_path("../public/version.js", __dir__))[/app:\s*'([^']+)'/, 1]
+  end
+end
