@@ -10,8 +10,8 @@
     <!-- Version info -->
     <script src="version.js"></script>
 
-  <script type="module" crossorigin src="./assets/index-jJ2PklAu.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-BhGOPTn6.css">
+  <script type="module" crossorigin src="./assets/index-dfzq9ASq.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DvKJHmJB.css">
 </head>
 <body>
     <div id="safe-area-probe" aria-hidden="true"></div>
@@ -113,12 +113,12 @@
                 </div>
 
                 <div class="help-section">
-                    <h3>Puhelimella</h3>
+                    <h3><span class="web-only">Puhelimella</span><span class="app-only">Tietopaneeli</span></h3>
                     <ul>
                         <li><strong>Tietopaneeli</strong> on näytön alareunassa. Vedä kahvasta tai napauta sitä, niin paneeli kasvaa tai pienenee.</li>
                         <li><strong>Välilehdet</strong> Yhteenveto, Kuviot ja Ehdotukset pitävät tiedot lyhyinä.</li>
                         <li><strong>Kuvion napautus kartalla</strong> avaa sen tiedot Kuviot-välilehdelle.</li>
-                        <li><strong>⋯-valikosta</strong> löytyvät linkin kopiointi, CSV-lataus, tulostus ja valinnan poisto.</li>
+                        <li><strong>⋯-valikosta</strong> löytyvät <span class="web-only">linkin kopiointi, CSV-lataus, tulostus</span><span class="app-only">linkin ja CSV-tiedoston jakaminen</span> ja valinnan poisto.</li>
                     </ul>
                 </div>
 
@@ -131,9 +131,9 @@
                         <li><strong>Luontokohteet</strong> — Metsälain erityisen tärkeät elinympäristöt (tasovalitsin)</li>
                         <li><strong>Metsänkäyttöilmoitukset</strong> — Ilmoitetut hakkuualueet kartalla värikoodattuina (tasovalitsin)</li>
                         <li><strong>Sanasto-tooltipit</strong> — (i)-kuvake termin vieressä näyttää selityksen</li>
-                        <li><strong>CSV-lataus</strong> — Lataa kuviotiedot taulukkolaskentaohjelmaan</li>
-                        <li><strong>Tulostus</strong> — Tulosta yhteenveto paperille</li>
-                        <li><strong>Linkki</strong> — Kopioi suora linkki kiinteistöön jaettavaksi</li>
+                        <li><strong>CSV-tiedosto</strong> — <span class="web-only">Lataa</span><span class="app-only">Jaa</span> kuviotiedot taulukkolaskentaohjelmaan</li>
+                        <li class="web-only"><strong>Tulostus</strong> — Tulosta yhteenveto paperille</li>
+                        <li><strong>Linkki</strong> — <span class="web-only">Kopioi</span><span class="app-only">Jaa</span> suora linkki kiinteistöön</li>
                     </ul>
                 </div>
 
@@ -157,7 +157,7 @@
                     </ul>
                 </div>
 
-                <div class="help-section">
+                <div class="help-section web-only">
                     <h3>MCP-palvelin (tekoälyintegraatio)</h3>
                     <p>Metsäinfon tiedot ovat käytettävissä myös tekoälytyökaluissa <a href="https://modelcontextprotocol.io/" target="_blank">MCP-palvelimen</a> kautta. Voit hakea metsävaratietoja suoraan tekoälykeskustelussa.</p>
                     <ul>
@@ -170,7 +170,14 @@
 
                 <div class="help-section">
                     <h3>Uutta versiossa</h3>
-                    <div class="changelog">
+                    <div class="changelog app-only">
+                        <div class="changelog-entry">
+                            <span class="changelog-version">1.0</span>
+                            <span class="changelog-date">2026</span>
+                            <p>Ensimmäinen julkaisu</p>
+                        </div>
+                    </div>
+                    <div class="changelog web-only">
                         <div class="changelog-entry">
                             <span class="changelog-version">v3.3.0</span>
                             <span class="changelog-date">2026-11-10</span>
@@ -233,7 +240,8 @@
                     <p>Metsäinfo on avoimen datan opetuksellinen katselusovellus. Tiedot eivät korvaa metsäammattilaisen arviota.</p>
                     <p>Henkilökohtaiset hoitosuositukset: <a href="https://www.metsaan.fi" target="_blank">metsään.fi</a></p>
                     <p><a href="tietosuoja.html" target="_blank">Tietosuojaseloste</a></p>
-                    <p class="help-contact">Tero Rönkkö — <a href="mailto:inetoroy@gmail.com">inetoroy@gmail.com</a> — <a href="https://github.com/trotor/metsainfo" target="_blank">GitHub</a></p>
+                    <p class="help-contact web-only">Tero Rönkkö — <a href="mailto:inetoroy@gmail.com">inetoroy@gmail.com</a> — <a href="https://github.com/trotor/metsainfo" target="_blank">GitHub</a></p>
+                    <p class="help-contact app-only">Metsäinfo <span id="app-version"></span> — © Inetor Oy — <a href="mailto:inetoroy@gmail.com">inetoroy@gmail.com</a></p>
                 </div>
             </div>
         </div>
