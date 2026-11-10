@@ -2,7 +2,8 @@
 /**
  * Kopioi public/version.js:n versionumeron iOS-projektiin.
  *
- * - MARKETING_VERSION (CFBundleShortVersionString) = version.js:n number
+ * - MARKETING_VERSION (CFBundleShortVersionString) = version.js:n app-kenttä
+ *   (App Storen versio, erillinen verkkoversion numerosta)
  * - CURRENT_PROJECT_VERSION (CFBundleVersion) = git-committien määrä,
  *   joka kasvaa aina (App Store Connect vaatii kasvavan build-numeron)
  *
@@ -14,12 +15,12 @@ import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 export function parseVersionJs(source) {
-    const match = source.match(/number:\s*'([^']+)'/);
-    if (!match) throw new Error('version.js: number-kenttää ei löytynyt');
+    const match = source.match(/app:\s*'([^']+)'/);
+    if (!match) throw new Error('version.js: app-kenttää (App Storen versio) ei löytynyt');
     const version = match[1];
-    // App Store hyväksyy vain enintään kolme pisteillä erotettua kokonaislukua
-    if (!/^\d+\.\d+\.\d+$/.test(version)) {
-        throw new Error(`version.js: "${version}" ei kelpaa iOS:n versioksi (muoto x.y.z)`);
+    // App Store hyväksyy enintään kolme pisteillä erotettua kokonaislukua
+    if (!/^\d+\.\d+(\.\d+)?$/.test(version)) {
+        throw new Error(`version.js: "${version}" ei kelpaa iOS:n versioksi (muoto x.y tai x.y.z)`);
     }
     return version;
 }

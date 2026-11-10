@@ -23,7 +23,7 @@ npm run ios:open     # avaa ios/App/App.xcodeproj Xcodessa
 ### iOS-sovellus (Capacitor 8)
 - `capacitor.config.json`: appId `fi.inetor.metsainfo`, webDir `dist`. `ios/` on versionhallinnassa (SPM, ei CocoaPodsia), vain iPhone, tiimi Inetor oy `TTND84D98U`.
 - Sovelluskoodi ei kutsu Capacitor-plugineja suoraan vaan `js/platform/`-moduuleja. `isNative()` erottaa sovelluksen verkkoversiosta; sovelluksessa linkki ja CSV jaetaan iOS:n jakonäkymällä, tulostus on piilotettu ja jaettavat linkit osoittavat julkiseen verkkoversioon.
-- Versio: `scripts/sync-version.mjs` kirjoittaa `public/version.js`:n numeron `MARKETING_VERSION`iksi ja git-committien määrän build-numeroksi. Aja `npm run ios:sync` ennen jokaista iOS-buildia.
+- Versio: `scripts/sync-version.mjs` kirjoittaa `public/version.js`:n `app`-kentän (App Storen versio, nyt 1.0; erillinen verkkoversion `number`ista) `MARKETING_VERSION`iksi ja git-committien määrän build-numeroksi. Aja `npm run ios:sync` ennen jokaista iOS-buildia.
 - `ios/App/App/PrivacyInfo.xcprivacy`: tarkista aina, kun lisäät pluginin.
 - Paikannus: `js/platform/location.js` (Capacitor Geolocation / navigator.geolocation), `js/platform/compass.js`, puhdas logiikka `js/location/logic.js`, käyttöliittymä `js/ui/location-ui.js`. Vain evätty lupa lopettaa seurannan; tilapäiset katkot eivät. Sijaintipiste piirretään omaan paneeliin `locationPane` kuviotasojen yläpuolelle.
 
