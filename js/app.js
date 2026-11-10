@@ -59,6 +59,9 @@ function init() {
  */
 function initNative() {
     document.documentElement.classList.add('is-native');
+    // Sovelluksen oma versio (App Store), ei verkkoversion numero
+    const appVersion = document.getElementById('app-version');
+    if (appVersion && typeof VERSION !== 'undefined') appVersion.textContent = VERSION.app;
     const copyItem = document.querySelector('#sheet-menu [data-action="copy"]');
     if (copyItem) copyItem.textContent = 'Jaa linkki';
     document.querySelectorAll('a[href="tietosuoja.html"]').forEach(a => {
