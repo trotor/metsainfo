@@ -35,6 +35,7 @@
             </div>
             <button id="close-panel" aria-label="Sulje">&times;</button>
             <h2>Metsävaratiedot</h2>
+            <button id="here-row" type="button" hidden><span class="here-dot" aria-hidden="true"></span><span class="here-text"></span></button>
             <div id="loading" class="hidden">
                 <div class="spinner"></div>
                 <p>Haetaan tietoja...</p>
@@ -219,6 +220,8 @@
                 </div>
             </div>
         </div>
+
+        <div id="toast" role="status" aria-live="polite" hidden></div>
 
         <!-- Footer -->
         <footer id="footer">

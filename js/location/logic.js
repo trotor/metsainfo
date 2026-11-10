@@ -59,3 +59,12 @@ export function hereRowModel({ hasParcel, inside, feature }) {
     if (devClass) parts.push(devClass);
     return { kind: 'stand', text: parts.join(' · ') };
 }
+
+/**
+ * Vain evätty lupa lopettaa seurannan. "Sijainti ei saatavilla" ja
+ * aikakatkaisu ovat maastossa tilapäisiä (iOS: kCLErrorLocationUnknown),
+ * ja seuranta jatkuu niiden jälkeen.
+ */
+export function shouldStopOnError(kind) {
+    return kind === 'denied';
+}

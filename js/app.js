@@ -18,7 +18,7 @@ import * as state from './state.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
 import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels, fetchForestUseDeclarations } from './data.js';
-import { onEachFeature, onEachHabitat, onEachMkiFeature, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, setMkiColorMode, updateMkiLegend, copyParcelLink, downloadCSV, toggleHelp, initPanel, openPanelForSelection, setPeekMessage, mapFitOptions } from './ui/index.js';
+import { onEachFeature, onEachHabitat, onEachMkiFeature, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, setMkiColorMode, updateMkiLegend, copyParcelLink, downloadCSV, toggleHelp, initPanel, openPanelForSelection, setPeekMessage, mapFitOptions, initLocation, refreshHereRow } from './ui/index.js';
 
 // Expose functions for HTML onclick handlers
 window.copyParcelLink = copyParcelLink;
@@ -36,6 +36,7 @@ function init() {
     initLayers();
     initControls();
     initPanel({ onClearSelection: clearSelection });
+    initLocation({ selectParcel });
     initEventListeners();
     checkUrlParams();
 }
@@ -252,6 +253,8 @@ function clearSelection() {
     updateUrlParam(null);
     document.getElementById('color-mode-control').classList.add('hidden');
     document.getElementById('color-legend').classList.add('hidden');
+    state.setState('currentFeatures', []);
+    refreshHereRow();
 }
 
 /**
@@ -362,6 +365,9 @@ async function loadParcelsInView() {
                     addParcelLabel(feature);
                 }
             });
+
+            // Paikannuksen automaattinen kiinteistövalinta odottaa rajoja
+            document.dispatchEvent(new CustomEvent('parcels-loaded'));
         }
     } catch (error) {
         console.warn('Failed to load parcels:', error);
@@ -525,6 +531,7 @@ async function selectParcels(parcels) {
         }
 
         showSummary(filteredFeatures, currentParcel, parcels.length);
+        refreshHereRow();
 
     } catch (error) {
         loading.classList.add('hidden');

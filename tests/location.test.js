@@ -3,7 +3,7 @@ import '../js/config.js';
 import { describe, it, expect } from 'vitest';
 import {
     latLonTo3067, findFeatureIndexAt, findParcelAt, isInsideParcel,
-    nextFollowMode, isStale, hereRowModel
+    nextFollowMode, isStale, hereRowModel, shouldStopOnError
 } from '../js/location/logic.js';
 import { STANDS } from './fixtures/stands.js';
 
@@ -108,5 +108,13 @@ describe('hereRowModel', () => {
 
     it('ilman kiinteistöä ei riviä', () => {
         expect(hereRowModel({ hasParcel: false, inside: false, feature: null }).kind).toBe('none');
+    });
+});
+
+describe('shouldStopOnError', () => {
+    it('vain evätty lupa lopettaa seurannan', () => {
+        expect(shouldStopOnError('denied')).toBe(true);
+        expect(shouldStopOnError('unavailable')).toBe(false);
+        expect(shouldStopOnError('timeout')).toBe(false);
     });
 });
