@@ -8,6 +8,23 @@ describe('sheetin laskenta', () => {
         expect(H).toEqual({ peek: 174, half: 422, full: 780 });
     });
 
+    it('peek kasvaa sijaintirivin verran', () => {
+        expect(computeSnapHeights(844, 64, 34, 48).peek).toBe(222);
+    });
+
+    it('createSheet.setPeekExtra kasvattaa peek-korkeutta', () => {
+        document.body.innerHTML = '<div id="search-control"></div><div id="info-panel"></div>';
+        document.getElementById('search-control').getBoundingClientRect = () => ({ bottom: 64 });
+        const win = { innerHeight: 844, matchMedia: () => ({ matches: true, addEventListener() {}, removeEventListener() {} }) };
+        const panel = document.getElementById('info-panel');
+        const sheet = createSheet(panel, { win, doc: document, safeBottom: () => 34 });
+        sheet.setSnap('peek');
+        sheet.setPeekExtra(48);
+        expect(panel.style.getPropertyValue('--sheet-height')).toBe('222px');
+        sheet.setPeekExtra(0);
+        expect(panel.style.getPropertyValue('--sheet-height')).toBe('174px');
+    });
+
     it('pitää korkeudet nousevina matalassa näkymässä', () => {
         const h = computeSnapHeights(300, 64, 21);
         expect(h.half).toBeGreaterThanOrEqual(h.peek);

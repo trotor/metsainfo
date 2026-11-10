@@ -15,8 +15,8 @@ export const FLING_MS = 150;
 
 const SNAPS = ['peek', 'half', 'full'];
 
-export function computeSnapHeights(viewportHeight, topInsetPx, safeBottom = 0) {
-    const peek = PEEK_HEIGHT + safeBottom;
+export function computeSnapHeights(viewportHeight, topInsetPx, safeBottom = 0, peekExtra = 0) {
+    const peek = PEEK_HEIGHT + safeBottom + peekExtra;
     const half = Math.max(Math.round(viewportHeight * 0.5), peek);
     const full = Math.max(viewportHeight - topInsetPx, half);
     return { peek, half, full };
@@ -59,7 +59,8 @@ export function readSafeBottom(doc = document) {
 
 export function createSheet(panelEl, { win = window, doc = document, onChange, safeBottom = () => readSafeBottom(doc) } = {}) {
     let snap = 'peek';
-    let heights = computeSnapHeights(win.innerHeight, topInset(doc), safeBottom());
+    let peekExtra = 0;
+    let heights = computeSnapHeights(win.innerHeight, topInset(doc), safeBottom(), peekExtra);
     const root = doc.documentElement;
 
     const isHidden = () => panelEl.classList.contains('hidden');
@@ -82,7 +83,7 @@ export function createSheet(panelEl, { win = window, doc = document, onChange, s
     }
 
     function recompute() {
-        heights = computeSnapHeights(win.innerHeight, topInset(doc), safeBottom());
+        heights = computeSnapHeights(win.innerHeight, topInset(doc), safeBottom(), peekExtra);
         apply();
     }
 
@@ -105,6 +106,12 @@ export function createSheet(panelEl, { win = window, doc = document, onChange, s
         },
         /** Päivittää --sheet-offsetin, kun paneeli piilotetaan tai näytetään */
         refresh: apply,
+        /** Lisäkorkeus peek-tilaan, esim. "Olet kuviolla" -riville */
+        setPeekExtra(px) {
+            if (px === peekExtra) return;
+            peekExtra = px;
+            recompute();
+        },
         recompute,
         destroy: clearInline
     };

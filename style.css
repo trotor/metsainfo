@@ -331,6 +331,107 @@ body {
     display: none;
 }
 
+/* Oma sijainti */
+.locate-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+}
+
+.locate-btn[data-mode="show"] {
+    color: var(--sijainti);
+}
+
+.locate-btn[data-mode="follow"],
+.locate-btn[data-mode="heading"] {
+    color: white;
+    background: var(--sijainti) !important;
+}
+
+.locate-btn[data-mode="heading"] svg {
+    transform: rotate(45deg);
+}
+
+.heading-cone {
+    pointer-events: none;
+}
+
+.heading-cone .cone {
+    width: 64px;
+    height: 64px;
+    background: conic-gradient(from -30deg at 50% 50%, rgba(26, 115, 232, 0.45) 0deg 60deg, transparent 60deg);
+    border-radius: 50%;
+    -webkit-mask: radial-gradient(circle, transparent 9px, #000 10px);
+    mask: radial-gradient(circle, transparent 9px, #000 10px);
+}
+
+/* "Olet kuviolla" -rivi: ainoa vahva värikohta (spec 5.4) */
+#here-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    min-height: 44px;
+    margin: 12px 20px 0;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 10px;
+    background: var(--havu);
+    color: white;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+#here-row[hidden] {
+    display: none;
+}
+
+#here-row .here-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#here-row .here-dot {
+    flex-shrink: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--sijainti);
+    box-shadow: 0 0 0 3px white;
+}
+
+#here-row[data-kind="outside"],
+#here-row[data-kind="none"] {
+    background: #e3e8e0;
+    color: var(--kaarna);
+    font-weight: 500;
+}
+
+#toast {
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 76px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2100;
+    max-width: calc(100vw - 32px);
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: var(--kaarna);
+    color: white;
+    font-size: 15px;
+    line-height: 1.4;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+}
+
+#toast[hidden] {
+    display: none;
+}
+
 /* iOS-sovellus: WKWebView ei tue tulostusta */
 .is-native .print-btn,
 .is-native #sheet-menu [data-action="print"] {
@@ -1526,6 +1627,16 @@ h3 .info-tip-icon {
         scrollbar-width: none;
     }
 
+    #here-row {
+        margin: 0 12px 8px;
+        min-height: 44px;
+    }
+
+    .locate-btn {
+        width: 44px !important;
+        height: 44px !important;
+    }
+
     /* Selitteet napautuksella: 44 px kosketusalue, teksti termin alle */
     .info-tip::before {
         content: '';
@@ -1866,7 +1977,7 @@ h3 .info-tip-icon {
 @media print {
     /* Hide everything except info panel content */
     #header, #map, #footer, #search-control, #close-panel,
-    #sheet-handle, #sheet-peek, #sheet-menu, .tabbar, #map-strip,
+    #sheet-handle, #sheet-peek, #sheet-menu, .tabbar, #map-strip, #here-row, #toast,
     #color-mode-control, #color-legend,
     #mki-color-mode-control, #mki-legend,
     #help-modal, #help-overlay,

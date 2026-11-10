@@ -8,5 +8,6 @@ export { toggleHelp, copyParcelLink, downloadCSV, buildCSV } from './actions.js'
 export { tip, initTips, closeTips } from './tips.js';
 export { renderStandItem, highlightStand, highlightFilteredStands, attachStandEventListeners, attachFilterEventListeners, openStand } from './stands.js';
 export { showSummary, renderPeek } from './summary.js';
+export { initLocation, refreshHereRow, showToast } from './location-ui.js';
 export { MOBILE_QUERY, isMobileLayout, onLayoutChange, topInset, fitPadding, visibleCenterOffset } from './layout.js';
 export { initPanel, openPanelForSelection, setPeekMessage, getSheet, mapFitOptions, setActiveTab, getActiveTab, initTabs } from './panel.js';
