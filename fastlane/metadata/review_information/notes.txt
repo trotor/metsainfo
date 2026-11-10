@@ -1,0 +1,12 @@
+Metsäinfo shows Finland's open forest resource data (Finnish Forest Centre) and cadastral boundaries (National Land Survey of Finland) on a map. It is intended for forest owners and professionals, including use in the field. The app is in Finnish and the data covers Finland only. No login is needed.
+
+HOW TO TEST
+1. Launch the app. The map opens in Central Finland.
+2. Type the property ID 592-404-1-32 in the search field and tap "Hae" (Search). The map zooms to the property and the bottom panel shows a summary of its forest stands.
+3. Drag the panel handle up, or tap it, to see the tabs Yhteenveto (Summary), Kuviot (Stands) and Ehdotukset (Proposals).
+4. Tap a forest stand on the map: the Kuviot tab opens with that stand's details.
+5. Location: tap the arrow button under the zoom buttons. Location is used only on the device to show the user's position and which forest stand they are standing on. To see this, simulate a location in Finland, for example 62.2244, 25.0911 (inside property 592-404-1-32).
+6. The ⋯ menu shares a link to the property or a CSV file of the stand data via the iOS share sheet.
+
+DATA AND PRIVACY
+The app does not collect any data, has no accounts, ads or analytics. Map tiles and forest data are fetched directly from the public open-data interfaces of the Finnish Forest Centre and the National Land Survey (CC BY 4.0). The app is not an official service of these agencies.

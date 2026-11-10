@@ -26,3 +26,7 @@ dist/
 
 # Superpowers-työtila
 .superpowers/
+fastlane/report.xml
+fastlane/README.md
+fastlane/Preview.html
+fastlane/test_output
