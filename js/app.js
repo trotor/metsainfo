@@ -14,6 +14,17 @@ import '../style.css';
 
 import { CONFIG, crsEPSG3067 } from './config.js';
 import { isNative, PUBLIC_BASE_URL } from './platform/index.js';
+import { expandBbox, bboxContains } from './viewport.js';
+
+// Kiinteistörajat haetaan näkymää laajemmalta alueelta (25 % joka suuntaan)
+// zoomitasolta 13 alkaen. Uusi haku vain, kun näkymä menee alueen
+// ulkopuolelle tai tunnusten näyttöraja (zoom 15) ylittyy. MML palauttaa
+// enintään 2000 kiinteistöä, joten pienillä zoomeilla ei laajenneta eikä
+// katkaistua tulosta tallenneta.
+const PARCEL_FETCH_MARGIN = 0.25;
+const PARCEL_MARGIN_MIN_ZOOM = 13;
+const PARCEL_WFS_LIMIT = 2000;
+let lastParcelFetch = null; // { bbox, labels }
 import * as state from './state.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
@@ -326,14 +337,22 @@ async function loadParcelsInView() {
         state.cadastralLayer.clearLayers();
         state.parcelLabelsLayer.clearLayers();
         state.loadedParcels.clear();
+        lastParcelFetch = null;
         return;
     }
 
     const bounds = map.getBounds();
     const sw = proj4('WGS84', 'EPSG:3067', [bounds.getWest(), bounds.getSouth()]);
     const ne = proj4('WGS84', 'EPSG:3067', [bounds.getEast(), bounds.getNorth()]);
+    const view = { minX: sw[0], minY: sw[1], maxX: ne[0], maxY: ne[1] };
+    const labels = zoom >= 15;
 
-    const bbox = `${sw[0]},${sw[1]},${ne[0]},${ne[1]},EPSG:3067`;
+    if (lastParcelFetch && lastParcelFetch.labels === labels && bboxContains(lastParcelFetch.bbox, view)) {
+        return;
+    }
+
+    const fetchBox = zoom >= PARCEL_MARGIN_MIN_ZOOM ? expandBbox(view, PARCEL_FETCH_MARGIN) : view;
+    const bbox = `${fetchBox.minX},${fetchBox.minY},${fetchBox.maxX},${fetchBox.maxY},EPSG:3067`;
 
     const params = new URLSearchParams({
         service: 'WFS',
@@ -352,6 +371,7 @@ async function loadParcelsInView() {
         const data = await response.json();
 
         if (data.features) {
+            lastParcelFetch = data.features.length < PARCEL_WFS_LIMIT ? { bbox: fetchBox, labels } : null;
             state.cadastralLayer.clearLayers();
             state.parcelLabelsLayer.clearLayers();
             state.loadedParcels.clear();
@@ -453,12 +473,15 @@ async function loadMkiInView() {
 /**
  * Select a parcel and load its forest data (fetches all parts with same reference)
  */
-async function selectParcel(parcel) {
+async function selectParcel(parcel, { auto = false } = {}) {
     const reference = parcel.properties?.nationalCadastralReference;
 
     if (reference) {
         try {
             const allParts = await fetchParcelsByReference(reference);
+            // Paikannuksen automaattivalinta ei ohita käyttäjän omaa valintaa,
+            // joka ehti tulla haun aikana
+            if (auto && state.currentParcel) return;
             if (allParts.length > 1) {
                 selectParcels(allParts);
                 return;
@@ -468,6 +491,7 @@ async function selectParcel(parcel) {
         }
     }
 
+    if (auto && state.currentParcel) return;
     selectParcels([parcel]);
 }
 

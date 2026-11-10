@@ -14,7 +14,7 @@ import { watchPosition } from '../platform/location.js';
 import { requestCompassPermission, watchCompass } from '../platform/compass.js';
 import {
     latLonTo3067, findFeatureIndexAt, findParcelAt, isInsideParcel,
-    nextFollowMode, isStale, hereRowModel, shouldStopOnError
+    nextFollowMode, isStale, hereRowModel, shouldStopOnError, needsRecenter
 } from '../location/logic.js';
 
 const HERE_ROW_HEIGHT = 52;
@@ -25,6 +25,7 @@ const STALE_COLOR = '#9aa0a6';
 const PANE = 'locationPane';
 
 let mode = 'off';            // off | show | follow | heading
+let generation = 0;          // kasvaa jokaisessa start/stop-kutsussa (kilpatilanteet)
 let stopWatch = null;
 let stopCompass = null;
 let last = null;             // { lat, lon, accuracy, heading, timestamp }
@@ -94,8 +95,9 @@ function onButton() {
 
     if (mode === 'off') {
         // Kompassilupa on pyydettävä napautuksen yhteydessä (iOS Safari)
+        const gen = generation + 1; // start() kasvattaa laskurin tähän arvoon
         requestCompassPermission().then(granted => {
-            if (granted && !stopCompass) {
+            if (granted && !stopCompass && gen === generation && mode !== 'off') {
                 stopCompass = watchCompass(heading => {
                     hasCompass = true;
                     lastHeading = heading;
@@ -112,19 +114,27 @@ function onButton() {
     }
 
     setMode(next);
-    if (last) centerOn(last);
+    if (last) centerOn(last, { ensureZoom: true });
 }
 
 async function start() {
+    const gen = ++generation;
     autoSelectPending = !state.currentParcel;
     firstFix = true;
     warnedUnavailable = false;
-    stopWatch = await watchPosition(onPosition, onError);
+    const stopper = await watchPosition(onPosition, onError);
+    // stop() ehti kutsua tai seuranta ei käynnistynyt: ei jätetä GPS:ää päälle
+    if (gen !== generation || mode === 'off') {
+        stopper();
+        return;
+    }
+    stopWatch = stopper;
     clearInterval(staleTimer);
     staleTimer = setInterval(updateStale, 5000);
 }
 
 function stop() {
+    generation++;
     stopWatch?.();
     stopWatch = null;
     stopCompass?.();
@@ -140,12 +150,18 @@ function stop() {
 
 let warnedUnavailable = false;
 
-function onError(kind) {
-    if (shouldStopOnError(kind)) {
+function onError(kind, info = {}) {
+    if (shouldStopOnError(kind) || info.fatal) {
         stop();
-        showToast(isNative()
-            ? 'Sijainti ei ole käytössä. Salli se kohdassa Asetukset → Metsäinfo → Sijainti.'
-            : 'Sijainti ei ole käytössä. Salli sijainti selaimen asetuksista.', 8000);
+        if (kind === 'denied') {
+            showToast(isNative()
+                ? 'Sijainti ei ole käytössä. Salli se kohdassa Asetukset → Metsäinfo → Sijainti.'
+                : 'Sijainti ei ole käytössä. Salli sijainti selaimen asetuksista.', 8000);
+        } else if (kind === 'off') {
+            showToast('Sijaintipalvelut ovat pois päältä. Kytke ne päälle kohdassa Asetukset → Tietosuoja ja turvallisuus → Sijaintipalvelut.', 8000);
+        } else {
+            showToast('Sijaintia ei saatu. Tarkista, että sijaintipalvelut ovat päällä.');
+        }
         return;
     }
     // Tilapäinen katko: seuranta jatkuu, ja vanha piste harmaantuu.
@@ -160,7 +176,7 @@ function onPosition(pos) {
     if (mode === 'off') return; // lopetettu ennen kuin sijainti ehti
     last = pos;
     drawPosition(pos);
-    if (mode === 'follow' || mode === 'heading' || firstFix) centerOn(pos);
+    if (mode === 'follow' || mode === 'heading' || firstFix) centerOn(pos, { ensureZoom: firstFix });
     firstFix = false;
     autoSelect();
     refreshHereRow();
@@ -218,17 +234,30 @@ function updateHeadingMarker() {
 
 /**
  * Keskittää sijaintiin niin, että piste jää hakupalkin ja tietopaneelin
- * väliin. Ensimmäisellä kerralla zoomataan vähintään tasolle 13.
+ * väliin. Vain ensimmäisellä kerralla (tai painikkeesta) zoomataan
+ * vähintään tasolle 13, jotta käyttäjän oma zoomaus säilyy seurannassa.
+ * Pieni siirto ohitetaan: setView laukaisee moveendin ja WFS-haut.
  */
-function centerOn(pos) {
+function centerOn(pos, { ensureZoom = false } = {}) {
     const map = state.map;
-    const zoom = Math.max(map.getZoom(), FOLLOW_MIN_ZOOM);
+    const current = map.getZoom();
+    const zoom = ensureZoom ? Math.max(current, FOLLOW_MIN_ZOOM) : current;
     const sheet = getSheet();
     const offset = isMobileLayout()
         ? visibleCenterOffset(sheet ? sheet.targetHeight() : 0, topInset())
         : [0, 0];
-    const point = map.project(L.latLng(pos.lat, pos.lon), zoom).add(offset);
-    map.setView(map.unproject(point, zoom), zoom);
+    const target = map.project(L.latLng(pos.lat, pos.lon), zoom).add(offset);
+    const now = map.project(map.getCenter(), zoom);
+    if (!needsRecenter({ dx: target.x - now.x, dy: target.y - now.y, zoomChanged: zoom !== current })) return;
+    map.setView(map.unproject(target, zoom), zoom);
+}
+
+/**
+ * Kartalla näkyvät kiinteistöosat. state.loadedParcels pitää vain yhden
+ * osan per kiinteistötunnus, joten haku tehdään kiinteistötasosta.
+ */
+function visibleParcels() {
+    return state.cadastralLayer.getLayers().map(layer => layer.feature).filter(Boolean);
 }
 
 /**
@@ -241,10 +270,10 @@ function autoSelect() {
         autoSelectPending = false;
         return;
     }
-    const parcel = findParcelAt(state.loadedParcels.values(), latLonTo3067(last.lat, last.lon));
+    const parcel = findParcelAt(visibleParcels(), latLonTo3067(last.lat, last.lon));
     if (parcel) {
         autoSelectPending = false;
-        selectParcelFn(parcel);
+        selectParcelFn(parcel, { auto: true });
     }
 }
 
@@ -291,7 +320,7 @@ function onHereRowTap() {
     if (row.dataset.kind === 'stand' && hereStandIndex >= 0) {
         openStand(hereStandIndex);
     } else if (row.dataset.kind === 'outside' && last) {
-        const parcel = findParcelAt(state.loadedParcels.values(), latLonTo3067(last.lat, last.lon));
+        const parcel = findParcelAt(visibleParcels(), latLonTo3067(last.lat, last.lon));
         if (parcel) selectParcelFn(parcel);
         else showToast('Tästä kohdasta ei löytynyt kiinteistöä. Zoomaa lähemmäs.');
     }
