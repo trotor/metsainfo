@@ -432,6 +432,12 @@ body {
     display: none;
 }
 
+/* Verkkoversion ja iOS-sovelluksen omat tekstit (sovellus on erillinen tuote) */
+html:not(.is-native) .app-only,
+.is-native .web-only {
+    display: none !important;
+}
+
 /* iOS-sovellus: WKWebView ei tue tulostusta */
 .is-native .print-btn,
 .is-native #sheet-menu [data-action="print"] {
