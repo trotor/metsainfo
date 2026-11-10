@@ -43,6 +43,15 @@ Run `npm test` for logic. UI has no automated tests — verify it manually:
 25. Print preview on phone prints all tabs including the parcel id
 26. On a real iPhone: safe-area (notch, home indicator), handle drag, keyboard in the search field
 
+## Location (Playwright: context with `geolocation` + `permissions: ['geolocation']`, or a real phone)
+28. Tap the locate button (below zoom) → blue dot with accuracy circle, map centres on it, button turns blue
+29. With no parcel selected, the parcel under you is selected automatically (once per start)
+30. "Olet: Kuvio N · …" row above the tabs; tap opens the stand in Kuviot; walking to another stand updates the row without changing tab
+31. Leave the parcel → row reads "Valitun kiinteistön ulkopuolella"; tap selects the parcel under you
+32. Drag the map → following stops but the dot stays; tap the button to follow again; on a phone with compass the next tap shows heading, then off
+33. Deny permission → button returns to off and a hint appears; the app keeps working
+34. Dot turns grey when the position is older than 30 s
+
 ## Desktop regression (1280×800)
 27. Panel at left (x 10, y 70, width 420), header and footer visible, one layer control top right, stand click opens a Leaflet popup, (i) tooltips open on hover
 
