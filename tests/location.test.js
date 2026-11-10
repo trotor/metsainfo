@@ -3,7 +3,7 @@ import '../js/config.js';
 import { describe, it, expect } from 'vitest';
 import {
     latLonTo3067, findFeatureIndexAt, findParcelAt, isInsideParcel,
-    nextFollowMode, isStale, hereRowModel, shouldStopOnError
+    nextFollowMode, isStale, hereRowModel, shouldStopOnError, containsPoint, needsRecenter
 } from '../js/location/logic.js';
 import { STANDS } from './fixtures/stands.js';
 
@@ -116,5 +116,53 @@ describe('shouldStopOnError', () => {
         expect(shouldStopOnError('denied')).toBe(true);
         expect(shouldStopOnError('unavailable')).toBe(false);
         expect(shouldStopOnError('timeout')).toBe(false);
+    });
+});
+
+describe('reiälliset kuviot', () => {
+    // Kuvio A on 300 m neliö, jonka keskellä on reikä; reiässä on kuvio B
+    const holed = {
+        type: 'Polygon',
+        coordinates: [
+            [[500000, 6822000], [500300, 6822000], [500300, 6822300], [500000, 6822300], [500000, 6822000]],
+            [[500100, 6822100], [500200, 6822100], [500200, 6822200], [500100, 6822200], [500100, 6822100]]
+        ]
+    };
+    const inner = square(500100, 6822100);
+    const features = [
+        { type: 'Feature', properties: { STANDNUMBER: 137 }, geometry: holed },
+        { type: 'Feature', properties: { STANDNUMBER: 135 }, geometry: inner }
+    ];
+
+    it('reiän sisällä oleva piste ei ole ulomman kuvion sisällä', () => {
+        expect(containsPoint(holed, [500150, 6822150])).toBe(false);
+        expect(containsPoint(holed, [500050, 6822050])).toBe(true);
+    });
+
+    it('findFeatureIndexAt löytää reiässä olevan kuvion', () => {
+        expect(findFeatureIndexAt(features, [500150, 6822150])).toBe(1);
+    });
+
+    it('MultiPolygonin reiät huomioidaan', () => {
+        const multi = { type: 'MultiPolygon', coordinates: [holed.coordinates] };
+        expect(containsPoint(multi, [500150, 6822150])).toBe(false);
+        expect(containsPoint(multi, [500250, 6822250])).toBe(true);
+    });
+
+    it('kiinteistön reikä on kiinteistön ulkopuolella', () => {
+        const parcel = { type: 'Feature', properties: {}, geometry: holed };
+        expect(isInsideParcel(parcel, [500150, 6822150])).toBe(false);
+        expect(findParcelAt([parcel], [500150, 6822150])).toBeNull();
+    });
+});
+
+describe('needsRecenter', () => {
+    it('alle 8 px:n siirtoa ei tehdä samalla zoomilla', () => {
+        expect(needsRecenter({ dx: 3, dy: -4, zoomChanged: false })).toBe(false);
+    });
+
+    it('isompi siirto tai zoomin muutos keskittää', () => {
+        expect(needsRecenter({ dx: 0, dy: 9, zoomChanged: false })).toBe(true);
+        expect(needsRecenter({ dx: 0, dy: 0, zoomChanged: true })).toBe(true);
     });
 });
