@@ -25,6 +25,7 @@ npm run ios:open     # avaa ios/App/App.xcodeproj Xcodessa
 - Sovelluskoodi ei kutsu Capacitor-plugineja suoraan vaan `js/platform/`-moduuleja. `isNative()` erottaa sovelluksen verkkoversiosta; sovelluksessa linkki ja CSV jaetaan iOS:n jakonäkymällä, tulostus on piilotettu ja jaettavat linkit osoittavat julkiseen verkkoversioon.
 - Versio: `scripts/sync-version.mjs` kirjoittaa `public/version.js`:n numeron `MARKETING_VERSION`iksi ja git-committien määrän build-numeroksi. Aja `npm run ios:sync` ennen jokaista iOS-buildia.
 - `ios/App/App/PrivacyInfo.xcprivacy`: tarkista aina, kun lisäät pluginin.
+- Paikannus: `js/platform/location.js` (Capacitor Geolocation / navigator.geolocation), `js/platform/compass.js`, puhdas logiikka `js/location/logic.js`, käyttöliittymä `js/ui/location-ui.js`. Vain evätty lupa lopettaa seurannan; tilapäiset katkot eivät. Sijaintipiste piirretään omaan paneeliin `locationPane` kuviotasojen yläpuolelle.
 
 Verkkosovellus julkaistaan automaattisesti GitHub Actionsilla `gh-pages`-haaraan
 jokaisella `main`-pushilla. Älä päivitä `gh-pages`-haaraa käsin.
