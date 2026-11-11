@@ -112,4 +112,15 @@ describe('createNativeWatch', () => {
         geo.watches[0].cb({ timestamp: 5, coords: { latitude: 1, longitude: 2, accuracy: 3, heading: null } });
         expect(got[0]).toEqual({ lat: 1, lon: 2, accuracy: 3, heading: null, timestamp: 5 });
     });
+
+    it('Androidin päivitysväli on lyhyt eikä seuraa aikakatkaisua', async () => {
+        // Android-plugin käyttää muuten aikakatkaisua (60 s) päivitysvälinä,
+        // jolloin piste harmaantuu (vanha > 30 s) kävellessäkin
+        const geo = fakeGeo();
+        await createNativeWatch(geo, () => {}, () => {});
+        const opts = geo.watches[0].opts;
+        expect(opts.interval).toBeLessThanOrEqual(5000);
+        expect(opts.minimumUpdateInterval).toBeLessThanOrEqual(opts.interval);
+        expect(opts.timeout).toBeGreaterThan(30000);
+    });
 });

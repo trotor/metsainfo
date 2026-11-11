@@ -91,7 +91,7 @@ function hidePanel() {
     sheet.refresh();
 }
 
-function closeMenu() {
+export function closeMenu() {
     const menu = document.getElementById('sheet-menu');
     if (menu) menu.hidden = true;
 }
