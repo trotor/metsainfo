@@ -1,4 +1,4 @@
-# Metsäinfo iOS -julkaisu.
+# Metsäinfo iOS- ja Android-julkaisu.
 #
 # API-avain luetaan ympäristömuuttujista, ei koskaan reposta:
 #   source ~/code/appstoreconnect.env
@@ -8,6 +8,12 @@
 #   fastlane ios availability  # jakelu vain Suomeen
 #   fastlane ios release_settings  # ikäluokitus, sisältöoikeudet, hinta, build
 #   fastlane ios submit            # lähettää App Reviewiin
+#
+# Google Play (palvelutilin avain ympäristöstä, GOOGLE_PLAY_JSON_KEY):
+#   fastlane android check     # tarkistaa avaimen ja raidat
+#   fastlane android build     # allekirjoitettu AAB (avain ~/Documents/keystores)
+#   fastlane android metadata  # kauppatekstit ja kuvat (fastlane/android/metadata/fi-FI)
+#   fastlane android internal  # build sisäiseen testiin (luonnoksena)
 
 default_platform(:ios)
 
@@ -240,3 +246,56 @@ platform :ios do
     File.read(File.expand_path("../public/version.js", __dir__))[/app:\s*'([^']+)'/, 1]
   end
 end
+
+platform :android do
+  AAB = File.expand_path("../android/app/build/outputs/bundle/release/app-release.aab", __dir__)
+  METADATA = File.expand_path("android/metadata", __dir__)
+
+  desc "Tarkistaa palvelutilin avaimen ja näyttää raitojen versiot"
+  lane :check do
+    validate_play_store_json_key
+    %w[internal production].each do |track|
+      codes = begin
+        google_play_track_version_codes(track: track)
+      rescue StandardError => e
+        UI.important("#{track}: #{e.message}")
+        nil
+      end
+      UI.message("#{track}: #{codes.inspect}") if codes
+    end
+  end
+
+  desc "Rakentaa allekirjoitetun AAB:n (versio public/version.js, versionCode = committien määrä)"
+  lane :build do
+    root = File.expand_path("..", __dir__)
+    java_home = ENV["JAVA_HOME"] || "/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+    sh("cd #{root.shellescape} && npm run android:sync")
+    sh("cd #{File.join(root, 'android').shellescape} && JAVA_HOME=#{java_home.shellescape} ./gradlew bundleRelease")
+    UI.success("AAB: #{AAB}")
+  end
+
+  desc "Päivittää kauppatekstit ja kuvat"
+  lane :metadata do
+    upload_to_play_store(
+      metadata_path: METADATA,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_changelogs: true
+    )
+  end
+
+  desc "Lataa AAB:n sisäiseen testiin luonnoksena (uusi sovellus hyväksyy vain luonnoksia)"
+  lane :internal do
+    UI.user_error!("AAB puuttuu, aja ensin: fastlane android build") unless File.exist?(AAB)
+    upload_to_play_store(
+      track: "internal",
+      release_status: "draft",
+      aab: AAB,
+      metadata_path: METADATA,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end
+
