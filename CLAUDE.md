@@ -18,6 +18,8 @@ npm run build        # tuotantobuild dist/-hakemistoon
 npm run preview      # tuotantobuildin esikatselu
 npm run ios:sync     # build + versio iOS-projektiin + cap sync ios
 npm run ios:open     # avaa ios/App/App.xcodeproj Xcodessa
+npm run android:sync # build + versio Android-projektiin + cap sync android
+npm run android:open # avaa android/ Android Studiossa
 ```
 
 ### iOS-sovellus (Capacitor 8)
@@ -27,6 +29,15 @@ npm run ios:open     # avaa ios/App/App.xcodeproj Xcodessa
 - `ios/App/App/PrivacyInfo.xcprivacy` ja Info.plistin käyttötarkoitustekstit: tarkista aina, kun lisäät pluginin. Geolocation-plugin vaatii myös avaimen `NSLocationAlwaysAndWhenInUseUsageDescription` (ITMS-90683), vaikka sovellus pyytää vain etualan luvan.
 - App Store Connect: `fastlane/` (Fastfile, kauppatekstit `fastlane/metadata/fi/`, tarkastusmuistiinpanot `fastlane/metadata/review_information/notes.txt`). API-avain ja App Reviewn yhteystiedot tulevat ympäristöstä: `source ~/code/appstoreconnect.env` — ei koskaan repoon. Lanet: `check`, `metadata`, `screenshots`, `availability` (jakelu vain Suomeen), `release_settings` (ikäluokitus 4+, sisältöoikeudet, hinta ilmainen, uusin kelvollinen build versioon), `submit` (lähettää App Reviewiin; vain käyttäjän luvalla). App Privacy -kysely ja DSA-kauppiastieto eivät onnistu API-avaimella, vaan ne täytetään selaimessa. Buildin lataus: `xcodebuild -exportArchive` `destination = upload` -asetuksella (Xcoden kirjautunut tili).
 - Paikannus: `js/platform/location.js` (Capacitor Geolocation / navigator.geolocation), `js/platform/compass.js`, puhdas logiikka `js/location/logic.js`, käyttöliittymä `js/ui/location-ui.js`. Vain evätty lupa lopettaa seurannan; tilapäiset katkot eivät. Sijaintipiste piirretään omaan paneeliin `locationPane` kuviotasojen yläpuolelle.
+
+### Android-sovellus (Capacitor 8)
+- `android/` on versionhallinnassa: applicationId `fi.inetor.metsainfo`, minSdk 24, target 36. Komentoriviltä `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
+- Versio: `scripts/sync-version.mjs` kirjoittaa saman `app`-version `versionName`ksi ja committien määrän `versionCode`ksi (`npm run android:sync`).
+- Release-allekirjoitus: upload-avain `~/Documents/keystores/metsainfo-upload.jks`, salasanat `~/Documents/keystores/metsainfo-keystore.properties` (tai `METSAINFO_KEYSTORE_PROPERTIES`). Ei koskaan repoon; Play App Signing hallitsee varsinaista avainta.
+- Takaisin-painike: `js/ui/back.js` (puhdas logiikka) + `js/platform/back-button.js` (`@capacitor/app`): sulkee ohjeen, valikon ja pienentää paneelin ennen poistumista.
+- Sijainti: Android-plugin käyttää muuten aikakatkaisua päivitysvälinä, siksi `interval`/`minimumUpdateInterval` on annettu `NATIVE_OPTIONS`issa.
+- Testaus emulaattorilla: debug-buildin WebView näkyy DevToolsille (`adb forward tcp:9333 localabstract:webview_devtools_remote_<pid>`), sijainti `adb emu geo fix <lon> <lat>`.
+- Google Play: `fastlane android check|build|metadata|internal`, tekstit ja kuvat `fastlane/android/metadata/fi-FI` (ei `fastlane/metadata/android`, koska iOS:n deliver tulkitsisi sen kielikansioksi). Palvelutilin avain ympäristöstä `GOOGLE_PLAY_JSON_KEY`. Uusi sovellus hyväksyy API:n kautta vain luonnosjulkaisuja; maarajaus (vain Suomi), Data safety ja IARC-luokitus tehdään Play Consolessa.
 
 Verkkosovellus julkaistaan automaattisesti GitHub Actionsilla `gh-pages`-haaraan
 jokaisella `main`-pushilla. Älä päivitä `gh-pages`-haaraa käsin.

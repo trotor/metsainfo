@@ -1,2 +1,8 @@
 app_identifier("fi.inetor.metsainfo")
 team_id("TTND84D98U")
+
+for_platform :android do
+  package_name("fi.inetor.metsainfo")
+  # Palvelutilin JSON-avain repon ulkopuolelta (GOOGLE_PLAY_JSON_KEY)
+  json_key_file(ENV["GOOGLE_PLAY_JSON_KEY"])
+end
