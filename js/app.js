@@ -14,6 +14,9 @@ import '../style.css';
 
 import { CONFIG, crsEPSG3067 } from './config.js';
 import { isNative, PUBLIC_BASE_URL } from './platform/index.js';
+import { onBackButton } from './platform/back-button.js';
+import { createBackHandler } from './ui/back.js';
+import { closeMenu, getSheet } from './ui/panel.js';
 import { expandBbox, bboxContains } from './viewport.js';
 
 // Kiinteistörajat haetaan näkymää laajemmalta alueelta (25 % joka suuntaan)
@@ -67,6 +70,7 @@ function initNative() {
     document.querySelectorAll('a[href="tietosuoja.html"]').forEach(a => {
         a.href = new URL('tietosuoja.html', PUBLIC_BASE_URL).href;
     });
+    onBackButton(createBackHandler({ toggleHelp, closeMenu, getSheet }));
 }
 
 /**

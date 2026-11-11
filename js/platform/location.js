@@ -12,8 +12,16 @@ import { isNative } from './index.js';
 
 const WEB_OPTIONS = { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 };
 // Natiivi plugin lopettaa seurannan aikakatkaisussa, joten aikaraja on
-// pitkä ja seuranta käynnistetään uudelleen katkaisun jälkeen
-const NATIVE_OPTIONS = { enableHighAccuracy: true, maximumAge: 5000, timeout: 60000 };
+// pitkä ja seuranta käynnistetään uudelleen katkaisun jälkeen. Android
+// käyttäisi aikakatkaisua myös päivitysvälinä, joten väli annetaan erikseen
+// (iOS ei käytä interval-kenttiä).
+const NATIVE_OPTIONS = {
+    enableHighAccuracy: true,
+    maximumAge: 5000,
+    timeout: 60000,
+    interval: 2000,
+    minimumUpdateInterval: 1000
+};
 
 export function normalizePosition(raw) {
     const c = raw.coords;

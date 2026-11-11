@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseVersionJs, applyVersion } from '../scripts/sync-version.mjs';
+import { parseVersionJs, applyVersion, applyAndroidVersion } from '../scripts/sync-version.mjs';
 
 const PBX = `
 				CURRENT_PROJECT_VERSION = 1;
@@ -29,5 +29,16 @@ describe('sync-version', () => {
         expect(out.match(/MARKETING_VERSION = 3\.2\.0;/g)).toHaveLength(2);
         expect(out.match(/CURRENT_PROJECT_VERSION = 57;/g)).toHaveLength(2);
         expect(out).toContain('PRODUCT_BUNDLE_IDENTIFIER = fi.inetor.metsainfo;');
+    });
+
+    it('päivittää Androidin versionCode- ja versionName-kentät', () => {
+        const gradle = `        applicationId "fi.inetor.metsainfo"
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "x"`;
+        const out = applyAndroidVersion(gradle, { name: '1.0.1', code: 80 });
+        expect(out).toContain('versionCode 80\n');
+        expect(out).toContain('versionName "1.0.1"\n');
+        expect(out).toContain('applicationId "fi.inetor.metsainfo"');
     });
 });
