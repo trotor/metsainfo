@@ -7,6 +7,7 @@
 #   fastlane ios check         # tarkistaa yhteyden ja nykyiset tiedot
 #   fastlane ios availability  # jakelu vain Suomeen
 #   fastlane ios release_settings  # ikäluokitus, sisältöoikeudet, hinta, build
+#   fastlane ios submit            # lähettää App Reviewiin
 
 default_platform(:ios)
 
@@ -194,6 +195,44 @@ platform :ios do
     check.call(client.patch("v1/appStoreVersions/#{version.id}/relationships/build", {
       data: { type: "builds", id: build.id }
     }), "Build #{build.version} liitetty versioon #{version.version_string}")
+  end
+
+  desc "Lähettää muokattavan version App Reviewiin (aja release_settings ensin)"
+  lane :submit do
+    asc_key
+    app = Spaceship::ConnectAPI::App.find("fi.inetor.metsainfo")
+    client = Spaceship::ConnectAPI.client.tunes_request_client
+    version = app.get_edit_app_store_version(platform: Spaceship::ConnectAPI::Platform::IOS)
+    UI.user_error!("Ei muokattavaa versiota") unless version
+    build = client.get("v1/appStoreVersions/#{version.id}/build").body["data"]
+    UI.user_error!("Versioon #{version.version_string} ei ole liitetty buildia") unless build
+    UI.message("Lähetetään #{version.version_string} (build #{build.dig('attributes', 'version')}), tila #{version.app_store_state}")
+
+    fail_on = lambda do |response, what|
+      return response unless response && response.status >= 300
+      UI.user_error!("#{what}: #{response.status} #{response.body.to_json}")
+    end
+
+    # Käytetään keskeneräistä lähetystä, jos sellainen on, muuten luodaan uusi
+    open = client.get("v1/reviewSubmissions?filter[app]=#{app.id}&filter[platform]=IOS&filter[state]=READY_FOR_REVIEW").body["data"].first
+    submission_id = open ? open["id"] : fail_on.call(client.post("v1/reviewSubmissions", {
+      data: { type: "reviewSubmissions", attributes: { platform: "IOS" },
+              relationships: { app: { data: { type: "apps", id: app.id } } } }
+    }), "reviewSubmission").body["data"]["id"]
+
+    items = client.get("v1/reviewSubmissions/#{submission_id}/items").body["data"]
+    if items.empty?
+      fail_on.call(client.post("v1/reviewSubmissionItems", {
+        data: { type: "reviewSubmissionItems",
+                relationships: { reviewSubmission: { data: { type: "reviewSubmissions", id: submission_id } },
+                                 appStoreVersion: { data: { type: "appStoreVersions", id: version.id } } } }
+      }), "reviewSubmissionItem")
+    end
+
+    response = fail_on.call(client.patch("v1/reviewSubmissions/#{submission_id}", {
+      data: { type: "reviewSubmissions", id: submission_id, attributes: { submitted: true } }
+    }), "Lähetys")
+    UI.success("Lähetetty App Reviewiin: tila #{response.body.dig('data', 'attributes', 'state')}")
   end
 
   # App Storen versio public/version.js:n app-kentästä
