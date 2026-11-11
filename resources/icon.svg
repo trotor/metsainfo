@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<defs>
+<linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a7031"/><stop offset="1" stop-color="#1a3518"/></linearGradient>
+</defs>
+<rect width="1024" height="1024" fill="#f3f6f1"/>
+<g transform="translate(0 -24)">
+<ellipse cx="512" cy="912" rx="130" ry="26" fill="#1a3518" fill-opacity=".16"/>
+<path d="M512,900 C430,780 242,640 242,430 A270,270 0 1 1 782,430 C782,640 594,780 512,900 Z" fill="url(#g)"/>
+<g transform="translate(512 440) scale(0.56) translate(-512 -465)"><polygon points="512,170 620,340 572,340 672,500 610,500 730,680 548,680 548,760 476,760 476,680 294,680 414,500 352,500 452,340 404,340" fill="#f3f6f1"/></g>
+</g>
+</svg>
