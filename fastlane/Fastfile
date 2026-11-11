@@ -4,8 +4,9 @@
 #   source ~/code/appstoreconnect.env
 #   fastlane ios metadata      # kauppatekstit (fastlane/metadata/fi)
 #   fastlane ios screenshots   # kuvakaappaukset (fastlane/screenshots/fi)
-#   fastlane ios beta          # build TestFlightiin
 #   fastlane ios check         # tarkistaa yhteyden ja nykyiset tiedot
+#   fastlane ios availability  # jakelu vain Suomeen
+#   fastlane ios release_settings  # ikäluokitus, sisältöoikeudet, hinta, build
 
 default_platform(:ios)
 
@@ -125,6 +126,74 @@ platform :ios do
     loc = version.get_app_store_version_localizations.first
     info = app.fetch_edit_app_info.get_app_info_localizations.first
     UI.message("Tarkistus: kieli #{loc.locale}, nimi '#{info.name}', alaotsikko '#{info.subtitle}', avainsanat #{loc.keywords.to_s.length}/100, kuvaus #{loc.description.to_s.length} merkkiä")
+  end
+
+  desc "Ikäluokitus, sisältöoikeudet, hinta (ilmainen) ja uusin kelvollinen build versiolle"
+  lane :release_settings do
+    asc_key
+    app = Spaceship::ConnectAPI::App.find("fi.inetor.metsainfo")
+    client = Spaceship::ConnectAPI.client.tunes_request_client
+    check = lambda do |response, what|
+      # Relaatio-PATCH palauttaa 204 ilman runkoa (nil)
+      if response && response.status >= 300
+        UI.user_error!("#{what}: #{response.status} #{response.body}")
+      end
+      UI.success(what)
+    end
+
+    # Näyttää kolmannen osapuolen avointa dataa (Metsäkeskus, MML, Kapsi; CC BY 4.0)
+    check.call(client.patch("v1/apps/#{app.id}", {
+      data: { type: "apps", id: app.id, attributes: { contentRightsDeclaration: "USES_THIRD_PARTY_CONTENT" } }
+    }), "Sisältöoikeudet: kolmannen osapuolen sisältö, oikeudet kunnossa")
+
+    # Ikäluokitus: ei mitään luokiteltavaa sisältöä → 4+
+    info = client.get("v1/apps/#{app.id}/appInfos").body["data"]
+                 .find { |i| i.dig("attributes", "state") != "READY_FOR_DISTRIBUTION" }
+    rating = client.get("v1/appInfos/#{info['id']}/ageRatingDeclaration").body["data"]
+    none = %w[alcoholTobaccoOrDrugUseOrReferences contests gamblingSimulated gunsOrOtherWeapons
+              medicalOrTreatmentInformation profanityOrCrudeHumor sexualContentGraphicAndNudity
+              sexualContentOrNudity horrorOrFearThemes matureOrSuggestiveThemes violenceCartoonOrFantasy
+              violenceRealisticProlongedGraphicOrSadistic violenceRealistic]
+    no = %w[advertising gambling healthOrWellnessTopics lootBox messagingAndChat parentalControls
+            ageAssurance socialMedia userGeneratedContent unrestrictedWebAccess]
+    attributes = none.to_h { |k| [k, "NONE"] }.merge(no.to_h { |k| [k, false] })
+    check.call(client.patch("v1/ageRatingDeclarations/#{rating['id']}", {
+      data: { type: "ageRatingDeclarations", id: rating["id"], attributes: attributes }
+    }), "Ikäluokitus")
+
+    # Hinta: ilmainen, perusalue Suomi
+    free = nil
+    path = "v1/apps/#{app.id}/appPricePoints?filter[territory]=FIN&limit=200"
+    while path && free.nil?
+      page = client.get(path).body
+      free = page["data"].find { |p| p.dig("attributes", "customerPrice").to_f.zero? }
+      next_url = page.dig("links", "next")
+      path = next_url && next_url.sub(%r{\Ahttps://[^/]+/}, "")
+    end
+    UI.user_error!("Ilmaista hintapistettä ei löytynyt") unless free
+    check.call(client.post("v1/appPriceSchedules", {
+      data: {
+        type: "appPriceSchedules",
+        relationships: {
+          app: { data: { type: "apps", id: app.id } },
+          baseTerritory: { data: { type: "territories", id: "FIN" } },
+          manualPrices: { data: [{ type: "appPrices", id: "${free}" }] }
+        }
+      },
+      included: [{
+        type: "appPrices", id: "${free}", attributes: { startDate: nil },
+        relationships: { appPricePoint: { data: { type: "appPricePoints", id: free["id"] } } }
+      }]
+    }), "Hinta: ilmainen")
+
+    # Build: uusin kelvollinen build muokattavalle versiolle
+    version = app.get_edit_app_store_version(platform: Spaceship::ConnectAPI::Platform::IOS)
+    build = Spaceship::ConnectAPI::Build.all(app_id: app.id, version: version.version_string, sort: "-uploadedDate", limit: 10)
+                                        .find { |b| b.processing_state == "VALID" }
+    UI.user_error!("Versiolle #{version.version_string} ei ole kelvollista buildia") unless build
+    check.call(client.patch("v1/appStoreVersions/#{version.id}/relationships/build", {
+      data: { type: "builds", id: build.id }
+    }), "Build #{build.version} liitetty versioon #{version.version_string}")
   end
 
   # App Storen versio public/version.js:n app-kentästä
