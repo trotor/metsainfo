@@ -12,4 +12,14 @@ Sovellus `fi.inetor.metsainfo`, Inetor Oy. Jakelu vain Suomeen.
 ### Android (Google Play)
 - 12.11.2026: AAB 1.0 (versionCode 79), upload-avain `metsainfo-upload` (CN=Inetor Oy), sisäinen raita `completed`.
 - 12.11.2026: suomenkielinen kauppasivu, kuvake, esittelykuva ja 5 kuvakaappausta (`fastlane android metadata`).
-- Kesken, tehdään Play Consolessa: App content -ilmoitukset (Data safety: ei tietojen keruuta, IARC, kohdeyleisö, mainokset: ei, sovelluksen käyttö: ei rajoituksia), kategoria, maat (vain Suomi), tuotantojulkaisu ja lähetys tarkastukseen. Nämä tehdään vasta Teron luvalla.
+- 12.11.2026 (Teron luvalla, Play Console Chromessa), App content:
+  - Tietosuojakäytäntö https://trotor.github.io/metsainfo/tietosuoja.html
+  - Sisäänkirjautuminen: ei rajoituksia. Mainokset: ei. Mainostunnus: ei (merged manifestissa ei AD_ID:tä).
+  - IARC: "Kaikki muut sovellustyypit", kaikki vastaukset "Ei" → PEGI 3, ESRB Everyone, USK 0, ClassInd L. Yhteysosoite inetoroy@gmail.com.
+    - Online-sisältö "Ei": kartta- ja metsävaratiedot ovat sovelluksen toiminto, eivät sisältökirjasto.
+  - Kohdeyleisö 18+ (ei alaikäisrajausta).
+  - Data safety: ei kerää eikä jaa. GPS-sijainti pysyy laitteella; karttapyynnöt (Metsäkeskus, MML, Kapsi) sisältävät vain katsotun alueen, ei tunnisteita. Linjassa iOS:n App Privacyn ("Data Not Collected") ja tietosuojasivun kanssa.
+  - Viranomaissovellus: ei. Finanssi: ei. Terveys: ei. Elinkeinonharjoittaja: kyllä (peritty kehittäjätililtä).
+- Kaupan asetukset: luokka Kartat ja navigointi, sähköposti inetoroy@gmail.com, sivusto https://trotor.github.io/metsainfo/.
+- Tuotanto: luonnos 1.0 (79) API:lla sisäiseltä raidalta, maat: vain Suomi, julkaisu tallennettu valmiiksi (varoitus: ei deobfuskointitiedostoa, ei estä).
+- Julkaisuyhteenveto: 11 muutosta odottaa lähetystä tarkastukseen. Hallinnoitu julkaiseminen pois päältä, joten hyväksytty sovellus julkaistaan heti. Lähetys vasta Teron luvalla.
