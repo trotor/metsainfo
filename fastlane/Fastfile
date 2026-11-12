@@ -280,9 +280,14 @@ platform :android do
     UI.success("AAB: #{AAB} (allekirjoittaja Inetor Oy)")
   end
 
-  desc "Päivittää kauppatekstit ja kuvat"
+  desc "Päivittää kauppatekstit ja kuvat (sisäisen raidan uusimman julkaisun kautta)"
   lane :metadata do
+    # supply vaatii raidalla olevan julkaisun; oletusraita olisi production
+    code = google_play_track_version_codes(track: "internal").max
+    UI.user_error!("Sisäisellä raidalla ei ole julkaisua, aja ensin: fastlane android internal") unless code
     upload_to_play_store(
+      track: "internal",
+      version_code: code,
       metadata_path: METADATA,
       skip_upload_aab: true,
       skip_upload_apk: true,
