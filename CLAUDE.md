@@ -37,7 +37,7 @@ npm run android:open # avaa android/ Android Studiossa
 - Takaisin-painike: `js/ui/back.js` (puhdas logiikka) + `js/platform/back-button.js` (`@capacitor/app`): sulkee ohjeen, valikon ja pienentää paneelin ennen poistumista.
 - Sijainti: Android-plugin käyttää muuten aikakatkaisua päivitysvälinä, siksi `interval`/`minimumUpdateInterval` on annettu `NATIVE_OPTIONS`issa.
 - Testaus emulaattorilla: debug-buildin WebView näkyy DevToolsille (`adb forward tcp:9333 localabstract:webview_devtools_remote_<pid>`), sijainti `adb emu geo fix <lon> <lat>`.
-- Google Play: `fastlane android check|build|metadata|internal`, tekstit ja kuvat `fastlane/android/metadata/fi-FI` (ei `fastlane/metadata/android`, koska iOS:n deliver tulkitsisi sen kielikansioksi). Palvelutilin avain ympäristöstä `GOOGLE_PLAY_JSON_KEY`. Uusi sovellus hyväksyy API:n kautta vain luonnosjulkaisuja; maarajaus (vain Suomi), Data safety ja IARC-luokitus tehdään Play Consolessa.
+- Google Play: `fastlane android check|build|metadata|internal`, tekstit ja kuvat `fastlane/android/metadata/fi-FI` (ei `fastlane/metadata/android`, koska iOS:n deliver tulkitsisi sen kielikansioksi). Palvelutili on Inetorin yhteinen `tassutie-play-uploader`: `source ~/code/googleplay.env` (`HEARTH_PLAY_JSON`) tai `GOOGLE_PLAY_JSON_KEY`. Build kieltäytyy ilman upload-avainta ja tarkistaa allekirjoittajan; ohjeet myös `app-store-release`-skillissä. Uusi sovellus hyväksyy API:n kautta vain luonnosjulkaisuja; maarajaus (vain Suomi), Data safety ja IARC-luokitus tehdään Play Consolessa.
 
 Verkkosovellus julkaistaan automaattisesti GitHub Actionsilla `gh-pages`-haaraan
 jokaisella `main`-pushilla. Älä päivitä `gh-pages`-haaraa käsin.
