@@ -269,9 +269,15 @@ platform :android do
   lane :build do
     root = File.expand_path("..", __dir__)
     java_home = ENV["JAVA_HOME"] || "/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+    props = ENV["METSAINFO_KEYSTORE_PROPERTIES"] || File.expand_path("~/Documents/keystores/metsainfo-keystore.properties")
+    # Ilman avaintiedostoa Gradle tekisi allekirjoittamattoman paketin, jota Play ei hyväksy
+    UI.user_error!("Upload-avaimen tiedot puuttuvat: #{props}") unless File.exist?(props)
     sh("cd #{root.shellescape} && npm run android:sync")
     sh("cd #{File.join(root, 'android').shellescape} && JAVA_HOME=#{java_home.shellescape} ./gradlew bundleRelease")
-    UI.success("AAB: #{AAB}")
+    signer = sh("#{File.join(java_home, 'bin', 'keytool').shellescape} -printcert -jarfile #{AAB.shellescape}", log: false)
+    UI.user_error!("AAB on allekirjoitettu debug-avaimella") if signer.include?("Android Debug")
+    UI.user_error!("AAB:ta ei ole allekirjoitettu upload-avaimella") unless signer.include?("CN=Inetor Oy")
+    UI.success("AAB: #{AAB} (allekirjoittaja Inetor Oy)")
   end
 
   desc "Päivittää kauppatekstit ja kuvat"
@@ -284,18 +290,29 @@ platform :android do
     )
   end
 
-  desc "Lataa AAB:n sisäiseen testiin luonnoksena (uusi sovellus hyväksyy vain luonnoksia)"
+  desc "Lataa AAB:n sisäiseen testiin (completed; luonnos, jos Play hyväksyy vain sen)"
   lane :internal do
     UI.user_error!("AAB puuttuu, aja ensin: fastlane android build") unless File.exist?(AAB)
-    upload_to_play_store(
-      track: "internal",
-      release_status: "draft",
-      aab: AAB,
-      metadata_path: METADATA,
-      skip_upload_metadata: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true
-    )
+    version = File.read(File.expand_path("../public/version.js", __dir__))[/app:\s*'([^']+)'/, 1]
+    upload = lambda do |status|
+      upload_to_play_store(
+        track: "internal",
+        release_status: status,
+        version_name: version,
+        aab: AAB,
+        metadata_path: METADATA,
+        skip_upload_metadata: true,
+        skip_upload_images: true,
+        skip_upload_screenshots: true
+      )
+    end
+    begin
+      upload.call("completed")
+    rescue StandardError => e
+      raise unless e.message.include?("draft")
+      UI.important("Play hyväksyy vain luonnoksen: #{e.message}")
+      upload.call("draft")
+    end
   end
 end
 
