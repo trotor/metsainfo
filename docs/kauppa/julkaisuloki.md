@@ -22,4 +22,4 @@ Sovellus `fi.inetor.metsainfo`, Inetor Oy. Jakelu vain Suomeen.
   - Viranomaissovellus: ei. Finanssi: ei. Terveys: ei. Elinkeinonharjoittaja: kyllä (peritty kehittäjätililtä).
 - Kaupan asetukset: luokka Kartat ja navigointi, sähköposti inetoroy@gmail.com, sivusto https://trotor.github.io/metsainfo/.
 - Tuotanto: luonnos 1.0 (79) API:lla sisäiseltä raidalta, maat: vain Suomi, julkaisu tallennettu valmiiksi (varoitus: ei deobfuskointitiedostoa, ei estä).
-- Julkaisuyhteenveto: 11 muutosta odottaa lähetystä tarkastukseen. Hallinnoitu julkaiseminen pois päältä, joten hyväksytty sovellus julkaistaan heti. Lähetys vasta Teron luvalla.
+- 12.11.2026: Teron luvalla 11 muutosta (tuotanto 1.0 (79), täysi käyttöönotto, vain Suomi) lähetetty tarkastukseen julkaisuyhteenvedosta, tila "Muutoksia tarkistetaan". Hallinnoitu julkaiseminen pois päältä, joten sovellus julkaistaan heti hyväksynnän jälkeen.
