@@ -37,6 +37,11 @@ export function renderPeek({ label, areaHa, partsInfo, stats, featureCount }) {
 /**
  * Show summary of forest features and parcel info
  */
+/** Hakkuuvuosi on lähivuosina (0–2 v), jolloin se korostetaan. */
+function isSoon(year) {
+    return Number(year) - new Date().getFullYear() <= 2;
+}
+
 export function showSummary(features, parcel, partCount = 1) {
     const content = document.getElementById('info-content');
     const stats = calculateStatistics(features);
@@ -95,14 +100,14 @@ export function showSummary(features, parcel, partCount = 1) {
         ` : ''}
 
         ${features.length > 0 && stats.measurementYearMin ? `
-        <div class="measurement-info${(new Date().getFullYear() - stats.measurementYearMax) >= 5 ? ' measurement-old' : ''}">
+        <div class="measurement-info group-aineisto${(new Date().getFullYear() - stats.measurementYearMax) >= 5 ? ' measurement-old' : ''}">
             <span class="measurement-label">Aineiston mittausvuosi: ${stats.measurementYearMin === stats.measurementYearMax ? stats.measurementYearMin : `${stats.measurementYearMin}–${stats.measurementYearMax}`}</span>
             ${(new Date().getFullYear() - stats.measurementYearMax) >= 5 ? '<span class="measurement-warning">Tiedot voivat olla vanhentuneita</span>' : ''}
         </div>
         ` : ''}
 
         ${features.length > 0 ? `
-        <div class="summary-section">
+        <div class="summary-section group-puusto">
             <h3>Metsävarat yhteenveto</h3>
             <div class="stat-grid">
                 <div class="stat-item">
@@ -124,7 +129,7 @@ export function showSummary(features, parcel, partCount = 1) {
             </div>
         </div>
 
-        <div class="summary-section">
+        <div class="summary-section group-puusto">
             <h3>Puulajijakauma ${tip('puulajijakauma')}</h3>
             <div class="species-bar">
                 ${stats.speciesPercent.pine > 0 ? `<div class="pine" style="width: ${stats.speciesPercent.pine}%"></div>` : ''}
@@ -138,7 +143,7 @@ export function showSummary(features, parcel, partCount = 1) {
             </div>
         </div>
 
-        <div class="summary-section">
+        <div class="summary-section group-puusto">
             <h3>Puusto</h3>
             <div class="stat-grid">
                 <div class="stat-item">
@@ -164,7 +169,7 @@ export function showSummary(features, parcel, partCount = 1) {
             </div>
         </div>
 
-        <div class="summary-section">
+        <div class="summary-section group-puusto">
             <h3>Tukkipuu / Kuitupuu</h3>
             <div class="stat-grid">
                 <div class="stat-item">
@@ -186,7 +191,7 @@ export function showSummary(features, parcel, partCount = 1) {
             </div>
         </div>
 
-        <div class="summary-section">
+        <div class="summary-section group-maa">
             <h3>Kasvupaikka</h3>
             <div class="stat-grid">
                 <div class="stat-item">
@@ -215,7 +220,7 @@ export function showSummary(features, parcel, partCount = 1) {
 
         ${hasRecs ? '<section class="tab-panel" data-tab="recs">' : ''}
         ${stats.cuttingRecommendations.length > 0 ? `
-        <div class="summary-section">
+        <div class="summary-section group-hakkuu">
             <h3>Hakkuuehdotukset ${tip('hakkuuehdotus')}</h3>
             <ul class="recommendations-list clickable">
                 ${stats.cuttingRecommendations.map(r => `
@@ -223,7 +228,7 @@ export function showSummary(features, parcel, partCount = 1) {
                         <span class="recommendation-type">${r.name}</span>
                         <span class="recommendation-info">
                             <span class="recommendation-count">${r.count} kuviota</span>
-                            ${r.year ? `<span class="recommendation-year">${r.year}</span>` : ''}
+                            ${r.year ? `<span class="recommendation-year${isSoon(r.year) ? ' soon' : ''}">${r.year}</span>` : ''}
                         </span>
                     </li>
                 `).join('')}
@@ -232,7 +237,7 @@ export function showSummary(features, parcel, partCount = 1) {
         ` : ''}
 
         ${stats.silvicultureRecommendations.length > 0 ? `
-        <div class="summary-section">
+        <div class="summary-section group-hoito">
             <h3>Metsänhoitoehdotukset ${tip('metsanhoitoehdotus')}</h3>
             <ul class="recommendations-list clickable">
                 ${stats.silvicultureRecommendations.map(r => `

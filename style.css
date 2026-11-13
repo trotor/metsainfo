@@ -6,6 +6,14 @@
     --kaarna: #3b3a36;
     --sammal: #6b7a63;
     --sijainti: #1a73e8;
+
+    /* Asiaryhmien värit (mobiilin värikortit): teksti/reunus + vaalea pohja, kontrasti ≥ 4.5:1 */
+    --puusto: #2d5a27;   --puusto-bg: #e6f0e2;  --puusto-reuna: #2d5a27;
+    --maa: #5a4632;      --maa-bg: #f1ebe3;     --maa-reuna: #a08466;
+    --arvo: #7a4d00;     --arvo-bg: #fbefd2;    --arvo-reuna: #d9a32b;
+    --hakkuu: #9a3a0b;   --hakkuu-bg: #fce6da;  --hakkuu-reuna: #e07a3f;
+    --hoito: #155e66;    --hoito-bg: #dceff1;   --hoito-reuna: #3a9aa6;
+    --aineisto: #4f5a49; --aineisto-bg: #eceee9; --aineisto-reuna: #9aa393;
 }
 
 /* Reset and base styles */
@@ -1534,6 +1542,74 @@ h3 .info-tip-icon {
 
     .stand-header {
         min-height: 44px;
+    }
+
+    /* Värikortit: jokaisella asiaryhmällä oma väri (vain mobiili) */
+    .summary-section[class*="group-"] {
+        background: var(--g-bg);
+        border-left: 5px solid var(--g-reuna);
+        border-radius: 12px;
+        padding: 10px 12px 4px;
+        margin-bottom: 10px;
+    }
+
+    .summary-section[class*="group-"] h3 {
+        color: var(--g);
+        font-weight: 700;
+        border-bottom-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .summary-section[class*="group-"] .stat-item {
+        border-bottom-color: rgba(0, 0, 0, 0.07);
+    }
+
+    .summary-section[class*="group-"] .stat-item:nth-last-child(-n+2) {
+        border-bottom: none;
+    }
+
+    .group-puusto { --g: var(--puusto); --g-bg: var(--puusto-bg); --g-reuna: var(--puusto-reuna); }
+    .group-maa { --g: var(--maa); --g-bg: var(--maa-bg); --g-reuna: var(--maa-reuna); }
+    .group-arvo { --g: var(--arvo); --g-bg: var(--arvo-bg); --g-reuna: var(--arvo-reuna); }
+    .group-hakkuu { --g: var(--hakkuu); --g-bg: var(--hakkuu-bg); --g-reuna: var(--hakkuu-reuna); }
+    .group-hoito { --g: var(--hoito); --g-bg: var(--hoito-bg); --g-reuna: var(--hoito-reuna); }
+
+    .group-hakkuu .recommendations-list li,
+    .group-hoito .recommendations-list li {
+        background: transparent;
+        border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .group-hakkuu .recommendation-year,
+    .group-hoito .recommendation-year {
+        background: #fff;
+        color: var(--g);
+        border: 1px solid var(--g-reuna);
+        font-size: 12px;
+        padding: 2px 8px;
+    }
+
+    .group-hakkuu .recommendation-count,
+    .group-hoito .recommendation-count {
+        background: rgba(255, 255, 255, 0.75);
+        color: var(--g);
+    }
+
+    .group-hakkuu .recommendation-year.soon {
+        background: var(--hakkuu);
+        border-color: var(--hakkuu);
+        color: #fff;
+    }
+
+    .measurement-info.group-aineisto {
+        background: var(--aineisto-bg);
+        border-left: 5px solid var(--aineisto-reuna);
+        border-radius: 12px;
+        color: var(--aineisto);
+    }
+
+    .measurement-info.group-aineisto.measurement-old {
+        background: #fef3d6;
+        border-left-color: #d99a1e;
     }
 
     /* Karttakontrollit: 44 px kohteet oikean reunan pinossa */

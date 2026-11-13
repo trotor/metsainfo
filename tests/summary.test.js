@@ -43,4 +43,27 @@ describe('showSummary', () => {
         const peek = document.getElementById('sheet-peek').textContent.replace(/\s+/g, ' ');
         expect(peek).toMatch(/\b3 kuviota\b/);
     });
+
+    it('värikoodaa osiot asiaryhmittäin', () => {
+        showSummary(STANDS, null);
+        const group = (h) => [...document.querySelectorAll('.summary-section')]
+            .find(sec => sec.querySelector('h3')?.textContent.startsWith(h))?.className || '';
+        expect(group('Metsävarat yhteenveto')).toContain('group-puusto');
+        expect(group('Puulajijakauma')).toContain('group-puusto');
+        expect(group('Puusto')).toContain('group-puusto');
+        expect(group('Tukkipuu')).toContain('group-puusto');
+        expect(group('Kasvupaikka')).toContain('group-maa');
+        expect(group('Hakkuuehdotukset')).toContain('group-hakkuu');
+        expect(document.querySelector('.measurement-info').className).toContain('group-aineisto');
+    });
+
+    it('korostaa lähivuosien (0–2 v) hakkuuvuoden', () => {
+        const thisYear = new Date().getFullYear();
+        const stands = STANDS.map((f, i) => ({ ...f, properties: { ...f.properties,
+            CUTTINGTYPE: i === 0 ? 3 : 5, CUTTINGPROPOSALYEAR: i === 0 ? thisYear + 1 : thisYear + 6 } }));
+        showSummary(stands, null);
+        const years = [...document.querySelectorAll('.group-hakkuu .recommendation-year')];
+        expect(years.find(y => y.textContent === String(thisYear + 1)).classList.contains('soon')).toBe(true);
+        expect(years.find(y => y.textContent === String(thisYear + 6)).classList.contains('soon')).toBe(false);
+    });
 });
