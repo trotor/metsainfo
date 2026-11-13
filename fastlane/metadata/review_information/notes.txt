@@ -8,5 +8,11 @@ HOW TO TEST
 5. Location: tap the arrow button under the zoom buttons. Location is used only on the device to show the user's position and which forest stand they are standing on. To see this, simulate a location in Finland, for example 62.2244, 25.0911 (inside property 592-404-1-32).
 6. The ⋯ menu shares a link to the property or a CSV file of the stand data via the iOS share sheet.
 
+IN-APP PURCHASE (version 4.0.0)
+"Puukaupan hinta-arvio" (fi.inetor.metsainfo.hintaarvio) is a one-time, non-consumable purchase that unlocks the timber price estimate for all properties.
+7. With property 592-404-1-32 open, the Summary tab shows a locked card "Arvio nykyhinnoin" with a "Kokeile" button, and there is a fourth tab "Arvio". Both open the purchase screen, which shows the price from the App Store and has "Osta hinta-arvio" (Buy) and "Palauta aiempi osto" (Restore Purchases).
+8. Without purchasing, "Kokeile esimerkkimetsällä" opens a fictional demo forest where the whole feature works: current stumpage prices are fetched with "Hae verkosta", prices can be edited, and the estimate is shown per year.
+9. After purchase, the Arvio tab shows the estimate for the real property: the price region is derived from the property's municipality, prices come from the weekly roundwood trade statistics (Finnish Forest Industries Federation, published in the Natural Resources Institute Finland statistics database), and "Jaa arvio" shares the estimate as a CSV file.
+
 DATA AND PRIVACY
-The app does not collect any data, has no accounts, ads or analytics. Map tiles and forest data are fetched directly from the public open-data interfaces of the Finnish Forest Centre and the National Land Survey (CC BY 4.0). The app is not an official service of these agencies.
+The app does not collect any data, has no accounts, ads or analytics. Purchases are handled by the App Store; ownership is checked on the device with StoreKit. Map tiles and forest data are fetched directly from the public open-data interfaces of the Finnish Forest Centre and the National Land Survey (CC BY 4.0); stumpage prices from the Natural Resources Institute Finland statistics database and the property's municipality from Statistics Finland (only the property's reference point is sent). The app is not an official service of these agencies.
