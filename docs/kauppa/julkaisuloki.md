@@ -46,9 +46,16 @@ Haara `feature/4.0-hinta-arvio`. Suunnitelmat: `docs/plans/2026-11-13-*`.
 - 13.11.2026: AAB 4.0.0 (versionCode 102, Billing 9.1.0) sisäiselle raidalle `completed`.
 - 13.11.2026: Play-kertaostotuote `fi.inetor.metsainfo.hintaarvio` (ostovaihtoehto `buy`, legacy-yhteensopiva) luotu ja aktivoitu, FI 9,99 € (`scripts/play-iap.py --live`).
 - **1.2.2027: aja `python3 scripts/play-iap.py --live`, joka vaihtaa hinnaksi 12,99 €.** Playssa ei voi ajastaa kertaostotuotteen hintaa.
-- Seuraavaksi:
-  - Tero hyväksyy tarjouskoodien ehdot. Vain tilin omistaja voi hyväksyä ne.
-  - Tarjouskoodikampanja tehdään tarkastajalle.
-  - App access -kohdan vastaukseksi vaihdetaan "Kyllä" ja ohjeeksi tarjouskoodi.
-  - Kauppatekstit päivitetään.
-  - Tuotanto 4.0.0 julkaistaan ja lähetetään tarkastukseen.
+- 13.11.2026, tarjouskoodikampanja "App Review – hinta-arvio" (id 131783510):
+  - 5 kertakäyttöistä koodia, voimassa 13.11.2026 klo 16.00 – 30.6.2027.
+  - Koodit ovat Teron koneella (`~/Downloads/promotion_codes (1).csv`), eivät repossa.
+  - Koodi 1 on käytössä App access -ohjeessa.
+- 13.11.2026, App access:
+  - Vastaus "Kyllä".
+  - Ohje "Promo code for the one-time purchase (no login)", täysi pääsy.
+  - Googlen automaattisten testilaitteiden käyttö kytketty pois, jotta koodi ei kulu.
+- 13.11.2026: Androidin kauppatekstit ja julkaisutiedot 4.0.0 hinta-arviolla (`fastlane android metadata`).
+- 13.11.2026: Teron luvalla tuotanto 4.0.0 (102) `completed`, vain Suomi.
+  - Julkaisuyhteenvedon tila "Muutoksia tarkistetaan". Tämä korvasi tarkastuksessa olleen 1.0:n, jota ei ollut vielä hyväksytty.
+  - Hallinnoitu julkaiseminen on pois päältä, joten sovellus julkaistaan heti hyväksynnän jälkeen.
+- Seuraavan tarkastuksen yhteydessä: tarkista, että App accessin koodi on käyttämätön. Muuten vaihda tilalle uusi CSV:n koodi.
