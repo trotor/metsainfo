@@ -43,3 +43,12 @@ Haara `feature/4.0-hinta-arvio`. Suunnitelmat: `docs/plans/2026-11-13-*`.
 
 ### Android
 - Billing-plugin `android/app/src/main/java/fi/inetor/metsainfo/PurchasesPlugin.java` (Play Billing 9.1.0), rekisteröidään MainActivityssä.
+- 13.11.2026: AAB 4.0.0 (versionCode 102, Billing 9.1.0) sisäiselle raidalle `completed`.
+- 13.11.2026: Play-kertaostotuote `fi.inetor.metsainfo.hintaarvio` (ostovaihtoehto `buy`, legacy-yhteensopiva) luotu ja aktivoitu, FI 9,99 € (`scripts/play-iap.py --live`).
+- **1.2.2027: aja `python3 scripts/play-iap.py --live`, joka vaihtaa hinnaksi 12,99 €.** Playssa ei voi ajastaa kertaostotuotteen hintaa.
+- Seuraavaksi:
+  - Tero hyväksyy tarjouskoodien ehdot. Vain tilin omistaja voi hyväksyä ne.
+  - Tarjouskoodikampanja tehdään tarkastajalle.
+  - App access -kohdan vastaukseksi vaihdetaan "Kyllä" ja ohjeeksi tarjouskoodi.
+  - Kauppatekstit päivitetään.
+  - Tuotanto 4.0.0 julkaistaan ja lähetetään tarkastukseen.
