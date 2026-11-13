@@ -1,4 +1,3 @@
 Uutta versiossa 4.0.0:
-• Puukaupan hinta-arvio: hakkuiden arvo alueen tuoreilla kantohinnoilla tai omilla hinnoilla (lisäosa, kokeile ilmaiseksi esimerkkimetsällä)
 • Selkeämmät, värikoodatut tietoruudut
 • Versionumero on nyt sama kuin verkkoversiossa

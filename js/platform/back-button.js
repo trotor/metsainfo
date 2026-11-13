@@ -10,3 +10,10 @@ export function onBackButton(handler) {
         if (!handler()) App.exitApp();
     });
 }
+
+/** Kutsuu fn:ää, kun sovellus palaa etualalle. */
+export function onAppResume(fn) {
+    App.addListener('appStateChange', ({ isActive }) => {
+        if (isActive) fn();
+    });
+}

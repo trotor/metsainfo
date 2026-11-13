@@ -7,7 +7,7 @@
  */
 
 import { PRICE_REGIONS } from '../pricing/region.js';
-import { WEEKLY_URL, MONTHLY_URL, weeklyQuery, monthlyQuery, parseWeekly, parseMonthly, fillMissing } from '../pricing/prices.js';
+import { WEEKLY_URL, MONTHLY_URL, weeklyQuery, monthlyQuery, parseWeekly, parseMonthly, fillMissing, METHODS, SPECIES } from '../pricing/prices.js';
 
 const CACHE_PREFIX = 'metsainfo.hinnat.';
 const OVERRIDES_KEY = 'metsainfo.hintaOverrides';
@@ -77,17 +77,24 @@ export async function fetchPrices(regionKey, { fetch: fetchImpl = globalThis.fet
     return result;
 }
 
+/** Välimuistin hinnat tai null, jos niitä ei ole tai rakenne on vanha/rikki. */
 export function loadCachedPrices(regionKey) {
-    return readJson(CACHE_PREFIX + regionKey);
+    const cached = readJson(CACHE_PREFIX + regionKey);
+    const ok = cached?.table && METHODS.every(m => SPECIES.every(s =>
+        cached.table[m]?.[s] && 'tukki' in cached.table[m][s] && 'kuitu' in cached.table[m][s]));
+    return ok ? cached : null;
 }
 
-export function loadOverrides() {
-    const o = readJson(OVERRIDES_KEY);
+// Omat hinnat: kiinteistöt ja esimerkkimetsä erikseen
+const overridesKey = (scope) => (scope === 'demo' ? OVERRIDES_KEY + '.demo' : OVERRIDES_KEY);
+
+export function loadOverrides(scope) {
+    const o = readJson(overridesKey(scope));
     return o && typeof o === 'object' ? o : {};
 }
 
-export function saveOverrides(overrides) {
-    writeJson(OVERRIDES_KEY, overrides || {});
+export function saveOverrides(overrides, scope) {
+    writeJson(overridesKey(scope), overrides || {});
 }
 
 /** Kunta (numero ja nimi) EPSG:3067-pisteestä tai null. */

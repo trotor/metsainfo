@@ -84,4 +84,15 @@ describe('ostot', () => {
         await p.purchase();
         expect(seen).toEqual([true]);
     });
+    it('kaupan muutosilmoitus (esim. hyväksytty ostopyyntö tai hyvitys) päivittää oikeuden', async () => {
+        const plugin = fakePlugin();
+        let notify = null;
+        plugin.addListener = (event, fn) => { if (event === 'entitlementsChanged') notify = fn; return { remove() {} }; };
+        const p = createPurchases({ native: true, plugin });
+        expect(notify).toBeTypeOf('function');
+        plugin.owned = [PRODUCT_ID];
+        await notify({});
+        expect(p.isEntitled()).toBe(true);
+    });
 });
+

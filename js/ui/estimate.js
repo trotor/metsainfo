@@ -25,7 +25,7 @@ let wired = false;
 const kuntaCache = new Map();
 
 function newCtx() {
-    return { features: [], label: '', region: null, regionAuto: '', prices: null, loading: false, error: '', method: 'uudistus', demo: false };
+    return { gen: 0, features: [], label: '', region: null, regionAuto: '', prices: null, autoRegion: null, loading: false, resolving: false, error: '', method: 'uudistus', demo: false };
 }
 
 export function estimateEnabled() {
@@ -52,7 +52,8 @@ export function estimateSummaryCard() {
 export function initEstimate(contentEl, { features, parcel, label }) {
     if (!estimateEnabled()) return;
     wireOnce();
-    Object.assign(parcelCtx, newCtx(), { features, label: label || '' });
+    // Uusi sukupolvi: edellisen kiinteistön keskeneräiset haut hylätään
+    Object.assign(parcelCtx, newCtx(), { gen: parcelCtx.gen + 1, features, label: label || '' });
     renderAll();
     if (purchases.isEntitled()) ensurePrices(parcelCtx, parcel);
     else parcelCtx.pendingParcel = parcel;
@@ -60,47 +61,76 @@ export function initEstimate(contentEl, { features, parcel, label }) {
 
 /* ---------- Tila ja haut ---------- */
 
-async function resolveRegion(ctx, parcel) {
-    if (ctx.region) return;
+/** Palauttaa false, jos konteksti vaihtui haun aikana (tulos hylätään). */
+async function resolveRegion(ctx, parcel, gen) {
+    if (ctx.region) return true;
     let region = null;
+    let kuntaName = '';
     const point = parcelPoint(parcel);
     if (point) {
         const id = parcel.properties?.nationalCadastralReference || point.join(',');
         let kunta = kuntaCache.get(id);
         if (kunta === undefined) {
+            ctx.resolving = true;
+            renderAll();
             kunta = await lookupKunta(point[0], point[1]);
-            kuntaCache.set(id, kunta);
+            if (ctx.gen !== gen) return false;
+            ctx.resolving = false;
+            // Epäonnistunutta hakua ei tallenneta: yritetään uudelleen seuraavalla kerralla
+            if (kunta) kuntaCache.set(id, kunta);
         }
         region = regionForKunta(kunta?.kunta);
-        ctx.regionAuto = kunta?.nimi || '';
+        kuntaName = kunta?.nimi || '';
     }
     ctx.region = region || 'koko-maa';
+    ctx.autoRegion = ctx.region;
+    ctx.regionAuto = kuntaName;
+    return true;
 }
 
 async function ensurePrices(ctx, parcel, { force = false } = {}) {
-    await resolveRegion(ctx, parcel);
-    const cached = loadCachedPrices(ctx.region);
+    const gen = ctx.gen;
+    if (!(await resolveRegion(ctx, parcel, gen))) return;
+    const region = ctx.region;
+    const cached = loadCachedPrices(region);
     if (cached) ctx.prices = cached;
     const stale = !cached || Date.now() - (cached.fetchedAt || 0) > STALE_MS;
     if (!force && !stale) { renderAll(); return; }
     ctx.loading = true;
     ctx.error = '';
     renderAll();
+    let result = null;
+    let failed = false;
     try {
-        ctx.prices = await fetchPrices(ctx.region);
+        result = await fetchPrices(region);
     } catch {
+        failed = true;
+    }
+    // Kiinteistö tai alue vaihtui haun aikana: uudempi haku hoitaa näkymän
+    if (ctx.gen !== gen || ctx.region !== region) return;
+    if (failed) {
         ctx.error = cached
             ? 'Hintojen päivitys ei onnistunut. Käytössä aiemmin haetut hinnat.'
             : 'Hintoja ei saatu haettua. Tarkista verkkoyhteys tai syötä hinnat itse.';
-    } finally {
-        ctx.loading = false;
-        renderAll();
+    } else {
+        ctx.prices = result;
     }
+    ctx.loading = false;
+    renderAll();
 }
+
+const overrideScope = (ctx) => (ctx.demo ? 'demo' : 'kiinteisto');
 
 function currentTable(ctx) {
     const base = ctx.prices?.table || emptyFromSpecies();
-    return applyOverrides(base, loadOverrides());
+    return applyOverrides(base, loadOverrides(overrideScope(ctx)));
+}
+
+/** Latausilmaisin: hidas haku ei näytä jumittuneelta. */
+function busyHtml(ctx) {
+    if (ctx.resolving) return '<div class="est-loading" role="status"><span class="est-spinner"></span>Hetkinen – selvitetään hinta-aluetta…</div>';
+    if (ctx.loading) return '<div class="est-loading" role="status"><span class="est-spinner"></span>Hetkinen – haetaan kantohintoja…</div>';
+    return '';
 }
 
 function emptyFromSpecies() {
@@ -130,9 +160,9 @@ function cardHtml(ctx) {
     if (!unlocked(ctx)) {
         return `${head}<div class="est-card-row"><div><div class="est-big est-locked">🔒 ? ??? €</div>
             <div class="est-muted">Hakkuiden arvo tämän viikon kantohinnoilla</div></div>
-            <button type="button" class="est-btn-arvo" data-est="paywall">Kokeile</button></div>`;
+            <button type="button" class="est-btn-arvo" data-est="paywall">Avaa</button></div>`;
     }
-    if (ctx.loading && !ctx.prices) return `${head}<div class="est-muted">Haetaan kantohintoja…</div>`;
+    if ((ctx.loading || ctx.resolving) && !ctx.prices) return `${head}${busyHtml(ctx)}`;
     const { table, estimate } = compute(ctx);
     if (!hasPrices(table)) {
         return `${head}<div class="est-card-row"><div class="est-muted">${ctx.error || 'Hinnat puuttuvat.'}</div>
@@ -140,9 +170,11 @@ function cardHtml(ctx) {
     }
     const range = yearRangeLabel(estimate.byYear);
     const region = PRICE_REGIONS[ctx.region]?.name || '';
+    const missing = estimate.missing || estimate.stock.missing
+        ? '<div class="est-warn">Osalta kuvioista puuttuu hintoja, joten arvio on vajaa.</div>' : '';
     return `${head}<div class="est-card-row"><div><div class="est-big">${formatEuro(estimate.total)}</div>
-        <div class="est-muted">ehdotetut hakkuut${range ? ` ${range}` : ''} · ${region} ${ctx.prices?.periodLabel || ''}</div></div>
-        <button type="button" class="est-btn-arvo" data-est="open-tab">Näytä</button></div>`;
+        <div class="est-muted">ehdotetut hakkuut${range ? ` ${range}` : ''} · ${region} ${escapeHtml(ctx.prices?.periodLabel || '')}</div></div>
+        <button type="button" class="est-btn-arvo" data-est="open-tab">Näytä</button></div>${missing}${busyHtml(ctx)}`;
 }
 
 function lockedPanelHtml() {
@@ -159,15 +191,14 @@ function lockedPanelHtml() {
 function panelHtml(ctx) {
     if (!unlocked(ctx)) return lockedPanelHtml();
     const { table, estimate } = compute(ctx);
-    const overrides = loadOverrides();
+    const overrides = loadOverrides(overrideScope(ctx));
     const p = ctx.prices;
     const regionOptions = Object.entries(PRICE_REGIONS)
         .map(([key, r]) => `<option value="${key}"${key === ctx.region ? ' selected' : ''}>${r.name}</option>`).join('');
 
-    const srcLine = ctx.loading ? 'Haetaan…'
-        : p ? `${p.source}, ${p.periodLabel}` : 'Ei haettuja hintoja';
+    const srcLine = p ? escapeHtml(`${p.source}, ${p.periodLabel}`) : (ctx.loading || ctx.resolving ? 'Haetaan…' : 'Ei haettuja hintoja');
     const filledNote = p?.filled?.length
-        ? `<div class="est-muted">Osa hinnoista täydennetty: ${[...new Set(p.filled.map(f => `${f.source} ${periodShort(f.period)}`))].join(', ')}.</div>` : '';
+        ? `<div class="est-muted">Osa hinnoista täydennetty: ${escapeHtml([...new Set(p.filled.map(f => `${f.source} ${periodShort(f.period)}`))].join(', '))}.</div>` : '';
 
     const m = ctx.method;
     const rows = SPECIES.map(s => `<tr><td>${SPECIES_LABELS[s]}</td>${['tukki', 'kuitu'].map(a => {
@@ -183,9 +214,10 @@ function panelHtml(ctx) {
     return `
     <div class="est-src">
         <div><label class="est-region">Hinta-alue <select data-est="region">${regionOptions}</select></label>
-            <div class="est-muted">${srcLine}${ctx.regionAuto && !ctx.demo ? ` · kunta ${escapeHtml(ctx.regionAuto)}` : ''}</div></div>
-        <button type="button" class="est-btn" data-est="refresh"${ctx.loading ? ' disabled' : ''}>↻ Hae verkosta</button>
+            <div class="est-muted">${srcLine}${ctx.regionAuto && !ctx.demo && ctx.region === ctx.autoRegion ? ` · kunta ${escapeHtml(ctx.regionAuto)}` : ''}</div></div>
+        <button type="button" class="est-btn" data-est="refresh"${ctx.loading || ctx.resolving ? ' disabled' : ''}>↻ Hae verkosta</button>
     </div>
+    ${busyHtml(ctx)}
     ${ctx.error ? `<div class="est-error">${ctx.error}</div>` : ''}
     ${filledNote}
     <div class="est-seg" role="tablist">${METHODS.map(x => `<button type="button" data-est="method" data-m="${x}" aria-selected="${x === m}">${METHOD_LABELS[x]}</button>`).join('')}</div>
@@ -196,18 +228,19 @@ function panelHtml(ctx) {
         <h3>Ehdotetut hakkuut${estimate.byYear.length ? ` ${yearRangeLabel(estimate.byYear)}` : ''}</h3>
         ${estimate.plans.length ? `<div class="est-big">${formatEuro(estimate.total)}</div><div class="est-bars">${bars}</div>`
             : '<div class="est-muted">Kiinteistöllä ei ole hakkuuehdotuksia.</div>'}
-        ${estimate.missing ? `<div class="est-muted">${estimate.missing} kuviolta puuttuu osa hinnoista; syötä ne taulukkoon.</div>` : ''}
+        ${estimate.missing ? `<div class="est-warn">${estimate.missing} kuviolta puuttuu osa hinnoista, joten summa on vajaa. Tarkista hakkuutapojen hinnat taulukosta.</div>` : ''}
     </div>
-    <div class="summary-section group-puusto">
+    <div class="summary-section group-puusto est-stock">
         <h3>Koko puusto uudistushakkuun hinnoin</h3>
         <div class="est-big est-green">${formatEuro(estimate.stock.value)}</div>
         <div class="est-muted">Kantoraha-arvo, ei kerralla hakattavissa.</div>
+        ${estimate.stock.missing ? `<div class="est-warn">${estimate.stock.missing} kuviolta puuttuu uudistushakkuun hintoja, joten arvo on vajaa.</div>` : ''}
     </div>
     <div class="est-actions">
         <button type="button" class="est-btn-outline" data-est="share">Jaa arvio</button>
     </div>
     <p class="est-fine">Suuntaa-antava arvio, ei korvaa puukauppatarjousta. Tukki- ja kuitupuu on jaettu puulajiosuuksien mukaan; harvennuksissa poistuma ${pct(DEFAULT_REMOVAL.harvennus)}, ensiharvennuksissa ${pct(DEFAULT_REMOVAL.ensiharvennus)}, uudistushakkuissa koko puusto.
-    Hinnat: ${p?.source || 'Metsäteollisuus ry:n puukaupan viikkoseuranta'} ja Luonnonvarakeskus (tilastotietokanta), kunta: Tilastokeskus. Luken ja Tilastokeskuksen aineistot <a href="${CC_BY}" target="_blank" rel="noopener">CC BY 4.0</a>.</p>`;
+    Hinnat: ${escapeHtml(p?.source || 'Metsäteollisuus ry:n puukaupan viikkoseuranta')} ja Luonnonvarakeskus (tilastotietokanta), kunta: Tilastokeskus. Luken ja Tilastokeskuksen aineistot <a href="${CC_BY}" target="_blank" rel="noopener">CC BY 4.0</a>.</p>`;
 }
 
 function hasUudistus(estimate, year) {
@@ -255,7 +288,7 @@ function wireOnce() {
             case 'open-tab': document.querySelector('.tabbar [data-tab="arvio"]')?.click(); break;
             case 'refresh': ensurePrices(ctx, null, { force: true }); break;
             case 'method': ctx.method = btn.dataset.m; renderAll(); break;
-            case 'reset': saveOverrides({}); renderAll(); break;
+            case 'reset': saveOverrides({}, overrideScope(ctx)); renderAll(); break;
             case 'share': shareReport(ctx); break;
             case 'buy': buy(btn); break;
             case 'restore': restore(btn); break;
@@ -268,21 +301,29 @@ function wireOnce() {
         const el = e.target;
         if (el.matches?.('select[data-est="region"]')) {
             const ctx = ctxOf(el);
+            ctx.gen++;
             ctx.region = el.value;
             ctx.prices = loadCachedPrices(ctx.region);
+            ctx.loading = false;
+            ctx.resolving = false;
+            ctx.error = '';
             ensurePrices(ctx, null);
         } else if (el.matches?.('input.est-price')) {
             const { m, s, a } = el.dataset;
-            const overrides = loadOverrides();
+            const ctx = ctxOf(el);
+            const scope = overrideScope(ctx);
+            const overrides = loadOverrides(scope);
             const value = parsePriceInput(el.value);
-            const net = ctxOf(el).prices?.table?.[m]?.[s]?.[a] ?? null;
+            // Virheellinen syöte ei poista aiempaa hintaa: palautetaan näkymä ennalleen
+            if (value === null && el.value.trim() !== '') { renderAll(); return; }
+            const net = ctx.prices?.table?.[m]?.[s]?.[a] ?? null;
             overrides[m] = overrides[m] || {};
             overrides[m][s] = overrides[m][s] || {};
             if (value === null || value === net) delete overrides[m][s][a];
             else overrides[m][s][a] = value;
             if (Object.keys(overrides[m][s]).length === 0) delete overrides[m][s];
             if (Object.keys(overrides[m]).length === 0) delete overrides[m];
-            saveOverrides(overrides);
+            saveOverrides(overrides, scope);
             renderAll();
         }
     });
@@ -402,10 +443,11 @@ async function openDemo() {
         try {
             demoData = await (await fetch('demo/esimerkkimetsa.json')).json();
         } catch {
-            demoData = { features: [], region: 'koko-maa' };
+            // Ei tallenneta tyhjää: yritetään uudelleen seuraavalla avauksella
+            demoData = null;
         }
     }
-    Object.assign(demoCtx, newCtx(), { demo: true, features: demoData.features, label: demoData.name, region: demoData.region || 'keski-suomi' });
+    Object.assign(demoCtx, newCtx(), { gen: demoCtx.gen + 1, demo: true, features: demoData?.features || [], label: demoData?.name || '', region: demoData?.region || 'keski-suomi' });
     renderAll();
     ensurePrices(demoCtx, null);
 }

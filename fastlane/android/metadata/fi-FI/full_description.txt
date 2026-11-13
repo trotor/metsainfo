@@ -17,13 +17,6 @@ METSÄTIEDOT
 • Kuvioiden väritys tilavuuden, iän, puulajin tai kehitysluokan mukaan
 • Aineiston mittausvuosi näkyvissä
 
-PUUKAUPAN HINTA-ARVIO (LISÄOSA)
-• Ehdotettujen hakkuiden arvo vuosittain alueen tuoreilla kantohinnoilla
-• Hinnat verkosta: Metsäteollisuus ry:n puukaupan viikkoseuranta (Luonnonvarakeskuksen tilastot); hinta-alue kiinteistön kunnan mukaan
-• Omat hinnat esimerkiksi puukauppatarjouksen mukaan
-• Koko puuston kantoraha-arvo ja jaettava arvioraportti, esimerkiksi kuolinpesän osakkaille
-• Kertaosto, ei tilausta. Kokeile ilmaiseksi kuvitteellisella esimerkkimetsällä.
-
 KARTAT JA TASOT
 • Peruskartta, taustakartta ja ilmakuva
 • Kiinteistörajat
@@ -37,6 +30,6 @@ MUUTA
 TIETOLÄHTEET
 Tiedot haetaan suoraan avoimista rajapinnoista: metsävaratiedot Suomen metsäkeskukselta, kiinteistörajat ja taustakartat Maanmittauslaitokselta (CC BY 4.0).
 
-Sovellus ei kerää käyttäjätietoja, eikä siinä ole mainoksia tai analytiikkaa. Ostot hoitaa sovelluskauppa. Sijaintia käytetään vain laitteellasi.
+Sovellus ei kerää käyttäjätietoja, eikä siinä ole mainoksia tai analytiikkaa. Sijaintia käytetään vain laitteellasi.
 
-Metsäinfo on avoimen datan katselusovellus, eikä se ole Suomen metsäkeskuksen tai Maanmittauslaitoksen palvelu. Tiedot perustuvat kaukokartoitukseen ja maastomittauksiin, ja ne voivat poiketa todellisesta tilanteesta. Tiedot ja hinta-arvio ovat suuntaa-antavia eivätkä korvaa metsäammattilaisen arviota tai puukauppatarjousta.
+Metsäinfo on avoimen datan katselusovellus, eikä se ole Suomen metsäkeskuksen tai Maanmittauslaitoksen palvelu. Tiedot perustuvat kaukokartoitukseen ja maastomittauksiin, ja ne voivat poiketa todellisesta tilanteesta. Tiedot eivät korvaa metsäammattilaisen arviota.
