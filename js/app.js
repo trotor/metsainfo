@@ -14,7 +14,7 @@ import '../style.css';
 
 import { CONFIG, crsEPSG3067 } from './config.js';
 import { isNative, PUBLIC_BASE_URL } from './platform/index.js';
-import { onBackButton } from './platform/back-button.js';
+import { onBackButton, onAppResume } from './platform/back-button.js';
 import { createBackHandler } from './ui/back.js';
 import { closeMenu, getSheet } from './ui/panel.js';
 import { purchases } from './platform/purchases.js';
@@ -72,8 +72,11 @@ function initNative() {
         a.href = new URL('tietosuoja.html', PUBLIC_BASE_URL).href;
     });
     onBackButton(createBackHandler({ toggleHelp, closeMenu, getSheet }));
-    // Hinta-arvion ostotila kaupasta (tallennettu tila on käytössä heti)
+    // Hinta-arvion ostotila kaupasta (tallennettu tila on käytössä heti);
+    // tarkistetaan myös, kun sovellus palaa etualalle
+    if (purchases.isAvailable()) document.documentElement.classList.add('has-estimate');
     purchases.refreshEntitlement();
+    onAppResume(() => purchases.refreshEntitlement());
 }
 
 /**

@@ -85,4 +85,17 @@ describe('omat hinnat', () => {
         localStorage.setItem('metsainfo.hintaOverrides', '{rikki');
         expect(loadOverrides()).toEqual({});
     });
+    it('esimerkkimetsän omat hinnat eivät sekoitu kiinteistöjen hintoihin', () => {
+        saveOverrides({ uudistus: { manty: { tukki: 99 } } }, 'demo');
+        expect(loadOverrides('demo').uudistus.manty.tukki).toBe(99);
+        expect(loadOverrides()).toEqual({});
+    });
 });
+
+describe('välimuistin rakenne', () => {
+    it('vanhan tai rikkinäisen rakenteen välimuisti hylätään', () => {
+        localStorage.setItem('metsainfo.hinnat.lappi', JSON.stringify({ table: { uudistus: {} }, fetchedAt: 1 }));
+        expect(loadCachedPrices('lappi')).toBeNull();
+    });
+});
+

@@ -19,11 +19,13 @@ public class PurchasesPlugin: CAPPlugin, CAPBridgedPlugin {
 
     override public func load() {
         // Muualla tehdyt tai viivästyneet (esim. vanhemman hyväksymät) ostot
-        updates = Task.detached {
+        updates = Task.detached { [weak self] in
             for await result in Transaction.updates {
                 if case .verified(let transaction) = result {
                     await transaction.finish()
                 }
+                // JS tarkistaa omistuksen uudelleen (myös hyvitykset ja peruutukset)
+                self?.notifyListeners("entitlementsChanged", data: [:])
             }
         }
     }
@@ -62,7 +64,7 @@ public class PurchasesPlugin: CAPPlugin, CAPBridgedPlugin {
                     call.reject("Tuotetta ei löytynyt")
                     return
                 }
-                switch try await product.purchase() {
+                switch try await self.buy(product) {
                 case .success(let verification):
                     switch verification {
                     case .verified(let transaction):
@@ -82,6 +84,15 @@ public class PurchasesPlugin: CAPPlugin, CAPBridgedPlugin {
                 call.reject(error.localizedDescription)
             }
         }
+    }
+
+    /// iOS 17+: vahvistusikkuna sovelluksen ikkunaan (UIScene); vanhemmat ilman.
+    @MainActor
+    private func buy(_ product: Product) async throws -> Product.PurchaseResult {
+        if #available(iOS 17.0, *), let scene = bridge?.viewController?.view.window?.windowScene {
+            return try await product.purchase(confirmIn: scene)
+        }
+        return try await product.purchase()
     }
 
     @objc func getEntitlements(_ call: CAPPluginCall) {

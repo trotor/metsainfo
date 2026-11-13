@@ -57,6 +57,9 @@ export function buildEstimateReport({ label, regionName, prices, table, estimate
         `Hinnat;${prices?.source || 'omat hinnat'} ${prices?.periodLabel || ''}`.trim(),
         `Ehdotetut hakkuut yhteensä (€);${Math.round(estimate.total)}`,
         `Koko puusto uudistushakkuun hinnoin (€);${Math.round(estimate.stock.value)}`,
+        ...((estimate.missing || estimate.stock?.missing)
+            ? [`Huom;Osalta kuvioista puuttuu hintoja (${Math.max(estimate.missing || 0, estimate.stock?.missing || 0)} kuviota), joten arvio on vajaa`]
+            : []),
         '',
         'Hakkuutapa;Puulaji;Tukki (€/m³);Kuitu (€/m³)'
     ];

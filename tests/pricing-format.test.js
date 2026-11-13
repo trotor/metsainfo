@@ -54,4 +54,12 @@ describe('buildEstimateReport', () => {
         expect(report).toContain('7;2031;Uudistushakkuu;1,98;31215');
         expect(report).toMatch(/suuntaa-antava/i);
     });
+    it('kertoo raportissa puuttuvista hinnoista', () => {
+        const report = buildEstimateReport({
+            label: 'X', regionName: 'Lappi', prices: null, table: emptyTable(),
+            estimate: { total: 0, stock: { value: 0, missing: 2 }, plans: [], missing: 1 }
+        });
+        expect(report).toMatch(/Huom.*puuttuu hintoja/);
+    });
 });
+

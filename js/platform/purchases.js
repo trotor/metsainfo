@@ -43,7 +43,7 @@ export function createPurchases({ native, plugin }) {
         listeners.forEach(fn => fn(value));
     };
 
-    return {
+    const api = {
         isAvailable: () => available,
         isEntitled: () => entitled,
         onChange(fn) {
@@ -79,6 +79,12 @@ export function createPurchases({ native, plugin }) {
             return entitled;
         }
     };
+
+    // Kaupan ilmoitus muutoksesta (hyväksytty ostopyyntö, hyvitys, toisella laitteella tehty osto)
+    if (available && typeof plugin.addListener === 'function') {
+        plugin.addListener('entitlementsChanged', () => api.refreshEntitlement());
+    }
+    return api;
 }
 
 const nativePlugin = Capacitor.isPluginAvailable('Purchases') ? registerPlugin('Purchases') : null;
