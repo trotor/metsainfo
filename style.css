@@ -2228,3 +2228,4 @@ h3 .info-tip-icon {
 
 /* Hinta-arvion ohje vain, kun ostot ovat käytössä (iOS; Android Billingin jälkeen) */
 html:not(.has-estimate) .estimate-only { display: none !important; }
+.pw-msg .pw-wait { justify-content: center; background: none; color: var(--kaarna); font-weight: 600; margin: 4px 0; }

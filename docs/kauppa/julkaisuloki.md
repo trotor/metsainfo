@@ -42,4 +42,4 @@ Haara `feature/4.0-hinta-arvio`. Suunnitelmat: `docs/plans/2026-11-13-*`.
 - TestFlight-hiekkalaatikko-ostoa ei testattu oikealla laitteella ennen lähetystä (Teron päätös).
 
 ### Android
-- Billing-plugin puuttuu vielä (vaihe C). Ilman pluginia Arvio-välilehteä ei näytetä Androidilla (`purchases.isAvailable()`).
+- Billing-plugin `android/app/src/main/java/fi/inetor/metsainfo/PurchasesPlugin.java` (Play Billing 9.1.0), rekisteröidään MainActivityssä.
