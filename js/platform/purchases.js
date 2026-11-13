@@ -90,7 +90,7 @@ const nativePlugin = Capacitor.isPluginAvailable('Purchases') ? registerPlugin('
 function devStore() {
     let owned = [];
     return {
-        async getProducts() { return { products: [{ id: PRODUCT_ID, title: 'Hinta-arvio', displayPrice: '12,99 €' }] }; },
+        async getProducts() { return { products: [{ id: PRODUCT_ID, title: 'Hinta-arvio', displayPrice: '9,99 €' }] }; },
         async purchase() { owned = [PRODUCT_ID]; return { status: 'purchased' }; },
         async getEntitlements() { return { owned }; },
         async restore() {}

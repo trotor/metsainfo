@@ -241,6 +241,152 @@ platform :ios do
     UI.success("Lähetetty App Reviewiin: tila #{response.body.dig('data', 'attributes', 'state')}")
   end
 
+  desc "Hinta-arvion IAP (non-consumable): tuote, suomenkielinen nimi, hinta (aloitushinta + perushinta) ja saatavuus Suomeen"
+  lane :iap do |options|
+    require "date"
+    asc_key
+    app = Spaceship::ConnectAPI::App.find("fi.inetor.metsainfo")
+    client = Spaceship::ConnectAPI.client.tunes_request_client
+    product_id = "fi.inetor.metsainfo.hintaarvio"
+    base_price = options[:base_price] || "12.99"
+    launch_price = options[:launch_price] || "9.99"
+    launch_until = options[:launch_until] || "2027-01-31" # aloitushinta tähän päivään asti
+
+    fail_on = lambda do |response, what|
+      UI.user_error!("#{what}: #{response.status} #{response.body.to_json}") if response && response.status >= 300
+      response
+    end
+
+    iap = client.get("v1/apps/#{app.id}/inAppPurchasesV2?filter[productId]=#{product_id}").body["data"].first
+    unless iap
+      iap = fail_on.call(client.post("v2/inAppPurchases", {
+        data: {
+          type: "inAppPurchases",
+          attributes: {
+            name: "Hinta-arvio",
+            productId: product_id,
+            inAppPurchaseType: "NON_CONSUMABLE",
+            reviewNote: "Unlocks the timber price estimate (Arvio tab) for all properties. Without purchase, " \
+                        "the estimate can be tried on the fictional demo forest (Arvio tab > \"Kokeile esimerkkimetsällä\")."
+          },
+          relationships: { app: { data: { type: "apps", id: app.id } } }
+        }
+      }), "IAP").body["data"]
+      UI.success("IAP luotu: #{iap['id']}")
+    end
+    iap_id = iap["id"]
+    UI.message("IAP #{product_id}: #{iap_id}, tila #{iap.dig('attributes', 'state')}")
+
+    locs = client.get("v2/inAppPurchases/#{iap_id}/inAppPurchaseLocalizations").body["data"]
+    if locs.none? { |l| l.dig("attributes", "locale") == "fi" }
+      fail_on.call(client.post("v1/inAppPurchaseLocalizations", {
+        data: {
+          type: "inAppPurchaseLocalizations",
+          attributes: { locale: "fi", name: "Puukaupan hinta-arvio", description: "Hakkuiden arvo tuoreilla kantohinnoilla" },
+          relationships: { inAppPurchaseV2: { data: { type: "inAppPurchases", id: iap_id } } }
+        }
+      }), "Lokalisaatio")
+      UI.success("Suomenkielinen nimi ja kuvaus lisätty")
+    end
+
+    schedule = begin
+      client.get("v2/inAppPurchases/#{iap_id}/iapPriceSchedule?include=manualPrices").body
+    rescue StandardError
+      nil
+    end
+    if schedule.nil? || schedule["data"].nil? || Array(schedule["included"]).empty?
+      points = []
+      path = "v2/inAppPurchases/#{iap_id}/pricePoints?filter[territory]=FIN&limit=200"
+      while path
+        page = client.get(path).body
+        points.concat(page["data"])
+        next_url = page.dig("links", "next")
+        path = next_url && next_url.sub(%r{\Ahttps://[^/]+/}, "")
+      end
+      find = ->(price) { points.find { |p| p.dig("attributes", "customerPrice") == price } || UI.user_error!("Hintapistettä #{price} € ei löytynyt") }
+      # Aloitushinta on voimassa launch_until-päivän loppuun; perushinta alkaa seuraavana päivänä (ei aukkoa)
+      base_start = (Date.parse(launch_until) + 1).iso8601
+      fail_on.call(client.post("v1/inAppPurchasePriceSchedules", {
+        data: {
+          type: "inAppPurchasePriceSchedules",
+          relationships: {
+            inAppPurchase: { data: { type: "inAppPurchases", id: iap_id } },
+            baseTerritory: { data: { type: "territories", id: "FIN" } },
+            manualPrices: { data: [{ type: "inAppPurchasePrices", id: "${launch}" }, { type: "inAppPurchasePrices", id: "${base}" }] }
+          }
+        },
+        included: [
+          { type: "inAppPurchasePrices", id: "${launch}", attributes: { startDate: nil, endDate: base_start },
+            relationships: { inAppPurchasePricePoint: { data: { type: "inAppPurchasePricePoints", id: find.call(launch_price)["id"] } } } },
+          { type: "inAppPurchasePrices", id: "${base}", attributes: { startDate: base_start, endDate: nil },
+            relationships: { inAppPurchasePricePoint: { data: { type: "inAppPurchasePricePoints", id: find.call(base_price)["id"] } } } }
+        ]
+      }), "Hinta")
+      UI.success("Hinta: #{launch_price} € #{launch_until} asti, sitten #{base_price} €")
+    else
+      UI.message("Hinta on jo asetettu")
+    end
+
+    availability = begin
+      client.get("v2/inAppPurchases/#{iap_id}/inAppPurchaseAvailability").body["data"]
+    rescue StandardError
+      nil
+    end
+    unless availability
+      fail_on.call(client.post("v1/inAppPurchaseAvailabilities", {
+        data: {
+          type: "inAppPurchaseAvailabilities",
+          attributes: { availableInNewTerritories: false },
+          relationships: {
+            inAppPurchase: { data: { type: "inAppPurchases", id: iap_id } },
+            availableTerritories: { data: [{ type: "territories", id: "FIN" }] }
+          }
+        }
+      }), "Saatavuus")
+      UI.success("Saatavuus: Suomi")
+    end
+
+    final = client.get("v2/inAppPurchases/#{iap_id}").body["data"]["attributes"]
+    UI.message("Tila: #{final['state']}")
+    UI.important("Tarkastuskuva puuttuu: fastlane ios iap_screenshot path:...") if final["state"] == "MISSING_METADATA"
+  end
+
+  desc "Lataa IAP:n tarkastuskuvan (ostonäkymä): fastlane ios iap_screenshot path:..."
+  lane :iap_screenshot do |options|
+    asc_key
+    require "digest"
+    require "net/http"
+    path = File.expand_path(options[:path] || UI.user_error!("Anna path:"))
+    app = Spaceship::ConnectAPI::App.find("fi.inetor.metsainfo")
+    client = Spaceship::ConnectAPI.client.tunes_request_client
+    iap = client.get("v1/apps/#{app.id}/inAppPurchasesV2?filter[productId]=fi.inetor.metsainfo.hintaarvio").body["data"].first
+    UI.user_error!("IAP puuttuu, aja ensin: fastlane ios iap") unless iap
+    data = File.binread(path)
+    reserved = client.post("v1/inAppPurchaseAppStoreReviewScreenshots", {
+      data: {
+        type: "inAppPurchaseAppStoreReviewScreenshots",
+        attributes: { fileName: File.basename(path), fileSize: data.bytesize },
+        relationships: { inAppPurchaseV2: { data: { type: "inAppPurchases", id: iap["id"] } } }
+      }
+    })
+    UI.user_error!("Varaus: #{reserved.status} #{reserved.body}") if reserved.status >= 300
+    shot = reserved.body["data"]
+    shot.dig("attributes", "uploadOperations").each do |op|
+      uri = URI(op["url"])
+      req = Net::HTTPGenericRequest.new(op["method"], true, true, uri.request_uri)
+      op["requestHeaders"].each { |h| req[h["name"]] = h["value"] }
+      req.body = data.byteslice(op["offset"], op["length"])
+      res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |http| http.request(req) }
+      UI.user_error!("Lataus: #{res.code}") unless res.code.to_i < 300
+    end
+    done = client.patch("v1/inAppPurchaseAppStoreReviewScreenshots/#{shot['id']}", {
+      data: { type: "inAppPurchaseAppStoreReviewScreenshots", id: shot["id"],
+              attributes: { uploaded: true, sourceFileChecksum: Digest::MD5.hexdigest(data) } }
+    })
+    UI.user_error!("Vahvistus: #{done.status} #{done.body}") if done.status >= 300
+    UI.success("Tarkastuskuva ladattu (#{File.basename(path)})")
+  end
+
   # Yhteinen versio public/version.js:n number-kentästä
   def app_version
     File.read(File.expand_path("../public/version.js", __dir__))[/number:\s*'([^']+)'/, 1]
