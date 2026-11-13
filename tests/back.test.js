@@ -46,4 +46,14 @@ describe('createBackHandler', () => {
         expect(handler()).toBe(false);
         expect(calls).toEqual([]);
     });
+    it('sulkee ostonäkymän tai esimerkkimetsän ennen muuta', () => {
+        const { handler, calls } = setup({ help: true });
+        const pw = document.createElement('div'); pw.id = 'paywall'; document.body.appendChild(pw);
+        expect(handler()).toBe(true);
+        expect(document.getElementById('paywall')).toBeNull();
+        expect(calls).toEqual([]);
+        const demo = document.createElement('div'); demo.id = 'demo-view'; document.body.appendChild(demo);
+        expect(handler()).toBe(true);
+        expect(document.getElementById('demo-view')).toBeNull();
+    });
 });

@@ -45,3 +45,35 @@ export function regionForKunta(kunta) {
     const maakunta = KUNTA_MAAKUNTA[code];
     return (maakunta && MAAKUNTA_REGION[maakunta]) || null;
 }
+
+function refCoords(props) {
+    const c = props?.referencePoint?.coordinates;
+    return Array.isArray(c) && c.length >= 2 ? [c[0], c[1]] : null;
+}
+
+function boundsCenter(geometry) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    const walk = (c) => {
+        if (typeof c[0] === 'number') {
+            minX = Math.min(minX, c[0]); maxX = Math.max(maxX, c[0]);
+            minY = Math.min(minY, c[1]); maxY = Math.max(maxY, c[1]);
+        } else c.forEach(walk);
+    };
+    if (!geometry?.coordinates) return null;
+    walk(geometry.coordinates);
+    return Number.isFinite(minX) ? [(minX + maxX) / 2, (minY + maxY) / 2] : null;
+}
+
+/**
+ * Kiinteistön sijaintipiste (EPSG:3067) kunnan selvittämiseen: INSPIRE-
+ * viitepiste (kiinteistön sisällä), muuten ensimmäisen palstan viitepiste tai
+ * geometrian rajauksen keskipiste. Moniosaisella kiinteistöllä on `parts`.
+ */
+export function parcelPoint(parcel) {
+    if (!parcel) return null;
+    return refCoords(parcel.properties)
+        || refCoords(parcel.parts?.[0]?.properties)
+        || boundsCenter(parcel.geometry)
+        || boundsCenter(parcel.parts?.[0]?.geometry)
+        || null;
+}

@@ -83,5 +83,31 @@ export function createPurchases({ native, plugin }) {
 
 const nativePlugin = Capacitor.isPluginAvailable('Purchases') ? registerPlugin('Purchases') : null;
 
+/**
+ * Kehitystila: valekauppa selaintestaukseen (vain `npm run dev`, kun
+ * localStorage 'metsainfo.devOstot' = '1'). Tuotantobuildissa pois.
+ */
+function devStore() {
+    let owned = [];
+    return {
+        async getProducts() { return { products: [{ id: PRODUCT_ID, title: 'Hinta-arvio', displayPrice: '12,99 €' }] }; },
+        async purchase() { owned = [PRODUCT_ID]; return { status: 'purchased' }; },
+        async getEntitlements() { return { owned }; },
+        async restore() {}
+    };
+}
+
+let devMode = false;
+if (import.meta.env?.DEV) {
+    try {
+        devMode = localStorage.getItem('metsainfo.devOstot') === '1';
+    } catch {
+        devMode = false;
+    }
+}
+
 /** Sovelluksen ostot (yksi instanssi). */
-export const purchases = createPurchases({ native: isNative(), plugin: nativePlugin });
+export const purchases = createPurchases({
+    native: isNative() || devMode,
+    plugin: nativePlugin || (devMode ? devStore() : null)
+});

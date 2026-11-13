@@ -66,4 +66,12 @@ describe('showSummary', () => {
         expect(years.find(y => y.textContent === String(thisYear + 1)).classList.contains('soon')).toBe(true);
         expect(years.find(y => y.textContent === String(thisYear + 6)).classList.contains('soon')).toBe(false);
     });
+
+    it('verkkoversiossa ei hinta-arviota (ei välilehteä, korttia eikä ostonäkymää)', () => {
+        showSummary(STANDS, null);
+        expect(document.querySelector('.tabbar [data-tab="arvio"]')).toBeNull();
+        expect(document.querySelector('.tab-panel[data-tab="arvio"]')).toBeNull();
+        expect(document.querySelector('.estimate-card')).toBeNull();
+        expect(document.getElementById('paywall')).toBeNull();
+    });
 });

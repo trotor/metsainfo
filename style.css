@@ -1476,7 +1476,8 @@ h3 .info-tip-icon {
 
     #info-content[data-active-tab="summary"] .tab-panel[data-tab="summary"],
     #info-content[data-active-tab="stands"] .tab-panel[data-tab="stands"],
-    #info-content[data-active-tab="recs"] .tab-panel[data-tab="recs"] {
+    #info-content[data-active-tab="recs"] .tab-panel[data-tab="recs"],
+    #info-content[data-active-tab="arvio"] .tab-panel[data-tab="arvio"] {
         display: block;
         animation: tab-in 150ms ease;
     }
@@ -2160,3 +2161,62 @@ h3 .info-tip-icon {
         background: none !important;
     }
 }
+
+/* ===== Hinta-arvio (vain kaupan sovellus; verkkoversio ei renderöi näitä) ===== */
+.group-arvo { --g: var(--arvo); --g-bg: var(--arvo-bg); --g-reuna: var(--arvo-reuna); }
+.estimate-card, .est-result, .est-intro { background: var(--arvo-bg); border-left: 5px solid var(--arvo-reuna); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; }
+.estimate-card h3, .est-result h3, .est-intro h3 { color: var(--arvo); }
+.est-card-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.est-big { font-size: 24px; font-weight: 800; color: var(--arvo); line-height: 1.2; }
+.est-big.est-green { color: var(--puusto); }
+.est-big.est-locked { font-size: 19px; }
+.est-muted { font-size: 12.5px; color: #555; margin-top: 2px; }
+.est-error { font-size: 13px; color: #8a2a00; background: #fde8e0; border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; }
+.est-intro p { font-size: 14px; line-height: 1.45; color: #444; margin: 6px 0 10px; }
+.est-btn, .est-btn-arvo, .est-btn-outline { font: inherit; font-weight: 700; font-size: 14px; border-radius: 10px; padding: 10px 14px; min-height: 44px; cursor: pointer; white-space: nowrap; }
+.est-btn { background: var(--havu); color: #fff; border: none; }
+.est-btn:disabled { opacity: .55; }
+.est-btn-arvo { background: var(--arvo-reuna); color: #2d1d00; border: none; }
+.est-btn-outline { background: #fff; color: var(--havu); border: 2px solid var(--havu); }
+.est-link { background: none; border: none; color: var(--havu); font: inherit; font-weight: 600; text-decoration: underline; padding: 4px 0; cursor: pointer; }
+.est-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.est-src { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #fff; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
+.est-region { font-size: 13px; font-weight: 700; color: var(--kuusikko); }
+.est-region select { font: inherit; font-weight: 700; color: var(--kuusikko); border: none; background: none; padding: 4px 0; }
+.est-seg { display: flex; background: #e3e6df; border-radius: 10px; padding: 3px; margin: 6px 0; }
+.est-seg button { flex: 1; font: inherit; font-size: 12.5px; font-weight: 600; padding: 8px 0; border: none; border-radius: 8px; background: none; color: var(--kaarna); min-height: 40px; }
+.est-seg button[aria-selected="true"] { background: #fff; color: var(--kuusikko); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.est-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; font-size: 14px; margin-bottom: 6px; }
+.est-table th { font-size: 11.5px; text-align: left; color: #555; font-weight: 600; padding: 6px 8px; background: #f7f8f5; }
+.est-table td { padding: 4px 8px; border-top: 1px solid #eef0eb; }
+.est-price { width: 84px; font: inherit; font-size: 16px; padding: 6px 8px; border: 1px solid #cfd5ca; border-radius: 8px; text-align: right; }
+.est-price.edited { border-color: var(--arvo-reuna); background: var(--arvo-bg); }
+.est-bars { margin-top: 6px; }
+.est-yr { display: grid; grid-template-columns: 40px 1fr 74px; align-items: center; gap: 6px; font-size: 12.5px; padding: 2px 0; }
+.est-yr div { height: 10px; border-radius: 4px; background: var(--hakkuu-reuna); }
+.est-yr.u div { background: var(--hakkuu); }
+.est-yr b { text-align: right; }
+.est-fine { font-size: 11.5px; color: #555; line-height: 1.45; margin: 8px 0 16px; }
+.est-fine a { color: var(--havu); }
+
+#paywall { position: fixed; inset: 0; z-index: 3000; }
+.pw-dim { position: absolute; inset: 0; background: rgba(0,0,0,.4); }
+.pw-sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 92dvh; overflow-y: auto; background: #fff; border-radius: 20px 20px 0 0; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 30px rgba(0,0,0,.25); }
+.pw-sheet h2 { font-size: 22px; color: var(--kuusikko); margin: 4px 36px 6px 0; }
+.pw-sheet p { font-size: 14px; line-height: 1.45; color: #444; }
+.pw-sheet ul { list-style: none; margin: 12px 0; padding: 0; }
+.pw-sheet li { font-size: 14px; padding: 7px 0 7px 26px; position: relative; border-top: 1px solid #f0f0ee; }
+.pw-sheet li::before { content: "✓"; position: absolute; left: 4px; color: var(--havu); font-weight: 800; }
+.pw-close { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border: none; background: #f0f2ee; border-radius: 22px; font-size: 24px; line-height: 1; color: var(--kaarna); cursor: pointer; }
+.pw-wide { display: block; width: 100%; margin: 8px 0; }
+.pw-price { display: flex; justify-content: space-between; align-items: baseline; margin: 10px 0 2px; }
+.pw-price b { font-size: 26px; color: var(--kuusikko); }
+.pw-restore { display: block; margin: 4px auto; }
+.pw-msg { font-size: 13px; color: #8a2a00; text-align: center; min-height: 1em; }
+
+#demo-view { position: fixed; inset: 0; z-index: 2900; background: var(--jakala); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); }
+.demo-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #dde3d9; position: relative; }
+.demo-head b { display: block; font-size: 18px; color: var(--kuusikko); }
+.demo-head span { font-size: 12.5px; color: var(--sammal); }
+.demo-head .pw-close { position: static; }
+.demo-body { flex: 1; overflow-y: auto; padding: 12px 14px calc(16px + env(safe-area-inset-bottom)); }
