@@ -368,13 +368,18 @@ async function openPaywall() {
         <div class="pw-price"><span>Kertamaksu</span><b class="pw-amount">…</b></div>
         <button type="button" class="est-btn pw-wide pw-buy" data-est="buy" disabled>Osta hinta-arvio</button>
         <button type="button" class="est-link pw-restore" data-est="restore">Palauta aiempi osto</button>
-        <div class="pw-msg" aria-live="polite"></div>
+        <div class="pw-msg" aria-live="polite"><span class="est-loading pw-wait"><span class="est-spinner"></span>Hetkinen – haetaan hintaa kaupasta…</span></div>
         <p class="est-fine">Hinnat: Metsäteollisuus ry:n puukaupan viikkoseuranta ja Luonnonvarakeskuksen tilastot. Arvio on suuntaa-antava.</p>
     </div>`;
     document.body.appendChild(el);
     try {
-        const product = await purchases.getProduct();
+        // Kauppa ei aina vastaa (esim. ei verkkoa): ei jäädä odottamaan loputtomiin
+        const product = await Promise.race([
+            purchases.getProduct(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 15000))
+        ]);
         if (!document.getElementById('paywall')) return;
+        el.querySelector('.pw-msg').textContent = '';
         if (product) {
             el.querySelector('.pw-amount').textContent = product.displayPrice;
             el.querySelector('.pw-buy').disabled = false;
