@@ -16,6 +16,14 @@ export function backAction({ helpOpen, menuOpen, snap }) {
  */
 export function createBackHandler({ toggleHelp, closeMenu, getSheet, doc = document }) {
     return () => {
+        // Hinta-arvion ostonäkymä ja esimerkkimetsä ovat päällimmäisinä
+        for (const id of ['paywall', 'demo-view']) {
+            const overlay = doc.getElementById(id);
+            if (overlay) {
+                overlay.remove();
+                return true;
+            }
+        }
         const sheet = getSheet();
         const action = backAction({
             helpOpen: doc.getElementById('help-modal')?.classList.contains('hidden') === false,

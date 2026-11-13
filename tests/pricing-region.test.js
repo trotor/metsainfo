@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { regionForKunta, PRICE_REGIONS } from '../js/pricing/region.js';
+import { regionForKunta, PRICE_REGIONS, parcelPoint } from '../js/pricing/region.js';
 
 describe('hinta-alue kunnasta (Luke: Hinta-alueet ja maakunnat 2021)', () => {
     it('Petäjävesi on Keski-Suomi', () => {
@@ -44,3 +44,23 @@ describe('hinta-alue kunnasta (Luke: Hinta-alueet ja maakunnat 2021)', () => {
         expect(PRICE_REGIONS['koko-maa']).toMatchObject({ weekly: '9', monthly: 'SSS' });
     });
 });
+
+describe('parcelPoint', () => {
+    it('käyttää kiinteistön INSPIRE-viitepistettä', () => {
+        expect(parcelPoint({ properties: { referencePoint: { type: 'Point', coordinates: [400557.5, 6900270.6] } }, parts: [] }))
+            .toEqual([400557.5, 6900270.6]);
+    });
+    it('moniosaisella kiinteistöllä ensimmäisen palstan viitepiste', () => {
+        expect(parcelPoint({ properties: {}, parts: [{ properties: { referencePoint: { coordinates: [1, 2] } } }] })).toEqual([1, 2]);
+    });
+    it('ilman viitepistettä geometrian rajauksen keskipiste', () => {
+        const geometry = { type: 'Polygon', coordinates: [[[0, 0], [10, 0], [10, 20], [0, 20], [0, 0]]] };
+        expect(parcelPoint({ properties: {}, geometry })).toEqual([5, 10]);
+        expect(parcelPoint({ properties: {}, parts: [{ geometry }] })).toEqual([5, 10]);
+    });
+    it('ilman tietoja null', () => {
+        expect(parcelPoint(null)).toBeNull();
+        expect(parcelPoint({ properties: {} })).toBeNull();
+    });
+});
+

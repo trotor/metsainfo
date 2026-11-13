@@ -47,9 +47,11 @@ async function postJson(fetchImpl, url, body) {
 export async function fetchPrices(regionKey, { fetch: fetchImpl = globalThis.fetch, now = Date.now } = {}) {
     const region = PRICE_REGIONS[regionKey] || PRICE_REGIONS['koko-maa'];
     const country = PRICE_REGIONS['koko-maa'];
+    // PxWeb hylkää toistuvat koodit (koko maa → vain yksi alue)
+    const unique = (...codes) => [...new Set(codes)];
     const [w, m] = await Promise.allSettled([
-        postJson(fetchImpl, WEEKLY_URL, weeklyQuery([region.weekly, country.weekly], 4)),
-        postJson(fetchImpl, MONTHLY_URL, monthlyQuery([region.monthly, country.monthly]))
+        postJson(fetchImpl, WEEKLY_URL, weeklyQuery(unique(region.weekly, country.weekly), 4)),
+        postJson(fetchImpl, MONTHLY_URL, monthlyQuery(unique(region.monthly, country.monthly)))
     ]);
     if (w.status === 'rejected' && m.status === 'rejected') {
         throw new Error('Hintojen haku epäonnistui');

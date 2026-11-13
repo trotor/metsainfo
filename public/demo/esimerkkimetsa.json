@@ -1,0 +1,223 @@
+{
+ "name": "Esimerkkimetsä (kuvitteellinen)",
+ "region": "keski-suomi",
+ "note": "Kuvitteellinen tila hinta-arvion kokeiluun. Ei todellinen kiinteistö.",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 1,
+    "AREA": 2.6,
+    "PROPORTIONPINE": 0.8,
+    "PROPORTIONSPRUCE": 0.1,
+    "PROPORTIONOTHER": 0.1,
+    "SAWLOGVOLUME": 118,
+    "PULPWOODVOLUME": 74,
+    "VOLUME": 192,
+    "CUTTINGTYPE": 5,
+    "CUTTINGPROPOSALYEAR": 2027,
+    "DEVELOPMENTCLASS": "04",
+    "MAINTREESPECIES": 1
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 2,
+    "AREA": 1.9,
+    "PROPORTIONPINE": 0.15,
+    "PROPORTIONSPRUCE": 0.75,
+    "PROPORTIONOTHER": 0.1,
+    "SAWLOGVOLUME": 132,
+    "PULPWOODVOLUME": 61,
+    "VOLUME": 193,
+    "CUTTINGTYPE": 5,
+    "CUTTINGPROPOSALYEAR": 2029,
+    "DEVELOPMENTCLASS": "04",
+    "MAINTREESPECIES": 2
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 3,
+    "AREA": 3.4,
+    "PROPORTIONPINE": 0.6,
+    "PROPORTIONSPRUCE": 0.3,
+    "PROPORTIONOTHER": 0.1,
+    "SAWLOGVOLUME": 58,
+    "PULPWOODVOLUME": 92,
+    "VOLUME": 150,
+    "CUTTINGTYPE": 3,
+    "CUTTINGPROPOSALYEAR": 2027,
+    "DEVELOPMENTCLASS": "03",
+    "MAINTREESPECIES": 1
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 4,
+    "AREA": 2.2,
+    "PROPORTIONPINE": 0.2,
+    "PROPORTIONSPRUCE": 0.65,
+    "PROPORTIONOTHER": 0.15,
+    "SAWLOGVOLUME": 64,
+    "PULPWOODVOLUME": 88,
+    "VOLUME": 152,
+    "CUTTINGTYPE": 3,
+    "CUTTINGPROPOSALYEAR": 2028,
+    "DEVELOPMENTCLASS": "03",
+    "MAINTREESPECIES": 2
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 5,
+    "AREA": 1.5,
+    "PROPORTIONPINE": 0.7,
+    "PROPORTIONSPRUCE": 0.1,
+    "PROPORTIONOTHER": 0.2,
+    "SAWLOGVOLUME": 9,
+    "PULPWOODVOLUME": 71,
+    "VOLUME": 80,
+    "CUTTINGTYPE": 2,
+    "CUTTINGPROPOSALYEAR": 2027,
+    "DEVELOPMENTCLASS": "02",
+    "MAINTREESPECIES": 1
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 6,
+    "AREA": 2.8,
+    "PROPORTIONPINE": 0.4,
+    "PROPORTIONSPRUCE": 0.3,
+    "PROPORTIONOTHER": 0.3,
+    "SAWLOGVOLUME": 6,
+    "PULPWOODVOLUME": 64,
+    "VOLUME": 70,
+    "CUTTINGTYPE": 2,
+    "CUTTINGPROPOSALYEAR": 2030,
+    "DEVELOPMENTCLASS": "02",
+    "MAINTREESPECIES": 1
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 7,
+    "AREA": 1.2,
+    "PROPORTIONPINE": 0.1,
+    "PROPORTIONSPRUCE": 0.2,
+    "PROPORTIONOTHER": 0.7,
+    "SAWLOGVOLUME": 22,
+    "PULPWOODVOLUME": 70,
+    "VOLUME": 92,
+    "CUTTINGTYPE": 3,
+    "CUTTINGPROPOSALYEAR": 2031,
+    "DEVELOPMENTCLASS": "03",
+    "MAINTREESPECIES": 4
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 8,
+    "AREA": 2.0,
+    "PROPORTIONPINE": 0.85,
+    "PROPORTIONSPRUCE": 0.05,
+    "PROPORTIONOTHER": 0.1,
+    "SAWLOGVOLUME": 71,
+    "PULPWOODVOLUME": 80,
+    "VOLUME": 151,
+    "CUTTINGTYPE": 3,
+    "CUTTINGPROPOSALYEAR": 2033,
+    "DEVELOPMENTCLASS": "03",
+    "MAINTREESPECIES": 1
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 9,
+    "AREA": 1.7,
+    "PROPORTIONPINE": 0.3,
+    "PROPORTIONSPRUCE": 0.6,
+    "PROPORTIONOTHER": 0.1,
+    "SAWLOGVOLUME": 141,
+    "PULPWOODVOLUME": 58,
+    "VOLUME": 199,
+    "CUTTINGTYPE": 5,
+    "CUTTINGPROPOSALYEAR": 2034,
+    "DEVELOPMENTCLASS": "04",
+    "MAINTREESPECIES": 2
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 10,
+    "AREA": 2.4,
+    "PROPORTIONPINE": 0.5,
+    "PROPORTIONSPRUCE": 0.3,
+    "PROPORTIONOTHER": 0.2,
+    "SAWLOGVOLUME": 0,
+    "PULPWOODVOLUME": 18,
+    "VOLUME": 18,
+    "CUTTINGTYPE": null,
+    "CUTTINGPROPOSALYEAR": null,
+    "DEVELOPMENTCLASS": "02",
+    "MAINTREESPECIES": 1
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 11,
+    "AREA": 1.1,
+    "PROPORTIONPINE": 0.0,
+    "PROPORTIONSPRUCE": 0.0,
+    "PROPORTIONOTHER": 0.0,
+    "SAWLOGVOLUME": 0,
+    "PULPWOODVOLUME": 0,
+    "VOLUME": 0,
+    "CUTTINGTYPE": null,
+    "CUTTINGPROPOSALYEAR": null,
+    "DEVELOPMENTCLASS": "A0",
+    "MAINTREESPECIES": null
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "STANDNUMBER": 12,
+    "AREA": 1.6,
+    "PROPORTIONPINE": 0.55,
+    "PROPORTIONSPRUCE": 0.35,
+    "PROPORTIONOTHER": 0.1,
+    "SAWLOGVOLUME": 46,
+    "PULPWOODVOLUME": 84,
+    "VOLUME": 130,
+    "CUTTINGTYPE": 3,
+    "CUTTINGPROPOSALYEAR": 2036,
+    "DEVELOPMENTCLASS": "03",
+    "MAINTREESPECIES": 1
+   }
+  }
+ ]
+}

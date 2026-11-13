@@ -12,7 +12,7 @@ import * as state from '../state.js';
 let sheet = null;
 let panelEl = null;
 
-const TABS = ['summary', 'stands', 'recs'];
+const TABS = ['summary', 'stands', 'recs', 'arvio'];
 
 /**
  * Aktivoi välilehden. Jos välilehteä ei ole (esim. ei ehdotuksia),

@@ -7,6 +7,7 @@ import { formatNumber, formatCadastralReference, calculateParcelArea } from '../
 import { tip, closeTips } from './tips.js';
 import { renderStandItem, attachStandEventListeners, attachFilterEventListeners } from './stands.js';
 import { setActiveTab } from './panel.js';
+import { estimateTabButton, estimateTabPanel, estimateSummaryCard, initEstimate } from './estimate.js';
 
 /**
  * Mobiilin kurkistusrivi: tunnus, toimintovalikko ja neljä avainlukua
@@ -72,6 +73,7 @@ export function showSummary(features, parcel, partCount = 1) {
             <button type="button" role="tab" data-tab="summary">Yhteenveto</button>
             <button type="button" role="tab" data-tab="stands">Kuviot (${features.length})</button>
             ${hasRecs ? '<button type="button" role="tab" data-tab="recs">Ehdotukset</button>' : ''}
+            ${estimateTabButton()}
         </div>
         ` : ''}
 
@@ -128,6 +130,8 @@ export function showSummary(features, parcel, partCount = 1) {
                 </div>
             </div>
         </div>
+
+        ${estimateSummaryCard()}
 
         <div class="summary-section group-puusto">
             <h3>Puulajijakauma ${tip('puulajijakauma')}</h3>
@@ -254,6 +258,8 @@ export function showSummary(features, parcel, partCount = 1) {
         ` : ''}
         ${hasRecs ? '</section>' : ''}
 
+        ${estimateTabPanel()}
+
         <section class="tab-panel" data-tab="stands">
         <div class="summary-section stands-section">
             <h3>Kuviot <span class="stands-count">(${features.length} kpl)</span></h3>
@@ -273,5 +279,6 @@ export function showSummary(features, parcel, partCount = 1) {
 
     attachStandEventListeners(content);
     attachFilterEventListeners(content);
+    if (features.length > 0) initEstimate(content, { features, parcel, label: parcelLabel });
     setActiveTab('summary');
 }

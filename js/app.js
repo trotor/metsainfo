@@ -17,6 +17,7 @@ import { isNative, PUBLIC_BASE_URL } from './platform/index.js';
 import { onBackButton } from './platform/back-button.js';
 import { createBackHandler } from './ui/back.js';
 import { closeMenu, getSheet } from './ui/panel.js';
+import { purchases } from './platform/purchases.js';
 import { expandBbox, bboxContains } from './viewport.js';
 
 // Kiinteistörajat haetaan näkymää laajemmalta alueelta (25 % joka suuntaan)
@@ -71,6 +72,8 @@ function initNative() {
         a.href = new URL('tietosuoja.html', PUBLIC_BASE_URL).href;
     });
     onBackButton(createBackHandler({ toggleHelp, closeMenu, getSheet }));
+    // Hinta-arvion ostotila kaupasta (tallennettu tila on käytössä heti)
+    purchases.refreshEntitlement();
 }
 
 /**

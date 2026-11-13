@@ -44,6 +44,15 @@ describe('fetchPrices', () => {
         expect(r.periodLabel).toBe('9/2026');
         expect(r.source).toMatch(/Luonnonvarakeskus/);
     });
+    it('koko maan haussa aluekoodi ei toistu (PxWeb hylkää kaksoiskoodit)', async () => {
+        const f = fakeFetch(url => ({ body: url === WEEKLY_URL ? weekly : monthly }));
+        await fetchPrices('koko-maa', { fetch: f });
+        const wq = JSON.parse(f.calls.find(c => c.url === WEEKLY_URL).init.body);
+        const mq = JSON.parse(f.calls.find(c => c.url === MONTHLY_URL).init.body);
+        expect(wq.query.find(q => q.code === 'MPKH').selection.values).toEqual(['9']);
+        expect(mq.query.find(q => q.code === 'MPKH').selection.values).toEqual(['SSS']);
+    });
+
     it('heittää virheen, jos kumpikaan haku ei onnistu', async () => {
         const f = fakeFetch(() => ({ ok: false, status: 503, body: null }));
         await expect(fetchPrices('keski-suomi', { fetch: f })).rejects.toThrow();
