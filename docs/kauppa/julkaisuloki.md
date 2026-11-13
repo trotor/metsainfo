@@ -45,6 +45,7 @@ Haara `feature/4.0-hinta-arvio`. Suunnitelmat: `docs/plans/2026-11-13-*`.
   - Korjaus Teron luvalla: IAP:n saatavuus kaikille 175 kauppa-alueelle (`availableInNewTerritories` true). Sovellus itse on edelleen vain Suomessa. Fastfilen `iap`-lane tekee saman jatkossa.
   - Tarkastusohjeet korjattu: lukitun kortin nappi on "Avaa", lisäksi maininta kauppa-alueista.
   - Lähetetty uudelleen samalla buildilla 98 (sama reviewSubmission 78d15b77-…), tila WAITING_FOR_REVIEW.
+  - Tero vastasi App Reviewin viestiin App Store Connectissa: syy (vain Suomi) ja ohjeet oston löytämiseen.
 
 ### Android
 - Billing-plugin `android/app/src/main/java/fi/inetor/metsainfo/PurchasesPlugin.java` (Play Billing 9.1.0), rekisteröidään MainActivityssä.
