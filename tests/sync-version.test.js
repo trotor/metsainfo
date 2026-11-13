@@ -10,18 +10,19 @@ const PBX = `
 `;
 
 describe('sync-version', () => {
-    it('lukee sovelluksen version app-kentästä, ei verkkoversiota', () => {
-        const src = "const VERSION = {\n    number: '3.3.0',\n    app: '1.0',\n    date: '2026-11-10',\n};";
-        expect(parseVersionJs(src)).toBe('1.0');
+    it('lukee yhteisen version number-kentästä (verkko, iOS ja Android)', () => {
+        const src = "const VERSION = {\n    number: '4.0.0',\n    date: '2026-11-13',\n};";
+        expect(parseVersionJs(src)).toBe('4.0.0');
     });
 
     it('hyväksyy x.y- ja x.y.z-muodot', () => {
-        expect(parseVersionJs("app: '1.0.1'")).toBe('1.0.1');
+        expect(parseVersionJs("number: '4.1'")).toBe('4.1');
+        expect(parseVersionJs("number: '4.0.1'")).toBe('4.0.1');
     });
 
-    it('hylkää puuttuvan tai virheellisen sovellusversion', () => {
-        expect(() => parseVersionJs("number: '3.3.0'")).toThrow();
-        expect(() => parseVersionJs("app: '1.0-beta'")).toThrow();
+    it('hylkää puuttuvan tai virheellisen version', () => {
+        expect(() => parseVersionJs("app: '1.0'")).toThrow();
+        expect(() => parseVersionJs("number: '4.0-beta'")).toThrow();
     });
 
     it('päivittää kaikki versiokentät', () => {

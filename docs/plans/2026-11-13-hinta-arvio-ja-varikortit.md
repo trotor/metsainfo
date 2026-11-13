@@ -202,7 +202,20 @@ android/app/src/main/java/.../PurchasesPlugin.kt   Play Billing 8 (paikallinen p
 - **Arvion tarkkuus:** tukki- ja kuitujako on johdettu puulajiosuuksista, poistuma on oletus ja metsävaratieto voi olla vanhaa. Selite näkyy aina, ja Aineisto-kortti varoittaa vanhasta datasta.
 - **Applen ohjeet 3.1.1:** ostonäkymässä ei saa mainita verkkoversiota eikä muita hintoja.
 
-## 9. Päätettävät asiat
+## 9. Päätökset 13.11.2026 (Tero)
+
+1. **Hinta:** kertaosto 12,99 €, julkaisun aloitushinta 9,99 €. Ilmainen esimerkkimetsä.
+2. **Käyttölupa:**
+   - Luken tilastotietokanta on CC BY 4.0, myös kaupalliseen käyttöön, paitsi muiden tuottajien taulukoissa, joissa pätevät tuottajan ehdot.
+   - Viikkoseuranta on Metsäteollisuus ry:n tuottama ja julkisesti käytössä, esimerkiksi Metsälehdessä.
+   - Varalähteeksi tulee Luken oma virallinen kuukausitilasto (SVT, CC BY 4.0).
+3. **Julkaisu:** värikortit ja hinta-arvio julkaistaan yhdessä.
+4. **Versio:** kaikki versiot (verkko, iOS, Android) yhdistetään yhteen numeroon **4.0.0**.
+5. **Hinta-alue:** Luken virallinen aluejako. Kunta selvitetään sijainnista Tilastokeskuksen WFS:llä, joka on testattu (58 ms, CORS sallittu).
+
+Toteutussuunnitelma: [2026-11-13-versio-4-0-hinta-arvio.md](2026-11-13-versio-4-0-hinta-arvio.md).
+
+## 10. Alkuperäiset avoimet kysymykset
 
 1. **Malli ja hinta:** kertaosto 9,99 € (suositus) vai vuositilaus kokeilulla? Tehdäänkö aloitushinta?
 2. **Datan lupa:** kysytäänkö Lukelta tai Metsäteollisuudelta? Voin luonnostella viestin.

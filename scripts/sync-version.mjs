@@ -3,7 +3,7 @@
  * Kopioi public/version.js:n versionumeron iOS- ja Android-projekteihin.
  *
  * - Versio (iOS MARKETING_VERSION, Android versionName) = version.js:n
- *   app-kenttä (kauppojen versio, erillinen verkkoversion numerosta)
+ *   number-kenttä: sama versio verkossa, App Storessa ja Google Playssa
  * - Build-numero (iOS CURRENT_PROJECT_VERSION, Android versionCode) =
  *   git-committien määrä, joka kasvaa aina (molemmat kaupat vaativat
  *   kasvavan numeron)
@@ -16,12 +16,12 @@ import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 export function parseVersionJs(source) {
-    const match = source.match(/app:\s*'([^']+)'/);
-    if (!match) throw new Error('version.js: app-kenttää (App Storen versio) ei löytynyt');
+    const match = source.match(/number:\s*'([^']+)'/);
+    if (!match) throw new Error('version.js: number-kenttää ei löytynyt');
     const version = match[1];
     // App Store hyväksyy enintään kolme pisteillä erotettua kokonaislukua
     if (!/^\d+\.\d+(\.\d+)?$/.test(version)) {
-        throw new Error(`version.js: "${version}" ei kelpaa iOS:n versioksi (muoto x.y tai x.y.z)`);
+        throw new Error(`version.js: "${version}" ei kelpaa kauppojen versioksi (muoto x.y tai x.y.z)`);
     }
     return version;
 }
