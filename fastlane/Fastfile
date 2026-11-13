@@ -335,18 +335,29 @@ platform :ios do
     rescue StandardError
       nil
     end
-    unless availability
+    # IAP kaikille kauppa-alueille: App Reviewin sandbox-tili on yleensä USA:ssa, eikä
+    # StoreKit palauta tuotetta alueella, jossa sitä ei myydä (hylkäys 2.1(b) 13.11.2026).
+    # Sovellus itse on jaossa vain Suomessa (lane availability).
+    all_territories = availability && availability.dig("attributes", "availableInNewTerritories")
+    unless all_territories
+      territories = []
+      path = "v1/territories?limit=200"
+      while path
+        page = client.get(path).body
+        territories.concat(page["data"].map { |t| t["id"] })
+        path = page.dig("links", "next")&.sub(%r{\Ahttps://api.appstoreconnect.apple.com/}, "")
+      end
       fail_on.call(client.post("v1/inAppPurchaseAvailabilities", {
         data: {
           type: "inAppPurchaseAvailabilities",
-          attributes: { availableInNewTerritories: false },
+          attributes: { availableInNewTerritories: true },
           relationships: {
             inAppPurchase: { data: { type: "inAppPurchases", id: iap_id } },
-            availableTerritories: { data: [{ type: "territories", id: "FIN" }] }
+            availableTerritories: { data: territories.map { |t| { type: "territories", id: t } } }
           }
         }
       }), "Saatavuus")
-      UI.success("Saatavuus: Suomi")
+      UI.success("Saatavuus: kaikki kauppa-alueet (#{territories.size})")
     end
 
     final = client.get("v2/inAppPurchases/#{iap_id}").body["data"]["attributes"]

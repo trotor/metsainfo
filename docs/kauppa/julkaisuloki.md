@@ -40,6 +40,11 @@ Haara `feature/4.0-hinta-arvio`. Suunnitelmat: `docs/plans/2026-11-13-*`.
 - 13.11.2026: haara yhdistetty `main`iin (c944119). Verkkoversio 4.0.0 ja tietosuojasivu (päivitetty 13.11.2026) ovat julki.
 - 13.11.2026: Teron luvalla 4.0.0 (98) ja IAP lähetetty App Reviewiin (reviewSubmission 78d15b77-…). Tila WAITING_FOR_REVIEW, julkaisu automaattisesti hyväksynnän jälkeen.
 - TestFlight-hiekkalaatikko-ostoa ei testattu oikealla laitteella ennen lähetystä (Teron päätös).
+- 13.11.2026: hylätty, Guideline 2.1(b) "cannot locate the In-App Purchases" (iPhone 17 Pro Max ja iPad Air, build 98).
+  - Syy: IAP oli saatavilla vain Suomessa. App Reviewin sandbox-tili on USA:n kaupassa (hinta näkyi $8.99), eikä StoreKit palauta tuotetta alueella, jossa sitä ei myydä.
+  - Korjaus Teron luvalla: IAP:n saatavuus kaikille 175 kauppa-alueelle (`availableInNewTerritories` true). Sovellus itse on edelleen vain Suomessa. Fastfilen `iap`-lane tekee saman jatkossa.
+  - Tarkastusohjeet korjattu: lukitun kortin nappi on "Avaa", lisäksi maininta kauppa-alueista.
+  - Lähetetty uudelleen samalla buildilla 98 (sama reviewSubmission 78d15b77-…), tila WAITING_FOR_REVIEW.
 
 ### Android
 - Billing-plugin `android/app/src/main/java/fi/inetor/metsainfo/PurchasesPlugin.java` (Play Billing 9.1.0), rekisteröidään MainActivityssä.

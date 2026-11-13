@@ -9,8 +9,8 @@ HOW TO TEST
 6. The ⋯ menu shares a link to the property or a CSV file of the stand data via the iOS share sheet.
 
 IN-APP PURCHASE (version 4.0.0)
-"Puukaupan hinta-arvio" (fi.inetor.metsainfo.hintaarvio) is a one-time, non-consumable purchase that unlocks the timber price estimate for all properties.
-7. With property 592-404-1-32 open, the Summary tab shows a locked card "Arvio nykyhinnoin" with a "Kokeile" button, and there is a fourth tab "Arvio". Both open the purchase screen, which shows the price from the App Store and has "Osta hinta-arvio" (Buy) and "Palauta aiempi osto" (Restore Purchases).
+"Puukaupan hinta-arvio" (fi.inetor.metsainfo.hintaarvio) is a one-time, non-consumable purchase that unlocks the timber price estimate for all properties. The app is distributed in Finland only, but the in-app purchase is available in all storefronts, so it loads with any sandbox account. There is no login and no other restriction.
+7. Open property 592-404-1-32 (steps 2-3). On the Yhteenveto (Summary) tab, the card "Arvio nykyhinnoin" shows a locked value "? ??? €" and a button "Avaa" (Open). There is also a fourth tab "Arvio" with the button "Avaa hinta-arvio". Both open the purchase screen, which shows the price from the App Store and has "Osta hinta-arvio" (Buy) and "Palauta aiempi osto" (Restore Purchases).
 8. Without purchasing, "Kokeile esimerkkimetsällä" opens a fictional demo forest where the whole feature works: current stumpage prices are fetched with "Hae verkosta", prices can be edited, and the estimate is shown per year.
 9. After purchase, the Arvio tab shows the estimate for the real property: the price region is derived from the property's municipality, prices come from the weekly roundwood trade statistics (Finnish Forest Industries Federation, published in the Natural Resources Institute Finland statistics database), and "Jaa arvio" shares the estimate as a CSV file.
 
