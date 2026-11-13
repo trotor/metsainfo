@@ -226,8 +226,11 @@ platform :ios do
               relationships: { app: { data: { type: "apps", id: app.id } } } }
     }), "reviewSubmission").body["data"]["id"]
 
-    items = client.get("v1/reviewSubmissions/#{submission_id}/items").body["data"]
-    if items.empty?
+    # Lähetyksessä voi olla jo esim. ensimmäinen IAP (lisätty versiosivulta); versio lisätään sen rinnalle
+    items = client.get("v1/reviewSubmissions/#{submission_id}/items?include=appStoreVersion").body["data"]
+    has_version = items.any? { |i| i.dig("relationships", "appStoreVersion", "data", "id") == version.id }
+    UI.message("Lähetyksessä #{items.length} kohdetta#{has_version ? ', versio mukana' : ''}")
+    unless has_version
       fail_on.call(client.post("v1/reviewSubmissionItems", {
         data: { type: "reviewSubmissionItems",
                 relationships: { reviewSubmission: { data: { type: "reviewSubmissions", id: submission_id } },
