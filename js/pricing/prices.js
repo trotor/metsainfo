@@ -148,3 +148,16 @@ export function fillMissing(primary, ...fallbacks) {
     }
     return { table, filled };
 }
+
+/**
+ * Käyttäjän omat hinnat (esim. puukauppatarjouksesta) korvaavat verkon hinnat.
+ * overrides: { hakkuutapa: { puulaji: { tukki?, kuitu? } } }. Palauttaa uuden taulukon.
+ */
+export function applyOverrides(table, overrides = {}) {
+    const out = emptyTable();
+    for (const m of METHODS) for (const s of SPECIES) for (const a of ASSORTMENTS) {
+        const o = overrides?.[m]?.[s]?.[a];
+        out[m][s][a] = typeof o === 'number' && Number.isFinite(o) ? o : table[m][s][a];
+    }
+    return out;
+}
