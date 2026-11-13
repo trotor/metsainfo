@@ -241,9 +241,9 @@ platform :ios do
     UI.success("Lähetetty App Reviewiin: tila #{response.body.dig('data', 'attributes', 'state')}")
   end
 
-  # App Storen versio public/version.js:n app-kentästä
+  # Yhteinen versio public/version.js:n number-kentästä
   def app_version
-    File.read(File.expand_path("../public/version.js", __dir__))[/app:\s*'([^']+)'/, 1]
+    File.read(File.expand_path("../public/version.js", __dir__))[/number:\s*'([^']+)'/, 1]
   end
 end
 
@@ -298,7 +298,7 @@ platform :android do
   desc "Lataa AAB:n sisäiseen testiin (completed; luonnos, jos Play hyväksyy vain sen)"
   lane :internal do
     UI.user_error!("AAB puuttuu, aja ensin: fastlane android build") unless File.exist?(AAB)
-    version = File.read(File.expand_path("../public/version.js", __dir__))[/app:\s*'([^']+)'/, 1]
+    version = File.read(File.expand_path("../public/version.js", __dir__))[/number:\s*'([^']+)'/, 1]
     upload = lambda do |status|
       upload_to_play_store(
         track: "internal",
