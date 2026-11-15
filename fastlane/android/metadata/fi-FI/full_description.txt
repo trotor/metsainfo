@@ -1,4 +1,4 @@
-Metsäinfo näyttää Suomen metsävaratiedot kartalla. Hae kiinteistötunnuksella tai napauta kiinteistöä kartalta, niin saat yhteenvedon sen metsikkökuvioista: puuston määrän, puulajit, iän sekä hakkuu- ja hoitoehdotukset.
+Metsäinfo näyttää Suomen metsävaratiedot kartalla. Hae kiinteistötunnuksella tai napauta kiinteistöä kartalta, niin saat yhteenvedon sen metsikkökuvioista: puuston määrän, puulajit, iän sekä hakkuu- ja hoitoehdotukset. Lisäosana puukaupan hinta-arvio: ehdotettujen hakkuiden arvo alueen tuoreilla kantohinnoilla.
 
 Sovellus on tehty käytettäväksi myös maastossa.
 

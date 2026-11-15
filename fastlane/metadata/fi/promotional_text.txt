@@ -1,1 +1,1 @@
-Näe millä metsikkökuviolla seisot: oma sijainti kartalla ja kuvion puusto, ikä ja hakkuuehdotukset yhdellä napautuksella.
+Uutta: puukaupan hinta-arvio. Näe hakkuiden arvo alueen tuoreilla kantohinnoilla. Lisäksi oma sijainti kartalla ja kuvion puusto, ikä ja hakkuuehdotukset.
