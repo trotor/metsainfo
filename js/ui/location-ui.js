@@ -312,7 +312,15 @@ export function refreshHereRow() {
     hereLayer.clearLayers();
     if (feature) hereLayer.addData(feature);
 
-    sheet?.setPeekExtra(isMobileLayout() ? HERE_ROW_HEIGHT : 0);
+    sheet?.setPeekExtra(isMobileLayout() ? hereRowHeight(row) : 0);
+}
+
+/** Rivin korkeus marginaaleineen; teksti voi mobiilissa jakautua kahdelle riville */
+function hereRowHeight(row) {
+    const h = row.getBoundingClientRect().height;
+    if (!h) return HERE_ROW_HEIGHT;
+    const css = getComputedStyle(row);
+    return Math.ceil(h + parseFloat(css.marginTop || 0) + parseFloat(css.marginBottom || 0));
 }
 
 function onHereRowTap() {

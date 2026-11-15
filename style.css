@@ -1715,6 +1715,16 @@ h3 .info-tip-icon {
         min-height: 44px;
     }
 
+    /* Kapealla näytöllä kehitysluokka ei mahdu yhdelle riville: enintään kaksi riviä */
+    #here-row .here-text {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        white-space: normal;
+        line-height: 1.25;
+    }
+
     .locate-btn {
         width: 44px !important;
         height: 44px !important;

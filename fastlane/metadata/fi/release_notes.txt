@@ -1,4 +1,2 @@
-Uutta versiossa 4.0.0:
-• Puukaupan hinta-arvio: hakkuiden arvo alueen tuoreilla kantohinnoilla tai omilla hinnoilla (lisäosa, kokeile ilmaiseksi esimerkkimetsällä)
-• Selkeämmät, värikoodatut tietoruudut
-• Versionumero on nyt sama kuin verkkoversiossa
+Uutta versiossa 4.0.1:
+• "Olet kuviolla" -rivi näyttää kuvion kehitysluokan kokonaan, eikä pitkä nimi enää katkea
