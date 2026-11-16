@@ -39,6 +39,9 @@ const fi = {
     kokeilu: 'Kokeilu · vain testiversiossa',
     lukittu: 'Koko kuvaus, metsävisa ja pisteet kuuluvat Puukaupan hinta-arvio -lisäosaan (sama kertaosto).',
     avaaLisaosa: 'Avaa lisäosa',
+    kartalta: 'Kokeile kartalta (ilman maastoa)',
+    karttaOhje: 'Kokeilu kartalta: siirrä karttaa niin, että risti on kohdassa, josta haluat tietoa ja kysymyksiä.',
+    omaSijainti: 'Käytä omaa sijaintia',
     arvonimet: ['Metsäretkeläinen', 'Polkujen kulkija', 'Kuvioiden tuntija', 'Metsänlukija', 'Metsämestari'],
 
     /* ---------- Paikan kuvaus (paikka.js) ---------- */
@@ -172,6 +175,9 @@ const en = {
     kokeilu: 'Trial · test version only',
     lukittu: 'The full description, the forest quiz and points are part of the Timber sale estimate add-on (one purchase).',
     avaaLisaosa: 'Unlock the add-on',
+    kartalta: 'Try it on the map (no field trip)',
+    karttaOhje: 'Map trial: move the map so the cross is on the spot you want to learn about and be quizzed on.',
+    omaSijainti: 'Use my location',
     arvonimet: ['Forest rambler', 'Trail walker', 'Stand spotter', 'Forest reader', 'Forest master'],
 
     lower: enLower,

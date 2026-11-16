@@ -91,3 +91,34 @@
 .mk-feedback.oikea { background: var(--puusto-bg); color: var(--puusto); }
 .mk-feedback.vaara { background: var(--hakkuu-bg); color: var(--hakkuu); }
 .mk-plus { font-weight: 700; margin-top: 4px; }
+
+/* Kokeilu kartalta: risti kartan näkyvän osan keskellä */
+.mk-risti {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 650;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+.mk-risti::before, .mk-risti::after {
+    content: '';
+    position: absolute;
+    background: #c2410c;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+    border-radius: 2px;
+}
+.mk-risti::before { width: 34px; height: 4px; left: -17px; top: -2px; }
+.mk-risti::after { width: 4px; height: 34px; left: -2px; top: -17px; }
+.mk-risti[hidden] { display: none; }
+.mk-kartalta { margin-top: 6px; font-size: 14px; }
+.mk-lahde-kartta {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--hoito-bg);
+    color: var(--hoito);
+    font-size: 14px;
+}
+.mk-lahde-kartta p { margin: 0; }

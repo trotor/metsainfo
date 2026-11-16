@@ -12,7 +12,7 @@ import { getLang, locale } from '../i18n.js';
 import { latLonTo3067 } from '../location/logic.js';
 import { coordsEPSG3067ToLatLng } from '../utils.js';
 import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
-import { onPositionChange, requestLocation } from '../ui/location-ui.js';
+import { onPositionChange, requestLocation, releaseFollow } from '../ui/location-ui.js';
 import { tip, initTips } from '../ui/tips.js';
 import { tileKey, neighbourKeys, tileCache } from '../rest2.js';
 import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
@@ -49,7 +49,8 @@ export function startMaasto() {
     const ui = {
         open: false,
         view: 'place',       // place | quiz
-        pos: null,
+        pos: null,           // viimeisin GPS-sijainti
+        source: 'gps',       // gps | kartta (kokeilu: kohta valitaan kartalta, ks. kartaltaPos)
         point: null,
         stand: null,
         status: 'waiting',   // waiting | inaccurate | loading | error | none | edge | ok
@@ -88,6 +89,8 @@ export function startMaasto() {
         else if (action === 'level') { store.setLevel(el.dataset.level); ui.feedback = null; pickQuestion(); render(); }
         else if (action === 'answer') answer(el.dataset.value);
         else if (action === 'next') { ui.feedback = null; pickQuestion(); render(); }
+        else if (action === 'kartta') setSource('kartta');
+        else if (action === 'gps') setSource('gps');
     });
 
     function toggle(force) {
@@ -95,12 +98,61 @@ export function startMaasto() {
         if (ui.open) card.open(); else card.close();
         button.setPressed(ui.open);
         if (ui.open) {
-            requestLocation();
+            if (ui.source === 'gps') requestLocation();
             update();
         } else {
             highlight.clearLayers();
         }
+        placeCrosshair();
     }
+
+    /* ---------- Kokeilu: kohta kartalta GPS:n sijaan ---------- */
+
+    // Visaa ja pisteitä voi kokeilla missä tahansa: kartan näkyvän osan
+    // keskikohta (risti) toimii sijaintina. Havaintokysymystä ei kysytä,
+    // koska käyttäjä ei ole paikalla.
+    const crosshair = L.DomUtil.create('div', 'mk-risti', state.map.getContainer());
+    crosshair.hidden = true;
+    crosshair.setAttribute('aria-hidden', 'true');
+
+    function viewCenter() {
+        const size = state.map.getSize();
+        let x = size.x / 2;
+        let y = size.y / 2;
+        if (ui.open) {
+            const r = card.el.getBoundingClientRect();
+            const m = state.map.getContainer().getBoundingClientRect();
+            // Kortti peittää alaosan (mobiili) tai oikean reunan (työpöytä)
+            // Mobiilissa hakupalkki peittää kartan yläreunaa noin 64 px
+            if (isMobileLayout()) y = Math.max(40, (r.top - m.top + 64) / 2);
+            else x = Math.max(40, (r.left - m.left) / 2);
+        }
+        return L.point(x, y);
+    }
+
+    function placeCrosshair() {
+        const show = ui.open && ui.source === 'kartta';
+        crosshair.hidden = !show;
+        if (show) L.DomUtil.setPosition(crosshair, viewCenter());
+    }
+
+    function mapPos() {
+        const ll = state.map.containerPointToLatLng(viewCenter());
+        return { lat: ll.lat, lon: ll.lng, accuracy: 5, kartta: true };
+    }
+
+    function setSource(source) {
+        ui.source = source;
+        ui.feedback = null;
+        ui.question = null;
+        if (source === 'kartta') releaseFollow();
+        else requestLocation();
+        update();
+    }
+
+    state.map.on('moveend resize', () => {
+        if (ui.open && ui.source === 'kartta') update();
+    });
 
     /* ---------- Sijainti → kuvio ---------- */
 
@@ -136,7 +188,7 @@ export function startMaasto() {
 
     function update() {
         if (!ui.open) return;
-        const pos = ui.pos;
+        const pos = ui.source === 'kartta' ? mapPos() : ui.pos;
         if (!pos) {
             ui.status = 'waiting';
             ui.stand = null;
@@ -170,7 +222,7 @@ export function startMaasto() {
 
     onPositionChange((pos) => {
         ui.pos = pos;
-        update();
+        if (ui.source === 'gps') update();
     });
 
     /* ---------- Visa ---------- */
@@ -180,7 +232,8 @@ export function startMaasto() {
         ui.questionStand = null;
         if (ui.status !== 'ok' || !ui.stand) return;
         const id = ui.stand.properties.STANDID;
-        ui.question = nextQuestion(ui.stand.properties, store.level, store.answered(id));
+        const q = nextQuestion(ui.stand.properties, store.level, store.answered(id));
+        ui.question = q?.kind === 'observe' && ui.source === 'kartta' ? null : q;
         ui.questionStand = ui.stand;
     }
 
@@ -191,7 +244,7 @@ export function startMaasto() {
         const value = q.options.find(o => String(o.value) === raw)?.value;
         const result = scoreAnswer(q, value, store.streak);
         store.record(stand.properties.STANDID, q, value, result, {
-            question: q.id, dataDate: stand.properties.TREESTANDDATE
+            question: q.id, dataDate: stand.properties.TREESTANDDATE, source: ui.source
         });
         ui.feedback = q.kind === 'observe'
             ? { correct: null, text: T.kiitosHavainnosta, points: result.points, chosen: value }
@@ -314,6 +367,18 @@ export function startMaasto() {
             ${cardHeader({ title: T.otsikko, badge: T.kokeilu, closeLabel: T.sulje })}
             ${locked() ? '' : scoreBar()}
             ${flash}
-            <div class="mk-body">${body}</div>`;
+            <div class="mk-body">${body}</div>
+            ${sourceHtml()}`;
+        placeCrosshair();
+    }
+
+    function sourceHtml() {
+        if (ui.source === 'kartta') {
+            return `<div class="mk-lahde-kartta">
+                <p>${esc(T.karttaOhje)}</p>
+                <button type="button" class="kortti-btn kortti-link" data-mk="gps">${esc(T.omaSijainti)}</button>
+            </div>`;
+        }
+        return `<button type="button" class="kortti-btn kortti-link mk-kartalta" data-mk="kartta">${esc(T.kartalta)}</button>`;
     }
 }
