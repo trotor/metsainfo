@@ -46,8 +46,8 @@ export function applyAndroidVersion(gradle, { name, code }) {
         .replace(/versionName "[^"]*"/, `versionName "${name}"`);
 }
 
-// Kunkin kokeilutoiminnon kortin luokka (js/maasto/, js/lahihaku/)
-export const KOKEILU_MARKERS = ['maasto-kortti', 'lahihaku-kortti'];
+// Kunkin kokeilutoiminnon kortin luokka (js/maasto/, js/lahihaku/, js/suosikit/)
+export const KOKEILU_MARKERS = ['maasto-kortti', 'lahihaku-kortti', 'suosikit-kortti'];
 export const KOKEILU_PATCH_OFFSET = 900;
 
 /** Kokeilubuildin oma versiojono: 4.0.2 → 4.0.902, 4.1 → 4.1.900. */

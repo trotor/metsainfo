@@ -5,10 +5,11 @@
  * omana lisäosanaan tai siirtää omaan sovellukseen
  * (docs/plans/2026-11-16-maastotila-erillinen-sovellus.md):
  *
- * - koodi omassa hakemistossaan (js/maasto/, js/lahihaku/ …) ja tekstit
+ * - koodi omassa hakemistossaan (js/maasto/, js/lahihaku/, js/suosikit/ …) ja tekstit
  *   sen omassa teksti.js:ssä
- * - yhteinen tieto vain jaetuista moduuleista (js/rest2.js, js/location/,
- *   js/config.js), ei toisen toiminnon hakemistosta
+ * - yhteinen tieto vain jaetuista moduuleista (js/rest2.js, js/kuviotieto.js,
+ *   js/location/, js/config.js, js/ui/kortti.js), ei toisen toiminnon
+ *   hakemistosta; viestit toiminnolta toiselle js/vayla.js:n kautta
  * - kokeilu vain kokeilubuildissa: app.js lataa toiminnon dynaamisella
  *   importilla VITE_KOKEILU-ehdon takana, ei merkintöjä index.html:ään
  * - avaus aina isUnlocked(id):llä, ei suoraan purchases.isEntitled():llä
@@ -25,7 +26,9 @@ export const FEATURES = {
     // Kokeilu #26/#27: "Kerro tästä paikasta" ja metsävisa (js/maasto/)
     maastotila: { product: PRODUCT_ID, kokeilu: true },
     // Suunniteltu #28: tietynlaiset metsät 1 km × 1 km alueelta (js/lahihaku/)
-    lahihaku: { product: PRODUCT_ID, kokeilu: true }
+    lahihaku: { product: PRODUCT_ID, kokeilu: true },
+    // Kokeilu #25: suosikit ja omat muistiinpanot, maksuton (js/suosikit/)
+    suosikit: { product: null, kokeilu: true }
 };
 
 /**
@@ -36,6 +39,7 @@ export const FEATURES = {
 export function isUnlocked(id, p = purchases) {
     const feature = FEATURES[id];
     if (!feature) return false;
+    if (!feature.product) return true; // maksuton toiminto
     if (!p.isAvailable()) return feature.kokeilu;
     // Nyt kaikki toiminnot kuuluvat samaan tuotteeseen
     return feature.product === PRODUCT_ID && p.isEntitled();

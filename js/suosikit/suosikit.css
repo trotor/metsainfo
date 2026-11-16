@@ -1,0 +1,98 @@
+/* Suosikit (kokeilu): vain VITE_KOKEILU=1 -buildissa. Kortin runko: js/ui/kortti.css */
+
+.sk-suodatus { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 8px; }
+.sk-chip {
+    border: 1px solid #d5dbd1;
+    background: #fff;
+    color: var(--kaarna);
+    border-radius: 999px;
+    min-height: 34px;
+    padding: 4px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.sk-chip[aria-pressed="true"] { background: var(--havu); border-color: var(--havu); color: #fff; font-weight: 600; }
+
+.sk-haku {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 40px;
+    border: 1px solid #d5dbd1;
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 16px; /* iOS ei zoomaa */
+}
+
+.sk-lista { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.sk-item {
+    border: 1px solid #d5dbd1;
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: grid;
+    gap: 4px;
+}
+.sk-tiedot { display: grid; gap: 2px; }
+.sk-nimi { font-weight: 600; color: var(--kuusikko); }
+.sk-tyyppi { font-size: 13px; color: var(--sammal); }
+.sk-note {
+    font-size: 14px;
+    white-space: pre-wrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.sk-napit { display: flex; gap: 12px; align-items: center; }
+.sk-napit .kortti-btn { margin-top: 4px; min-height: 36px; padding: 4px 14px; }
+.sk-tyhja { color: var(--sammal); font-size: 14px; }
+.sk-huom { margin: 10px 0 0; font-size: 12px; color: var(--sammal); }
+
+.sk-muokkaus label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; color: var(--sammal); margin-top: 4px; }
+.sk-muokkaus input, .sk-muokkaus textarea {
+    font: inherit;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--kaarna);
+    border: 1px solid #d5dbd1;
+    border-radius: 10px;
+    padding: 6px 10px;
+}
+.sk-rivi { display: flex; gap: 8px; }
+.sk-rivi .kortti-btn { flex: 1; }
+.sk-poista { border-color: var(--hakkuu-reuna); color: var(--hakkuu); }
+
+/* Kiinteistön yhteenvedossa ja kuviolistassa */
+.sk-kiinteisto { margin: 8px 0; }
+.sk-tahti-btn {
+    border: 1px solid var(--havu);
+    background: #fff;
+    color: var(--havu);
+    border-radius: 999px;
+    min-height: 36px;
+    padding: 4px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.sk-tahti-btn[aria-pressed="true"] { background: var(--arvo-bg); border-color: var(--arvo); color: var(--arvo); }
+.sk-tahti {
+    border: 0;
+    background: none;
+    color: var(--arvo);
+    font-size: 20px;
+    line-height: 1;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0;
+    margin-right: 2px;
+    cursor: pointer;
+}
+.sk-oma {
+    margin: 6px 0;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: var(--arvo-bg);
+    color: var(--kaarna);
+    font-size: 14px;
+    white-space: pre-wrap;
+}

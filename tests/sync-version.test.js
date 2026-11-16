@@ -53,6 +53,7 @@ describe('kokeilubuildin versiojono', () => {
     it('tunnistaa kokeilukoodin buildista', () => {
         expect(containsKokeilu(['a', 'b .maasto-kortti{}'])).toBe(true);
         expect(containsKokeilu(['a', 'lahihaku-kortti'])).toBe(true);
+        expect(containsKokeilu(['suosikit-kortti'])).toBe(true);
         expect(containsKokeilu(['a', 'b'])).toBe(false);
         expect(containsKokeilu([])).toBe(false);
     });

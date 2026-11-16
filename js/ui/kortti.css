@@ -3,7 +3,8 @@
 .kortti {
     position: fixed;
     z-index: 2050;
-    left: 12px;
+    /* Työpöydällä oikealla, koska tietopaneeli on vasemmalla */
+    right: 12px;
     bottom: calc(12px + env(safe-area-inset-bottom));
     width: 380px;
     max-width: calc(100% - 24px);

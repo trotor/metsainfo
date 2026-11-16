@@ -25,6 +25,13 @@ export const T = {
     valitseEhto: 'Valitse vähintään yksi ehto.',
     keskiSijainti: 'Hakualue: sijaintisi ympäriltä.',
     keskiKartta: 'Sijaintia ei ole, joten haetaan kartan keskeltä.',
+    keskiLahde: {
+        sijainti: 'Hakualue: sijaintisi ympäriltä.',
+        kartta: 'Hakualue: kartan keskeltä (sijaintia ei ollut).',
+        tallennettu: 'Hakualue: tallennetun haun alue.'
+    },
+    tallennaHaku: 'Tallenna haku suosikiksi',
+    tallennaKuvio: 'Tallenna kuvio suosikiksi',
     haetaan: (n, kaikki) => `Haetaan metsätietoja… ${n}/${kaikki}`,
     eiVerkkoa: 'Metsätietoja ei saatu. Tarkista verkkoyhteys.',
     osittain: (n, kaikki) => `Osa alueesta jäi hakematta (${n}/${kaikki} ruutua puuttuu), joten kaikkia kuvioita ei ehkä löytynyt.`,

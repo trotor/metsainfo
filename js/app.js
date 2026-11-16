@@ -30,6 +30,8 @@ const PARCEL_MARGIN_MIN_ZOOM = 13;
 const PARCEL_WFS_LIMIT = 2000;
 let lastParcelFetch = null; // { bbox, labels }
 import * as state from './state.js';
+import { on, VIESTIT } from './vayla.js';
+import { showToast } from './ui/location-ui.js';
 import { KUVAUSTILA, loadEsimerkkimetsa, createKuvitteellinenKartta, startKuvausohjaus } from './demo/kuvaustila.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
@@ -58,7 +60,11 @@ function init() {
     // Kokeilutoiminnot vain kokeilubuildissa (TestFlight, kehitys). Tavallinen
     // build karsii haaran ja dynaamisen importin pois kokonaan.
     if (import.meta.env?.VITE_KOKEILU === '1') {
+        on(VIESTIT.avaaKiinteisto, ({ reference }) => openParcelByReference(reference)
+            .then(ok => { if (!ok) showToast('Kiinteistöä ei löytynyt'); })
+            .catch(() => showToast('Kiinteistön haku epäonnistui')));
         import('./maasto/index.js').then(m => m.startMaasto());
+        import('./suosikit/index.js').then(m => m.startSuosikit());
         import('./lahihaku/index.js').then(m => m.startLahihaku());
     }
 }
@@ -317,6 +323,25 @@ function clearSelection() {
 /**
  * Search for a parcel by cadastral reference
  */
+/** Hakee kiinteistön tunnuksella, kohdistaa kartan ja valitsee sen. false, jos ei löytynyt. */
+async function openParcelByReference(reference) {
+    const parcels = await fetchParcelsByReference(reference);
+    if (!parcels.length) return false;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    parcels.forEach(parcel => {
+        const bounds = getGeometryBounds3067(parcel.geometry);
+        minX = Math.min(minX, bounds.minX);
+        minY = Math.min(minY, bounds.minY);
+        maxX = Math.max(maxX, bounds.maxX);
+        maxY = Math.max(maxY, bounds.maxY);
+    });
+    const sw = proj4('EPSG:3067', 'WGS84', [minX, minY]);
+    const ne = proj4('EPSG:3067', 'WGS84', [maxX, maxY]);
+    state.map.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], mapFitOptions({ maxZoom: 16 }, { newSelection: true }));
+    selectParcels(parcels);
+    return true;
+}
+
 async function searchParcel() {
     const input = document.getElementById('search-input').value.trim();
     const errorEl = document.getElementById('search-error');
@@ -341,24 +366,7 @@ async function searchParcel() {
     button.textContent = 'Haetaan...';
 
     try {
-        const parcels = await fetchParcelsByReference(normalizedId);
-
-        if (parcels.length > 0) {
-            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-            parcels.forEach(parcel => {
-                const bounds = getGeometryBounds3067(parcel.geometry);
-                minX = Math.min(minX, bounds.minX);
-                minY = Math.min(minY, bounds.minY);
-                maxX = Math.max(maxX, bounds.maxX);
-                maxY = Math.max(maxY, bounds.maxY);
-            });
-
-            const sw = proj4('EPSG:3067', 'WGS84', [minX, minY]);
-            const ne = proj4('EPSG:3067', 'WGS84', [maxX, maxY]);
-            state.map.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], mapFitOptions({ maxZoom: 16 }, { newSelection: true }));
-
-            selectParcels(parcels);
-        } else {
+        if (!(await openParcelByReference(normalizedId))) {
             errorEl.textContent = 'Kiinteistöä ei löytynyt';
             errorEl.classList.remove('hidden');
         }

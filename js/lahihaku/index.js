@@ -14,7 +14,8 @@
 import './lahihaku.css';
 import * as state from '../state.js';
 import { CODES } from '../config.js';
-import { formatNumber, coordsEPSG3067ToLatLng } from '../utils.js';
+import { formatNumber, coordsEPSG3067ToLatLng, getGeometryBounds3067 } from '../utils.js';
+import { on, emit, has, VIESTIT } from '../vayla.js';
 import { latLonTo3067 } from '../location/logic.js';
 import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
 import { onPositionChange, requestLocation } from '../ui/location-ui.js';
@@ -43,7 +44,7 @@ export function startLahihaku() {
         view: 'form',            // form | results | detail
         criteria: emptyCriteria(),
         pos: null,               // viimeisin sijainti; null-ilmoitus ei poista hakua
-        search: null,            // { criteria, center, fromLocation, keys, status, results, done }
+        search: null,            // { criteria, center, source, keys, status, results, done }
         selected: null           // STANDID
     };
     let token = 0;
@@ -78,12 +79,12 @@ export function startLahihaku() {
         results.eachLayer(l => l.setStyle(l.feature.properties.STANDID === ui.selected ? STYLE_SELECTED : STYLE));
     }
 
-    // Kortti peittää kartan vasemman reunan (työpöytä) tai alaosan (mobiili)
+    // Kortti peittää kartan oikean reunan (työpöytä) tai alaosan (mobiili)
     function cardPadding() {
         const r = card.el.getBoundingClientRect();
         return isMobileLayout()
             ? { paddingTopLeft: [16, 16], paddingBottomRight: [16, r.height + 16] }
-            : { paddingTopLeft: [r.width + 24, 16], paddingBottomRight: [16, 16] };
+            : { paddingTopLeft: [16, 16], paddingBottomRight: [r.width + 24, 16] };
     }
 
     function boxBounds(center) {
@@ -108,7 +109,8 @@ export function startLahihaku() {
             ui.criteria.hakkuu = !ui.criteria.hakkuu;
             render();
         } else if (action === 'hae') runSearch();
-        else if (action === 'retry') runSearch(ui.search?.center, ui.search?.fromLocation);
+        else if (action === 'retry') runSearch(ui.search?.center, ui.search?.source);
+        else if (action === 'tallenna') saveFavorite();
         else if (action === 'muuta') { ui.view = 'form'; render(); }
         else if (action === 'listaan') { ui.view = 'results'; ui.selected = null; drawMap(); render(); }
         else if (action === 'valitse') select(Number(el.dataset.id) || el.dataset.id);
@@ -135,18 +137,19 @@ export function startLahihaku() {
 
     /* ---------- Haku ---------- */
 
+    // source: sijainti | kartta | tallennettu
     function currentCenter() {
-        if (ui.pos) return { center: latLonTo3067(ui.pos.lat, ui.pos.lon), fromLocation: true };
+        if (ui.pos) return { center: latLonTo3067(ui.pos.lat, ui.pos.lon), source: 'sijainti' };
         const c = state.map.getCenter();
-        return { center: latLonTo3067(c.lat, c.lng), fromLocation: false };
+        return { center: latLonTo3067(c.lat, c.lng), source: 'kartta' };
     }
 
-    function runSearch(center, fromLocation) {
+    function runSearch(center, source) {
         if (!hasCriteria(ui.criteria)) return;
-        if (!center) ({ center, fromLocation } = currentCenter());
+        if (!center) ({ center, source } = currentCenter());
         const keys = boxTileKeys(searchBox(center));
         const my = ++token;
-        ui.search = { criteria: { ...ui.criteria }, center, fromLocation, keys, status: 'loading', results: [], done: false };
+        ui.search = { criteria: { ...ui.criteria }, center, source, keys, status: 'loading', results: [], done: false };
         ui.view = 'results';
         ui.selected = null;
         render();
@@ -171,6 +174,41 @@ export function startLahihaku() {
         drawMap();
         render();
     }
+
+    /* ---------- Suosikit (#25, jos mukana buildissa) ---------- */
+
+    // Suosikit avaavat tallennetun haun
+    on(VIESTIT.avaaHaku, ({ criteria, center }) => {
+        if (!criteria || !center) return;
+        toggle(true);
+        ui.criteria = { ...emptyCriteria(), ...criteria };
+        runSearch(center, 'tallennettu');
+    });
+
+    function saveFavorite() {
+        const s = ui.search;
+        if (!s) return;
+        if (ui.view === 'detail') {
+            const r = s.results.find(x => x.stand.properties.STANDID === ui.selected);
+            if (!r) return;
+            const p = r.stand.properties;
+            const b = getGeometryBounds3067(r.stand.geometry);
+            emit(VIESTIT.tallennaSuosikki, {
+                type: 'kuvio',
+                name: `${T.kuvio(p.STANDNUMBER ?? '–', formatNumber(p.AREA, 1))} · ${standLabel(p)}`,
+                ref: { standId: p.STANDID, standNumber: String(p.STANDNUMBER ?? ''), center: [Math.round((b.minX + b.maxX) / 2), Math.round((b.minY + b.maxY) / 2)] }
+            });
+        } else {
+            emit(VIESTIT.tallennaSuosikki, {
+                type: 'haku',
+                name: criteriaText(s.criteria),
+                ref: { criteria: { ...s.criteria }, center: s.center.map(Math.round) }
+            });
+        }
+    }
+
+    const saveButton = (label) => (has(VIESTIT.tallennaSuosikki) && !locked()
+        ? `<button type="button" class="kortti-btn kortti-link" data-lh="tallenna">☆ ${esc(label)}</button>` : '');
 
     function select(id) {
         const r = ui.search?.results.find(x => x.stand.properties.STANDID === id);
@@ -223,7 +261,7 @@ export function startLahihaku() {
     function resultsHtml() {
         const s = ui.search;
         const head = `<p class="lh-haku">${esc(criteriaText(s.criteria))}</p>
-            <p class="lh-note">${esc(s.fromLocation ? T.keskiSijainti : T.keskiKartta)}</p>`;
+            <p class="lh-note">${esc(T.keskiLahde[s.source])}</p>`;
         const actions = `
             <div class="lh-actions">
                 <button type="button" class="kortti-btn" data-lh="muuta">${esc(T.muutaHakua)}</button>
@@ -256,7 +294,8 @@ export function startLahihaku() {
         }).join('');
         return `${head}${partial}
             <p class="lh-maara">${esc(T.tulokset(s.results.length))}</p>
-            <ul class="lh-lista">${items}</ul>${actions}`;
+            <ul class="lh-lista">${items}</ul>${actions}
+            ${saveButton(T.tallennaHaku)}`;
     }
 
     function fact(label, value) {
@@ -286,6 +325,7 @@ export function startLahihaku() {
                 ${fact(T.hakkuuehdotus, cutting)}
             </dl>
             <p class="lh-source">${esc(T.lahde(year))}</p>
+            ${saveButton(T.tallennaKuvio)}
             <button type="button" class="kortti-btn kortti-link" data-lh="listaan">${esc(T.takaisinListaan)}</button>`;
     }
 

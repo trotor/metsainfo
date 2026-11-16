@@ -4,6 +4,7 @@
 
 import { calculateStatistics } from '../statistics.js';
 import { formatNumber, formatCadastralReference, calculateParcelArea } from '../utils.js';
+import { emit, VIESTIT } from '../vayla.js';
 import { tip, closeTips } from './tips.js';
 import { renderStandItem, attachStandEventListeners, attachFilterEventListeners } from './stands.js';
 import { setActiveTab } from './panel.js';
@@ -281,4 +282,9 @@ export function showSummary(features, parcel, partCount = 1) {
     attachFilterEventListeners(content);
     if (features.length > 0) initEstimate(content, { features, parcel, label: parcelLabel });
     setActiveTab('summary');
+    // Lisäosat (kokeilubuildissa suosikit) voivat täydentää yhteenvetoa
+    emit(VIESTIT.yhteenveto, {
+        content, parcel, features, label: parcelLabel,
+        reference: parcelProps?.nationalCadastralReference || null
+    });
 }
