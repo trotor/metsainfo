@@ -81,6 +81,8 @@
     <strong>Lyhyesti:</strong> Metsäinfo ei kerää käyttäjistään tietoja. Sovelluksessa ei ole käyttäjätilejä,
     analytiikkaa eikä mainoksia. Sijaintitietosi, valokuvasi ja muistiinpanosi käsitellään ja säilytetään
     ainoastaan omalla laitteellasi, eivätkä ne siirry sovelluksen kehittäjälle tai kenellekään muulle.
+    Testiversion kokeiluissa metsätietoja haetaan sijaintisi ympäriltä, katso
+    <a href="#kokeilut">Testiversion kokeilut</a>.
 </div>
 
 <h2>Rekisterinpitäjä</h2>
@@ -101,7 +103,7 @@
     <tr>
         <td>Sijainti (GPS)</td>
         <td>Oman sijainnin näyttäminen kartalla ja sen tunnistaminen, millä metsikkökuviolla olet</td>
-        <td>Vain laitteen muistissa käytön ajan. Ei tallenneta eikä lähetetä mihinkään.</td>
+        <td>Vain laitteen muistissa käytön ajan. Ei tallenneta eikä lähetetä mihinkään. (Testiversion kokeilut: katso alla.)</td>
     </tr>
     <tr>
         <td>Valokuvat</td>
@@ -147,7 +149,28 @@
 <p>
     Näiden palveluiden omat tietosuojakäytännöt koskevat niille päätyvää liikennettä.
     Sovellus ei lähetä näihin palveluihin sijaintiasi, valokuviasi eikä muistiinpanojasi.
+    Poikkeus ovat testiversion kokeilut alla.
 </p>
+
+<h2 id="kokeilut">Testiversion kokeilut</h2>
+<p>
+    Sovelluksen testiversiossa (TestFlight) on kokeilutoimintoja, joita julkaistussa sovelluksessa
+    ja verkkoversiossa ei ole. Niissä tietoja käsitellään näin:
+</p>
+<ul>
+    <li><strong>Kerro tästä paikasta, metsävisa ja Etsi läheltä</strong> hakevat metsätiedot
+        Suomen metsäkeskuksen rajapinnasta (<code>avoin.metsakeskus.fi</code>) 500 m × 500 m
+        ruutuina sijaintisi tai kartan keskipisteen ympäriltä. Pyynnössä on ruudun rajaus, josta
+        sijaintisi voi päätellä noin 500 metrin tarkkuudella. Tarkkaa sijaintipistettä ei lähetetä.</li>
+    <li><strong>Saavutettavuus</strong> hakee tiet ja tierajoitukset Väylävirastolta
+        (<code>avoinapi.vaylapilvi.fi</code>, Digiroad) ja korjuukelpoisuuskartan Suomen
+        metsäkeskukselta valitun kiinteistön ympäriltä. Pyynnössä on kiinteistön alueen rajaus,
+        ei sijaintiasi.</li>
+    <li><strong>Maastonmuodot</strong> hakee karttakuvat Geologian tutkimuskeskukselta
+        (<code>gtkdata.gtk.fi</code>) kartalla näkyvältä alueelta.</li>
+    <li>Suosikit, muistiinpanot, metsävisan pisteet ja havainnot sekä asetukset tallentuvat
+        vain laitteelle.</li>
+</ul>
 
 <h2>Sovelluksen sisäiset ostot</h2>
 <p>
@@ -188,6 +211,7 @@
     <li>Karttapohjat: © Maanmittauslaitos, tarjoiltu Kapsi Internet-käyttäjät ry:n palvelusta</li>
     <li>Puun kantohinnat: Metsäteollisuus ry:n puukaupan viikkoseuranta ja Luonnonvarakeskus, Teollisuuspuun kauppa (Luken tilastotietokanta, lisenssi CC BY 4.0)</li>
     <li>Kuntarajat ja kuntaluokitus: © Tilastokeskus, lisenssi CC BY 4.0</li>
+    <li>Testiversio: tiet ja tierajoitukset © Väylävirasto, Digiroad, lisenssi CC BY 4.0; korjuukelpoisuuskartta © Suomen metsäkeskus, lisenssi CC BY 4.0; korkeusmalli GTK, aineisto © Maanmittauslaitos</li>
 </ul>
 
 <div class="korostus">
@@ -211,7 +235,7 @@
 </main>
 
 <footer>
-    Päivitetty 13.11.2026 · <a href="./">Takaisin Metsäinfoon</a>
+    Päivitetty 16.11.2026 · <a href="./">Takaisin Metsäinfoon</a>
 </footer>
 
 </body>
