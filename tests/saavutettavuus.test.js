@@ -94,3 +94,77 @@ describe('tieverkko', () => {
         expect(routeToPublic(buildGraph(network), [[0, 500]])).toBe(null); // ei tietä 50 m sisällä
     });
 });
+
+import { soilScore, attributeScore, haulScore, connectionScore, combine } from '../js/saavutettavuus/indeksi.js';
+import { classifyPixel, rasterRequest, classShares } from '../js/saavutettavuus/rasteri.js';
+
+describe('pisteytys', () => {
+    it('maapohja pinta-alalla painotettuna, vesistö ei mukana', () => {
+        expect(soilScore({ 2: 0.5, 6: 0.5 })).toBe(50);
+        expect(soilScore({ 1: 0.5, 254: 0.5 })).toBe(100);
+        expect(soilScore({ 254: 1 })).toBe(null);
+        expect(soilScore(null)).toBe(null);
+    });
+
+    it('kuvion oma korjuukelpoisuus', () => {
+        expect(attributeScore(1)).toBe(100);
+        expect(attributeScore(4)).toBe(20);
+        expect(attributeScore(5)).toBe(null);
+    });
+
+    it('metsäkuljetusmatka', () => {
+        expect(haulScore(50)).toBe(100);
+        expect(haulScore(100)).toBe(100);
+        expect(haulScore(550)).toBe(50);
+        expect(haulScore(1000)).toBe(0);
+        expect(haulScore(3000)).toBe(0);
+        expect(haulScore(null)).toBe(null);
+    });
+
+    it('tieyhteys', () => {
+        expect(connectionScore({ reachesParcel: true, route: { length: 300 } })).toBe(100);
+        expect(connectionScore({ reachesParcel: true, route: null })).toBe(60);
+        expect(connectionScore({ reachesParcel: false, route: null })).toBe(0);
+        expect(connectionScore({ reachesParcel: true, route: { length: 1 }, restricted: true })).toBe(80);
+        expect(connectionScore({ reachesParcel: false, restricted: true })).toBe(0);
+    });
+
+    it('yhdistelmä, puuttuva osa ja luokkarajat', () => {
+        expect(combine({ M: 100, K: 50, Y: null })).toEqual({ score: 75, luokka: 'hyva', puuttuu: ['Y'] });
+        expect(combine({ M: 70, K: 70, Y: 70 }).luokka).toBe('hyva');
+        expect(combine({ M: 69, K: 69, Y: 69 }).luokka).toBe('kohtalainen');
+        expect(combine({ M: 39, K: 39, Y: 39 }).luokka).toBe('heikko');
+        expect(combine({}).score).toBe(null);
+    });
+});
+
+describe('korjuukelpoisuusrasteri', () => {
+    it('väri → luokka', () => {
+        expect(classifyPixel(0x61, 0x99, 0, 255)).toBe(2);
+        expect(classifyPixel(0x63, 0x9b, 0x02, 255)).toBe(2); // värinhallinnan pieni poikkeama
+        expect(classifyPixel(0x80, 0xff, 0xff, 255)).toBe(254);
+        expect(classifyPixel(0x61, 0x99, 0, 0)).toBe(null);
+        expect(classifyPixel(0x00, 0x00, 0xff, 255)).toBe(null);
+    });
+
+    it('pyynnön koko', () => {
+        const r = rasterRequest({ minX: 0, minY: 0, maxX: 2000, maxY: 2000 });
+        expect([r.width, r.height]).toEqual([250, 250]);
+        const big = rasterRequest({ minX: 0, minY: 0, maxX: 20000, maxY: 10000 });
+        expect([big.width, big.height]).toEqual([1024, 512]);
+        expect(r.url).toContain('layers=Korjuukelpoisuus');
+    });
+
+    it('luokkien osuudet kuvion sisältä', () => {
+        // 4 × 4 px, 10 m/px; vasen puoli luokka 2, oikea puoli luokka 6
+        const width = 4, height = 4, data = new Uint8ClampedArray(width * height * 4);
+        for (let j = 0; j < height; j++) for (let i = 0; i < width; i++) {
+            const c = i < 2 ? [0x61, 0x99, 0] : [0xff, 0x26, 0];
+            data.set([...c, 255], (j * width + i) * 4);
+        }
+        const raster = { data, width, height, bbox: { minX: 0, minY: 0, maxX: 40, maxY: 40 } };
+        expect(classShares(raster, square(0, 0, 40))).toEqual({ 2: 0.5, 6: 0.5 });
+        expect(classShares(raster, square(0, 0, 20))).toEqual({ 2: 1 });
+        expect(classShares(raster, square(100, 100, 10))).toBe(null);
+    });
+});
