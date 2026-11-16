@@ -72,13 +72,14 @@ function init() {
         // Ladataan rinnakkain, käynnistetään aina samassa järjestyksessä (karttapainikkeet)
         Promise.all([
             import('./maasto/index.js'), import('./lahihaku/index.js'), import('./suosikit/index.js'),
-            import('./korkeusmalli/index.js'), import('./asetukset/index.js')
-        ]).then(([maasto, lahihaku, suosikit, korkeusmalli, asetukset]) => {
+            import('./korkeusmalli/index.js'), import('./asetukset/index.js'), import('./saavutettavuus/index.js')
+        ]).then(([maasto, lahihaku, suosikit, korkeusmalli, asetukset, saavutettavuus]) => {
             maasto.startMaasto();
             lahihaku.startLahihaku();
             suosikit.startSuosikit();
             korkeusmalli.startKorkeusmalli();
             asetukset.startAsetukset();
+            saavutettavuus.startSaavutettavuus();
         });
     }
 }

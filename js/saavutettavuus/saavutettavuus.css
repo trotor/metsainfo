@@ -1,0 +1,81 @@
+/* Saavutettavuus (kokeilu): vain VITE_KOKEILU=1 -buildissa. Kortin runko: js/ui/kortti.css */
+
+.sv-body { margin-top: 8px; }
+.sv-kiinteisto { margin: 2px 0 0; font-size: 13px; color: var(--sammal); font-weight: 600; }
+.sv-status, .sv-huom { color: var(--sammal); margin: 8px 0; font-size: 14px; }
+.sv-lahde { color: var(--sammal); margin: 8px 0 0; font-size: 12px; }
+
+.sv-tie h3, .sv-otsikko {
+    margin: 10px 0 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sammal);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+.sv-tie p { margin: 2px 0; font-size: 14px; color: var(--kaarna); }
+.sv-rajoitus { color: var(--hakkuu) !important; }
+
+.sv-varoitus {
+    margin: 8px 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--hakkuu-bg);
+    color: var(--hakkuu);
+    font-size: 14px;
+}
+.sv-varoitus p { margin: 0 0 6px; }
+
+.sv-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.sv-rivi {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    width: 100%;
+    text-align: left;
+    border: 1px solid #d5dbd1;
+    background: #fff;
+    color: var(--kaarna);
+    border-radius: 12px;
+    min-height: 44px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.sv-rivi.sv-valittu { border-color: var(--kuusikko); box-shadow: 0 0 0 1px var(--kuusikko); }
+.sv-rivi-teksti { display: grid; gap: 2px; }
+.sv-rivi-nimi { font-weight: 600; color: var(--kuusikko); }
+.sv-rivi-tieto { font-size: 13px; color: var(--sammal); }
+.sv-nayta { margin-top: 4px; width: 100%; }
+
+.sv-merkki {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #6b7280;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.sv-merkki.sv-hyva { background: #15803d; }
+.sv-merkki.sv-kohtalainen { background: #a16207; }
+.sv-merkki.sv-heikko { background: #b91c1c; }
+.stand-summary .sv-merkki { margin-right: 6px; }
+
+.sv-avaa {
+    border: 1px solid var(--havu);
+    background: #fff;
+    color: var(--havu);
+    border-radius: 999px;
+    min-height: 36px;
+    padding: 4px 14px;
+    margin: 6px 0;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
