@@ -1,51 +1,56 @@
-/* Saavutettavuus (kokeilu): vain VITE_KOKEILU=1 -buildissa. Kortin runko: js/ui/kortti.css */
+/* Saavutettavuus (kokeilu): vain VITE_KOKEILU=1 -buildissa. */
 
-.sv-body { margin-top: 8px; }
-.sv-kiinteisto { margin: 2px 0 0; font-size: 13px; color: var(--sammal); font-weight: 600; }
-.sv-status, .sv-huom { color: var(--sammal); margin: 8px 0; font-size: 14px; }
-.sv-lahde { color: var(--sammal); margin: 8px 0 0; font-size: 12px; }
-
-.sv-tie h3, .sv-otsikko {
-    margin: 10px 0 4px;
+/* Arviolaatikko: erottuu Metsäkeskuksen faktatiedoista (katkoviivakehys, oma tausta) */
+.sv-laatikko {
+    margin: 10px 0;
+    padding: 10px 12px;
+    border: 1.5px dashed #7c8f84;
+    border-radius: 12px;
+    background: #f4f7f2;
+}
+.stand-details .sv-laatikko { margin: 10px 0 6px; }
+.sv-laatikko-otsikko {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--sammal);
     text-transform: uppercase;
     letter-spacing: .03em;
 }
-.sv-tie p { margin: 2px 0; font-size: 14px; color: var(--kaarna); }
-.sv-rajoitus { color: var(--hakkuu) !important; }
+.sv-arvio-merkki, .sv-kokeilu-merkki {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 600;
+    font-size: 11px;
+    border-radius: 999px;
+    padding: 1px 8px;
+}
+.sv-arvio-merkki { background: #fff; color: var(--kaarna); border: 1px solid #c7d1c9; }
+.sv-kokeilu-merkki { background: var(--arvo-bg, #fdf3d8); color: var(--arvo, #8a6100); }
+
+.sv-ryhma { font-size: 13px; font-weight: 600; color: var(--kuusikko); margin: 4px 0 2px; }
+.sv-rivi-teksti { margin: 2px 0; font-size: 14px; color: var(--kaarna); }
+.sv-status, .sv-huom { color: var(--sammal); margin: 6px 0 0; font-size: 13px; }
+.sv-lahde { color: var(--sammal); margin: 6px 0 0; font-size: 11px; }
+.sv-rajoitus { color: var(--hakkuu); margin: 4px 0 0; font-size: 13px; }
+.sv-kartalle { width: 100%; margin-top: 8px; }
+.sv-kartalle[aria-pressed="true"] { background: var(--havu); color: #fff; }
 
 .sv-varoitus {
-    margin: 8px 0;
+    margin: 4px 0 8px;
     padding: 8px 10px;
     border-radius: 10px;
     background: var(--hakkuu-bg);
     color: var(--hakkuu);
-    font-size: 14px;
+    font-size: 13px;
 }
 .sv-varoitus p { margin: 0 0 6px; }
 
-.sv-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.sv-rivi {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    width: 100%;
-    text-align: left;
-    border: 1px solid #d5dbd1;
-    background: #fff;
-    color: var(--kaarna);
-    border-radius: 12px;
-    min-height: 44px;
-    padding: 8px 12px;
-    cursor: pointer;
-}
-.sv-rivi.sv-valittu { border-color: var(--kuusikko); box-shadow: 0 0 0 1px var(--kuusikko); }
-.sv-rivi-teksti { display: grid; gap: 2px; }
-.sv-rivi-nimi { font-weight: 600; color: var(--kuusikko); }
-.sv-rivi-tieto { font-size: 13px; color: var(--sammal); }
-.sv-nayta { margin-top: 4px; width: 100%; }
+.sv-pisteet { display: flex; align-items: center; gap: 8px; margin: 2px 0 6px; font-weight: 600; color: var(--kuusikko); }
 
 .sv-merkki {
     flex: none;
@@ -67,15 +72,26 @@
 .sv-merkki.sv-heikko { background: #b91c1c; }
 .stand-summary .sv-merkki { margin-right: 6px; }
 
-.sv-avaa {
-    border: 1px solid var(--havu);
-    background: #fff;
-    color: var(--havu);
-    border-radius: 999px;
-    min-height: 36px;
-    padding: 4px 14px;
-    margin: 6px 0;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
+/* Karttaselite: sovelluksen väriselitteen paikalla, joka piilotetaan värityksen ajaksi */
+body.sv-varit #color-legend,
+body.sv-varit #color-mode-control { display: none !important; }
+#sv-selite {
+    position: absolute;
+    bottom: 40px;
+    left: 10px;
+    z-index: 1000;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    padding: 8px 10px;
+    font-size: 0.75rem;
+}
+#sv-selite[hidden] { display: none; }
+#sv-selite:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+#sv-selite .legend-items { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.sv-selite-otsikko { font-weight: 600; }
+.sv-selite-viiva { display: inline-block; width: 18px; height: 4px; border-radius: 2px; background: #2563eb; margin-right: 6px; vertical-align: middle; }
+
+@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+    #sv-selite { position: static; grid-column: 1 / -1; order: 4; border-radius: 10px; }
 }

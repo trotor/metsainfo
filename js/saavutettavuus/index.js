@@ -3,6 +3,11 @@
  * korjuukelpoisuus ja tieyhteys kiinteistölle kuvioittain.
  * Vain VITE_KOKEILU=1 -buildissa (dynaaminen import app.js:ssä).
  * Suunnitelma: docs/plans/2026-11-16-saavutettavuus-kokeilu.md
+ *
+ * - Karttapainike värittää avatun kiinteistön kuviot indeksin luokan mukaan.
+ * - Kuvion tietokorttiin (kuvioluettelon avattu rivi) tulee arviolaatikko,
+ *   joka erottuu Metsäkeskuksen faktatiedoista.
+ * - Yhteenvetoon tulee kiinteistön tieyhteys samanlaisessa laatikossa.
  */
 
 import './saavutettavuus.css';
@@ -12,9 +17,9 @@ import { locale } from '../i18n.js';
 import { formatNumber, coordsEPSG3067ToLatLng } from '../utils.js';
 import { on, VIESTIT } from '../vayla.js';
 import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
-import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
+import { addMapButton } from '../ui/kortti.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
-import { openStand } from '../ui/stands.js';
+import { showToast } from '../ui/location-ui.js';
 import { purchases } from '../platform/purchases.js';
 import { isUnlocked } from '../features.js';
 import { analyseParcel } from './analyysi.js';
@@ -36,56 +41,89 @@ export function startSaavutettavuus() {
     addHelpSection({ id: 'saavutettavuus', title: T.ohjeOsio.otsikko, html: T.ohjeOsio.html });
 
     const roads = createRoadSource();
-    const ui = { open: false, ctx: null, status: 'idle', result: null, selected: null };
+    const ui = { colors: false, ctx: null, status: 'idle', result: null };
     let token = 0;
 
-    /* ---------- Kartta ---------- */
+    /* ---------- Kartta: kuviot luokan väreillä ---------- */
 
     const roadLayer = L.layerGroup();
+    // Ei klikattava: kuvion napautus menee alla olevalle kuviotasolle (kuvion tiedot)
     const standLayer = L.geoJSON(null, {
         coordsToLatLng: coordsEPSG3067ToLatLng,
-        bubblingMouseEvents: false,
-        style: (f) => standStyle(f),
-        onEachFeature(feature, layer) {
-            layer.on('click', () => select(feature.properties.__index));
+        interactive: false,
+        style: (f) => {
+            const r = ui.result?.kuviot.get(f.properties.__index);
+            const color = VARIT[r?.luokka] || '#6b7280';
+            return { color, weight: 1.5, fillColor: color, fillOpacity: 0.55 };
         }
     });
 
-    function standStyle(f) {
-        const r = ui.result?.kuviot.get(f.properties.__index);
-        const color = VARIT[r?.luokka] || '#6b7280';
-        const sel = f.properties.__index === ui.selected;
-        return { color: sel ? '#111827' : color, weight: sel ? 4 : 1.5, fillColor: color, fillOpacity: 0.35 };
-    }
-
     const line = (l, style) => L.polyline(l.coords.map(coordsEPSG3067ToLatLng), { interactive: false, ...style });
+
+    // Selite samaan kohtaan kuin sovelluksen väriselite (mobiilissa karttanauhaan)
+    const legend = document.createElement('div');
+    legend.id = 'sv-selite';
+    legend.hidden = true;
+    document.getElementById('color-legend')?.after(legend);
 
     function drawMap() {
         roadLayer.clearLayers();
         standLayer.clearLayers();
         const r = ui.result;
-        const show = ui.open && r && !locked();
+        const show = Boolean(ui.colors && r && !locked());
+        document.body.classList.toggle('sv-varit', show);
+        legend.hidden = !show;
         if (!show) {
             roadLayer.remove();
             standLayer.remove();
             return;
         }
         for (const l of r.tiet) {
-            if (l.kind === 'auto') line(l, { color: '#1f2937', weight: 3, opacity: 0.8 }).addTo(roadLayer);
-            else if (l.kind === 'ajopolku') line(l, { color: '#1f2937', weight: 2, dashArray: '4 6', opacity: 0.7 }).addTo(roadLayer);
+            if (l.kind === 'auto') line(l, { color: '#1f2937', weight: 2.5, opacity: 0.75 }).addTo(roadLayer);
+            else if (l.kind === 'ajopolku') line(l, { color: '#1f2937', weight: 1.5, dashArray: '4 6', opacity: 0.6 }).addTo(roadLayer);
         }
-        for (const l of r.reitti) line(l, { color: '#2563eb', weight: 5, opacity: 0.9 }).addTo(roadLayer);
+        for (const l of r.reitti) line(l, { color: '#2563eb', weight: 4, opacity: 0.85 }).addTo(roadLayer);
         ui.ctx.features.forEach((f, i) => {
             if (f.geometry) standLayer.addData({ type: 'Feature', geometry: f.geometry, properties: { __index: i } });
         });
-        roadLayer.addTo(state.map);
         standLayer.addTo(state.map);
+        roadLayer.addTo(state.map);
+        legend.innerHTML = `<div class="sv-selite-otsikko">${esc(T.selite)}</div>
+            <div class="legend-items">
+                ${['hyva', 'kohtalainen', 'heikko'].map(k => `<div class="legend-item"><span class="legend-color" style="background:${VARIT[k]}"></span>${esc(T.luokat[k])}</div>`).join('')}
+                ${r.reitti.length ? `<div class="legend-item"><span class="sv-selite-viiva"></span>${esc(T.seliteReitti)}</div>` : ''}
+            </div>`;
     }
 
     const button = addMapButton({
-        map: state.map, label: T.nappi, icon: ICON, onClick: () => toggle(),
+        map: state.map, label: T.nappi, icon: ICON, onClick: () => toggleColors(),
         isMobile: isMobileLayout, onLayoutChange
     });
+
+    function openPaywall() {
+        // Hinta-arvion ostonäkymä avautuu data-est="paywall" -painikkeesta (js/ui/estimate.js)
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.dataset.est = 'paywall';
+        b.hidden = true;
+        document.body.appendChild(b);
+        b.click();
+        b.remove();
+    }
+
+    function toggleColors(force) {
+        const next = force ?? !ui.colors;
+        if (next && locked()) return openPaywall();
+        if (next && !ui.ctx?.features?.length) {
+            showToast(ui.ctx ? T.eiKuvioita : T.valitseKiinteisto);
+            return;
+        }
+        ui.colors = next;
+        button.setPressed(ui.colors);
+        if (ui.colors && ui.status === 'error') run();
+        drawMap();
+        renderSummaryBox();
+    }
 
     /* ---------- Analyysi ---------- */
 
@@ -95,7 +133,7 @@ export function startSaavutettavuus() {
         const my = ++token;
         ui.status = 'loading';
         ui.result = null;
-        render();
+        renderSummaryBox();
         try {
             const result = await analyseParcel({ parcel: ctx.parcel, features: ctx.features }, {
                 roads,
@@ -110,178 +148,56 @@ export function startSaavutettavuus() {
             console.warn('[saavutettavuus]', err);
             ui.status = 'error';
         }
-        decorate();
+        renderSummaryBox();
+        decorateStands();
         drawMap();
-        render();
     }
 
     on(VIESTIT.yhteenveto, (ctx) => {
         ui.ctx = ctx;
-        ui.selected = null;
         ui.result = null;
         ui.status = 'idle';
         token++;
-        addSummaryButton();
+        renderSummaryBox();
         drawMap();
         if (!locked() && ctx?.features?.length) run();
-        else render();
     }, { replay: true });
 
     purchases.onChange(() => {
         if (!locked() && ui.ctx && !ui.result && ui.status !== 'loading') run();
-        else { decorate(); drawMap(); render(); }
+        else { renderSummaryBox(); decorateStands(); drawMap(); }
     });
 
-    /* ---------- Yhteenveto: painike ja kuvioiden merkit ---------- */
+    /* ---------- Yhteenveto: kiinteistön laatikko ---------- */
 
-    function addSummaryButton() {
-        const content = ui.ctx?.content;
-        if (!content?.isConnected) return;
-        content.querySelectorAll('.sv-lisa').forEach(el => el.remove());
-        const parcelInfo = content.querySelector('.parcel-section .parcel-info');
-        if (!parcelInfo) return;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'sv-lisa sv-avaa';
-        btn.textContent = T.avaa;
-        btn.addEventListener('click', () => toggle(true));
-        parcelInfo.after(btn);
+    function boxHead({ kokeilu = false } = {}) {
+        return `<div class="sv-laatikko-otsikko">
+            <span>${esc(T.otsikko)}</span>
+            <span class="sv-arvio-merkki">${esc(T.arvioMerkki)}</span>
+            ${kokeilu ? `<span class="sv-kokeilu-merkki">${esc(T.kokeilu)}</span>` : ''}
+        </div>`;
     }
 
-    function decorate() {
-        const content = ui.ctx?.content;
-        const r = ui.result;
-        if (!content?.isConnected) return;
-        content.querySelectorAll('.stand-item .sv-lisa').forEach(el => el.remove());
-        if (!r || locked()) return;
-        content.querySelectorAll('.stand-item').forEach(itemEl => {
-            const k = r.kuviot.get(Number(itemEl.dataset.index));
-            if (!k || k.score == null) return;
-            const badge = document.createElement('span');
-            badge.className = `sv-lisa sv-merkki sv-${k.luokka}`;
-            badge.textContent = k.score;
-            badge.title = T.merkki(k.score, T.luokat[k.luokka]);
-            badge.setAttribute('aria-label', badge.title);
-            itemEl.querySelector('.stand-summary')?.prepend(badge);
-            const row = document.createElement('div');
-            row.className = 'sv-lisa detail-row';
-            row.innerHTML = `<span>${esc(T.otsikko)}:</span><span>${esc(`${T.pisteet(k.score)} · ${T.luokat[k.luokka]}`)}</span>`;
-            itemEl.querySelector('.stand-details')?.prepend(row);
-        });
-    }
-
-    /* ---------- Kortti ---------- */
-
-    const card = createCard({ id: 'saavutettavuus', label: T.nappi, className: 'saavutettavuus-kortti', onClose: () => toggle(false) });
-
-    card.el.addEventListener('click', (e) => {
-        if (e.target.closest('[data-close]')) return toggle(false);
-        const el = e.target.closest('[data-sv]');
-        if (!el) return;
-        const action = el.dataset.sv;
-        if (action === 'retry') run();
-        else if (action === 'valitse') select(Number(el.dataset.index));
-        else if (action === 'kuvio') {
-            toggle(false);
-            openStand(Number(el.dataset.index));
-        }
-    });
-
-    function toggle(force) {
-        ui.open = force ?? !ui.open;
-        if (ui.open) {
-            card.open();
-            render();
-            fitParcel();
-        } else {
-            card.close();
-            ui.selected = null;
-        }
-        button.setPressed(ui.open);
-        drawMap();
-    }
-
-    // Kortti peittää kartan oikean reunan (työpöytä) tai alaosan (mobiili),
-    // työpöydällä tietopaneeli vasemman reunan
-    function cardPadding() {
-        const r = card.el.getBoundingClientRect();
-        if (isMobileLayout()) return { paddingTopLeft: [16, 16], paddingBottomRight: [16, r.height + 16] };
-        const panel = document.getElementById('info-panel');
-        const left = panel && !panel.classList.contains('hidden') ? panel.getBoundingClientRect().right : 0;
-        return { paddingTopLeft: [left + 16, 16], paddingBottomRight: [r.width + 24, 16] };
-    }
-
-    function fitParcel() {
-        const parts = ui.ctx?.parcel ? (ui.ctx.parcel.parts || [ui.ctx.parcel]) : [];
-        const layer = L.geoJSON({ type: 'FeatureCollection', features: parts }, { coordsToLatLng: coordsEPSG3067ToLatLng });
-        const b = layer.getBounds();
-        if (b.isValid()) state.map.fitBounds(b, cardPadding());
-    }
-
-    function select(index) {
-        ui.selected = ui.selected === index ? null : index;
-        standLayer.eachLayer(l => l.setStyle(standStyle(l.feature)));
-        render();
-        card.el.querySelector(`[data-index="${index}"]`)?.scrollIntoView({ block: 'nearest' });
-    }
-
-    function soilText(k, feature) {
-        if (k.maapohjaLahde === 'kartta' && k.paaluokka) return T.korjuukelpoisuus(T.maapohja[k.paaluokka]);
-        if (k.maapohjaLahde === 'kuvio') return T.kuvionTieto(codeName('accessibility', feature?.properties?.ACCESSIBILITY));
-        return null;
-    }
-
-    function roadSection(r) {
+    function roadLines(r) {
         const t = r.tie;
-        if (t.virhe) {
-            return `<div class="sv-varoitus"><p>${esc(T.tieVirhe)}</p>
-                <button type="button" class="kortti-btn" data-sv="retry">${esc(T.yritaUudelleen)}</button></div>`;
-        }
-        const lines = [];
-        if (!t.reachesParcel) lines.push(T.eiTieta);
-        else {
-            lines.push(T.tieTulee);
-            if (t.route?.length === 0) lines.push(T.yleisenTienVarrella);
-            else if (t.route) lines.push(T.reitti(meters(t.route.length)));
-            else lines.push(T.eiReittia);
-            if (t.tiekunta) lines.push(T.tiekunta);
-        }
-        const limits = t.rajoitukset.map(x => x.tyyppi === 'kelirikko' ? T.kelirikko(tonnes(x.kg), x.alku, x.loppu) : T.massa(tonnes(x.kg)));
-        return `<section class="sv-tie">
-            <h3>${esc(T.tieKiinteistolle)}</h3>
-            ${lines.map(l => `<p>${esc(l)}</p>`).join('')}
-            ${limits.length ? `<p class="sv-rajoitus"><strong>${esc(T.rajoitukset)}:</strong> ${esc(limits.join(', '))}</p>` : ''}
-        </section>`;
+        if (t.virhe) return [];
+        if (!t.reachesParcel) return [T.eiTieta];
+        const lines = [T.tieTulee];
+        if (t.route?.length === 0) lines.push(T.yleisenTienVarrella);
+        else if (t.route) lines.push(T.reitti(meters(t.route.length)));
+        else lines.push(T.eiReittia);
+        if (t.tiekunta) lines.push(T.tiekunta);
+        return lines;
     }
 
-    function standRow(k, i) {
-        const f = ui.ctx.features[i];
-        const n = f?.properties?.STANDNUMBER ?? i + 1;
-        const details = [
-            k.tieKuviolla ? T.tieKuviolla : k.meanDist != null ? T.metsakuljetus(meters(k.meanDist)) : null,
-            soilText(k, f),
-            k.puuttuu.length ? T.puuttuu(k.puuttuu.map(p => T.osat[p]).join(', ')) : null
-        ].filter(Boolean);
-        const sel = i === ui.selected;
-        return `<li><button type="button" class="sv-rivi${sel ? ' sv-valittu' : ''}" data-sv="valitse" data-index="${i}" aria-pressed="${sel}">
-                <span class="sv-merkki sv-${esc(k.luokka)}" aria-hidden="true">${k.score ?? '–'}</span>
-                <span class="sv-rivi-teksti">
-                    <span class="sv-rivi-nimi">${esc(T.kuvio(n))} · ${esc(k.luokka ? T.luokat[k.luokka] : '–')}</span>
-                    ${details.map(d => `<span class="sv-rivi-tieto">${esc(d)}</span>`).join('')}
-                </span>
-            </button>
-            ${sel ? `<button type="button" class="kortti-btn sv-nayta" data-sv="kuvio" data-index="${i}">${esc(T.naytaKuvio)}</button>` : ''}
-        </li>`;
+    function limitsText(r) {
+        return r.tie.rajoitukset.map(x => x.tyyppi === 'kelirikko' ? T.kelirikko(tonnes(x.kg), x.alku, x.loppu) : T.massa(tonnes(x.kg)));
     }
 
-    function body() {
-        if (!ui.ctx) return `<p class="sv-status">${esc(T.valitseKiinteisto)}</p>`;
-        if (!ui.ctx.features?.length) return `<p class="sv-status">${esc(T.eiKuvioita)}</p>`;
+    function summaryBody() {
         if (locked()) {
-            return `<div class="kortti-lukittu">
-                <p>${esc(T.lukittu)}</p>
-                <button type="button" class="kortti-btn kortti-primary" data-est="paywall">${esc(T.avaaLisaosa)}</button>
-            </div>`;
+            return `<p class="sv-rivi-teksti">${esc(T.lukittu)}</p>
+                <button type="button" class="kortti-btn kortti-primary" data-est="paywall">${esc(T.avaaLisaosa)}</button>`;
         }
         if (ui.status === 'loading' || ui.status === 'idle') return `<p class="sv-status" role="status">${esc(T.lasketaan)}</p>`;
         if (ui.status === 'error') {
@@ -289,25 +205,95 @@ export function startSaavutettavuus() {
                 <button type="button" class="kortti-btn" data-sv="retry">${esc(T.yritaUudelleen)}</button>`;
         }
         const r = ui.result;
-        const number = (i) => Number(ui.ctx.features[i]?.properties?.STANDNUMBER ?? i + 1);
-        const rows = [...r.kuviot.entries()].sort(([a], [b]) => number(a) - number(b) || a - b)
-            .map(([i, k]) => standRow(k, i)).join('');
-        return `${r.partial ? `<div class="sv-varoitus"><p>${esc(T.osittain)}</p>
+        const limits = limitsText(r);
+        const warn = r.tie.virhe ? T.tieVirhe : r.partial ? T.osittain : null;
+        return `${warn ? `<div class="sv-varoitus"><p>${esc(warn)}</p>
                 <button type="button" class="kortti-btn" data-sv="retry">${esc(T.yritaUudelleen)}</button></div>` : ''}
-            ${roadSection(r)}
-            <h3 class="sv-otsikko">${esc(T.kuviot)}</h3>
-            <ul class="sv-lista">${rows}</ul>
-            <p class="sv-huom">${esc(T.kartalla)}</p>
-            <p class="sv-huom">${esc(T.arvio)}</p>
+            ${r.tie.virhe ? '' : `<div class="sv-ryhma">${esc(T.tieKiinteistolle)}</div>`}
+            ${roadLines(r).map(l => `<p class="sv-rivi-teksti">${esc(l)}</p>`).join('')}
+            ${limits.length ? `<p class="sv-rajoitus"><strong>${esc(T.rajoitukset)}:</strong> ${esc(limits.join(', '))}</p>` : ''}
+            <button type="button" class="kortti-btn sv-kartalle" data-sv="varit" aria-pressed="${ui.colors}">${esc(ui.colors ? T.piilotaKartalta : T.naytaKartalla)}</button>
+            <p class="sv-huom">${esc(T.kuvionLaatikko)}</p>
             <p class="sv-huom">${esc(T.lisamaksu)}</p>
             <p class="sv-lahde">${esc(T.lahteet(r.lahteet.alue))}</p>`;
     }
 
-    function render() {
-        if (!ui.open) return;
-        const label = ui.ctx?.label ? ` · ${ui.ctx.label}` : '';
-        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: T.kokeilu, closeLabel: T.sulje })}
-            ${ui.ctx ? `<p class="sv-kiinteisto">${esc(label.slice(3))}</p>` : ''}
-            <div class="sv-body">${body()}</div>`;
+    function renderSummaryBox() {
+        const content = ui.ctx?.content;
+        if (!content?.isConnected) return;
+        content.querySelector('.sv-kiinteisto')?.remove();
+        if (!ui.ctx.features?.length) return;
+        const parcelInfo = content.querySelector('.parcel-section .parcel-info');
+        if (!parcelInfo) return;
+        const box = document.createElement('section');
+        box.className = 'sv-lisa sv-laatikko sv-kiinteisto';
+        box.innerHTML = `${boxHead({ kokeilu: true })}${summaryBody()}`;
+        box.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-sv]');
+            if (!el) return;
+            if (el.dataset.sv === 'retry') run();
+            else if (el.dataset.sv === 'varit') toggleColors();
+        });
+        parcelInfo.after(box);
+    }
+
+    /* ---------- Kuvioluettelo: merkki ja arviolaatikko kuvion tiedoissa ---------- */
+
+    function soilText(k, feature) {
+        if (k.maapohjaLahde === 'kartta' && k.paaluokka) return T.maapohja[k.paaluokka];
+        if (k.maapohjaLahde === 'kuvio') return T.kuvionTieto(codeName('accessibility', feature?.properties?.ACCESSIBILITY));
+        return null;
+    }
+
+    function connectionText(r) {
+        const t = r.tie;
+        if (t.virhe) return null;
+        if (!t.reachesParcel) return T.eiTietaLyhyt;
+        if (t.route?.length === 0) return T.yleisenTienVarrellaLyhyt;
+        if (t.route) return T.reittiLyhyt(meters(t.route.length));
+        return T.eiReittiaLyhyt;
+    }
+
+    function standBox(k, feature, r) {
+        const rows = [
+            [T.metsakuljetus, k.tieKuviolla ? T.tieKuviolla : k.meanDist != null ? T.noin(meters(k.meanDist)) : null],
+            [T.korjuukelpoisuus, soilText(k, feature)],
+            [T.tieyhteys, connectionText(r)]
+        ].filter(([, v]) => v);
+        const limits = limitsText(r);
+        return `<div class="detail-group sv-lisa sv-laatikko sv-kuvio">
+            ${boxHead()}
+            <div class="sv-pisteet"><span class="sv-merkki sv-${esc(k.luokka)}">${k.score}</span><span>${esc(T.luokat[k.luokka])} · ${esc(T.pisteet(k.score))}</span></div>
+            <div class="detail-grid">
+                ${rows.map(([a, b]) => `<div class="detail-row"><span>${esc(a)}</span><span>${esc(b)}</span></div>`).join('')}
+            </div>
+            ${limits.length ? `<p class="sv-rajoitus"><strong>${esc(T.rajoitukset)}:</strong> ${esc(limits.join(', '))}</p>` : ''}
+            ${k.puuttuu.length ? `<p class="sv-huom">${esc(T.puuttuu(k.puuttuu.map(p => T.osat[p]).join(', ')))}</p>` : ''}
+            <p class="sv-huom">${esc(T.arvio)}</p>
+        </div>`;
+    }
+
+    function decorateStands() {
+        const content = ui.ctx?.content;
+        const r = ui.result;
+        if (!content?.isConnected) return;
+        content.querySelectorAll('.stand-item .sv-lisa').forEach(el => el.remove());
+        if (!r || locked()) return;
+        content.querySelectorAll('.stand-item').forEach(itemEl => {
+            const i = Number(itemEl.dataset.index);
+            const k = r.kuviot.get(i);
+            if (!k || k.score == null) return;
+            const badge = document.createElement('span');
+            badge.className = `sv-lisa sv-merkki sv-${k.luokka}`;
+            badge.textContent = k.score;
+            badge.title = T.merkki(k.score, T.luokat[k.luokka]);
+            badge.setAttribute('aria-label', badge.title);
+            itemEl.querySelector('.stand-summary')?.prepend(badge);
+            const details = itemEl.querySelector('.stand-details');
+            if (!details) return;
+            const holder = document.createElement('div');
+            holder.innerHTML = standBox(k, ui.ctx.features[i], r);
+            details.insertBefore(holder.firstElementChild, details.querySelector('.detail-footer'));
+        });
     }
 }
