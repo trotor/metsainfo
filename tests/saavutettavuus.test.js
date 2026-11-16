@@ -168,3 +168,131 @@ describe('korjuukelpoisuusrasteri', () => {
         expect(classShares(raster, square(100, 100, 10))).toBe(null);
     });
 });
+
+import { analyseParcel } from '../js/saavutettavuus/analyysi.js';
+import { createRoadSource, tileKeys, toLinks } from '../js/saavutettavuus/aineisto.js';
+
+describe('aineisto', () => {
+    const feature = (id, coords, props = {}) => ({
+        type: 'Feature', geometry: { type: 'LineString', coordinates: coords }, properties: { link_id: id, ...props }
+    });
+    const respond = (json) => Promise.resolve({ ok: true, json: () => Promise.resolve(json) });
+
+    it('ruudut ja monirivinen linkki', () => {
+        expect(tileKeys({ minX: 100, minY: 100, maxX: 2100, maxY: 1900 })).toEqual(['0,0', '1,0']);
+        const parts = toLinks({ geometry: { type: 'MultiLineString', coordinates: [[[0, 0, 5], [1, 1, 5]], [[2, 2], [3, 3]]] }, properties: { link_id: 'x' } });
+        expect(parts.map(p => p.id)).toEqual(['x#0', 'x#1']);
+        expect(parts[0].linkId).toBe('x');
+        expect(parts[0].coords).toEqual([[0, 0], [1, 1]]);
+    });
+
+    it('sama linkki kahdessa ruudussa kerran; vajaa ruutu → partial', async () => {
+        const urls = [];
+        const source = createRoadSource({
+            fetchFn: (url) => {
+                urls.push(url);
+                const json = { features: [feature('L1', [[1900, 0], [2100, 0]])], numberMatched: url.includes('bbox=2000') ? 5 : 1 };
+                return respond(json);
+            }
+        });
+        const { links, partial } = await source.links({ minX: 100, minY: 100, maxX: 2100, maxY: 1900 });
+        expect(links).toHaveLength(1);
+        expect(partial).toBe(true);
+        await source.links({ minX: 100, minY: 100, maxX: 2100, maxY: 1900 });
+        expect(urls).toHaveLength(2); // välimuisti
+    });
+
+    it('rajoitukset link_id:n mukaan, pienin raja', async () => {
+        const source = createRoadSource({
+            fetchFn: (url) => {
+                if (url.includes('kelirikko')) return respond({ features: [
+                    feature('A', [[0, 0], [1, 1]], { arvo: '15000', kestoalku1: '15.03.2027', kestolopp1: '15.06.2027' }),
+                    feature('A', [[0, 0], [1, 1]], { arvo: '8000', kestoalku1: '', kestolopp1: '' })
+                ] });
+                if (url.includes('tiekunnalliset')) return respond({ features: [feature('A', [[0, 0], [1, 1]])] });
+                if (url.includes('dr_max_massa')) return respond({ features: [feature('B', [[0, 0], [1, 1]], { arvo: 6000 })] });
+                return respond({ features: [] });
+            }
+        });
+        const r = await source.restrictions({ minX: 0, minY: 0, maxX: 10, maxY: 10 });
+        expect(r.kelirikko.get('A')).toEqual({ kg: 8000, alku: null, loppu: null });
+        expect(r.tiekunta.has('A')).toBe(true);
+        expect(r.massa.get('B').kg).toBe(6000);
+    });
+
+    it('verkkovirhe: haku epäonnistuu ja yritetään uudelleen', async () => {
+        let fail = true;
+        const source = createRoadSource({ fetchFn: () => fail ? Promise.reject(new Error('offline')) : respond({ features: [] }) });
+        await expect(source.links({ minX: 0, minY: 0, maxX: 10, maxY: 10 })).rejects.toThrow('offline');
+        fail = false;
+        await expect(source.links({ minX: 0, minY: 0, maxX: 10, maxY: 10 })).resolves.toEqual({ links: [], partial: false });
+    });
+});
+
+describe('analyysi', () => {
+    const P = link('P', [[-500, 200], [0, 200], [1000, 200], [1500, 200]]);
+    const Q = link('Q', [[1500, 200], [1500, 2000]], { hallinn_lk: 2, toiminn_lk: 4 });
+    const noRestrictions = { kelirikko: new Map(), tiekunta: new Set(), massa: new Map(), partial: false };
+    const fakeRoads = (links, restrictions = noRestrictions) => ({
+        links: async () => ({ links, partial: false }),
+        restrictions: async () => restrictions
+    });
+    const stand = (geometry, props = {}) => ({ geometry, properties: props });
+
+    it('tie kuviolla, kaukana oleva kuvio, tieyhteys ja kuvion oma korjuukelpoisuus', async () => {
+        const parcel = { geometry: square(0, 0, 1000), properties: {} };
+        const res = await analyseParcel(
+            { parcel, features: [stand(square(100, 100, 200), { ACCESSIBILITY: 1 }), stand(square(600, 600, 100), { ACCESSIBILITY: 4 })] },
+            { roads: fakeRoads([P, Q]) });
+        expect(res.tie.reachesParcel).toBe(true);
+        expect(res.tie.route.length).toBe(1500);
+        expect(res.tie.route.linkIds).toEqual(['P']);
+        const [a, b] = [res.kuviot.get(0), res.kuviot.get(1)];
+        expect(a.tieKuviolla).toBe(true);
+        expect(a.meanDist).toBeLessThan(60);
+        expect(b.tieKuviolla).toBe(false);
+        expect(b.meanDist).toBe(450);
+        expect(Math.round(b.K)).toBe(61);
+        expect(b.M).toBe(20);
+        expect(b.maapohjaLahde).toBe('kuvio');
+        expect(a.Y).toBe(100);
+    });
+
+    it('monipalstainen kiinteistö: tie vain toisella palstalla', async () => {
+        const parcel = { properties: {}, parts: [{ geometry: square(5000, 5000, 100) }, { geometry: square(0, 0, 1000) }] };
+        const res = await analyseParcel({ parcel, features: [stand(square(5000, 5000, 100))] }, { roads: fakeRoads([P, Q]) });
+        expect(res.tie.reachesParcel).toBe(true);
+    });
+
+    it('ei tietä kiinteistölle: tieyhteys 0', async () => {
+        const parcel = { geometry: square(0, 5000, 100), properties: {} };
+        const res = await analyseParcel({ parcel, features: [stand(square(0, 5000, 100))] }, { roads: fakeRoads([P, Q]) });
+        expect(res.tie.reachesParcel).toBe(false);
+        expect(res.kuviot.get(0).Y).toBe(0);
+    });
+
+    it('tiekunta ja kelirikko reitillä', async () => {
+        const parcel = { geometry: square(0, 0, 1000), properties: {} };
+        const restrictions = {
+            kelirikko: new Map([['P', { kg: 15000, alku: '15.03.2027', loppu: '15.06.2027' }]]),
+            tiekunta: new Set(['P']), massa: new Map(), partial: false
+        };
+        const res = await analyseParcel({ parcel, features: [stand(square(100, 100, 200))] }, { roads: fakeRoads([P, Q], restrictions) });
+        expect(res.tie.tiekunta).toBe(true);
+        expect(res.tie.rajoitukset).toEqual([{ tyyppi: 'kelirikko', kg: 15000, alku: '15.03.2027', loppu: '15.06.2027' }]);
+        expect(res.kuviot.get(0).Y).toBe(80);
+    });
+
+    it('maapohja korjuukelpoisuuskartasta', async () => {
+        const width = 10, height = 10, data = new Uint8ClampedArray(width * height * 4);
+        for (let o = 0; o < data.length; o += 4) data.set([0x61, 0x99, 0, 255], o);
+        const parcel = { geometry: square(0, 0, 1000), properties: {} };
+        const res = await analyseParcel({ parcel, features: [stand(square(100, 100, 200))] }, {
+            roads: fakeRoads([P, Q]),
+            raster: async (bbox) => ({ data, width, height, bbox })
+        });
+        expect(res.kuviot.get(0).M).toBe(80);
+        expect(res.kuviot.get(0).paaluokka).toBe(2);
+        expect(res.kuviot.get(0).maapohjaLahde).toBe('kartta');
+    });
+});

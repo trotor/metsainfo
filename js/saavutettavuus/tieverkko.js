@@ -1,6 +1,7 @@
 /**
  * Digiroadin tieverkko: lähin tie ja lyhin reitti yleiselle tielle.
- * Linkki = { id, coords: [[x, y], …], props } EPSG:3067:ssa. Puhtaat funktiot.
+ * Linkki = { id, linkId?, coords: [[x, y], …], props } EPSG:3067:ssa (linkId = Digiroadin
+ * link_id, kun monirivinen linkki on pilkottu osiin). Puhtaat funktiot.
  */
 
 import Flatbush from 'flatbush';
@@ -78,8 +79,9 @@ export function buildGraph(links) {
         for (let i = 1; i < link.coords.length; i++) {
             const a = node(link.coords[i - 1]), b = node(link.coords[i]);
             const len = Math.hypot(link.coords[i][0] - link.coords[i - 1][0], link.coords[i][1] - link.coords[i - 1][1]);
-            a.edges.push({ to: b, len, linkId: link.id });
-            b.edges.push({ to: a, len, linkId: link.id });
+            const linkId = link.linkId ?? link.id;
+            a.edges.push({ to: b, len, linkId });
+            b.edges.push({ to: a, len, linkId });
             if (pub) a.public = b.public = true;
         }
     }
@@ -144,8 +146,8 @@ export function routeToPublic(graph, startPoints, { maxLength = 5000, snap = 50 
         const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
         // Projektion paikka janalla
         const t = len ? Math.max(0, Math.min(1, ((p[0] - a[0]) * (b[0] - a[0]) + (p[1] - a[1]) * (b[1] - a[1])) / (len * len))) : 0;
-        seed(graph.nodes.get(key(a)), t * len, link.id);
-        seed(graph.nodes.get(key(b)), (1 - t) * len, link.id);
+        seed(graph.nodes.get(key(a)), t * len, link.linkId ?? link.id);
+        seed(graph.nodes.get(key(b)), (1 - t) * len, link.linkId ?? link.id);
     }
     const done = new Set();
     while (q.size) {
