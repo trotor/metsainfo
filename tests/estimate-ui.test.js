@@ -164,3 +164,17 @@ describe('käyttöönotto', () => {
         expect(estimateTabButton()).not.toContain('Uutta');
     });
 });
+
+describe('kuvitteellinen tila', () => {
+    it('käyttää annettua hinta-aluetta eikä hae kuntaa', async () => {
+        let kuntaCalls = 0;
+        mocks.lookupKunta = () => { kuntaCalls++; return Promise.resolve({ kunta: '698', nimi: 'Rovaniemi' }); };
+        mocks.fetchPrices = (region) => Promise.resolve(pricesFor(region, 70));
+        const parcel = { properties: { label: 'Esimerkkimetsä', esimerkki: true, priceRegion: 'keski-suomi' } };
+        initEstimate(null, { features: [stand], parcel, label: 'Esimerkkimetsä' });
+        await flush(); await flush();
+        expect(kuntaCalls).toBe(0);
+        expect(shownRegion()).toBe('keski-suomi');
+        expect(document.querySelector('.estimate-root').textContent).not.toContain('· kunta');
+    });
+});

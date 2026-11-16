@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:kuvat": "VITE_KUVAUSTILA=1 vite build",
+    "dev:kuvat": "VITE_KUVAUSTILA=1 vite",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

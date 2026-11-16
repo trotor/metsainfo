@@ -88,6 +88,13 @@ export function initEstimate(contentEl, { features, parcel, label }) {
 /** Palauttaa false, jos konteksti vaihtui haun aikana (tulos hylätään). */
 async function resolveRegion(ctx, parcel, gen) {
     if (ctx.region) return true;
+    // Kuvitteellinen tila (kuvaustila): alue annettu, kuntaa ei haeta
+    if (parcel?.properties?.priceRegion) {
+        ctx.region = parcel.properties.priceRegion;
+        ctx.autoRegion = ctx.region;
+        ctx.regionAuto = '';
+        return true;
+    }
     let region = null;
     let kuntaName = '';
     const point = parcelPoint(parcel);

@@ -30,6 +30,7 @@ const PARCEL_MARGIN_MIN_ZOOM = 13;
 const PARCEL_WFS_LIMIT = 2000;
 let lastParcelFetch = null; // { bbox, labels }
 import * as state from './state.js';
+import { KUVAUSTILA, loadEsimerkkimetsa } from './demo/kuvaustila.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
 import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels, fetchForestUseDeclarations } from './data.js';
@@ -85,6 +86,10 @@ function initNative() {
  * Check URL parameters for parcel deep link (?parcel=091-416-0001-0123)
  */
 function checkUrlParams() {
+    if (KUVAUSTILA) {
+        showEsimerkkimetsa();
+        return;
+    }
     const params = new URLSearchParams(window.location.search);
     const parcelParam = params.get('parcel');
     if (parcelParam) {
@@ -94,6 +99,17 @@ function checkUrlParams() {
             searchParcel();
         }
     }
+}
+
+/** Kuvaustila: kuvitteellinen Esimerkkimetsä valitaan heti käynnistyksessä. */
+async function showEsimerkkimetsa() {
+    const { parcel } = await loadEsimerkkimetsa();
+    document.getElementById('search-input').value = parcel.properties.label;
+    const b = getGeometryBounds3067(parcel.geometry);
+    const sw = proj4('EPSG:3067', 'WGS84', [b.minX, b.minY]);
+    const ne = proj4('EPSG:3067', 'WGS84', [b.maxX, b.maxY]);
+    state.map.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], mapFitOptions({ maxZoom: 16 }, { newSelection: true }));
+    selectParcels([parcel]);
 }
 
 /**
@@ -348,6 +364,19 @@ async function loadParcelsInView() {
     const map = state.map;
     const zoom = map.getZoom();
 
+    if (KUVAUSTILA) {
+        // Vain kuvitteellinen tila, ei naapureiden oikeita rajoja tai tunnuksia
+        const { parcel } = await loadEsimerkkimetsa();
+        state.cadastralLayer.clearLayers();
+        state.parcelLabelsLayer.clearLayers();
+        state.loadedParcels.clear();
+        if (zoom < CONFIG.minZoomForParcels) return;
+        state.loadedParcels.set(parcel.properties.nationalCadastralReference, parcel);
+        state.cadastralLayer.addData(parcel);
+        if (zoom >= 15) addParcelLabel(parcel);
+        return;
+    }
+
     if (zoom < CONFIG.minZoomForParcels) {
         state.cadastralLayer.clearLayers();
         state.parcelLabelsLayer.clearLayers();
@@ -416,7 +445,7 @@ async function loadHabitatsInView() {
     const map = state.map;
     const zoom = map.getZoom();
 
-    if (zoom < CONFIG.minZoomForParcels) {
+    if (KUVAUSTILA || zoom < CONFIG.minZoomForParcels) {
         state.habitatLayer.clearLayers();
         return;
     }
@@ -459,7 +488,7 @@ async function loadMkiInView() {
     const map = state.map;
     const zoom = map.getZoom();
 
-    if (zoom < CONFIG.minZoomForParcels) {
+    if (KUVAUSTILA || zoom < CONFIG.minZoomForParcels) {
         state.mkiLayer.clearLayers();
         document.getElementById('mki-legend').classList.add('hidden');
         return;
@@ -491,7 +520,7 @@ async function loadMkiInView() {
 async function selectParcel(parcel, { auto = false } = {}) {
     const reference = parcel.properties?.nationalCadastralReference;
 
-    if (reference) {
+    if (reference && !parcel.properties?.esimerkki) {
         try {
             const allParts = await fetchParcelsByReference(reference);
             // Paikannuksen automaattivalinta ei ohita käyttäjän omaa valintaa,
@@ -549,7 +578,9 @@ async function selectParcels(parcels) {
 
         const combinedBounds = { minX, minY, maxX, maxY };
 
-        const features = await fetchForestDataByBounds(combinedBounds);
+        const features = KUVAUSTILA && parcels[0]?.properties?.esimerkki
+            ? (await loadEsimerkkimetsa()).features
+            : await fetchForestDataByBounds(combinedBounds);
 
         const filteredFeatures = filterFeaturesByParcels(features, parcels);
         state.setState('currentFeatures', filteredFeatures);
