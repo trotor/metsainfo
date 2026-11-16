@@ -53,7 +53,7 @@ const fi = {
     lisamaksu: 'Kuuluu nyt hinta-arvion lisäosaan. Saavutettavuudesta voi myöhemmin tulla erillinen maksullinen lisäosa.',
     lukittu: 'Saavutettavuus kertoo jokaisen kuvion metsäkuljetusmatkan, maapohjan korjuukelpoisuuden ja tieyhteyden kiinteistölle. Toiminto kuuluu puukaupan hinta-arvion lisäosaan (sama kertaosto). Saavutettavuudesta voi myöhemmin tulla erillinen maksullinen lisäosa.',
     avaaLisaosa: 'Avaa lisäosa',
-    lahteet: (alue) => `Lähteet: © Väylävirasto, Digiroad (CC BY 4.0); © Suomen metsäkeskus, korjuukelpoisuuskartta${alue ? ` (alue ${alue})` : ''} ja metsävaratiedot.`,
+    lahteet: (alue) => `Lähteet: © Väylävirasto, Digiroad (CC BY 4.0). Sisältää Suomen metsäkeskuksen korjuukelpoisuuskartta-aineistoa${alue ? ` (alue ${alue})` : ''} ja metsävaratietoja (CC BY 4.0); muokattu: luokat pisteytetty indeksiksi.`,
     ohjeOsio: {
         otsikko: 'Saavutettavuus',
         html: `<p>Saavutettavuus arvioi, kuinka helposti kuvion puut saadaan korjattua ja kuljetettua. Avaa kiinteistö ja valitse yhteenvedosta <strong>Saavutettavuus ja tieyhteys</strong> tai kartan painike.</p>
@@ -114,7 +114,7 @@ const sv = {
     lisamaksu: 'Ingår nu i tillägget Prisuppskattning. Åtkomligheten kan senare bli ett separat avgiftsbelagt tillägg.',
     lukittu: 'Åtkomligheten visar varje figurs terrängtransportavstånd, markens drivningsförhållanden och vägförbindelsen till fastigheten. Funktionen ingår i tillägget Prisuppskattning för virkesaffär (samma engångsköp). Åtkomligheten kan senare bli ett separat avgiftsbelagt tillägg.',
     avaaLisaosa: 'Lås upp tillägget',
-    lahteet: (alue) => `Källor: © Trafikledsverket, Digiroad (CC BY 4.0); © Finlands skogscentral, karta över drivningsförhållanden${alue ? ` (område ${alue})` : ''} och skogsdata.`,
+    lahteet: (alue) => `Källor: © Trafikledsverket, Digiroad (CC BY 4.0). Innehåller data från Finlands skogscentrals karta över drivningsförhållanden${alue ? ` (område ${alue})` : ''} och skogsdata (CC BY 4.0); bearbetat: klasserna poängsatta till ett index.`,
     ohjeOsio: {
         otsikko: 'Åtkomlighet',
         html: `<p>Åtkomligheten uppskattar hur lätt virket på en figur kan avverkas och transporteras. Öppna en fastighet och välj <strong>Åtkomlighet och vägförbindelse</strong> i sammandraget eller kartknappen.</p>
@@ -175,7 +175,7 @@ const en = {
     lisamaksu: 'Currently part of the price estimate add-on. Accessibility may later become a separate paid add-on.',
     lukittu: 'Accessibility shows the forwarding distance, the ground’s harvesting conditions and the road access to the property for every stand. It is part of the timber sale price estimate add-on (same one-time purchase). Accessibility may later become a separate paid add-on.',
     avaaLisaosa: 'Unlock add-on',
-    lahteet: (alue) => `Sources: © Finnish Transport Infrastructure Agency, Digiroad (CC BY 4.0); © Finnish Forest Centre, harvesting conditions map${alue ? ` (area ${alue})` : ''} and forest data.`,
+    lahteet: (alue) => `Sources: © Finnish Transport Infrastructure Agency, Digiroad (CC BY 4.0). Contains data from the Finnish Forest Centre’s harvesting conditions map${alue ? ` (area ${alue})` : ''} and forest data (CC BY 4.0); modified: classes scored into an index.`,
     ohjeOsio: {
         otsikko: 'Accessibility',
         html: `<p>Accessibility estimates how easily the timber on a stand can be harvested and transported. Open a property and choose <strong>Accessibility and road access</strong> in the summary, or use the map button.</p>
