@@ -4,7 +4,7 @@
  * (palettikuva, ei sekoittuneita reunavärejä; tarkistettu 16.11.2026).
  */
 
-import { containsPoint } from './geometria.js';
+import { containsPoint, bboxOf } from './geometria.js';
 
 export const WMS_URL = 'https://avoin.metsakeskus.fi/rajapinnat/v1/ows';
 
@@ -49,9 +49,13 @@ export function classShares(raster, geometry) {
     const px = (bbox.maxX - bbox.minX) / width, py = (bbox.maxY - bbox.minY) / height;
     const counts = {};
     let total = 0;
-    for (let j = 0; j < height; j++) {
+    // Vain kuvion rajaavan suorakulmion pikselit (iso kiinteistö, satoja kuvioita)
+    const g = bboxOf([geometry]);
+    const i0 = Math.max(0, Math.floor((g.minX - bbox.minX) / px)), i1 = Math.min(width - 1, Math.ceil((g.maxX - bbox.minX) / px));
+    const j0 = Math.max(0, Math.floor((bbox.maxY - g.maxY) / py)), j1 = Math.min(height - 1, Math.ceil((bbox.maxY - g.minY) / py));
+    for (let j = j0; j <= j1; j++) {
         const y = bbox.maxY - (j + 0.5) * py; // kuvan rivit ylhäältä alas
-        for (let i = 0; i < width; i++) {
+        for (let i = i0; i <= i1; i++) {
             const x = bbox.minX + (i + 0.5) * px;
             if (!containsPoint(geometry, [x, y])) continue;
             const o = (j * width + i) * 4;

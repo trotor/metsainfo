@@ -24,6 +24,7 @@ const fi = {
     yleisenTienVarrella: 'Kiinteistö on yleisen tien varrella.',
     reitti: (m) => `Yleiselle tielle noin ${m}.`,
     eiReittia: 'Yhteyttä yleiselle tielle ei löytynyt 5 km:n matkalta.',
+    tieVirhe: 'Teitä ei saatu haettua, joten metsäkuljetus ja tieyhteys puuttuvat. Maapohja on laskettu.',
     tiekunta: 'Tiellä on tiekunta.',
     rajoitukset: 'Rajoitukset',
     kelirikko: (t, alku, loppu) => `Kelirikkorajoitus ${t} t${alku ? ` ${alku}–${loppu}` : ''}`,
@@ -36,12 +37,12 @@ const fi = {
     metsakuljetus: (m) => `Metsäkuljetus noin ${m}`,
     tieKuviolla: 'Tie kulkee kuviolla',
     maapohja: {
-        1: 'Kelirikko',
+        1: 'Ympärivuotinen, myös kelirikko',
         2: 'Normaali kesä, kivennäismaa',
-        3: 'Kuiva kesä, kivennäismaa',
+        3: 'Vain kuiva kesä, kivennäismaa',
         4: 'Normaali kesä, turvemaa',
-        5: 'Kuiva kesä, turvemaa',
-        6: 'Talvi'
+        5: 'Vain kuiva kesä, turvemaa',
+        6: 'Vain talvi (maa jäässä)'
     },
     korjuukelpoisuus: (nimi) => `Korjuukelpoisuus: ${nimi}`,
     kuvionTieto: (nimi) => `Korjuukelpoisuus kuvion tiedoista: ${nimi}`,
@@ -59,7 +60,7 @@ const fi = {
         html: `<p>Saavutettavuus arvioi, kuinka helposti kuvion puut saadaan korjattua ja kuljetettua. Avaa kiinteistö ja valitse yhteenvedosta <strong>Saavutettavuus ja tieyhteys</strong> tai kartan painike.</p>
 <ul>
 <li><strong>Indeksi 0–100</strong> ja luokka (hyvä, kohtalainen, heikko) jokaiselle kuviolle. Indeksi kootaan kolmesta osasta: maapohja 40 %, metsäkuljetus 40 % ja tieyhteys 20 %.</li>
-<li><strong>Maapohja</strong>: Metsäkeskuksen korjuukelpoisuuskartta (milloin maasto kantaa koneita: kelirikko, kesä, kuiva kesä tai talvi). Jos karttaa ei ole, käytetään kuvion omaa korjuukelpoisuustietoa.</li>
+<li><strong>Maapohja</strong>: Metsäkeskuksen korjuukelpoisuuskartta (milloin maasto kantaa koneita: ympäri vuoden, normaalina kesänä, vain kuivana kesänä tai vain talvella). Jos karttaa ei ole, käytetään kuvion omaa korjuukelpoisuustietoa.</li>
 <li><strong>Metsäkuljetus</strong>: keskimääräinen suora matka kuviolta lähimpään autotiehen.</li>
 <li><strong>Tieyhteys</strong>: tuleeko autotie kiinteistölle, löytyykö sieltä reitti yleiselle tielle sekä tiekunta ja kelirikko- tai painorajoitukset Digiroadista.</li>
 </ul>
@@ -85,6 +86,7 @@ const sv = {
     yleisenTienVarrella: 'Fastigheten ligger vid en allmän väg.',
     reitti: (m) => `Cirka ${m} till allmän väg.`,
     eiReittia: 'Ingen förbindelse till allmän väg hittades inom 5 km.',
+    tieVirhe: 'Vägarna kunde inte hämtas, så terrängtransport och vägförbindelse saknas. Markförhållandena är beräknade.',
     tiekunta: 'Vägen har ett väglag.',
     rajoitukset: 'Begränsningar',
     kelirikko: (t, alku, loppu) => `Begränsning under menföre ${t} t${alku ? ` ${alku}–${loppu}` : ''}`,
@@ -97,12 +99,12 @@ const sv = {
     metsakuljetus: (m) => `Terrängtransport cirka ${m}`,
     tieKuviolla: 'Vägen går genom figuren',
     maapohja: {
-        1: 'Menföre',
+        1: 'Året runt, även under menföre',
         2: 'Normal sommar, mineraljord',
-        3: 'Torr sommar, mineraljord',
+        3: 'Bara torr sommar, mineraljord',
         4: 'Normal sommar, torvmark',
-        5: 'Torr sommar, torvmark',
-        6: 'Vinter'
+        5: 'Bara torr sommar, torvmark',
+        6: 'Bara vinter (frusen mark)'
     },
     korjuukelpoisuus: (nimi) => `Drivningsförhållanden: ${nimi}`,
     kuvionTieto: (nimi) => `Drivningsförhållanden enligt figurens uppgifter: ${nimi}`,
@@ -120,7 +122,7 @@ const sv = {
         html: `<p>Åtkomligheten uppskattar hur lätt virket på en figur kan avverkas och transporteras. Öppna en fastighet och välj <strong>Åtkomlighet och vägförbindelse</strong> i sammandraget eller kartknappen.</p>
 <ul>
 <li><strong>Index 0–100</strong> och klass (god, måttlig, svag) för varje figur. Indexet består av tre delar: markförhållanden 40 %, terrängtransport 40 % och vägförbindelse 20 %.</li>
-<li><strong>Markförhållanden</strong>: Skogscentralens karta över drivningsförhållanden (när marken bär maskiner: menföre, sommar, torr sommar eller vinter). Saknas kartan används figurens egen uppgift.</li>
+<li><strong>Markförhållanden</strong>: Skogscentralens karta över drivningsförhållanden (när marken bär maskiner: året runt, normal sommar, bara torr sommar eller bara vinter). Saknas kartan används figurens egen uppgift.</li>
 <li><strong>Terrängtransport</strong>: genomsnittligt avstånd fågelvägen från figuren till närmaste bilväg.</li>
 <li><strong>Vägförbindelse</strong>: om en bilväg når fastigheten, om det finns en rutt till allmän väg samt väglag och begränsningar under menföre eller viktbegränsningar enligt Digiroad.</li>
 </ul>
@@ -146,6 +148,7 @@ const en = {
     yleisenTienVarrella: 'The property is next to a public road.',
     reitti: (m) => `About ${m} to a public road.`,
     eiReittia: 'No connection to a public road was found within 5 km.',
+    tieVirhe: 'Roads could not be fetched, so forwarding and road access are missing. The ground has been assessed.',
     tiekunta: 'The road has a road association.',
     rajoitukset: 'Restrictions',
     kelirikko: (t, alku, loppu) => `Spring thaw limit ${t} t${alku ? ` ${alku}–${loppu}` : ''}`,
@@ -158,12 +161,12 @@ const en = {
     metsakuljetus: (m) => `Forwarding about ${m}`,
     tieKuviolla: 'A road runs through the stand',
     maapohja: {
-        1: 'Thaw season',
+        1: 'Year-round, even during thaw',
         2: 'Normal summer, mineral soil',
-        3: 'Dry summer, mineral soil',
+        3: 'Dry summer only, mineral soil',
         4: 'Normal summer, peatland',
-        5: 'Dry summer, peatland',
-        6: 'Winter'
+        5: 'Dry summer only, peatland',
+        6: 'Winter only (frozen ground)'
     },
     korjuukelpoisuus: (nimi) => `Harvesting conditions: ${nimi}`,
     kuvionTieto: (nimi) => `Harvesting conditions from stand data: ${nimi}`,
@@ -181,7 +184,7 @@ const en = {
         html: `<p>Accessibility estimates how easily the timber on a stand can be harvested and transported. Open a property and choose <strong>Accessibility and road access</strong> in the summary, or use the map button.</p>
 <ul>
 <li><strong>Index 0–100</strong> and class (good, moderate, poor) for each stand, built from three parts: ground 40 %, forwarding 40 % and road access 20 %.</li>
-<li><strong>Ground</strong>: the Finnish Forest Centre’s harvesting conditions map (when the ground carries machines: thaw season, summer, dry summer or winter). Without the map, the stand’s own data is used.</li>
+<li><strong>Ground</strong>: the Finnish Forest Centre’s harvesting conditions map (when the ground carries machines: year-round, normal summer, dry summer only or winter only). Without the map, the stand’s own data is used.</li>
 <li><strong>Forwarding</strong>: average straight-line distance from the stand to the nearest road.</li>
 <li><strong>Road access</strong>: whether a road reaches the property, whether there is a route to a public road, and road associations and thaw or weight limits from Digiroad.</li>
 </ul>

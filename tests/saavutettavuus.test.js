@@ -296,3 +296,32 @@ describe('analyysi', () => {
         expect(res.kuviot.get(0).maapohjaLahde).toBe('kartta');
     });
 });
+
+describe('analyysi: virheet ja rajoitusten rajaus', () => {
+    const P = link('P', [[-500, 200], [0, 200], [1000, 200], [1500, 200]]);
+    const Q = link('Q', [[1500, 200], [1500, 2000]], { hallinn_lk: 2, toiminn_lk: 4 });
+    const R = link('R', [[200, -300], [200, 50]]); // umpitie kiinteistölle, ei reitillä
+    const stand = (geometry, props = {}) => ({ geometry, properties: props });
+
+    it('teiden haku epäonnistuu: maapohja lasketaan, muut puuttuvat', async () => {
+        const roads = { links: async () => { throw new Error('offline'); }, restrictions: async () => { throw new Error('x'); } };
+        const res = await analyseParcel({ parcel: { geometry: square(0, 0, 1000), properties: {} }, features: [stand(square(100, 100, 200), { ACCESSIBILITY: 1 })] }, { roads });
+        expect(res.tie.virhe).toBe(true);
+        const k = res.kuviot.get(0);
+        expect([k.M, k.K, k.Y]).toEqual([100, null, null]);
+        expect(k.score).toBe(100);
+        expect(k.puuttuu).toEqual(['K', 'Y']);
+    });
+
+    it('vain reitin rajoitukset, ei muiden kiinteistölle tulevien teiden', async () => {
+        const restrictions = {
+            kelirikko: new Map([['R', { kg: 8000, alku: null, loppu: null }]]),
+            tiekunta: new Set(), massa: new Map(), partial: false
+        };
+        const roads = { links: async () => ({ links: [P, Q, R], partial: false }), restrictions: async () => restrictions };
+        const res = await analyseParcel({ parcel: { geometry: square(0, 0, 1000), properties: {} }, features: [stand(square(100, 100, 200))] }, { roads });
+        expect(res.tie.route.linkIds).toEqual(['P']);
+        expect(res.tie.rajoitukset).toEqual([]);
+        expect(res.kuviot.get(0).Y).toBe(100);
+    });
+});

@@ -129,7 +129,7 @@ export function startSaavutettavuus() {
 
     purchases.onChange(() => {
         if (!locked() && ui.ctx && !ui.result && ui.status !== 'loading') run();
-        else { drawMap(); render(); }
+        else { decorate(); drawMap(); render(); }
     });
 
     /* ---------- Yhteenveto: painike ja kuvioiden merkit ---------- */
@@ -151,9 +151,10 @@ export function startSaavutettavuus() {
     function decorate() {
         const content = ui.ctx?.content;
         const r = ui.result;
-        if (!content?.isConnected || !r || locked()) return;
+        if (!content?.isConnected) return;
+        content.querySelectorAll('.stand-item .sv-lisa').forEach(el => el.remove());
+        if (!r || locked()) return;
         content.querySelectorAll('.stand-item').forEach(itemEl => {
-            itemEl.querySelectorAll('.sv-lisa').forEach(el => el.remove());
             const k = r.kuviot.get(Number(itemEl.dataset.index));
             if (!k || k.score == null) return;
             const badge = document.createElement('span');
@@ -232,6 +233,10 @@ export function startSaavutettavuus() {
 
     function roadSection(r) {
         const t = r.tie;
+        if (t.virhe) {
+            return `<div class="sv-varoitus"><p>${esc(T.tieVirhe)}</p>
+                <button type="button" class="kortti-btn" data-sv="retry">${esc(T.yritaUudelleen)}</button></div>`;
+        }
         const lines = [];
         if (!t.reachesParcel) lines.push(T.eiTieta);
         else {

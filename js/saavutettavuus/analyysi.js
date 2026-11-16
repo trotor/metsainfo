@@ -65,7 +65,13 @@ export async function analyseParcel({ parcel, features }, { roads, raster = asyn
     const rasterP = raster(grow(all, 20)).catch(() => null);
     const areaP = area([(all.minX + all.maxX) / 2, (all.minY + all.maxY) / 2]).catch(() => null);
 
-    let { links, partial } = await roads.links(grow(all, NEAR));
+    // Teiden haku voi epäonnistua: maapohja näytetään silti, metsäkuljetus ja tieyhteys puuttuvat
+    let links = [], partial = false, tieVirhe = false;
+    try {
+        ({ links, partial } = await roads.links(grow(all, NEAR)));
+    } catch {
+        tieVirhe = true;
+    }
     const prep = (ls) => ls.map(l => ({ ...l, box: linkBox(l), kind: roadKind(l.props) }));
     let all3 = prep(links);
     let auto = all3.filter(l => l.kind === 'auto');
@@ -88,8 +94,9 @@ export async function analyseParcel({ parcel, features }, { roads, raster = asyn
         }
     }
 
-    // Rajoitukset kiinteistölle tulevilla teillä ja reitillä
-    const routeIds = new Set([...(route?.linkIds || []), ...reaching.map(l => l.linkId ?? l.id)]);
+    // Rajoitukset reitillä (reitin ensimmäinen linkki on kiinteistölle tuleva tie);
+    // ilman reittiä kiinteistölle tulevilla teillä
+    const routeIds = new Set(route ? route.linkIds : reaching.map(l => l.linkId ?? l.id));
     const routeLinks = auto.filter(l => routeIds.has(l.linkId ?? l.id));
     let rajoitukset = [], tiekunta = false;
     if (routeLinks.length) {
@@ -116,7 +123,7 @@ export async function analyseParcel({ parcel, features }, { roads, raster = asyn
         }
     }
     const reachesParcel = reaching.length > 0;
-    const Y = connectionScore({ reachesParcel, route, restricted: rajoitukset.length > 0 });
+    const Y = tieVirhe ? null : connectionScore({ reachesParcel, route, restricted: rajoitukset.length > 0 });
 
     // Kuviot
     const ras = await rasterP;
@@ -132,11 +139,11 @@ export async function analyseParcel({ parcel, features }, { roads, raster = asyn
         const shares = ras ? classShares(ras, g) : null;
         const fromMap = soilScore(shares);
         const M = fromMap ?? attributeScore(f.properties?.ACCESSIBILITY);
-        const K = haulScore(meanDist);
+        const K = tieVirhe ? null : haulScore(meanDist);
         kuviot.set(i, {
             ...combine({ M, K, Y }),
             M, K, Y,
-            meanDist: meanDist == null ? null : Math.round(meanDist),
+            meanDist: tieVirhe || meanDist == null ? null : Math.round(meanDist),
             tieKuviolla,
             paaluokka: mainClass(shares),
             maapohjaLahde: fromMap != null ? 'kartta' : M != null ? 'kuvio' : null
@@ -145,7 +152,7 @@ export async function analyseParcel({ parcel, features }, { roads, raster = asyn
 
     const view = grow(all, 500);
     return {
-        tie: { reachesParcel, route, tiekunta, rajoitukset },
+        tie: { reachesParcel, route, tiekunta, rajoitukset, virhe: tieVirhe },
         kuviot,
         lahteet: { alue: await areaP, rasteri: Boolean(ras) },
         partial,
