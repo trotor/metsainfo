@@ -6,11 +6,12 @@ const mocks = vi.hoisted(() => ({
     lookupKunta: null,
     fetchPrices: null,
     cache: new Map(),
-    overrides: {}
+    overrides: {},
+    entitled: true
 }));
 
 vi.mock('../js/platform/purchases.js', () => ({
-    purchases: { isAvailable: () => true, isEntitled: () => true, onChange: () => () => {} }
+    purchases: { isAvailable: () => true, isEntitled: () => mocks.entitled, onChange: () => () => {} }
 }));
 vi.mock('../js/platform/share.js', () => ({ shareTextFile: vi.fn() }));
 vi.mock('../js/platform/prices.js', () => ({
@@ -21,7 +22,7 @@ vi.mock('../js/platform/prices.js', () => ({
     saveOverrides: (o) => { mocks.overrides = o; }
 }));
 
-const { initEstimate } = await import('../js/ui/estimate.js');
+const { initEstimate, estimateTabButton } = await import('../js/ui/estimate.js');
 
 function deferred() {
     let resolve;
@@ -48,6 +49,8 @@ beforeEach(() => {
     document.body.innerHTML = '<div class="estimate-card" data-ctx="parcel"></div><div class="estimate-root" data-ctx="parcel"></div>';
     mocks.cache = new Map();
     mocks.overrides = {};
+    mocks.entitled = true;
+    localStorage.clear();
 });
 
 describe('hinta-arvion haut eivät sekoitu', () => {
@@ -100,5 +103,64 @@ describe('puuttuvat hinnat näkyvät', () => {
         await flush(); await flush();
         expect(document.querySelector('.estimate-card').textContent).toMatch(/puuttuu/i);
         expect(document.querySelector('.est-stock').textContent).toMatch(/puuttuu/i);
+    });
+});
+
+describe('käyttöönotto', () => {
+    const stands = [
+        stand,
+        { properties: { ...stand.properties, STANDNUMBER: 2, CUTTINGTYPE: 3, CUTTINGPROPOSALYEAR: 2027 } }
+    ];
+
+    it('lukittu kortti kertoo kiinteistön hakkuuehdotukset ilman euroja', () => {
+        mocks.entitled = false;
+        initEstimate(null, { features: stands, parcel: parcel('A', 1), label: 'A' });
+        const card = document.querySelector('.estimate-card').textContent;
+        expect(card).toContain('2 hakkuuehdotusta');
+        expect(card).toContain('Vuosina 2027–2030.');
+        expect(card.replace(/\s/g, ' ')).toContain('130 m³');
+        expect(card).not.toMatch(/\d\s*€/);
+        expect(document.querySelector('.estimate-card [data-est="paywall"]').textContent).toBe('Näytä arvo');
+    });
+
+    it('ostettuna tulos näkyy ensin ja hintataulukko on piilossa, kunnes sen avaa', async () => {
+        mocks.cache.set('lappi', pricesFor('lappi', 70));
+        mocks.lookupKunta = () => Promise.resolve({ kunta: '698', nimi: 'Rovaniemi' });
+        mocks.fetchPrices = (region) => Promise.resolve(pricesFor(region, 70));
+        // Oma tunnus: kuntien välimuisti on moduulin laajuinen
+        initEstimate(null, { features: stands, parcel: parcel('L', 3), label: 'L' });
+        await flush(); await flush();
+        const root = document.querySelector('.estimate-root');
+        const body = root.querySelector('.est-prices-body');
+        // Tulos ennen hintataulukkoa
+        expect(root.querySelector('.est-result').compareDocumentPosition(body) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(body.hidden).toBe(true);
+        expect(root.querySelector('.est-prices-head').textContent).toContain('Lappi');
+        root.querySelector('[data-est="toggle-prices"]').click();
+        expect(document.querySelector('.estimate-root .est-prices-body').hidden).toBe(false);
+    });
+
+    it('ilman hintoja hintataulukko on auki', async () => {
+        mocks.lookupKunta = () => Promise.resolve(null);
+        mocks.fetchPrices = () => Promise.reject(new Error('offline'));
+        initEstimate(null, { features: stands, parcel: parcel('B', 1), label: 'B' });
+        await flush(); await flush();
+        expect(document.querySelector('.estimate-root .est-prices-body').hidden).toBe(false);
+        expect(document.querySelector('.estimate-root').textContent).toContain('Hinnat puuttuvat');
+    });
+
+    it('Uutta-merkki näkyy, kunnes Arvio-välilehti avataan', () => {
+        mocks.entitled = false;
+        document.body.innerHTML = `<div class="tabbar">${estimateTabButton()}</div>`;
+        initEstimate(null, { features: stands, parcel: parcel('A', 1), label: 'A' });
+        expect(document.querySelector('.est-new')).not.toBeNull();
+        document.querySelector('.tabbar [data-tab="arvio"]').click();
+        expect(document.querySelector('.est-new')).toBeNull();
+        expect(estimateTabButton()).not.toContain('Uutta');
+    });
+
+    it('ostaneelle ei näytetä Uutta-merkkiä', () => {
+        mocks.entitled = true;
+        expect(estimateTabButton()).not.toContain('Uutta');
     });
 });

@@ -12,6 +12,11 @@ export function isNative(cap = Capacitor) {
     return !!cap?.isNativePlatform?.();
 }
 
+/** 'ios', 'android' tai 'web'. */
+export function platformName(cap = Capacitor) {
+    return cap?.getPlatform?.() || 'web';
+}
+
 /**
  * Jaettava kiinteistölinkki. Sovelluksessa sivun osoite on
  * capacitor://localhost/..., joka ei toimi muilla, joten linkki

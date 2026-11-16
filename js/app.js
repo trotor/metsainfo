@@ -13,7 +13,7 @@ import './vendor/index.js';
 import '../style.css';
 
 import { CONFIG, crsEPSG3067 } from './config.js';
-import { isNative, PUBLIC_BASE_URL } from './platform/index.js';
+import { isNative, platformName, PUBLIC_BASE_URL } from './platform/index.js';
 import { onBackButton, onAppResume } from './platform/back-button.js';
 import { createBackHandler } from './ui/back.js';
 import { closeMenu, getSheet } from './ui/panel.js';
@@ -75,6 +75,8 @@ function initNative() {
     // Hinta-arvion ostotila kaupasta (tallennettu tila on käytössä heti);
     // tarkistetaan myös, kun sovellus palaa etualalle
     if (purchases.isAvailable()) document.documentElement.classList.add('has-estimate');
+    // Ohjeen kauppakohtaiset tekstit (App Store / Google Play)
+    document.documentElement.classList.add(`platform-${platformName()}`);
     purchases.refreshEntitlement();
     onAppResume(() => purchases.refreshEntitlement());
 }

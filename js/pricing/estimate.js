@@ -108,3 +108,25 @@ export function estimateParcel(features, table, { removal = DEFAULT_REMOVAL } = 
         missing
     };
 }
+
+/**
+ * Hakkuuehdotukset ilman hintoja (houkutin ennen ostoa): määrä, myytävä
+ * kertymä (tukki + kuitu, poistumilla), vuodet ja koko puuston kertymä.
+ */
+export function cuttingSummary(features, { removal = DEFAULT_REMOVAL } = {}) {
+    let count = 0;
+    let volume = 0;
+    let stockVolume = 0;
+    const years = new Set();
+    for (const f of features) {
+        const p = f.properties || {};
+        const v = ((p.SAWLOGVOLUME || 0) + (p.PULPWOODVOLUME || 0)) * (p.AREA || 0);
+        stockVolume += v;
+        const method = cuttingMethod(p.CUTTINGTYPE);
+        if (!method) continue;
+        count++;
+        volume += v * (removal[method] ?? 1);
+        if (p.CUTTINGPROPOSALYEAR !== null && p.CUTTINGPROPOSALYEAR !== undefined) years.add(p.CUTTINGPROPOSALYEAR);
+    }
+    return { count, volume, years: [...years].sort((a, b) => a - b), stockVolume };
+}

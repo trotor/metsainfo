@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { cuttingMethod, speciesShares, standValue, estimateParcel, DEFAULT_REMOVAL } from '../js/pricing/estimate.js';
+import { cuttingMethod, speciesShares, standValue, estimateParcel, cuttingSummary, DEFAULT_REMOVAL } from '../js/pricing/estimate.js';
 import { emptyTable } from '../js/pricing/prices.js';
 
 function prices() {
@@ -96,5 +96,26 @@ describe('estimateParcel', () => {
     it('kuviot, joilta hinta puuttuu, lasketaan', () => {
         const t = prices(); t.harvennus.manty.tukki = null;
         expect(estimateParcel(features, t).missing).toBe(1);
+    });
+});
+
+describe('cuttingSummary', () => {
+    it('laskee ehdotettujen hakkuiden määrän, kertymän poistumilla ja vuodet ilman hintoja', () => {
+        const s = cuttingSummary([
+            stand({ CUTTINGTYPE: 5, CUTTINGPROPOSALYEAR: 2030 }),      // 300 m³ × 1
+            stand({ CUTTINGTYPE: 3, CUTTINGPROPOSALYEAR: 2027 }),      // 300 m³ × 0,30
+            stand({ CUTTINGTYPE: 0 })                                  // ei hakkuuta
+        ]);
+        expect(s.count).toBe(2);
+        expect(s.volume).toBeCloseTo(300 + 300 * DEFAULT_REMOVAL.harvennus);
+        expect(s.years).toEqual([2027, 2030]);
+        expect(s.stockVolume).toBeCloseTo(900);
+    });
+    it('ilman hakkuuehdotuksia palauttaa nollan ja koko puuston kertymän', () => {
+        const s = cuttingSummary([stand({ CUTTINGTYPE: 0 })]);
+        expect(s.count).toBe(0);
+        expect(s.volume).toBe(0);
+        expect(s.years).toEqual([]);
+        expect(s.stockVolume).toBeCloseTo(300);
     });
 });
