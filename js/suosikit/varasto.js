@@ -66,6 +66,13 @@ export function createFavorites(storage = globalThis.localStorage, { now = () =>
             save();
             return item;
         },
+        /** Kuvion kiinteistötunnus, kun se selviää (lähihausta tallennettu kuvio). */
+        setReference(id, reference) {
+            const item = items.find(i => i.id === id);
+            if (!item || item.type !== 'kuvio' || !reference || item.ref.reference === reference) return;
+            item.ref = { ...item.ref, reference };
+            save();
+        },
         remove(id) {
             const before = items.length;
             items = items.filter(i => i.id !== id);

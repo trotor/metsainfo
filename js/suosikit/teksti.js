@@ -32,7 +32,8 @@ const fi = {
     omaMuistiinpano: 'Oma muistiinpano',
     kuvioNimi: (n, kiinteisto) => `Kuvio ${n}${kiinteisto ? `, ${kiinteisto}` : ''}`,
     kuvioKartalla: 'Kuvio näkyy kartalla. Napauta karttaa kuvion kohdalta nähdäksesi kiinteistön.',
-    tallennettu: 'Tallennettu suosikkeihin'
+    tallennettu: 'Tallennettu suosikkeihin',
+    kuvioEiListassa: 'Kuvio näkyy kartalla merkillä, mutta ei tämän kiinteistön kuvioissa.'
 };
 
 const en = {
@@ -63,7 +64,8 @@ const en = {
     omaMuistiinpano: 'Your note',
     kuvioNimi: (n, kiinteisto) => `Stand ${n}${kiinteisto ? `, ${kiinteisto}` : ''}`,
     kuvioKartalla: 'The stand is shown on the map. Tap the map at the stand to see the property.',
-    tallennettu: 'Saved to favourites'
+    tallennettu: 'Saved to favourites',
+    kuvioEiListassa: 'The stand is marked on the map but is not listed among this property\'s stands.'
 };
 
 const sv = {
@@ -94,7 +96,8 @@ const sv = {
     omaMuistiinpano: 'Egen anteckning',
     kuvioNimi: (n, kiinteisto) => `Figur ${n}${kiinteisto ? `, ${kiinteisto}` : ''}`,
     kuvioKartalla: 'Figuren visas på kartan. Tryck på kartan vid figuren för att se fastigheten.',
-    tallennettu: 'Sparad i favoriter'
+    tallennettu: 'Sparad i favoriter',
+    kuvioEiListassa: 'Figuren visas med en markering på kartan men inte bland fastighetens figurer.'
 };
 
 export const TEKSTIT = { fi, sv, en };

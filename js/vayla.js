@@ -32,8 +32,11 @@ export function has(name) {
 export const VIESTIT = {
     // Sovellus → lisäosat: yhteenveto piirretty { content, parcel, reference, label, features }
     yhteenveto: 'sovellus:yhteenveto',
-    // Lisäosat → sovellus: avaa kiinteistö tunnuksella (string) → Promise<boolean>
+    // Lisäosat → sovellus: avaa kiinteistö tunnuksella { reference }
     avaaKiinteisto: 'sovellus:avaa-kiinteisto',
+    // Lisäosat → sovellus: avaa kiinteistö, jolla piste on { points: [[x, y], …] } (EPSG:3067);
+    // pisteitä kokeillaan järjestyksessä
+    avaaKohta: 'sovellus:avaa-kohta',
     // Lisäosat → suosikit: tallenna { type, name, ref }
     tallennaSuosikki: 'suosikit:tallenna',
     // Suosikit → lähihaku: avaa tallennettu haku { criteria, center }

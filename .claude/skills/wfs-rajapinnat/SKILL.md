@@ -36,6 +36,7 @@ description: WFS endpoint reference for Metsäinfo — Metsäkeskus forest stand
 - **Response**: GeoJSON FeatureCollection with parcel polygons
 - **Key properties**: `nationalCadastralReference` (14-digit ID), `label`, `referencePoint`
 - **Note**: Multi-part parcels return multiple features with the same `nationalCadastralReference`
+- **Quirk (verified 2026-11-16)**: a bbox that lies entirely inside a large parcel returns **0 features** (e.g. 100 m and 400 m boxes inside a ~450 m wide parcel; a 1 km box finds it). To find the parcel at a point, grow the bbox until a returned parcel contains the point: `fetchParcelContaining()` in `js/data.js`. The legacy `fetchCadastralParcel()` falls back to the first feature and may return a neighbour.
 
 ## General WFS Notes
 

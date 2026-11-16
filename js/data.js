@@ -59,6 +59,34 @@ export async function fetchParcelsByReference(reference) {
 }
 
 /**
+ * Kiinteistö, jonka sisällä piste on, tai null.
+ *
+ * MML:n INSPIRE-WFS ei palauta kiinteistöä, jos bbox on kokonaan sen
+ * sisällä (testattu 16.11.2026: 100 m ja 400 m laatikot ison kiinteistön
+ * sisällä → 0 kohdetta, 1 km → löytyy). Siksi laatikkoa kasvatetaan,
+ * kunnes pisteen sisältävä kiinteistö löytyy.
+ */
+export async function fetchParcelContaining(x, y, { radii = [200, 700, 2000], fetchFn = fetch } = {}) {
+    for (const r of radii) {
+        const params = new URLSearchParams({
+            service: 'WFS',
+            version: '2.0.0',
+            request: 'GetFeature',
+            typeNames: 'cp:CadastralParcel',
+            outputFormat: 'application/json',
+            srsName: 'EPSG:3067',
+            bbox: `${x - r},${y - r},${x + r},${y + r},EPSG:3067`
+        });
+        const response = await fetchFn(`${CONFIG.cadastralWfsUrl}?${params}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const hit = (data.features || []).find(f => pointInPolygon3067([x, y], f.geometry));
+        if (hit) return hit;
+    }
+    return null;
+}
+
+/**
  * Fetch cadastral parcel at a specific point (legacy fallback)
  */
 export async function fetchCadastralParcel(x, y) {
@@ -171,17 +199,23 @@ export function filterFeaturesByParcels(features, parcels) {
  * Check if a forest stand belongs to a parcel (centroid must be inside)
  */
 function featureBelongsToParcel(featureGeom, parcelGeom) {
-    const ring = featureGeom.type === 'Polygon' ? featureGeom.coordinates[0] :
-                 featureGeom.type === 'MultiPolygon' ? featureGeom.coordinates[0][0] : null;
+    const centroid = standCentroid(featureGeom);
+    return centroid ? pointInPolygon3067(centroid, parcelGeom) : false;
+}
 
-    if (!ring || ring.length === 0) return false;
-
+/**
+ * Kuvion "keskipiste" kiinteistölle kohdistusta varten: ulkorenkaan kärkien
+ * keskiarvo. Kuvio näytetään sen kiinteistön kuvioissa, jolla tämä piste on,
+ * joten kuvion kiinteistö löytyy samalla pisteellä (suosikit, lähihaku).
+ */
+export function standCentroid(featureGeom) {
+    const ring = featureGeom?.type === 'Polygon' ? featureGeom.coordinates[0] :
+                 featureGeom?.type === 'MultiPolygon' ? featureGeom.coordinates[0][0] : null;
+    if (!ring || ring.length === 0) return null;
     let sumX = 0, sumY = 0;
     for (const [x, y] of ring) {
         sumX += x;
         sumY += y;
     }
-    const centroid = [sumX / ring.length, sumY / ring.length];
-
-    return pointInPolygon3067(centroid, parcelGeom);
+    return [sumX / ring.length, sumY / ring.length];
 }

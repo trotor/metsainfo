@@ -36,7 +36,7 @@ import { showToast } from './ui/location-ui.js';
 import { KUVAUSTILA, loadEsimerkkimetsa, createKuvitteellinenKartta, startKuvausohjaus } from './demo/kuvaustila.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
-import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels, fetchForestUseDeclarations } from './data.js';
+import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels, fetchForestUseDeclarations, fetchParcelContaining } from './data.js';
 import { onEachFeature, onEachHabitat, onEachMkiFeature, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, setMkiColorMode, updateMkiLegend, copyParcelLink, downloadCSV, toggleHelp, initPanel, openPanelForSelection, setPeekMessage, mapFitOptions, initLocation, refreshHereRow } from './ui/index.js';
 import { applyPageTexts } from './ui/sivu.js';
 
@@ -63,6 +63,9 @@ function init() {
     // Kokeilutoiminnot vain kokeilubuildissa (TestFlight, kehitys). Tavallinen
     // build karsii haaran ja dynaamisen importin pois kokonaan.
     if (import.meta.env?.VITE_KOKEILU === '1') {
+        on(VIESTIT.avaaKohta, ({ points }) => openParcelAtFirst(points)
+            .then(ok => { if (!ok) showToast(UI.sovellus.eiLoytynyt); })
+            .catch(() => showToast(UI.sovellus.hakuEpaonnistui)));
         on(VIESTIT.avaaKiinteisto, ({ reference }) => openParcelByReference(reference)
             .then(ok => { if (!ok) showToast(UI.sovellus.eiLoytynyt); })
             .catch(() => showToast(UI.sovellus.hakuEpaonnistui)));
@@ -351,6 +354,21 @@ async function openParcelByReference(reference) {
     state.map.fitBounds([[sw[1], sw[0]], [ne[1], ne[0]]], mapFitOptions({ maxZoom: 16 }, { newSelection: true }));
     selectParcels(parcels);
     return true;
+}
+
+/** Kiinteistö, jolla piste [x, y] (EPSG:3067) on; false, jos pisteessä ei ole kiinteistöä. */
+async function openParcelAtPoint([x, y]) {
+    const parcel = await fetchParcelContaining(x, y);
+    if (!parcel) return false;
+    const reference = parcel.properties?.nationalCadastralReference;
+    return reference ? openParcelByReference(reference) : (selectParcels([parcel]), true);
+}
+
+async function openParcelAtFirst(points = []) {
+    for (const p of points.filter(Boolean)) {
+        if (await openParcelAtPoint(p)) return true;
+    }
+    return false;
 }
 
 async function searchParcel() {

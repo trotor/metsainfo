@@ -15,8 +15,10 @@ import './lahihaku.css';
 import * as state from '../state.js';
 import { codeName } from '../koodit.js';
 import { locale } from '../i18n.js';
-import { formatNumber, coordsEPSG3067ToLatLng, getGeometryBounds3067 } from '../utils.js';
+import { formatNumber, coordsEPSG3067ToLatLng } from '../utils.js';
 import { on, emit, has, VIESTIT } from '../vayla.js';
+import { pointInside } from '../kuviotieto.js';
+import { standCentroid } from '../data.js';
 import { latLonTo3067 } from '../location/logic.js';
 import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
 import { onPositionChange, requestLocation, releaseFollow } from '../ui/location-ui.js';
@@ -199,11 +201,16 @@ export function startLahihaku() {
             const r = s.results.find(x => x.stand.properties.STANDID === ui.selected);
             if (!r) return;
             const p = r.stand.properties;
-            const b = getGeometryBounds3067(r.stand.geometry);
             emit(VIESTIT.tallennaSuosikki, {
                 type: 'kuvio',
                 name: `${T.kuvio(p.STANDNUMBER ?? '–', fmt(p.AREA, 1))} · ${standLabel(p)}`,
-                ref: { standId: p.STANDID, standNumber: String(p.STANDNUMBER ?? ''), center: [Math.round((b.minX + b.maxX) / 2), Math.round((b.minY + b.maxY) / 2)] }
+                // Piste kuvion sisältä: sillä suosikki avaa kuvion kiinteistön
+                ref: {
+                    standId: p.STANDID, standNumber: String(p.STANDNUMBER ?? ''),
+                    center: pointInside(r.stand.geometry),
+                    // Sovellus liittää kuvion kiinteistöön tällä pisteellä
+                    parcelPoint: standCentroid(r.stand.geometry)?.map(Math.round)
+                }
             });
         } else {
             emit(VIESTIT.tallennaSuosikki, {

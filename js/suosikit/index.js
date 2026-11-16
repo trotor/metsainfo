@@ -12,13 +12,14 @@
 
 import './suosikit.css';
 import * as state from '../state.js';
-import { coordsEPSG3067ToLatLng, getGeometryBounds3067, formatCadastralReference } from '../utils.js';
+import { coordsEPSG3067ToLatLng, formatCadastralReference } from '../utils.js';
 import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
 import { openStand } from '../ui/stands.js';
-import { releaseFollow } from '../ui/location-ui.js';
+import { releaseFollow, showToast } from '../ui/location-ui.js';
 import { isUnlocked } from '../features.js';
 import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
 import { on, emit, VIESTIT } from '../vayla.js';
+import { pointInside } from '../kuviotieto.js';
 import { createFavorites, filterFavorites, TYYPIT } from './varasto.js';
 import { T } from './teksti.js';
 
@@ -32,10 +33,7 @@ function standIdOf(feature) {
     return Number.isFinite(fromId) && fromId > 0 ? fromId : feature?.properties?.STANDID ?? null;
 }
 
-function centerOf(geometry) {
-    const b = getGeometryBounds3067(geometry);
-    return [Math.round((b.minX + b.maxX) / 2), Math.round((b.minY + b.maxY) / 2)];
-}
+const centerOf = (geometry) => pointInside(geometry);
 
 export function startSuosikit() {
     if (!isUnlocked('suosikit')) return;
@@ -195,10 +193,16 @@ export function startSuosikit() {
             pendingStand = { reference: item.ref.reference, standId: item.ref.standId };
             emit(VIESTIT.avaaKiinteisto, { reference: item.ref.reference });
         } else if (item.type === 'kuvio' && item.ref.center) {
+            // Ei kiinteistötunnusta (tallennettu lähihausta): kiinteistö kuvion
+            // kohdalta ja kuvio auki, kun yhteenveto on piirretty
+            pendingStand = { reference: null, standId: item.ref.standId, itemId: item.id };
             const ll = coordsEPSG3067ToLatLng(item.ref.center);
             L.circleMarker(ll, { radius: 9, color: '#e8a317', weight: 3, fillOpacity: 0.3 })
                 .bindTooltip(item.name, { permanent: true, direction: 'top' }).addTo(marker);
             state.map.setView(ll, Math.max(state.map.getZoom(), 13));
+            // Ensin piste, jolla sovellus liittää kuvion kiinteistöön; jos se on
+            // kiinteistöjen ulkopuolella (esim. niemen kuvio, piste vedessä), kuvion sisäpiste
+            emit(VIESTIT.avaaKohta, { points: [item.ref.parcelPoint, item.ref.center] });
         } else if (item.type === 'haku') {
             emit(VIESTIT.avaaHaku, { criteria: item.ref.criteria, center: item.ref.center });
         }
@@ -259,10 +263,19 @@ export function startSuosikit() {
             }
         });
 
-        if (pendingStand && sameRef(pendingStand.reference, reference)) {
-            const index = features.findIndex(f => standIdOf(f) === pendingStand.standId);
+        if (pendingStand && (pendingStand.reference == null || sameRef(pendingStand.reference, reference))) {
+            const { standId, itemId } = pendingStand;
+            const index = features.findIndex(f => standIdOf(f) === standId);
             pendingStand = null;
-            if (index >= 0) openStand(index);
+            if (index >= 0) {
+                marker.clearLayers();
+                openStand(index);
+                // Kiinteistö selvisi: seuraavalla kerralla avataan suoraan tunnuksella
+                if (itemId) store.setReference(itemId, reference);
+            } else {
+                // Kuvio ei kuulu kiinteistön kuvioihin: merkki jää kartalle
+                showToast(T.kuvioEiListassa);
+            }
         }
     }
 

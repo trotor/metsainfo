@@ -1,3 +1,4 @@
+import "../js/vendor/index.js";
 import { describe, it, expect } from 'vitest';
 import { createFavorites, filterFavorites, favoriteId } from '../js/suosikit/varasto.js';
 
@@ -79,5 +80,44 @@ describe('viestiväylä', () => {
         on('testi:replay', d => got.push(-d.n));
         emit('testi:replay', { n: 2 });
         expect(got).toEqual([1, 2, -2]);
+    });
+});
+
+import { pointInside } from '../js/kuviotieto.js';
+import { containsPoint } from '../js/location/logic.js';
+
+describe('piste kuvion sisältä', () => {
+    it('U-muotoinen kuvio: rajojen keskipiste ei ole kuviolla, palautettu piste on', () => {
+        const u = { type: 'Polygon', coordinates: [[[0, 0], [300, 0], [300, 300], [200, 300], [200, 100], [100, 100], [100, 300], [0, 300], [0, 0]]] };
+        expect(containsPoint(u, [150, 150])).toBe(false);
+        const p = pointInside(u);
+        expect(containsPoint(u, p)).toBe(true);
+    });
+
+    it('kuvion kiinteistötunnus tallentuu, kun se selviää', () => {
+        const m = new Map();
+        const f = createFavorites({ getItem: k => m.get(k) ?? null, setItem: (k, v) => m.set(k, v) });
+        const a = f.add({ type: 'kuvio', name: 'K', ref: { standId: 5, center: [1, 2] } });
+        f.setReference(a.id, '99240300020062');
+        expect(f.get(a.id).ref).toEqual({ standId: 5, center: [1, 2], reference: '99240300020062' });
+    });
+});
+
+import { fetchParcelContaining } from '../js/data.js';
+
+describe('kiinteistö pisteessä', () => {
+    it('kasvattaa hakualuetta, kunnes pisteen sisältävä kiinteistö löytyy', async () => {
+        const big = { type: 'Feature', properties: { nationalCadastralReference: 'X' }, geometry: { type: 'Polygon', coordinates: [[[0, 0], [1000, 0], [1000, 1000], [0, 1000], [0, 0]]] } };
+        const calls = [];
+        const fetchFn = async (url) => {
+            const r = Number(new URL(url).searchParams.get('bbox').split(',')[2]) - 500;
+            calls.push(r);
+            // Kuten MML: kokonaan kiinteistön sisällä oleva laatikko ei palauta sitä
+            return { ok: true, json: async () => ({ features: r >= 700 ? [big] : [] }) };
+        };
+        const hit = await fetchParcelContaining(500, 500, { fetchFn });
+        expect(hit.properties.nationalCadastralReference).toBe('X');
+        expect(calls).toEqual([200, 700]);
+        expect(await fetchParcelContaining(5000, 5000, { fetchFn })).toBeNull();
     });
 });
