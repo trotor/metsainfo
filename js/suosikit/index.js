@@ -15,6 +15,8 @@ import * as state from '../state.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, formatCadastralReference } from '../utils.js';
 import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
 import { openStand } from '../ui/stands.js';
+import { releaseFollow } from '../ui/location-ui.js';
+import { isUnlocked } from '../features.js';
 import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
 import { on, emit, VIESTIT } from '../vayla.js';
 import { createFavorites, filterFavorites, TYYPIT } from './varasto.js';
@@ -36,6 +38,7 @@ function centerOf(geometry) {
 }
 
 export function startSuosikit() {
+    if (!isUnlocked('suosikit')) return;
     const store = createFavorites();
     const ui = {
         open: false,
@@ -185,6 +188,7 @@ export function startSuosikit() {
         if (!item) return;
         marker.clearLayers();
         toggle(false);
+        releaseFollow(); // kartta jää avatun kohteen kohdalle
         if (item.type === 'kiinteisto') {
             emit(VIESTIT.avaaKiinteisto, { reference: item.ref.reference });
         } else if (item.type === 'kuvio' && item.ref.reference) {

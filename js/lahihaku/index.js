@@ -18,7 +18,7 @@ import { formatNumber, coordsEPSG3067ToLatLng, getGeometryBounds3067 } from '../
 import { on, emit, has, VIESTIT } from '../vayla.js';
 import { latLonTo3067 } from '../location/logic.js';
 import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
-import { onPositionChange, requestLocation } from '../ui/location-ui.js';
+import { onPositionChange, requestLocation, releaseFollow } from '../ui/location-ui.js';
 import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
 import { tileCache } from '../rest2.js';
 import { mainShare } from '../kuviotieto.js';
@@ -130,8 +130,11 @@ export function startLahihaku() {
     }
 
     onPositionChange((pos) => {
+        const had = Boolean(ui.pos);
         if (pos) ui.pos = pos;
-        if (ui.open && ui.view === 'form') render();
+        // Lomake piirretään uudelleen vain, kun sijainnin saatavuus muuttuu,
+        // ettei jokainen sijaintipäivitys hukkaa napautusta
+        if (ui.open && ui.view === 'form' && had !== Boolean(ui.pos)) render();
     });
     purchases.onChange(() => { drawMap(); render(); });
 
@@ -153,6 +156,7 @@ export function startLahihaku() {
         ui.view = 'results';
         ui.selected = null;
         render();
+        releaseFollow(); // seuraava sijainti ei vie karttaa pois hakualueelta
         state.map.fitBounds(boxBounds(center), cardPadding());
         const entries = keys.map(k => tileCache.get(k));
         for (const entry of entries) entry.promise.then(() => { if (my === token) refresh(); });
@@ -218,6 +222,7 @@ export function startLahihaku() {
         drawMap();
         const layer = results.getLayers().find(l => l.feature.properties.STANDID === id);
         render();
+        releaseFollow();
         if (layer) state.map.fitBounds(layer.getBounds(), { maxZoom: 15, ...cardPadding() });
     }
 

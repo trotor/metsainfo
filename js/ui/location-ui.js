@@ -53,6 +53,15 @@ export function onPositionChange(fn) {
     return () => positionListeners.delete(fn);
 }
 
+/**
+ * Lopettaa kartan keskittämisen sijaintiin, mutta sijainti näkyy ja
+ * päivittyy edelleen. Lisäosat kutsuvat tätä, kun ne vievät kartan
+ * muualle (esim. lähihaun kuvio), ettei seuraava sijainti siirrä sitä takaisin.
+ */
+export function releaseFollow() {
+    if (mode === 'follow' || mode === 'heading') setMode('show');
+}
+
 /** Käynnistää paikannuksen kuten painikkeesta, jos se ei ole päällä. */
 export function requestLocation() {
     if (mode === 'off') onButton();

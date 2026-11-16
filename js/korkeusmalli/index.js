@@ -12,6 +12,7 @@
 import './korkeusmalli.css';
 import * as state from '../state.js';
 import { T } from './teksti.js';
+import { isUnlocked } from '../features.js';
 
 export const WMS_URL = 'https://gtkdata.gtk.fi/arcgis/services/Rajapinnat/Korkeusmalli/MapServer/WMSServer';
 
@@ -34,7 +35,7 @@ function wmsLayer(extra = {}) {
 
 export function startKorkeusmalli() {
     const control = state.layersControl;
-    if (!control) return;
+    if (!control || !isUnlocked('korkeusmalli')) return;
     // Taustakartaksi: pelkkä maaston muoto
     control.addBaseLayer(wmsLayer({ className: 'korkeusmalli-taso' }), T.taustakartta);
     // Päälle: varjoste peruskartan tai ortokuvan päälle, nimet ja tiet näkyvät
