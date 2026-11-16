@@ -16,7 +16,7 @@ const OUT = new URL('../public/demo/esimerkkimetsa.json', import.meta.url);
 
 // Tilan keskipiste (EPSG:3067), kiertokulma ja koko. Pinta-ala 400 m × 610 m = 24,4 ha
 // vastaa kuvioiden yhteenlaskettua pinta-alaa.
-const CENTER = [427680, 6946850];
+const CENTER = [427440, 6947220];
 const ROTATION_DEG = -14;
 const WIDTH = 400;
 const HEIGHT = 610;
