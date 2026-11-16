@@ -231,7 +231,7 @@ export function showSummary(features, parcel, partCount = 1) {
                     <li data-filter="cutting" data-value="${r.code}">
                         <span class="recommendation-type">${r.name}</span>
                         <span class="recommendation-info">
-                            <span class="recommendation-count">${r.count} kuviota</span>
+                            <span class="recommendation-count">${r.count} ${r.count === 1 ? 'kuvio' : 'kuviota'}</span>
                             ${r.year ? `<span class="recommendation-year${isSoon(r.year) ? ' soon' : ''}">${r.year}</span>` : ''}
                         </span>
                     </li>
@@ -248,7 +248,7 @@ export function showSummary(features, parcel, partCount = 1) {
                     <li data-filter="silviculture" data-value="${r.code}">
                         <span class="recommendation-type">${r.name}</span>
                         <span class="recommendation-info">
-                            <span class="recommendation-count">${r.count} kuviota</span>
+                            <span class="recommendation-count">${r.count} ${r.count === 1 ? 'kuvio' : 'kuviota'}</span>
                             ${r.year ? `<span class="recommendation-year">${r.year}</span>` : ''}
                         </span>
                     </li>

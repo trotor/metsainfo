@@ -60,3 +60,34 @@ export function createKuvitteellinenKartta(map, coordsToLatLng) {
     });
     return group;
 }
+
+/* ---------- Kuvausohjaus (vain npm run dev:kuvat) ---------- */
+
+/**
+ * Simulaattorissa ja emulaattorissa sovellus ladataan kuvaustilan
+ * kehityspalvelimelta. Sivu lukee komentotiedostoa kuvaus/komento.txt
+ * (ei versionhallinnassa) ja ajaa sen, kun sisältö muuttuu: näin kuvat
+ * saadaan otettua ilman kosketusten syöttämistä. Tuotantobuildissa ei ole.
+ */
+export function startKuvausohjaus() {
+    if (!KUVAUSTILA || !import.meta.env?.DEV) return;
+    let last = null;
+    const tick = async () => {
+        try {
+            const res = await fetch(`kuvaus/komento.txt?t=${Date.now()}`, { cache: 'no-store' });
+            if (res.ok) {
+                const code = await res.text();
+                if (code !== last) {
+                    last = code;
+                    // Ensimmäinen luku vain muistetaan: vanhaa komentoa ei ajeta uudelleen
+                    if (tick.started) await new Function(`return (async () => { ${code} })()`)();
+                }
+            }
+        } catch (e) {
+            console.warn('kuvausohjaus', e);
+        }
+        tick.started = true;
+        setTimeout(tick, 700);
+    };
+    tick();
+}

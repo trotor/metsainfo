@@ -30,7 +30,7 @@ const PARCEL_MARGIN_MIN_ZOOM = 13;
 const PARCEL_WFS_LIMIT = 2000;
 let lastParcelFetch = null; // { bbox, labels }
 import * as state from './state.js';
-import { KUVAUSTILA, loadEsimerkkimetsa, createKuvitteellinenKartta } from './demo/kuvaustila.js';
+import { KUVAUSTILA, loadEsimerkkimetsa, createKuvitteellinenKartta, startKuvausohjaus } from './demo/kuvaustila.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
 import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels, fetchForestUseDeclarations } from './data.js';
@@ -88,6 +88,7 @@ function initNative() {
 function checkUrlParams() {
     if (KUVAUSTILA) {
         showEsimerkkimetsa();
+        startKuvausohjaus();
         return;
     }
     const params = new URLSearchParams(window.location.search);
