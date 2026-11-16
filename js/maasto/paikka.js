@@ -80,15 +80,27 @@ export const INDICATOR = {
     6: 'Karukkokankaalla maata peittävät jäkälät.'
 };
 
-/** Pääpuulajin osuus (0–1) tai null, jos osuuksia ei ole. */
-export function dominantShare(p) {
+/**
+ * Pääpuulajin (MAINTREESPECIES) oma osuus puustosta (0–1), null jos
+ * osuuksia ei ole. Metsäkeskuksen pääpuulaji voi olla eri kuin runsain
+ * laji (esim. kuusitaimikko, jossa lehtipuuta on enemmän), joten osuus
+ * lasketaan nimenomaan pääpuulajista.
+ */
+export function mainShare(p) {
     const shares = p?.SPECIESSHARES;
-    return shares?.length ? shares[0].share : null;
+    if (!shares?.length || p.MAINTREESPECIES == null) return null;
+    return shares.find(s => s.species === p.MAINTREESPECIES)?.share ?? 0;
+}
+
+/** Onko pääpuulaji selvästi vallitseva (vähintään 60 % ja runsain laji). */
+export function clearlyDominant(p) {
+    const share = mainShare(p);
+    return share != null && share >= 0.6 && p.SPECIESSHARES[0].species === p.MAINTREESPECIES;
 }
 
 function speciesWord(p) {
-    const share = dominantShare(p);
-    if (share != null && share < 0.6) return 'sekapuustoisessa';
+    if (mainShare(p) == null) return SPECIES_ADJ[p.MAINTREESPECIES] || '';
+    if (!clearlyDominant(p)) return 'sekapuustoisessa';
     return SPECIES_ADJ[p.MAINTREESPECIES] || '';
 }
 

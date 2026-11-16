@@ -11,7 +11,7 @@
 
 import { CODES } from '../config.js';
 import { formatNumber } from '../utils.js';
-import { dominantShare, INDICATOR } from './paikka.js';
+import { mainShare, clearlyDominant, INDICATOR } from './paikka.js';
 
 export const LEVELS = ['helppo', 'keski', 'vaikea'];
 export const POINTS = { helppo: 10, keski: 20, vaikea: 30, havainto: 5, uusiKuvio: 5, putkiBonus: 5 };
@@ -94,8 +94,8 @@ export function questionsFor(p) {
 
     // Helppo: pääpuulaji ja kehitysvaihe
     const group = speciesGroup(p.MAINTREESPECIES);
-    const share = dominantShare(p);
-    if (forest && group && share != null && share >= 0.6) {
+    const share = mainShare(p);
+    if (forest && group && clearlyDominant(p)) {
         const name = CODES.treeSpecies[p.MAINTREESPECIES];
         qs.push(choice('puulaji', 'helppo', 'Mikä puulaji on tällä kuviolla vallitseva?', SPECIES_OPTIONS, group,
             `Tietojen mukaan pääpuulaji on ${name.toLowerCase()}, noin ${formatNumber(share * 100, 0)} % puustosta.`));
@@ -143,7 +143,7 @@ export function questionsFor(p) {
     if (forest && nameLower && p.MEANHEIGHT) {
         qs.push({
             id: 'havainto', level: 'havainto', kind: 'observe', points: POINTS.havainto,
-            text: `Tietojen mukaan pääpuulaji on ${nameLower} ja puut ovat noin ${formatNumber(p.MEANHEIGHT, 0)} m pitkiä. Vastaako tämä sitä, mitä näet?`,
+            text: `Tietojen mukaan ${mainShare(p) == null || clearlyDominant(p) ? `pääpuulaji on ${nameLower}` : 'täällä on sekapuustoa'} ja puut ovat noin ${formatNumber(p.MEANHEIGHT, 0)} m pitkiä. Vastaako tämä sitä, mitä näet?`,
             options: [
                 { value: 'kylla', label: 'Kyllä, vastaa' },
                 { value: 'ei', label: 'Ei vastaa' },

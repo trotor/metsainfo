@@ -122,12 +122,16 @@ export function startMaasto() {
         return entry;
     }
 
-    // Naapuriruudut taustalla yksi kerrallaan, jotta kävely ruudun yli toimii myös ilman verkkoa
+    // Naapuriruudut taustalla yksi kerrallaan: kävely viereiseen ruutuun
+    // toimii katvealueella, kun sovellus on ollut auki ruudun haun ajan.
+    const queue = [];
     let prefetching = false;
     async function prefetch(key) {
+        for (const k of neighbourKeys(key)) if (!tiles.has(k) && !queue.includes(k)) queue.push(k);
         if (prefetching) return;
         prefetching = true;
-        for (const k of neighbourKeys(key)) {
+        while (queue.length) {
+            const k = queue.shift();
             if (tiles.has(k)) continue;
             const entry = { status: 'loading', stands: [] };
             tiles.set(k, entry);
@@ -137,6 +141,8 @@ export function startMaasto() {
             } catch {
                 tiles.delete(k); // yritetään uudelleen, kun ruutuun tullaan
             }
+            // Käyttäjä ehti ruutuun, jota esihaettiin
+            if (ui.point && tileKey(ui.point) === k) update();
         }
         prefetching = false;
     }
@@ -263,7 +269,8 @@ export function startMaasto() {
         const back = `<button type="button" class="mk-btn mk-link" data-mk="place">${esc(T.takaisin)}</button>`;
 
         if (ui.status !== 'ok' && !ui.feedback) {
-            return `${head}<p class="mk-note">${esc(ui.status === 'edge' ? T.reunallaEiKysymyksia : T.eiKuviota)}</p>${back}`;
+            const note = ui.status === 'edge' ? `<p class="mk-note">${esc(T.reunallaEiKysymyksia)}</p>` : statusHtml();
+            return `${head}${note}${back}`;
         }
         const q = ui.question;
         if (!q) {

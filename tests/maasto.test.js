@@ -141,7 +141,7 @@ describe('paikka', () => {
     });
     it('pääkappale tavallisella kielellä', () => {
         expect(leadSentence(stand.properties)).toBe('Seisot noin 80-vuotiaassa mäntyvaltaisessa uudistuskypsässä metsässä.');
-        expect(leadSentence({ ...stand.properties, DEVELOPMENTCLASS: 'T2', MAINTREESPECIES: 2 })).toBe('Seisot kuusivaltaisessa taimikossa.');
+        expect(leadSentence({ ...stand.properties, DEVELOPMENTCLASS: 'T2', MAINTREESPECIES: 2, SPECIESSHARES: [{ species: 2, share: 0.9 }] })).toBe('Seisot kuusivaltaisessa taimikossa.');
         expect(leadSentence({ ...stand.properties, DEVELOPMENTCLASS: 'A0' })).toMatch(/^Seisot aukealla/);
         expect(leadSentence({ ...stand.properties, MAINGROUP: 3 })).toMatch(/joutomaa/);
     });
@@ -200,6 +200,13 @@ describe('metsävisa', () => {
         expect(q.options.map(o => o.value)).toEqual([1, 2, 3, 4]);
         const q6 = questionsFor({ ...p, FERTILITYCLASS: 6 }).find(x => x.id === 'kasvupaikka');
         expect(q6.options.map(o => o.value)).toEqual([3, 4, 5, 6]);
+    });
+    it('ei puulajikysymystä, kun runsain laji ei ole pääpuulaji', () => {
+        // Kuusitaimikko, jossa lehtipuuta on 70 % (todellinen tapaus REST-datassa)
+        const sapling = { ...p, MAINTREESPECIES: 2, SPECIESSHARES: [{ species: 29, share: 0.7 }, { species: 2, share: 0.3 }] };
+        expect(questionsFor(sapling).some(q => q.id === 'puulaji')).toBe(false);
+        expect(questionsFor(sapling).find(q => q.id === 'havainto').text).toContain('sekapuustoa');
+        expect(leadSentence(sapling)).toContain('sekapuustoisessa');
     });
     it('ei puulajikysymystä sekametsässä eikä kasvupaikkaa suolla', () => {
         const mixed = { ...p, SPECIESSHARES: [{ species: 1, share: 0.55 }, { species: 2, share: 0.45 }] };
