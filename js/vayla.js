@@ -6,14 +6,21 @@
  */
 
 const handlers = new Map();
+const latest = new Map();
 
-export function on(name, fn) {
+/**
+ * Kuuntelee viestiä. replay: kutsutaan heti viimeisimmällä viestillä, jos
+ * sellainen on jo lähetetty (esim. yhteenveto piirtyi ennen kuin lisäosa latautui).
+ */
+export function on(name, fn, { replay = false } = {}) {
     if (!handlers.has(name)) handlers.set(name, new Set());
     handlers.get(name).add(fn);
+    if (replay && latest.has(name)) fn(latest.get(name));
     return () => handlers.get(name)?.delete(fn);
 }
 
 export function emit(name, detail) {
+    latest.set(name, detail);
     for (const fn of handlers.get(name) || []) fn(detail);
 }
 

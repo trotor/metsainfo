@@ -3,6 +3,7 @@
  * kartan täytteet paneelin korkeuden mukaan
  */
 
+import { T } from './teksti.js';
 import { isMobileLayout, onLayoutChange, topInset, fitPadding } from './layout.js';
 import { createSheet, resolveRelease, nextSnapOnTap } from './sheet.js';
 import { copyParcelLink, downloadCSV } from './actions.js';
@@ -82,7 +83,7 @@ export function openPanelForSelection() {
     panelEl.classList.remove('hidden');
     closeMenu();
     sheet.setSnap('peek');
-    setPeekMessage('Haetaan tietoja…');
+    setPeekMessage(T.haetaanTietoja);
 }
 
 function hidePanel() {

@@ -2,7 +2,9 @@
  * Karttakohteiden popupit, klikkaukset ja kiinteistötunnukset
  */
 
-import { CODES } from '../config.js';
+import { codeName } from '../koodit.js';
+import { locale } from '../i18n.js';
+import { T } from './teksti.js';
 import * as state from '../state.js';
 import { formatNumber, formatCadastralReference, getGeometryBounds3067 } from '../utils.js';
 import { isMobileLayout } from './layout.js';
@@ -14,12 +16,13 @@ import { openStand } from './stands.js';
 export function showFeaturePopup(feature, layer) {
     const props = feature.properties;
 
+    const fmt = (v, d) => formatNumber(v, d, locale());
     const content = `
-        <strong>Kuvio ${props.STANDNUMBER || '-'}</strong><br>
-        Pinta-ala: ${formatNumber(props.AREA, 2)} ha<br>
-        Tilavuus: ${formatNumber(props.VOLUME, 0)} m³/ha<br>
-        Pääpuulaji: ${CODES.treeSpecies[props.MAINTREESPECIES] || '-'}<br>
-        Ikä: ${props.MEANAGE || '-'} v
+        <strong>${T.kuvio(props.STANDNUMBER || '-')}</strong><br>
+        ${T.pintaAla}: ${fmt(props.AREA, 2)} ha<br>
+        ${T.tilavuus}: ${fmt(props.VOLUME, 0)} m³/ha<br>
+        ${T.paapuulaji}: ${codeName('treeSpecies', props.MAINTREESPECIES) || '-'}<br>
+        ${T.ikaPopup}: ${props.MEANAGE || '-'} ${T.vuotta}
     `;
 
     layer.bindPopup(content).openPopup();
@@ -45,14 +48,14 @@ export function onEachFeature(feature, layer) {
  */
 export function onEachHabitat(feature, layer) {
     const p = feature.properties;
-    const typeName = CODES.habitatType[p.SPECIALFEATURECODE] || `Tyyppi ${p.SPECIALFEATURECODE || '-'}`;
-    const area = formatNumber(p.AREA, 2);
+    const typeName = codeName('habitatType', p.SPECIALFEATURECODE) || T.tyyppi(p.SPECIALFEATURECODE || '-');
+    const area = formatNumber(p.AREA, 2, locale());
 
     layer.bindPopup(`
-        <strong>Luontokohde</strong><br>
+        <strong>${T.luontokohde}</strong><br>
         <span style="color:#c0392b;font-weight:600">${typeName}</span><br>
-        Pinta-ala: ${area} ha<br>
-        <span style="font-size:0.8em;color:#888">Metsälain 10 § erityisen tärkeä elinympäristö</span>
+        ${T.pintaAla}: ${area} ha<br>
+        <span style="font-size:0.8em;color:#888">${T.metsalaki}</span>
     `);
 }
 
@@ -61,19 +64,19 @@ export function onEachHabitat(feature, layer) {
  */
 export function onEachMkiFeature(feature, layer) {
     const p = feature.properties;
-    const purpose = CODES.cuttingPurpose[p.CUTTINGPURPOSE] || `Koodi ${p.CUTTINGPURPOSE || '-'}`;
-    const practice = CODES.cuttingType[p.CUTTINGREALIZATIONPRACTICE] || `Koodi ${p.CUTTINGREALIZATIONPRACTICE || '-'}`;
-    const species = CODES.treeSpecies[p.DECLARATIONMAINTREESPECIES] || '-';
-    const area = formatNumber(p.AREA, 2);
+    const purpose = codeName('cuttingPurpose', p.CUTTINGPURPOSE) || T.koodi(p.CUTTINGPURPOSE || '-');
+    const practice = codeName('cuttingType', p.CUTTINGREALIZATIONPRACTICE) || T.koodi(p.CUTTINGREALIZATIONPRACTICE || '-');
+    const species = codeName('treeSpecies', p.DECLARATIONMAINTREESPECIES) || '-';
+    const area = formatNumber(p.AREA, 2, locale());
     const year = p.DECLARATIONARRIVALYEAR || '-';
 
     layer.bindPopup(
-        '<strong>Metsänkäyttöilmoitus</strong><br>' +
+        '<strong>' + T.metsankayttoilmoitus + '</strong><br>' +
         '<span style="color:#c0392b;font-weight:600">' + purpose + '</span><br>' +
-        'Hakkuutapa: ' + practice + '<br>' +
-        'Pinta-ala: ' + area + ' ha<br>' +
-        'Vuosi: ' + year + '<br>' +
-        'Puulaji: ' + species
+        T.hakkuutapa + ': ' + practice + '<br>' +
+        T.pintaAla + ': ' + area + ' ha<br>' +
+        T.vuosi + ': ' + year + '<br>' +
+        T.puulaji + ': ' + species
     );
 
     layer.bindTooltip(year + ' – ' + purpose, {

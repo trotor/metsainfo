@@ -47,7 +47,33 @@ export const CODES_EN_EPAVIRALLINEN = {
         3: 'Thinning', 4: 'Strip cutting', 5: 'Clear cutting', 6: 'Veil tree cutting',
         7: 'Shelterwood cutting', 8: 'Seed tree cutting', 9: 'Special cutting',
         11: 'Thinning from above', 12: 'Release cutting', 13: 'Restoration cutting',
-        14: 'Selection cutting', 15: 'Small gap cutting', 20: 'Energy wood thinning'
+        14: 'Selection cutting', 15: 'Small gap cutting', 20: 'Energy wood thinning',
+        90: 'Cutting for change of land use', 91: 'Special cutting (section 6)',
+        92: 'Other cutting', 93: 'Regeneration cutting in a damaged area', 94: 'Thinning in a damaged area'
+    },
+    silvicultureType: {
+        1: 'Stand establishment', 2: 'Early sapling stand tending', 3: 'Sapling stand tending',
+        4: 'Young stand tending', 5: 'Other silviculture'
+    },
+    drainageState: {
+        1: 'Undrained mineral soil', 2: 'Paludified mineral soil', 3: 'Drained mineral soil',
+        6: 'Undrained mire', 7: 'Recently drained mire', 8: 'Transforming drained mire', 9: 'Drained peatland forest'
+    },
+    accessibility: {
+        1: 'All year', 2: 'Unfrozen ground (not during thaw)', 3: 'Dry season',
+        4: 'Frozen ground only', 5: 'Not defined'
+    },
+    cuttingPurpose: {
+        1: 'Thinning', 2: 'Regeneration cutting', 3: 'Other cutting',
+        4: 'Special cutting (section 6)', 5: 'Change of land use', 6: 'Forest damage area'
+    },
+    habitatType: {
+        530: 'Cliff', 540: 'Rock outcrop', 543: 'Rock outcrop', 545: 'Boulder field',
+        570: 'Dry herb-rich forest', 571: 'Mesic herb-rich forest', 572: 'Moist herb-rich forest',
+        577: 'Rich fen', 578: 'Rich spruce mire',
+        600: 'Forest island', 602: 'Sparsely wooded mire',
+        613: 'Pond', 614: 'Spring', 615: 'Spring area',
+        618: 'Brook', 620: 'Flooded meadow', 623: 'Rill', 624: 'Seepage area', 625: 'Water body'
     },
     mainGroup: {
         1: 'Forest land', 2: 'Poorly productive forest land', 3: 'Unproductive land',

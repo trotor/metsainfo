@@ -16,8 +16,8 @@
     <div id="app">
         <!-- Header -->
         <header id="header">
-            <h1>Metsäinfo <span id="version-badge"></span> <button id="help-toggle" onclick="toggleHelp()" title="Käyttöohje">?</button></h1>
-            <p>Suomen metsävaratiedot kartalla - hae kiinteistötunnuksella tai klikkaa karttaa</p>
+            <h1>Metsäinfo <span id="version-badge"></span> <button id="help-toggle" onclick="toggleHelp()" title="Käyttöohje" data-i18n-attr="title:kayttoohje">?</button></h1>
+            <p data-i18n="alaotsikko">Suomen metsävaratiedot kartalla - hae kiinteistötunnuksella tai klikkaa karttaa</p>
         </header>
 
         <!-- Map container -->
@@ -25,20 +25,20 @@
 
         <!-- Info panel -->
         <div id="info-panel" class="hidden">
-            <div id="sheet-handle" role="button" tabindex="0" aria-label="Muuta tietopaneelin kokoa"></div>
+            <div id="sheet-handle" role="button" tabindex="0" aria-label="Muuta tietopaneelin kokoa" data-i18n-attr="aria-label:muutaPaneelinKokoa"></div>
             <div id="sheet-peek"></div>
             <div id="sheet-menu" role="menu" hidden>
-                <button role="menuitem" data-action="copy">Kopioi linkki</button>
-                <button role="menuitem" data-action="csv">Lataa CSV</button>
-                <button role="menuitem" data-action="print">Tulosta</button>
-                <button role="menuitem" data-action="clear">Poista valinta</button>
+                <button role="menuitem" data-action="copy" data-i18n="kopioiLinkki">Kopioi linkki</button>
+                <button role="menuitem" data-action="csv" data-i18n="lataaCsv">Lataa CSV</button>
+                <button role="menuitem" data-action="print" data-i18n="tulosta">Tulosta</button>
+                <button role="menuitem" data-action="clear" data-i18n="poistaValinta">Poista valinta</button>
             </div>
-            <button id="close-panel" aria-label="Sulje">&times;</button>
-            <h2>Metsävaratiedot</h2>
+            <button id="close-panel" aria-label="Sulje" data-i18n-attr="aria-label:sulje">&times;</button>
+            <h2 data-i18n="metsavaratiedot">Metsävaratiedot</h2>
             <button id="here-row" type="button" hidden><span class="here-dot" aria-hidden="true"></span><span class="here-text"></span></button>
             <div id="loading" class="hidden">
                 <div class="spinner"></div>
-                <p>Haetaan tietoja...</p>
+                <p data-i18n="haetaanTietoja">Haetaan tietoja...</p>
             </div>
             <div id="info-content"></div>
         </div>
@@ -49,10 +49,10 @@
         <!-- Color mode selector -->
         <div id="color-mode-control" class="hidden">
             <select id="color-mode-select">
-                <option value="volume">Tilavuus (m³/ha)</option>
-                <option value="age">Ikä (v)</option>
-                <option value="species">Pääpuulaji</option>
-                <option value="devclass">Kehitysluokka</option>
+                <option value="volume" data-i18n="variTilavuus">Tilavuus (m³/ha)</option>
+                <option value="age" data-i18n="variIka">Ikä (v)</option>
+                <option value="species" data-i18n="variPaapuulaji">Pääpuulaji</option>
+                <option value="devclass" data-i18n="variKehitysluokka">Kehitysluokka</option>
             </select>
         </div>
 
@@ -62,8 +62,8 @@
         <!-- MKI color mode selector -->
         <div id="mki-color-mode-control" class="hidden">
             <select id="mki-color-mode-select">
-                <option value="year">Vuoden mukaan</option>
-                <option value="purpose">Hakkuutarkoitus</option>
+                <option value="year" data-i18n="mkiVuosi">Vuoden mukaan</option>
+                <option value="purpose" data-i18n="mkiTarkoitus">Hakkuutarkoitus</option>
             </select>
         </div>
 
@@ -74,13 +74,13 @@
 
         <!-- Search control -->
         <div id="search-control">
-            <button id="search-toggle" title="Hae kiinteistötunnuksella">&#128269;</button>
+            <button id="search-toggle" title="Hae kiinteistötunnuksella" data-i18n-attr="title:haeTunnuksella">&#128269;</button>
             <div id="search-form" class="hidden">
-                <input type="text" id="search-input" placeholder="esim. 91-416-1-123" enterkeyhint="search" autocomplete="off">
-                <button id="search-button">Hae</button>
+                <input type="text" id="search-input" placeholder="esim. 91-416-1-123" data-i18n-attr="placeholder:hakuEsimerkki" enterkeyhint="search" autocomplete="off">
+                <button id="search-button" data-i18n="hae">Hae</button>
                 <div id="search-error" class="hidden"></div>
             </div>
-            <button id="mobile-help-toggle" aria-label="Käyttöohje" onclick="toggleHelp()">?</button>
+            <button id="mobile-help-toggle" aria-label="Käyttöohje" data-i18n-attr="aria-label:kayttoohje" onclick="toggleHelp()">?</button>
         </div>
 
 
@@ -88,7 +88,7 @@
         <div id="help-overlay" class="hidden" onclick="toggleHelp()"></div>
         <div id="help-modal" class="hidden">
             <button id="close-help" onclick="toggleHelp()">&times;</button>
-            <h2>Metsäinfo — Käyttöohje</h2>
+            <h2 data-i18n="ohjeOtsikko">Metsäinfo — Käyttöohje</h2>
             <div id="help-content">
                 <div class="help-section">
                     <h3>Miten käytän sovellusta?</h3>
@@ -309,9 +309,9 @@
         <footer id="footer">
             <p>
                 <span id="author-info"></span> <a href="mailto:inetoroy@gmail.com">inetoroy@gmail.com</a> |
-                Metsätiedot: <a href="https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto" target="_blank">Metsäkeskus</a> |
-                Kartta: <a href="https://kartat.kapsi.fi/" target="_blank">Kapsi</a> / <a href="https://www.maanmittauslaitos.fi/" target="_blank">MML</a> |
-                Kiinteistöt: <a href="https://www.maanmittauslaitos.fi/" target="_blank">MML</a>
+                <span data-i18n="alaMetsatiedot">Metsätiedot:</span> <a href="https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto" target="_blank" data-i18n="alaMetsakeskus">Metsäkeskus</a> |
+                <span data-i18n="alaKartta">Kartta:</span> <a href="https://kartat.kapsi.fi/" target="_blank">Kapsi</a> / <a href="https://www.maanmittauslaitos.fi/" target="_blank" data-i18n="alaMml">MML</a> |
+                <span data-i18n="alaKiinteistot">Kiinteistöt:</span> <a href="https://www.maanmittauslaitos.fi/" target="_blank" data-i18n="alaMml">MML</a>
             </p>
         </footer>
     </div>

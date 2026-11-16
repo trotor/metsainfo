@@ -266,7 +266,7 @@ export function startSuosikit() {
         }
     }
 
-    on(VIESTIT.yhteenveto, decorate);
+    on(VIESTIT.yhteenveto, decorate, { replay: true });
     store.onChange(() => {
         if (lastSummary) decorate(lastSummary);
         if (ui.open && !ui.editing) renderList();

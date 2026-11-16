@@ -4,8 +4,10 @@
  * Geometria lasketaan EPSG:3067:ssä kuten muuallakin sovelluksessa.
  */
 
-import { CODES } from '../config.js';
 import { formatNumber } from '../utils.js';
+import { codeName } from '../koodit.js';
+import { locale } from '../i18n.js';
+import { T } from '../ui/teksti.js';
 
 export const STALE_MS = 30000;
 
@@ -81,15 +83,15 @@ export function isStale(timestamp, now, maxAgeMs = STALE_MS) {
 
 export function hereRowModel({ hasParcel, inside, feature }) {
     if (!hasParcel) return { kind: 'none', text: '' };
-    if (!inside) return { kind: 'outside', text: 'Valitun kiinteistön ulkopuolella' };
-    if (!feature) return { kind: 'none', text: 'Ei kuviotietoa tässä kohdassa' };
+    if (!inside) return { kind: 'outside', text: T.sijainti.ulkopuolella };
+    if (!feature) return { kind: 'none', text: T.sijainti.eiKuviotietoa };
 
     const p = feature.properties || {};
-    const parts = [`Kuvio ${p.STANDNUMBER ?? '-'}`];
-    const species = CODES.treeSpecies[p.MAINTREESPECIES];
+    const parts = [T.kuvio(p.STANDNUMBER ?? '-')];
+    const species = codeName('treeSpecies', p.MAINTREESPECIES);
     if (species) parts.push(species);
-    if (p.VOLUME != null) parts.push(`${formatNumber(p.VOLUME, 0)} m³/ha`);
-    const devClass = CODES.developmentClass[p.DEVELOPMENTCLASS];
+    if (p.VOLUME != null) parts.push(`${formatNumber(p.VOLUME, 0, locale())} m³/ha`);
+    const devClass = codeName('developmentClass', p.DEVELOPMENTCLASS);
     if (devClass) parts.push(devClass);
     return { kind: 'stand', text: parts.join(' · ') };
 }

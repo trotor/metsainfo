@@ -8,7 +8,10 @@ import { TEKSTIT as LAHIHAKU } from '../js/lahihaku/teksti.js';
 import { TEKSTIT as SUOSIKIT } from '../js/suosikit/teksti.js';
 import { TEKSTIT as KORKEUSMALLI } from '../js/korkeusmalli/teksti.js';
 import { TEKSTIT as ASETUKSET } from '../js/asetukset/teksti.js';
+import { TEKSTIT as ESTIMATE } from '../js/ui/estimate-teksti.js';
 import { formatNumber } from '../js/utils.js';
+import { TEKSTIT as UI } from '../js/ui/teksti.js';
+import { TEKSTIT as SIVU } from '../js/ui/sivu-teksti.js';
 
 /** Kaikki avaimet sisäkkäin, taulukot pituuksineen. */
 function shape(obj, prefix = '') {
@@ -25,7 +28,8 @@ function shape(obj, prefix = '') {
 describe('kielet', () => {
     it.each([
         ['maasto', MAASTO], ['lähihaku', LAHIHAKU], ['suosikit', SUOSIKIT],
-        ['korkeusmalli', KORKEUSMALLI], ['asetukset', ASETUKSET]
+        ['korkeusmalli', KORKEUSMALLI], ['asetukset', ASETUKSET], ['käyttöliittymä', UI],
+        ['hinta-arvio', ESTIMATE], ['sivu', SIVU]
     ])('%s: suomella ja englannilla samat avaimet', (_, t) => {
         expect(shape(t.en)).toEqual(shape(t.fi));
     });
@@ -47,7 +51,8 @@ describe('kielet', () => {
     it('koodin nimi: englanti epävirallisesta taulusta, puuttuva suomeksi', () => {
         expect(codeName('treeSpecies', 2, 'en')).toBe('Norway spruce');
         expect(codeName('treeSpecies', 2, 'fi')).toBe('Kuusi');
-        expect(codeName('cuttingType', 90, 'en')).toBe(CODES.cuttingType[90]);
+        expect(codeName('cuttingType', 90, 'en')).toBe('Cutting for change of land use');
+        expect(codeName('tuntematon', 1, 'en')).toBeNull();
         expect(codeName('treeSpecies', 999, 'en')).toBeNull();
         expect(codeName('treeSpecies', null, 'en')).toBeNull();
         // Jokainen englanninkielinen koodi on myös virallisessa koodistossa
@@ -83,5 +88,54 @@ describe('julkaisu pysyy suomeksi', () => {
         expect(initialLang({ enabled: true, saved: 'xx', device: () => 'fi' })).toBe('fi');
         // Testit ajetaan tavallisena buildina
         expect(getLang()).toBe('fi');
+    });
+});
+
+import { readFileSync } from 'node:fs';
+import { applyPageTexts, parseAttrSpec } from '../js/ui/sivu.js';
+
+describe('sivun (index.html) staattiset tekstit', () => {
+    const html = readFileSync(new URL('../index.html', `file://${process.cwd()}/tests/`), 'utf8');
+    const parse = () => new DOMParser().parseFromString(html, 'text/html');
+
+    it('jokainen merkintä löytyy tekstitaulusta ja suomi on täsmälleen sivun teksti', () => {
+        const doc = parse();
+        const marked = [...doc.querySelectorAll('[data-i18n]')];
+        expect(marked.length).toBeGreaterThan(10);
+        for (const el of marked) {
+            expect(SIVU.fi[el.dataset.i18n], el.dataset.i18n).toBe(el.textContent);
+        }
+        for (const el of doc.querySelectorAll('[data-i18n-attr]')) {
+            const pairs = parseAttrSpec(el.dataset.i18nAttr);
+            expect(pairs.length).toBeGreaterThan(0);
+            for (const [attr, key] of pairs) expect(SIVU.fi[key], key).toBe(el.getAttribute(attr));
+        }
+        expect(SIVU.fi.sivuOtsikko).toBe(doc.title);
+        expect(SIVU.fi.sivuKuvaus).toBe(doc.querySelector('meta[name="description"]').getAttribute('content'));
+    });
+
+    it('suomeksi sivuun ei kosketa', () => {
+        const doc = parse();
+        const before = doc.documentElement.outerHTML;
+        applyPageTexts(doc, 'fi');
+        expect(doc.documentElement.outerHTML).toBe(before);
+    });
+
+    it('englanniksi merkityt tekstit ja ohje vaihtuvat, sovelluksen kiinnekohdat säilyvät', () => {
+        const doc = parse();
+        const helpBefore = doc.getElementById('help-content');
+        const classes = (root) => [...root.querySelectorAll('[class]')].map(el => el.className).sort();
+        const fiClasses = classes(helpBefore);
+        applyPageTexts(doc, 'en');
+        expect(doc.documentElement.lang).toBe('en');
+        expect(doc.title).toBe(SIVU.en.sivuOtsikko);
+        expect(doc.getElementById('search-button').textContent).toBe('Search');
+        expect(doc.getElementById('search-input').getAttribute('placeholder')).toBe(SIVU.en.hakuEsimerkki);
+        expect(doc.getElementById('mobile-help-toggle').getAttribute('aria-label')).toBe('User guide');
+        const help = doc.getElementById('help-content');
+        expect(help.querySelector('h3').textContent).toBe('How do I use the app?');
+        expect(help.querySelector('#app-version')).not.toBeNull();
+        expect(help.querySelector('a[href="tietosuoja.html"]')).not.toBeNull();
+        expect(classes(help)).toEqual(fiClasses);
     });
 });

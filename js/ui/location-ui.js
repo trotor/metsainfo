@@ -4,6 +4,7 @@
  * automaattinen kiinteistövalinta (spec luku 5.1).
  */
 
+import { T } from './teksti.js';
 import * as state from '../state.js';
 import { coordsEPSG3067ToLatLng } from '../utils.js';
 import { isMobileLayout, onLayoutChange, visibleCenterOffset, topInset } from './layout.js';
@@ -85,7 +86,7 @@ const LocateControl = L.Control.extend({
         const btn = L.DomUtil.create('a', 'locate-btn', container);
         btn.href = '#';
         btn.setAttribute('role', 'button');
-        btn.setAttribute('aria-label', 'Näytä oma sijainti');
+        btn.setAttribute('aria-label', T.sijainti.off);
         btn.title = 'Oma sijainti';
         btn.innerHTML = ICON;
         btn.dataset.mode = mode;
@@ -106,10 +107,10 @@ function setMode(next) {
         btn.dataset.mode = mode;
         btn.setAttribute('aria-pressed', mode === 'off' ? 'false' : 'true');
         btn.setAttribute('aria-label', {
-            off: 'Näytä oma sijainti',
-            show: 'Keskitä omaan sijaintiin',
-            follow: hasCompass ? 'Näytä kulkusuunta' : 'Lopeta paikannus',
-            heading: 'Lopeta paikannus'
+            off: T.sijainti.off,
+            show: T.sijainti.show,
+            follow: hasCompass ? T.sijainti.followKompassi : T.sijainti.lopeta,
+            heading: T.sijainti.lopeta
         }[mode]);
     }
     updateHeadingMarker();
@@ -181,12 +182,12 @@ function onError(kind, info = {}) {
         stop();
         if (kind === 'denied') {
             showToast(isNative()
-                ? 'Sijainti ei ole käytössä. Salli se kohdassa Asetukset → Metsäinfo → Sijainti.'
-                : 'Sijainti ei ole käytössä. Salli sijainti selaimen asetuksista.', 8000);
+                ? T.sijainti.estettyNatiivi
+                : T.sijainti.estettySelain, 8000);
         } else if (kind === 'off') {
-            showToast('Sijaintipalvelut ovat pois päältä. Kytke ne päälle kohdassa Asetukset → Tietosuoja ja turvallisuus → Sijaintipalvelut.', 8000);
+            showToast(T.sijainti.palvelutPois, 8000);
         } else {
-            showToast('Sijaintia ei saatu. Tarkista, että sijaintipalvelut ovat päällä.');
+            showToast(T.sijainti.eiSaatu);
         }
         return;
     }
@@ -194,7 +195,7 @@ function onError(kind, info = {}) {
     // Ohje näytetään vain, jos sijaintia ei ole saatu lainkaan.
     if (!last && !warnedUnavailable) {
         warnedUnavailable = true;
-        showToast('Sijaintia haetaan. Tarkista, että sijaintipalvelut ovat päällä.');
+        showToast(T.sijainti.haetaan);
     }
 }
 
@@ -334,7 +335,7 @@ export function refreshHereRow() {
     hereStandIndex = index;
     row.hidden = false;
     row.dataset.kind = model.kind;
-    row.querySelector('.here-text').textContent = model.kind === 'stand' ? `Olet: ${model.text}` : model.text;
+    row.querySelector('.here-text').textContent = model.kind === 'stand' ? T.sijainti.olet(model.text) : model.text;
 
     hereLayer.clearLayers();
     if (feature) hereLayer.addData(feature);
@@ -357,7 +358,7 @@ function onHereRowTap() {
     } else if (row.dataset.kind === 'outside' && last) {
         const parcel = findParcelAt(visibleParcels(), latLonTo3067(last.lat, last.lon));
         if (parcel) selectParcelFn(parcel);
-        else showToast('Tästä kohdasta ei löytynyt kiinteistöä. Zoomaa lähemmäs.');
+        else showToast(T.sijainti.eiKiinteistoa);
     }
 }
 

@@ -13,10 +13,11 @@ import { PRICE_REGIONS, regionForKunta, parcelPoint } from '../pricing/region.js
 import { applyOverrides, METHODS, SPECIES } from '../pricing/prices.js';
 import { estimateParcel, cuttingSummary, DEFAULT_REMOVAL } from '../pricing/estimate.js';
 import { formatNumber } from '../utils.js';
+import { locale } from '../i18n.js';
+import { T } from './estimate-teksti.js';
 import { parsePriceInput, formatEuro, formatPrice, yearRangeLabel, buildEstimateReport, METHOD_LABELS, SPECIES_LABELS } from '../pricing/format.js';
 
 const STALE_MS = 7 * 24 * 3600 * 1000;
-const CC_BY = 'https://creativecommons.org/licenses/by/4.0/deed.fi';
 const SEEN_KEY = 'metsainfo.hintaArvioNahty';
 
 // Nykyinen kiinteistö (yhteenvedosta) ja esimerkkimetsä omina tiloinaan
@@ -40,8 +41,8 @@ const unlocked = (ctx) => ctx.demo || purchases.isEntitled();
 
 export function estimateTabButton() {
     if (!estimateEnabled()) return '';
-    const badge = isNew() ? ' <span class="est-new">Uutta</span>' : '';
-    return `<button type="button" role="tab" data-tab="arvio">Arvio${badge}</button>`;
+    const badge = isNew() ? ` <span class="est-new">${T.uutta}</span>` : '';
+    return `<button type="button" role="tab" data-tab="arvio">${T.valilehti}${badge}</button>`;
 }
 
 /* ---------- Uutta-merkki: näkyy, kunnes hinta-arvioon on tutustuttu ---------- */
@@ -141,8 +142,8 @@ async function ensurePrices(ctx, parcel, { force = false } = {}) {
     if (ctx.gen !== gen || ctx.region !== region) return;
     if (failed) {
         ctx.error = cached
-            ? 'Hintojen päivitys ei onnistunut. Käytössä aiemmin haetut hinnat.'
-            : 'Hintoja ei saatu haettua. Tarkista verkkoyhteys tai syötä hinnat itse.';
+            ? T.paivitysEpaonnistui
+            : T.hintojaEiSaatu;
     } else {
         ctx.prices = result;
     }
@@ -159,8 +160,8 @@ function currentTable(ctx) {
 
 /** Latausilmaisin: hidas haku ei näytä jumittuneelta. */
 function busyHtml(ctx) {
-    if (ctx.resolving) return '<div class="est-loading" role="status"><span class="est-spinner"></span>Hetkinen – selvitetään hinta-aluetta…</div>';
-    if (ctx.loading) return '<div class="est-loading" role="status"><span class="est-spinner"></span>Hetkinen – haetaan kantohintoja…</div>';
+    if (ctx.resolving) return `<div class="est-loading" role="status"><span class="est-spinner"></span>${T.selvitetaanAluetta}</div>`;
+    if (ctx.loading) return `<div class="est-loading" role="status"><span class="est-spinner"></span>${T.haetaanHintoja}</div>`;
     return '';
 }
 
@@ -187,31 +188,31 @@ function renderAll() {
 }
 
 function cardHtml(ctx) {
-    const head = '<h3>Arvio nykyhinnoin</h3>';
+    const head = `<h3>${T.korttiOtsikko}</h3>`;
     if (!unlocked(ctx)) {
         const t = teaser(ctx.features);
         if (!t) {
             return `${head}<div class="est-card-row"><div><div class="est-big est-locked">🔒 ? ??? €</div>
-                <div class="est-muted">Hakkuiden arvo tämän viikon kantohinnoilla</div></div>
-                <button type="button" class="est-btn-arvo" data-est="paywall">Avaa</button></div>`;
+                <div class="est-muted">${T.hakkuidenArvo}</div></div>
+                <button type="button" class="est-btn-arvo" data-est="paywall">${T.avaa}</button></div>`;
         }
         return `${head}<div class="est-card-row"><div><div class="est-teaser">${t.line}</div>
             <div class="est-muted">${t.question}</div></div>
-            <button type="button" class="est-btn-arvo" data-est="paywall">Näytä arvo</button></div>`;
+            <button type="button" class="est-btn-arvo" data-est="paywall">${T.naytaArvo}</button></div>`;
     }
     if ((ctx.loading || ctx.resolving) && !ctx.prices) return `${head}${busyHtml(ctx)}`;
     const { table, estimate } = compute(ctx);
     if (!hasPrices(table)) {
-        return `${head}<div class="est-card-row"><div class="est-muted">${ctx.error || 'Hinnat puuttuvat.'}</div>
-            <button type="button" class="est-btn-arvo" data-est="open-tab">Avaa</button></div>`;
+        return `${head}<div class="est-card-row"><div class="est-muted">${ctx.error || T.hinnatPuuttuvat}</div>
+            <button type="button" class="est-btn-arvo" data-est="open-tab">${T.avaa}</button></div>`;
     }
     const range = yearRangeLabel(estimate.byYear);
-    const region = PRICE_REGIONS[ctx.region]?.name || '';
+    const region = regionName(ctx.region);
     const missing = estimate.missing || estimate.stock.missing
-        ? '<div class="est-warn">Osalta kuvioista puuttuu hintoja, joten arvio on vajaa.</div>' : '';
+        ? `<div class="est-warn">${T.korttiVajaa}</div>` : '';
     return `${head}<div class="est-card-row"><div><div class="est-big">${formatEuro(estimate.total)}</div>
-        <div class="est-muted">ehdotetut hakkuut${range ? ` ${range}` : ''} · ${region} ${escapeHtml(ctx.prices?.periodLabel || '')}</div></div>
-        <button type="button" class="est-btn-arvo" data-est="open-tab">Näytä</button></div>${missing}${busyHtml(ctx)}`;
+        <div class="est-muted">${T.korttiHakkuut(range)} · ${region} ${escapeHtml(ctx.prices?.periodLabel || '')}</div></div>
+        <button type="button" class="est-btn-arvo" data-est="open-tab">${T.nayta}</button></div>${missing}${busyHtml(ctx)}`;
 }
 
 /** Kiinteistön hakkuuehdotukset ilman euroja: kertoo, mitä osto avaa. */
@@ -220,16 +221,16 @@ function teaser(features) {
     if (s.count > 0) {
         const first = s.years[0];
         const last = s.years[s.years.length - 1];
-        const years = s.years.length === 0 ? '' : first === last ? `Vuonna ${first}. ` : `Vuosina ${first}–${last}. `;
+        const years = s.years.length === 0 ? '' : first === last ? T.vuonna(first) : T.vuosina(first, last);
         return {
-            line: `${s.count} ${s.count === 1 ? 'hakkuuehdotus' : 'hakkuuehdotusta'}, n.&nbsp;${formatNumber(roundVolume(s.volume))}&nbsp;m³`,
-            question: `${years}Paljonko ${s.count === 1 ? 'se on' : 'ne ovat'} arvoltaan tämän viikon kantohinnoilla?`
+            line: T.ehdotuksia(s.count, formatNumber(roundVolume(s.volume), 0, locale())),
+            question: T.ehdotusKysymys(years, s.count)
         };
     }
     if (s.stockVolume > 0) {
         return {
-            line: `Ei hakkuuehdotuksia, puustoa n.&nbsp;${formatNumber(roundVolume(s.stockVolume))}&nbsp;m³`,
-            question: 'Paljonko puusto on arvoltaan tämän viikon kantohinnoilla?'
+            line: T.eiEhdotuksia(formatNumber(roundVolume(s.stockVolume), 0, locale())),
+            question: T.puustoKysymys
         };
     }
     return null;
@@ -240,12 +241,12 @@ const roundVolume = (v) => (v >= 100 ? Math.round(v / 10) * 10 : Math.round(v));
 function lockedPanelHtml(ctx) {
     const t = teaser(ctx.features);
     return `<div class="summary-section group-arvo est-intro">
-        <h3>Puukaupan hinta-arvio</h3>
+        <h3>${T.nimi}</h3>
         ${t ? `<div class="est-teaser">${t.line}</div><div class="est-muted">${t.question}</div>` : ''}
-        <p>Näe, paljonko kiinteistön ehdotetut hakkuut ovat arvoltaan alueen tuoreilla kantohinnoilla. Voit käyttää myös omia hintoja, esimerkiksi saamasi puukauppatarjouksen mukaan.</p>
+        <p>${T.esittely}</p>
         <div class="est-actions">
-            <button type="button" class="est-btn-outline" data-est="demo">Kokeile esimerkkimetsällä</button>
-            <button type="button" class="est-btn" data-est="paywall">Avaa hinta-arvio</button>
+            <button type="button" class="est-btn-outline" data-est="demo">${T.kokeileEsimerkilla}</button>
+            <button type="button" class="est-btn" data-est="paywall">${T.avaaArvio}</button>
         </div>
     </div>`;
 }
@@ -257,62 +258,62 @@ function panelHtml(ctx) {
     const p = ctx.prices;
     const busy = ctx.loading || ctx.resolving;
     const priced = hasPrices(table);
-    const regionName = PRICE_REGIONS[ctx.region]?.name || '';
-    const regionOptions = Object.entries(PRICE_REGIONS)
-        .map(([key, r]) => `<option value="${key}"${key === ctx.region ? ' selected' : ''}>${r.name}</option>`).join('');
+    const region = regionName(ctx.region);
+    const regionOptions = Object.keys(PRICE_REGIONS)
+        .map(key => `<option value="${key}"${key === ctx.region ? ' selected' : ''}>${regionName(key)}</option>`).join('');
 
-    const srcLine = p ? escapeHtml(`${p.source}, ${p.periodLabel}`) : (busy ? 'Haetaan…' : 'Ei haettuja hintoja');
+    const srcLine = p ? escapeHtml(`${p.source}, ${p.periodLabel}`) : (busy ? T.haetaan : T.eiHaettujaHintoja);
     const filledNote = p?.filled?.length
-        ? `<div class="est-muted">Osa hinnoista täydennetty: ${escapeHtml([...new Set(p.filled.map(f => `${f.source} ${periodShort(f.period)}`))].join(', '))}.</div>` : '';
+        ? `<div class="est-muted">${T.taydennetty(escapeHtml([...new Set(p.filled.map(f => `${f.source} ${periodShort(f.period)}`))].join(', ')))}</div>` : '';
 
     const m = ctx.method;
     const rows = SPECIES.map(s => `<tr><td>${SPECIES_LABELS[s]}</td>${['tukki', 'kuitu'].map(a => {
         const own = typeof overrides?.[m]?.[s]?.[a] === 'number';
-        return `<td><input inputmode="decimal" class="est-price${own ? ' edited' : ''}" data-m="${m}" data-s="${s}" data-a="${a}" value="${formatPrice(table[m][s][a])}" aria-label="${SPECIES_LABELS[s]} ${a} €/m³"></td>`;
+        return `<td><input inputmode="decimal" class="est-price${own ? ' edited' : ''}" data-m="${m}" data-s="${s}" data-a="${a}" value="${formatPrice(table[m][s][a])}" aria-label="${SPECIES_LABELS[s]} ${T.lajite[a]} €/m³"></td>`;
     }).join('')}</tr>`).join('');
     const anyOverride = Object.keys(overrides).length > 0;
     // Hinnat auki, jos niitä ei ole: käyttäjä voi hakea tai syöttää ne
     const open = ctx.pricesOpen || (!priced && !busy);
-    const priceSummary = [regionName, p?.periodLabel || (busy ? 'haetaan…' : 'ei hintoja'), anyOverride ? 'omia hintoja' : '']
+    const priceSummary = [region, p?.periodLabel || (busy ? T.haetaanPieni : T.eiHintoja), anyOverride ? T.omiaHintoja : '']
         .filter(Boolean).map(escapeHtml).join(' · ');
 
     const result = priced
         ? resultHtml(estimate)
-        : (busy ? '' : '<div class="summary-section group-arvo est-result"><h3>Ehdotetut hakkuut</h3><div class="est-muted">Hinnat puuttuvat. Hae ne verkosta tai syötä itse alla.</div></div>');
+        : (busy ? '' : `<div class="summary-section group-arvo est-result"><h3>${T.ehdotetutHakkuut}</h3><div class="est-muted">${T.hinnatPuuttuvatHae}</div></div>`);
 
     return `
     ${busyHtml(ctx)}
     ${ctx.error ? `<div class="est-error">${ctx.error}</div>` : ''}
     ${result}
     ${priced ? `<div class="summary-section group-puusto est-stock">
-        <h3>Koko puusto uudistushakkuun hinnoin</h3>
+        <h3>${T.kokoPuusto}</h3>
         <div class="est-big est-green">${formatEuro(estimate.stock.value)}</div>
-        <div class="est-muted">Kantoraha-arvo, ei kerralla hakattavissa.</div>
-        ${estimate.stock.missing ? `<div class="est-warn">${estimate.stock.missing} kuviolta puuttuu uudistushakkuun hintoja, joten arvo on vajaa.</div>` : ''}
+        <div class="est-muted">${T.kantoraha}</div>
+        ${estimate.stock.missing ? `<div class="est-warn">${T.puustoVajaa(estimate.stock.missing)}</div>` : ''}
     </div>` : ''}
 
     <div class="est-prices">
         <button type="button" class="est-prices-head" data-est="toggle-prices" aria-expanded="${open}">
-            <span><b>Hinnat</b> ${priceSummary}</span><span class="est-prices-act">${open ? 'Piilota' : 'Muokkaa'}</span>
+            <span><b>${T.hinnat}</b> ${priceSummary}</span><span class="est-prices-act">${open ? T.piilota : T.muokkaa}</span>
         </button>
         <div class="est-prices-body"${open ? '' : ' hidden'}>
             <div class="est-src">
-                <div><label class="est-region">Hinta-alue <select data-est="region">${regionOptions}</select></label>
-                    <div class="est-muted">${srcLine}${ctx.regionAuto && !ctx.demo && ctx.region === ctx.autoRegion ? ` · kunta ${escapeHtml(ctx.regionAuto)}` : ''}</div></div>
-                <button type="button" class="est-btn" data-est="refresh"${busy ? ' disabled' : ''}>↻ Hae verkosta</button>
+                <div><label class="est-region">${T.hintaAlue} <select data-est="region">${regionOptions}</select></label>
+                    <div class="est-muted">${srcLine}${ctx.regionAuto && !ctx.demo && ctx.region === ctx.autoRegion ? T.kunta(escapeHtml(ctx.regionAuto)) : ''}</div></div>
+                <button type="button" class="est-btn" data-est="refresh"${busy ? ' disabled' : ''}>${T.haeVerkosta}</button>
             </div>
             ${filledNote}
             <div class="est-seg" role="tablist">${METHODS.map(x => `<button type="button" data-est="method" data-m="${x}" aria-selected="${x === m}">${METHOD_LABELS[x]}</button>`).join('')}</div>
-            <table class="est-table"><thead><tr><th>€/m³</th><th>Tukki</th><th>Kuitu</th></tr></thead><tbody>${rows}</tbody></table>
-            ${anyOverride ? '<div class="est-muted">Korostetut hinnat on syötetty itse. <button type="button" class="est-link" data-est="reset">Palauta verkon hinnat</button></div>' : ''}
+            <table class="est-table"><thead><tr><th>€/m³</th><th>${T.tukki}</th><th>${T.kuitu}</th></tr></thead><tbody>${rows}</tbody></table>
+            ${anyOverride ? `<div class="est-muted">${T.omatSyotetty} <button type="button" class="est-link" data-est="reset">${T.palautaVerkon}</button></div>` : ''}
         </div>
     </div>
 
     <div class="est-actions">
-        <button type="button" class="est-btn-outline" data-est="share"${priced ? '' : ' disabled'}>Jaa arvio</button>
+        <button type="button" class="est-btn-outline" data-est="share"${priced ? '' : ' disabled'}>${T.jaa}</button>
     </div>
-    <p class="est-fine">Suuntaa-antava arvio, ei korvaa puukauppatarjousta. Tukki- ja kuitupuu on jaettu puulajiosuuksien mukaan; harvennuksissa poistuma ${pct(DEFAULT_REMOVAL.harvennus)}, ensiharvennuksissa ${pct(DEFAULT_REMOVAL.ensiharvennus)}, uudistushakkuissa koko puusto.
-    Hinnat: ${escapeHtml(p?.source || 'Metsäteollisuus ry:n puukaupan viikkoseuranta')} ja Luonnonvarakeskus (tilastotietokanta), kunta: Tilastokeskus. Luken ja Tilastokeskuksen aineistot <a href="${CC_BY}" target="_blank" rel="noopener">CC BY 4.0</a>.</p>`;
+    <p class="est-fine">${T.hienoArvio(pct(DEFAULT_REMOVAL.harvennus), pct(DEFAULT_REMOVAL.ensiharvennus))}
+    ${T.hienoLahteet(escapeHtml(p?.source || T.oletusLahde), `<a href="${T.ccBy}" target="_blank" rel="noopener">CC BY 4.0</a>`)}</p>`;
 }
 
 /** Ehdotettujen hakkuiden summa ja vuosipalkit (Arvio-välilehti ja ostonäkymän esimerkki). */
@@ -321,10 +322,10 @@ function resultHtml(estimate) {
     const bars = estimate.byYear.map(y => `<div class="est-yr${hasUudistus(estimate, y.year) ? ' u' : ''}">
         <span>${y.year ?? '–'}</span><div style="width:${Math.max(2, Math.round(100 * y.value / maxYear))}%"></div><b>${formatEuro(y.value).replace('≈ ', '')}</b></div>`).join('');
     return `<div class="summary-section group-arvo est-result">
-        <h3>Ehdotetut hakkuut${estimate.byYear.length ? ` ${yearRangeLabel(estimate.byYear)}` : ''}</h3>
+        <h3>${T.ehdotetutHakkuut}${estimate.byYear.length ? ` ${yearRangeLabel(estimate.byYear)}` : ''}</h3>
         ${estimate.plans.length ? `<div class="est-big">${formatEuro(estimate.total)}</div><div class="est-bars">${bars}</div>`
-            : '<div class="est-muted">Kiinteistöllä ei ole hakkuuehdotuksia.</div>'}
-        ${estimate.missing ? `<div class="est-warn">${estimate.missing} kuviolta puuttuu osa hinnoista, joten summa on vajaa. Tarkista hakkuutapojen hinnat taulukosta.</div>` : ''}
+            : `<div class="est-muted">${T.eiEhdotuksiaKiinteistolla}</div>`}
+        ${estimate.missing ? `<div class="est-warn">${T.summaVajaa(estimate.missing)}</div>` : ''}
     </div>`;
 }
 
@@ -332,7 +333,10 @@ function hasUudistus(estimate, year) {
     return estimate.plans.some(p => p.year === year && p.method === 'uudistus');
 }
 
-const pct = (v) => `${Math.round(v * 100)} %`;
+const pct = (v) => T.prosentti(Math.round(v * 100));
+
+/** Hinta-alueen nimi valitulla kielellä. */
+const regionName = (key) => T.alueet[key] || PRICE_REGIONS[key]?.name || '';
 
 /** Ulkoisesta lähteestä tuleva teksti (esim. kunnan nimi WFS:stä) HTML:ään. */
 function escapeHtml(text) {
@@ -341,7 +345,7 @@ function escapeHtml(text) {
 
 function periodShort(period) {
     const w = period?.match(/^(\d{4})W(\d{2})$/);
-    if (w) return `vko ${Number(w[2])}/${w[1]}`;
+    if (w) return T.viikko(Number(w[2]), w[1]);
     const m = period?.match(/^(\d{4})M(\d{2})$/);
     return m ? `${Number(m[2])}/${m[1]}` : '';
 }
@@ -418,16 +422,16 @@ function wireOnce() {
 
 async function shareReport(ctx) {
     const { table, estimate } = compute(ctx);
-    const label = ctx.demo ? 'esimerkkimetsa' : (ctx.label || 'kiinteisto');
+    const label = ctx.demo ? T.tiedostoEsimerkki : (ctx.label || T.tiedostoKiinteisto);
     const report = buildEstimateReport({
-        label: ctx.demo ? 'Esimerkkimetsä (kuvitteellinen)' : ctx.label,
-        regionName: PRICE_REGIONS[ctx.region]?.name || '',
+        label: ctx.demo ? T.esimerkkiRaportissa : ctx.label,
+        regionName: regionName(ctx.region),
         prices: ctx.prices,
         table,
         estimate
     });
     try {
-        await shareTextFile(`hinta-arvio_${label.replace(/[^\w-]+/g, '_')}.csv`, report);
+        await shareTextFile(T.tiedosto(label.replace(/[^\w-]+/g, '_')), report);
     } catch {
         // Jakaminen peruttu tai ei mahdollinen
     }
@@ -442,25 +446,25 @@ async function openPaywall() {
     el.id = 'paywall';
     el.innerHTML = `<div class="pw-dim" data-est="close-paywall"></div>
     <div class="pw-sheet" role="dialog" aria-modal="true" aria-labelledby="pw-title">
-        <button type="button" class="pw-close" data-est="close-paywall" aria-label="Sulje">×</button>
-        <h2 id="pw-title">Puukaupan hinta-arvio</h2>
-        <p>Näe, paljonko kiinteistön ehdotetut hakkuut ovat arvoltaan alueen tuoreilla kantohinnoilla.</p>
-        <div class="pw-preview" aria-label="Esimerkki hinta-arviosta">
-            <div class="pw-preview-label">Tältä arvio näyttää · esimerkkimetsä</div>
-            <div class="pw-preview-body"><div class="est-loading"><span class="est-spinner"></span>Hetkinen – lasketaan esimerkkiä…</div></div>
+        <button type="button" class="pw-close" data-est="close-paywall" aria-label="${T.sulje}">×</button>
+        <h2 id="pw-title">${T.nimi}</h2>
+        <p>${T.pwEsittely}</p>
+        <div class="pw-preview" aria-label="${T.esimerkkiAria}">
+            <div class="pw-preview-label">${T.esikatselu}</div>
+            <div class="pw-preview-body"><div class="est-loading"><span class="est-spinner"></span>${T.lasketaanEsimerkkia}</div></div>
         </div>
         <ul>
-            <li>Alueen tuoreet kantohinnat tai omat hinnat, esim. puukauppatarjouksen mukaan</li>
-            <li>Arvio vuosittain ja jaettava raportti, esim. kuolinpesän osakkaille</li>
-            ${import.meta.env?.VITE_KOKEILU === '1' ? '<li>Kokeilu: maastotila – kerro tästä paikasta ja metsävisa</li><li>Kokeilu: etsi läheltä – tietynlaiset metsät ympäriltäsi kartalle</li>' : ''}
-            <li>Kertaosto, ei tilausta – kaikki kiinteistöt</li>
+            <li>${T.etuHinnat}</li>
+            <li>${T.etuRaportti}</li>
+            ${import.meta.env?.VITE_KOKEILU === '1' ? `<li>${T.etuMaasto}</li><li>${T.etuLahihaku}</li>` : ''}
+            <li>${T.etuKertaosto}</li>
         </ul>
-        <button type="button" class="est-btn-outline pw-wide" data-est="demo">Kokeile esimerkkimetsällä</button>
-        <div class="pw-price"><span>Kertamaksu</span><b class="pw-amount">…</b></div>
-        <button type="button" class="est-btn pw-wide pw-buy" data-est="buy" disabled>Osta hinta-arvio</button>
-        <button type="button" class="est-link pw-restore" data-est="restore">Palauta aiempi osto</button>
-        <div class="pw-msg" aria-live="polite"><span class="est-loading pw-wait"><span class="est-spinner"></span>Hetkinen – haetaan hintaa kaupasta…</span></div>
-        <p class="est-fine">Hinnat: Metsäteollisuus ry:n puukaupan viikkoseuranta ja Luonnonvarakeskuksen tilastot. Arvio on suuntaa-antava.</p>
+        <button type="button" class="est-btn-outline pw-wide" data-est="demo">${T.kokeileEsimerkilla}</button>
+        <div class="pw-price"><span>${T.kertamaksu}</span><b class="pw-amount">…</b></div>
+        <button type="button" class="est-btn pw-wide pw-buy" data-est="buy" disabled>${T.osta}</button>
+        <button type="button" class="est-link pw-restore" data-est="restore">${T.palautaOsto}</button>
+        <div class="pw-msg" aria-live="polite"><span class="est-loading pw-wait"><span class="est-spinner"></span>${T.haetaanHintaa}</span></div>
+        <p class="est-fine">${T.pwHieno}</p>
     </div>`;
     document.body.appendChild(el);
     renderPaywallPreview(el);
@@ -477,11 +481,11 @@ async function openPaywall() {
             el.querySelector('.pw-buy').disabled = false;
         } else {
             el.querySelector('.pw-amount').textContent = '–';
-            el.querySelector('.pw-msg').textContent = 'Tuotetta ei saatu kaupasta juuri nyt. Yritä myöhemmin uudelleen.';
+            el.querySelector('.pw-msg').textContent = T.eiTuotetta;
         }
     } catch {
         el.querySelector('.pw-amount').textContent = '–';
-        el.querySelector('.pw-msg').textContent = 'Kauppaan ei saatu yhteyttä.';
+        el.querySelector('.pw-msg').textContent = T.eiYhteytta;
     }
 }
 
@@ -502,7 +506,7 @@ async function renderPaywallPreview(el) {
         const estimate = estimateParcel(demo.features, table);
         if (!el.isConnected) return;
         box.querySelector('.pw-preview-body').innerHTML = resultHtml(estimate)
-            + `<div class="est-muted">${escapeHtml(`${PRICE_REGIONS[region]?.name || ''}, ${prices.periodLabel || ''}`)}</div>`;
+            + `<div class="est-muted">${escapeHtml(`${regionName(region)}, ${prices.periodLabel || ''}`)}</div>`;
     } catch {
         box?.remove();
     }
@@ -544,12 +548,12 @@ async function buy(btn) {
             closePaywall();
             closeDemo();
             document.querySelector('.tabbar [data-tab="arvio"]')?.click();
-            showToast('Hinta-arvio avattu kaikille kiinteistöille.');
+            showToast(T.avattu);
         } else if (status === 'pending') {
-            if (msg) msg.textContent = 'Osto odottaa hyväksyntää.';
+            if (msg) msg.textContent = T.odottaa;
         }
     } catch {
-        if (msg) msg.textContent = 'Osto ei onnistunut. Yritä uudelleen.';
+        if (msg) msg.textContent = T.ostoEpaonnistui;
     } finally {
         btn.disabled = false;
     }
@@ -562,10 +566,10 @@ async function restore(btn) {
         const owned = await purchases.restore();
         if (owned) {
             closePaywall();
-            showToast('Osto palautettu – hinta-arvio on käytössä.');
-        } else if (msg) msg.textContent = 'Aiempaa ostoa ei löytynyt tällä kauppatilillä.';
+            showToast(T.palautettu);
+        } else if (msg) msg.textContent = T.eiAiempaa;
     } catch {
-        if (msg) msg.textContent = 'Palautus ei onnistunut. Yritä uudelleen.';
+        if (msg) msg.textContent = T.palautusEpaonnistui;
     } finally {
         btn.disabled = false;
     }
@@ -578,11 +582,11 @@ async function openDemo() {
     const el = document.createElement('div');
     el.id = 'demo-view';
     el.innerHTML = `<div class="demo-head">
-        <div><b>Esimerkkimetsä</b><span>Kuvitteellinen tila hinta-arvion kokeiluun</span></div>
-        <button type="button" class="pw-close" data-est="close-demo" aria-label="Sulje">×</button>
+        <div><b>${T.esimerkkimetsa}</b><span>${T.kuvitteellinen}</span></div>
+        <button type="button" class="pw-close" data-est="close-demo" aria-label="${T.sulje}">×</button>
     </div>
     <div class="demo-body" data-ctx="demo"><div class="estimate-root" data-ctx="demo"></div>
-        ${purchases.isEntitled() ? '' : '<button type="button" class="est-btn pw-wide" data-est="paywall">Avaa hinta-arvio omille kiinteistöille</button>'}
+        ${purchases.isEntitled() ? '' : `<button type="button" class="est-btn pw-wide" data-est="paywall">${T.avaaOmille}</button>`}
     </div>`;
     document.body.appendChild(el);
     markSeen();

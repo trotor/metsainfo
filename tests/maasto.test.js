@@ -310,3 +310,13 @@ describe('jaettu ruutuvälimuisti', () => {
         expect((await cache.get('5:5').promise).status).toBe('ok');
     });
 });
+
+describe('maastotila: kartalta vastattu', () => {
+    it('merkitään kuvioon', () => {
+        const m = new Map();
+        const storage = { getItem: k => m.get(k) ?? null, setItem: (k, v) => m.set(k, v) };
+        const s = createStore(storage);
+        s.record(7, { id: 'puulaji', kind: 'choice' }, 'manty', { correct: true, points: 10, streak: 1 }, { source: 'kartta' });
+        expect(JSON.parse(m.get('metsainfo.maasto')).stands[7].kartalta).toBe(true);
+    });
+});

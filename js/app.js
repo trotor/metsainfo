@@ -31,12 +31,14 @@ const PARCEL_WFS_LIMIT = 2000;
 let lastParcelFetch = null; // { bbox, labels }
 import * as state from './state.js';
 import { on, VIESTIT } from './vayla.js';
+import { T as UI } from './ui/teksti.js';
 import { showToast } from './ui/location-ui.js';
 import { KUVAUSTILA, loadEsimerkkimetsa, createKuvitteellinenKartta, startKuvausohjaus } from './demo/kuvaustila.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
 import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels, fetchForestUseDeclarations } from './data.js';
 import { onEachFeature, onEachHabitat, onEachMkiFeature, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, setMkiColorMode, updateMkiLegend, copyParcelLink, downloadCSV, toggleHelp, initPanel, openPanelForSelection, setPeekMessage, mapFitOptions, initLocation, refreshHereRow } from './ui/index.js';
+import { applyPageTexts } from './ui/sivu.js';
 
 // Expose functions for HTML onclick handlers
 window.copyParcelLink = copyParcelLink;
@@ -49,6 +51,7 @@ window.toggleHelp = toggleHelp;
  * Initialize the application
  */
 function init() {
+    applyPageTexts();
     if (isNative()) initNative();
     initMap();
     initLayers();
@@ -61,8 +64,8 @@ function init() {
     // build karsii haaran ja dynaamisen importin pois kokonaan.
     if (import.meta.env?.VITE_KOKEILU === '1') {
         on(VIESTIT.avaaKiinteisto, ({ reference }) => openParcelByReference(reference)
-            .then(ok => { if (!ok) showToast('Kiinteistöä ei löytynyt'); })
-            .catch(() => showToast('Kiinteistön haku epäonnistui')));
+            .then(ok => { if (!ok) showToast(UI.sovellus.eiLoytynyt); })
+            .catch(() => showToast(UI.sovellus.hakuEpaonnistui)));
         // Ladataan rinnakkain, käynnistetään aina samassa järjestyksessä (karttapainikkeet)
         Promise.all([
             import('./maasto/index.js'), import('./lahihaku/index.js'), import('./suosikit/index.js'),
@@ -88,7 +91,7 @@ function initNative() {
     const appVersion = document.getElementById('app-version');
     if (appVersion && typeof VERSION !== 'undefined') appVersion.textContent = VERSION.number;
     const copyItem = document.querySelector('#sheet-menu [data-action="copy"]');
-    if (copyItem) copyItem.textContent = 'Jaa linkki';
+    if (copyItem) copyItem.textContent = UI.sovellus.jaaLinkki;
     document.querySelectorAll('a[href="tietosuoja.html"]').forEach(a => {
         a.href = new URL('tietosuoja.html', PUBLIC_BASE_URL).href;
     });
@@ -164,8 +167,8 @@ function initMap() {
     if (KUVAUSTILA) {
         // Kauppakuvat: ei oikeaa karttaa, vain kuvitteellinen saari
         const saari = createKuvitteellinenKartta(map, coordsEPSG3067ToLatLng).addTo(map);
-        state.setState('layersControl', L.control.layers({ 'Kuvitteellinen kartta': saari }, null, { position: 'topright' }).addTo(map));
-        map.attributionControl.addAttribution('Kuvitteellinen kartta');
+        state.setState('layersControl', L.control.layers({ [UI.sovellus.kuvitteellinenKartta]: saari }, null, { position: 'topright' }).addTo(map));
+        map.attributionControl.addAttribution(UI.sovellus.kuvitteellinenKartta);
         return;
     }
 
@@ -186,9 +189,9 @@ function initMap() {
     peruskartta.addTo(map);
 
     const baseLayers = {
-        'Taustakartta': taustakartta,
-        'Peruskartta': peruskartta,
-        'Ortokuva': ortokuva
+        [UI.sovellus.taustakartta]: taustakartta,
+        [UI.sovellus.peruskartta]: peruskartta,
+        [UI.sovellus.ortokuva]: ortokuva
     };
 
     // Yksi tasovalitsin: pohjakartat tässä, päälle kytkettävät tasot initLayersissa
@@ -237,8 +240,8 @@ function initLayers() {
         coordsToLatLng: coordsEPSG3067ToLatLng
     }));
 
-    state.layersControl.addOverlay(state.habitatLayer, 'Luontokohteet');
-    state.layersControl.addOverlay(state.mkiLayer, 'Metsänkäyttöilmoitukset');
+    state.layersControl.addOverlay(state.habitatLayer, UI.sovellus.luontokohteet);
+    state.layersControl.addOverlay(state.mkiLayer, UI.sovellus.metsankayttoilmoitukset);
 
     map.on('overlayadd', (e) => {
         if (e.layer === state.habitatLayer) loadHabitatsInView();
@@ -358,33 +361,33 @@ async function searchParcel() {
     errorEl.classList.add('hidden');
 
     if (!input) {
-        errorEl.textContent = 'Syötä kiinteistötunnus';
+        errorEl.textContent = UI.sovellus.syotaTunnus;
         errorEl.classList.remove('hidden');
         return;
     }
 
     const normalizedId = normalizeParcelId(input);
     if (!normalizedId) {
-        errorEl.textContent = 'Virheellinen muoto. Käytä muotoa 91-416-1-123';
+        errorEl.textContent = UI.sovellus.virheellinenMuoto;
         errorEl.classList.remove('hidden');
         return;
     }
 
     button.disabled = true;
-    button.textContent = 'Haetaan...';
+    button.textContent = UI.sovellus.haetaan;
 
     try {
         if (!(await openParcelByReference(normalizedId))) {
-            errorEl.textContent = 'Kiinteistöä ei löytynyt';
+            errorEl.textContent = UI.sovellus.eiLoytynyt;
             errorEl.classList.remove('hidden');
         }
     } catch (error) {
         console.error('Search error:', error);
-        errorEl.textContent = 'Haku epäonnistui. Yritä uudelleen.';
+        errorEl.textContent = UI.sovellus.hakuEpaonnistuiYrita;
         errorEl.classList.remove('hidden');
     } finally {
         button.disabled = false;
-        button.textContent = 'Hae';
+        button.textContent = UI.sovellus.hae;
     }
 }
 
@@ -636,7 +639,7 @@ async function selectParcels(parcels) {
 
     } catch (error) {
         loading.classList.add('hidden');
-        setPeekMessage('Metsätietojen haku epäonnistui.');
+        setPeekMessage(UI.sovellus.metsatietojenHakuEpaonnistui);
         console.error('Error fetching forest data:', error);
         content.innerHTML = `
             <div class="no-data">

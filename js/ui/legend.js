@@ -5,6 +5,11 @@
 import { COLOR_MODES, MKI_COLOR_MODES } from '../config.js';
 import * as state from '../state.js';
 import { featureStyle, mkiStyle } from '../styles.js';
+import { T } from './teksti.js';
+
+// Selitteen otsikko ja rivit valitulla kielellä (värit config.js:stä)
+const labelOf = (texts, key, mode) => texts[key]?.label ?? mode.label;
+const itemLabel = (texts, key, item, i) => texts[key]?.legend?.[i] ?? item.label;
 
 /**
  * Change color mode and refresh forest layer styling + legend
@@ -55,10 +60,10 @@ export function updateLegend() {
 
     legendEl.classList.remove('hidden');
     legendEl.innerHTML = `
-        <div class="legend-title">${mode.label}</div>
+        <div class="legend-title">${labelOf(T.varitila, state.currentColorMode, mode)}</div>
         <div class="legend-items">
-            ${mode.legend.map(item =>
-                `<div class="legend-item"><span class="legend-color" style="background:${item.color}"></span>${item.label}</div>`
+            ${mode.legend.map((item, i) =>
+                `<div class="legend-item"><span class="legend-color" style="background:${item.color}"></span>${itemLabel(T.varitila, state.currentColorMode, item, i)}</div>`
             ).join('')}
         </div>
     `;
@@ -81,18 +86,18 @@ export function updateMkiLegend() {
 
     const title = document.createElement('div');
     title.className = 'legend-title';
-    title.textContent = mode.label;
+    title.textContent = labelOf(T.mkiVaritila, state.mkiColorMode, mode);
 
     const items = document.createElement('div');
     items.className = 'legend-items';
-    mode.legend.forEach(item => {
+    mode.legend.forEach((item, i) => {
         const el = document.createElement('div');
         el.className = 'legend-item';
         const color = document.createElement('span');
         color.className = 'legend-color';
         color.style.background = item.color;
         el.appendChild(color);
-        el.appendChild(document.createTextNode(item.label));
+        el.appendChild(document.createTextNode(itemLabel(T.mkiVaritila, state.mkiColorMode, item, i)));
         items.appendChild(el);
     });
 

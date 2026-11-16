@@ -68,3 +68,16 @@ describe('suosikit', () => {
         expect(filterFavorites(items, { text: '' })).toHaveLength(3);
     });
 });
+
+import { on, emit } from '../js/vayla.js';
+
+describe('viestiväylä', () => {
+    it('replay antaa jo lähetetyn viestin myöhään liittyvälle', () => {
+        emit('testi:replay', { n: 1 });
+        const got = [];
+        on('testi:replay', d => got.push(d.n), { replay: true });
+        on('testi:replay', d => got.push(-d.n));
+        emit('testi:replay', { n: 2 });
+        expect(got).toEqual([1, 2, -2]);
+    });
+});

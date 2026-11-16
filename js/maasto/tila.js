@@ -58,6 +58,7 @@ export function createStore(storage = globalThis.localStorage) {
         record(standId, question, value, result, meta = {}) {
             const stand = data.stands[standId] || (data.stands[standId] = { found: new Date().toISOString(), answered: [] });
             if (!stand.answered.includes(question.id)) stand.answered.push(question.id);
+            if (meta.source === 'kartta') stand.kartalta = true; // vastattu kokeilussa kartalta
             data.points += result.points;
             if (result.correct !== null) data.streak = result.streak;
             if (question.kind === 'observe') {

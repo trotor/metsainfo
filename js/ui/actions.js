@@ -2,6 +2,7 @@
  * Toiminnot: ohje, linkin kopiointi, CSV-lataus
  */
 
+import { T } from './teksti.js';
 import { CODES } from '../config.js';
 import * as state from '../state.js';
 import { isNative, shareableParcelUrl, csvFileName } from '../platform/index.js';
@@ -33,7 +34,7 @@ export function copyParcelLink(btn = document.getElementById('copy-link-btn')) {
     navigator.clipboard.writeText(url).then(() => {
         if (!btn) return;
         const originalText = btn.textContent;
-        btn.textContent = 'Kopioitu!';
+        btn.textContent = T.kopioitu;
         setTimeout(() => { btn.textContent = originalText; }, 2000);
     });
 }
@@ -98,7 +99,7 @@ export function buildCSV(features) {
  */
 export function downloadCSV() {
     if (!state.currentFeatures || state.currentFeatures.length === 0) {
-        alert('Ei ladattavia metsäkuviotietoja.');
+        alert(T.eiLadattavia);
         return;
     }
 
@@ -111,7 +112,7 @@ export function downloadCSV() {
         shareTextFile(csvFileName(parcelId), csvContent)
             .catch(error => {
                 console.error('CSV:n jako epäonnistui:', error);
-                alert('CSV-tiedoston jako epäonnistui.');
+                alert(T.csvJakoEpaonnistui);
             });
         return;
     }

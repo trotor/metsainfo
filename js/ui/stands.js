@@ -2,7 +2,9 @@
  * Kuviolista: renderöinti, avaus ja korostus kartalla
  */
 
-import { CODES } from '../config.js';
+import { codeName } from '../koodit.js';
+import { locale } from '../i18n.js';
+import { T } from './teksti.js';
 import * as state from '../state.js';
 import { formatNumber, getGeometryBounds3067 } from '../utils.js';
 import { tip } from './tips.js';
@@ -144,15 +146,16 @@ export function attachFilterEventListeners(root = document) {
  */
 export function renderStandItem(feature, index) {
     const p = feature.properties;
-    const species = CODES.treeSpecies[p.MAINTREESPECIES] || '-';
-    const devClass = CODES.developmentClass[p.DEVELOPMENTCLASS] || p.DEVELOPMENTCLASS || '-';
-    const fertility = CODES.fertilityClass[p.FERTILITYCLASS] || '-';
-    const accessibility = CODES.accessibility[p.ACCESSIBILITY] || '-';
-    const drainage = CODES.drainageState[p.DRAINAGESTATE] || '-';
-    const soil = CODES.soilType[p.SOILTYPE] || '-';
-    const cutting = CODES.cuttingType[p.CUTTINGTYPE];
-    const silviculture = CODES.silvicultureType[p.SILVICULTURETYPE];
-    const measureDate = p.MEASUREMENTDATE ? new Date(p.MEASUREMENTDATE).toLocaleDateString('fi-FI') : '-';
+    const fmt = (v, d = 0) => formatNumber(v, d, locale());
+    const species = codeName('treeSpecies', p.MAINTREESPECIES) || '-';
+    const devClass = codeName('developmentClass', p.DEVELOPMENTCLASS) || p.DEVELOPMENTCLASS || '-';
+    const fertility = codeName('fertilityClass', p.FERTILITYCLASS) || '-';
+    const accessibility = codeName('accessibility', p.ACCESSIBILITY) || '-';
+    const drainage = codeName('drainageState', p.DRAINAGESTATE) || '-';
+    const soil = codeName('soilType', p.SOILTYPE) || '-';
+    const cutting = codeName('cuttingType', p.CUTTINGTYPE);
+    const silviculture = codeName('silvicultureType', p.SILVICULTURETYPE);
+    const measureDate = p.MEASUREMENTDATE ? new Date(p.MEASUREMENTDATE).toLocaleDateString(locale()) : '-';
 
     const pineP = Math.round((p.PROPORTIONPINE || 0) * 100);
     const spruceP = Math.round((p.PROPORTIONSPRUCE || 0) * 100);
@@ -162,70 +165,70 @@ export function renderStandItem(feature, index) {
         <div class="stand-item" data-index="${index}">
             <div class="stand-header">
                 <div class="stand-title">
-                    <span class="stand-number">Kuvio ${p.STANDNUMBER || (index + 1)}</span>
+                    <span class="stand-number">${T.kuvio(p.STANDNUMBER || (index + 1))}</span>
                     <span class="stand-species">${species}</span>
                 </div>
                 <div class="stand-summary">
-                    <span class="stand-area">${formatNumber(p.AREA, 2)} ha</span>
-                    <span class="stand-volume">${formatNumber(p.VOLUME, 0)} m³/ha</span>
+                    <span class="stand-area">${fmt(p.AREA, 2)} ha</span>
+                    <span class="stand-volume">${fmt(p.VOLUME, 0)} m³/ha</span>
                 </div>
                 <div class="stand-toggle">▼</div>
             </div>
             <div class="stand-details">
                 <div class="detail-group">
-                    <div class="detail-title">Perustiedot</div>
+                    <div class="detail-title">${T.perustiedot}</div>
                     <div class="detail-grid">
-                        <div class="detail-row"><span>Kehitysluokka ${tip('kehitysluokka')}:</span><span>${devClass}</span></div>
-                        <div class="detail-row"><span>Kasvupaikka ${tip('kasvupaikka')}:</span><span>${fertility}</span></div>
-                        <div class="detail-row"><span>Maalaji ${tip('maalaji')}:</span><span>${soil}</span></div>
-                        <div class="detail-row"><span>Ojitustilanne ${tip('ojitustilanne')}:</span><span>${drainage}</span></div>
-                        <div class="detail-row"><span>Kulkukelpoisuus ${tip('kulkukelpoisuus')}:</span><span>${accessibility}</span></div>
+                        <div class="detail-row"><span>${T.kehitysluokka} ${tip('kehitysluokka')}:</span><span>${devClass}</span></div>
+                        <div class="detail-row"><span>${T.kasvupaikka} ${tip('kasvupaikka')}:</span><span>${fertility}</span></div>
+                        <div class="detail-row"><span>${T.maalaji} ${tip('maalaji')}:</span><span>${soil}</span></div>
+                        <div class="detail-row"><span>${T.ojitustilanne} ${tip('ojitustilanne')}:</span><span>${drainage}</span></div>
+                        <div class="detail-row"><span>${T.kulkukelpoisuus} ${tip('kulkukelpoisuus')}:</span><span>${accessibility}</span></div>
                     </div>
                 </div>
                 <div class="detail-group">
-                    <div class="detail-title">Puusto</div>
+                    <div class="detail-title">${T.puusto}</div>
                     <div class="detail-grid">
-                        <div class="detail-row"><span>Ikä:</span><span>${p.MEANAGE || '-'} v</span></div>
-                        <div class="detail-row"><span>Pituus:</span><span>${formatNumber(p.MEANHEIGHT, 1)} m</span></div>
-                        <div class="detail-row"><span>Läpimitta:</span><span>${formatNumber(p.MEANDIAMETER, 1)} cm</span></div>
-                        <div class="detail-row"><span>Pohjapinta-ala:</span><span>${formatNumber(p.BASALAREA, 1)} m²/ha</span></div>
-                        <div class="detail-row"><span>Runkoluku:</span><span>${formatNumber(p.STEMCOUNT, 0)} kpl/ha</span></div>
-                        <div class="detail-row"><span>Kasvu:</span><span>${formatNumber(p.VOLUMEGROWTH, 1)} m³/ha/v</span></div>
+                        <div class="detail-row"><span>${T.ika}</span><span>${p.MEANAGE || '-'} ${T.vuotta}</span></div>
+                        <div class="detail-row"><span>${T.pituus}</span><span>${fmt(p.MEANHEIGHT, 1)} m</span></div>
+                        <div class="detail-row"><span>${T.lapimitta}</span><span>${fmt(p.MEANDIAMETER, 1)} cm</span></div>
+                        <div class="detail-row"><span>${T.pohjapintaAlaLyhyt}</span><span>${fmt(p.BASALAREA, 1)} m²/ha</span></div>
+                        <div class="detail-row"><span>${T.runkolukuLyhyt}</span><span>${fmt(p.STEMCOUNT, 0)} ${T.kplHa}</span></div>
+                        <div class="detail-row"><span>${T.kasvuLyhyt}</span><span>${fmt(p.VOLUMEGROWTH, 1)} ${T.m3haV}</span></div>
                     </div>
                 </div>
                 <div class="detail-group">
-                    <div class="detail-title">Puulajijakauma</div>
+                    <div class="detail-title">${T.puulajijakauma}</div>
                     <div class="mini-species-bar">
-                        ${pineP > 0 ? `<div class="pine" style="width: ${pineP}%" title="Mänty ${pineP}%"></div>` : ''}
-                        ${spruceP > 0 ? `<div class="spruce" style="width: ${spruceP}%" title="Kuusi ${spruceP}%"></div>` : ''}
-                        ${otherP > 0 ? `<div class="birch" style="width: ${otherP}%" title="Lehtipuut ${otherP}%"></div>` : ''}
+                        ${pineP > 0 ? `<div class="pine" style="width: ${pineP}%" title="${T.manty} ${pineP}%"></div>` : ''}
+                        ${spruceP > 0 ? `<div class="spruce" style="width: ${spruceP}%" title="${T.kuusi} ${spruceP}%"></div>` : ''}
+                        ${otherP > 0 ? `<div class="birch" style="width: ${otherP}%" title="${T.lehtipuutLyhyt} ${otherP}%"></div>` : ''}
                     </div>
                     <div class="mini-species-legend">
-                        ${pineP > 0 ? `<span>Mänty ${pineP}%</span>` : ''}
-                        ${spruceP > 0 ? `<span>Kuusi ${spruceP}%</span>` : ''}
-                        ${otherP > 0 ? `<span>Lehtipuut ${otherP}%</span>` : ''}
+                        ${pineP > 0 ? `<span>${T.manty} ${pineP}%</span>` : ''}
+                        ${spruceP > 0 ? `<span>${T.kuusi} ${spruceP}%</span>` : ''}
+                        ${otherP > 0 ? `<span>${T.lehtipuutLyhyt} ${otherP}%</span>` : ''}
                     </div>
                 </div>
                 <div class="detail-group">
-                    <div class="detail-title">Puutavaralajit</div>
+                    <div class="detail-title">${T.puutavaralajit}</div>
                     <div class="detail-grid">
-                        <div class="detail-row"><span>Tukkipuu:</span><span>${formatNumber(p.SAWLOGVOLUME, 0)} m³/ha</span></div>
-                        <div class="detail-row"><span>Kuitupuu:</span><span>${formatNumber(p.PULPWOODVOLUME, 0)} m³/ha</span></div>
-                        <div class="detail-row"><span>Yhteensä:</span><span>${formatNumber(p.VOLUME, 0)} m³/ha</span></div>
-                        <div class="detail-row"><span>Kuviolla yht:</span><span>${formatNumber((p.VOLUME || 0) * (p.AREA || 0), 0)} m³</span></div>
+                        <div class="detail-row"><span>${T.tukkipuu}</span><span>${fmt(p.SAWLOGVOLUME, 0)} m³/ha</span></div>
+                        <div class="detail-row"><span>${T.kuitupuu}</span><span>${fmt(p.PULPWOODVOLUME, 0)} m³/ha</span></div>
+                        <div class="detail-row"><span>${T.yhteensa}</span><span>${fmt(p.VOLUME, 0)} m³/ha</span></div>
+                        <div class="detail-row"><span>${T.kuviollaYht}</span><span>${fmt((p.VOLUME || 0) * (p.AREA || 0), 0)} m³</span></div>
                     </div>
                 </div>
                 ${cutting || silviculture ? `
                 <div class="detail-group">
-                    <div class="detail-title">Toimenpide-ehdotukset</div>
+                    <div class="detail-title">${T.toimenpideEhdotukset}</div>
                     <div class="detail-grid">
-                        ${cutting ? `<div class="detail-row highlight"><span>Hakkuu:</span><span>${cutting}${p.CUTTINGPROPOSALYEAR ? ` (${p.CUTTINGPROPOSALYEAR})` : ''}</span></div>` : ''}
-                        ${silviculture ? `<div class="detail-row highlight"><span>Hoito:</span><span>${silviculture}${p.SILVICULTUREPROPOSALYEAR ? ` (${p.SILVICULTUREPROPOSALYEAR})` : ''}</span></div>` : ''}
+                        ${cutting ? `<div class="detail-row highlight"><span>${T.hakkuu}</span><span>${cutting}${p.CUTTINGPROPOSALYEAR ? ` (${p.CUTTINGPROPOSALYEAR})` : ''}</span></div>` : ''}
+                        ${silviculture ? `<div class="detail-row highlight"><span>${T.hoito}</span><span>${silviculture}${p.SILVICULTUREPROPOSALYEAR ? ` (${p.SILVICULTUREPROPOSALYEAR})` : ''}</span></div>` : ''}
                     </div>
                 </div>
                 ` : ''}
                 <div class="detail-footer">
-                    <span class="measurement-date">Mitattu: ${measureDate}</span>
+                    <span class="measurement-date">${T.mitattu(measureDate)}</span>
                 </div>
             </div>
         </div>

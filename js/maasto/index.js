@@ -115,19 +115,20 @@ export function startMaasto() {
     crosshair.hidden = true;
     crosshair.setAttribute('aria-hidden', 'true');
 
+    // Ristin paikka ei riipu kortin sisällöstä (korkeus vaihtelee näkymän
+    // mukaan): kortin suurin koko on kiinteä (kortti.css), joten risti on
+    // aina kartan näkyvällä osalla, ja haku ja risti osoittavat samaan kohtaan.
+    const SEARCH_BAR = 64;      // mobiilin hakupalkki kartan yläreunassa
+    const CARD_MAX_VH = 0.64;   // .kortti max-height mobiilissa
+    const CARD_WIDTH = 380 + 24; // .kortti leveys ja reunat työpöydällä
     function viewCenter() {
         const size = state.map.getSize();
-        let x = size.x / 2;
-        let y = size.y / 2;
-        if (ui.open) {
-            const r = card.el.getBoundingClientRect();
-            const m = state.map.getContainer().getBoundingClientRect();
-            // Kortti peittää alaosan (mobiili) tai oikean reunan (työpöytä)
-            // Mobiilissa hakupalkki peittää kartan yläreunaa noin 64 px
-            if (isMobileLayout()) y = Math.max(40, (r.top - m.top + 64) / 2);
-            else x = Math.max(40, (r.left - m.left) / 2);
+        if (!ui.open) return L.point(size.x / 2, size.y / 2);
+        if (isMobileLayout()) {
+            const visibleBottom = size.y - window.innerHeight * CARD_MAX_VH;
+            return L.point(size.x / 2, Math.max(40, (SEARCH_BAR + visibleBottom) / 2));
         }
-        return L.point(x, y);
+        return L.point(Math.max(40, (size.x - CARD_WIDTH) / 2), size.y / 2);
     }
 
     function placeCrosshair() {

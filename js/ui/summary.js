@@ -5,6 +5,10 @@
 import { calculateStatistics } from '../statistics.js';
 import { formatNumber, formatCadastralReference, calculateParcelArea } from '../utils.js';
 import { emit, VIESTIT } from '../vayla.js';
+import { locale } from '../i18n.js';
+import { T } from './teksti.js';
+
+const fmt = (v, d = 0) => formatNumber(v, d, locale());
 import { tip, closeTips } from './tips.js';
 import { renderStandItem, attachStandEventListeners, attachFilterEventListeners } from './stands.js';
 import { setActiveTab } from './panel.js';
@@ -21,17 +25,17 @@ export function renderPeek({ label, areaHa, partsInfo, stats, featureCount }) {
         <div class="peek-head">
             <span class="peek-id">${label}</span>
             ${partsInfo ? `<span class="peek-parts">${partsInfo}</span>` : ''}
-            <button type="button" id="sheet-menu-btn" aria-label="Toiminnot" aria-haspopup="menu">⋯</button>
+            <button type="button" id="sheet-menu-btn" aria-label="${T.toiminnot}" aria-haspopup="menu">⋯</button>
         </div>
         ${featureCount > 0 ? `
         <div class="peek-stats">
-            ${stat(formatNumber(areaHa, 2), 'ha')}
-            ${stat(featureCount, 'kuviota')}
-            ${stat(formatNumber(stats.avgVolume, 0), 'm³/ha')}
-            ${stat(formatNumber(stats.totalVolume, 0), 'm³')}
+            ${stat(fmt(areaHa, 2), 'ha')}
+            ${stat(featureCount, T.kuviotaYksikko)}
+            ${stat(fmt(stats.avgVolume, 0), 'm³/ha')}
+            ${stat(fmt(stats.totalVolume, 0), 'm³')}
         </div>
         ` : `
-        <div class="peek-empty">Ei metsävaratietoja</div>
+        <div class="peek-empty">${T.eiMetsavaratietoja}</div>
         `}
     `;
 }
@@ -51,8 +55,8 @@ export function showSummary(features, parcel, partCount = 1) {
     const parcelProps = parcel ? parcel.properties : null;
     const parcelLabel = parcelProps?.label || formatCadastralReference(parcelProps?.nationalCadastralReference) || '-';
     const parcelArea = calculateParcelArea(parcel, partCount);
-    const parcelAreaText = parcelArea ? `${formatNumber(parcelArea / 10000, 2)} ha` : '';
-    const partsInfo = partCount > 1 ? ` (${partCount} palstaa)` : '';
+    const parcelAreaText = parcelArea ? `${fmt(parcelArea / 10000, 2)} ha` : '';
+    const partsInfo = partCount > 1 ? T.palstaaSulkeissa(partCount) : '';
     const hasRecs = stats.cuttingRecommendations.length > 0 || stats.silvicultureRecommendations.length > 0;
 
     closeTips(content);
@@ -62,7 +66,7 @@ export function showSummary(features, parcel, partCount = 1) {
         peek.innerHTML = renderPeek({
             label: parcelLabel,
             areaHa: parcelArea ? parcelArea / 10000 : stats.totalArea,
-            partsInfo: partCount > 1 ? `${partCount} palstaa` : '',
+            partsInfo: partCount > 1 ? T.palstaa(partCount) : '',
             stats,
             featureCount: features.length
         });
@@ -71,9 +75,9 @@ export function showSummary(features, parcel, partCount = 1) {
     content.innerHTML = `
         ${features.length > 0 ? `
         <div class="tabbar" role="tablist">
-            <button type="button" role="tab" data-tab="summary">Yhteenveto</button>
-            <button type="button" role="tab" data-tab="stands">Kuviot (${features.length})</button>
-            ${hasRecs ? '<button type="button" role="tab" data-tab="recs">Ehdotukset</button>' : ''}
+            <button type="button" role="tab" data-tab="summary">${T.yhteenveto}</button>
+            <button type="button" role="tab" data-tab="stands">${T.kuviotTab(features.length)}</button>
+            ${hasRecs ? `<button type="button" role="tab" data-tab="recs">${T.ehdotukset}</button>` : ''}
             ${estimateTabButton()}
         </div>
         ` : ''}
@@ -81,21 +85,21 @@ export function showSummary(features, parcel, partCount = 1) {
         <section class="tab-panel" data-tab="summary">
         ${parcel ? `
         <div class="summary-section parcel-section">
-            <h3>Kiinteistö</h3>
+            <h3>${T.kiinteisto}</h3>
             <div class="parcel-info">
                 <div class="parcel-id">${parcelLabel}</div>
                 <div class="parcel-details">${parcelAreaText}${partsInfo}</div>
             </div>
             <div class="parcel-actions">
                 <button class="action-btn copy-link-btn" id="copy-link-btn" onclick="copyParcelLink()">
-                    <span class="action-icon">🔗</span> Kopioi linkki
+                    <span class="action-icon">🔗</span> ${T.kopioiLinkki}
                 </button>
                 ${features.length > 0 ? `
                 <button class="action-btn download-btn" onclick="downloadCSV()">
-                    <span class="action-icon">⬇</span> Lataa CSV
+                    <span class="action-icon">⬇</span> ${T.lataaCsv}
                 </button>
                 <button class="action-btn print-btn" onclick="window.print()">
-                    <span class="action-icon">🖨</span> Tulosta
+                    <span class="action-icon">🖨</span> ${T.tulosta}
                 </button>
                 ` : ''}
             </div>
@@ -104,30 +108,30 @@ export function showSummary(features, parcel, partCount = 1) {
 
         ${features.length > 0 && stats.measurementYearMin ? `
         <div class="measurement-info group-aineisto${(new Date().getFullYear() - stats.measurementYearMax) >= 5 ? ' measurement-old' : ''}">
-            <span class="measurement-label">Aineiston mittausvuosi: ${stats.measurementYearMin === stats.measurementYearMax ? stats.measurementYearMin : `${stats.measurementYearMin}–${stats.measurementYearMax}`}</span>
-            ${(new Date().getFullYear() - stats.measurementYearMax) >= 5 ? '<span class="measurement-warning">Tiedot voivat olla vanhentuneita</span>' : ''}
+            <span class="measurement-label">${T.mittausvuosi(stats.measurementYearMin === stats.measurementYearMax ? stats.measurementYearMin : `${stats.measurementYearMin}–${stats.measurementYearMax}`)}</span>
+            ${(new Date().getFullYear() - stats.measurementYearMax) >= 5 ? `<span class="measurement-warning">${T.vanhentuneita}</span>` : ''}
         </div>
         ` : ''}
 
         ${features.length > 0 ? `
         <div class="summary-section group-puusto">
-            <h3>Metsävarat yhteenveto</h3>
+            <h3>${T.metsavaratYhteenveto}</h3>
             <div class="stat-grid">
                 <div class="stat-item">
                     <div class="stat-value">${stats.count}</div>
-                    <div class="stat-label">Kuviota ${tip('kuvio')}</div>
+                    <div class="stat-label">${T.kuviota} ${tip('kuvio')}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.totalArea, 2)}</div>
-                    <div class="stat-label">Hehtaaria</div>
+                    <div class="stat-value">${fmt(stats.totalArea, 2)}</div>
+                    <div class="stat-label">${T.hehtaaria}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.avgVolume, 0)}</div>
-                    <div class="stat-label">m³/ha keskiarvo ${tip('tilavuus')}</div>
+                    <div class="stat-value">${fmt(stats.avgVolume, 0)}</div>
+                    <div class="stat-label">${T.keskiarvoTilavuus} ${tip('tilavuus')}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.totalVolume, 0)}</div>
-                    <div class="stat-label">m³ yhteensä</div>
+                    <div class="stat-value">${fmt(stats.totalVolume, 0)}</div>
+                    <div class="stat-label">${T.yhteensaTilavuus}</div>
                 </div>
             </div>
         </div>
@@ -135,89 +139,89 @@ export function showSummary(features, parcel, partCount = 1) {
         ${estimateSummaryCard()}
 
         <div class="summary-section group-puusto">
-            <h3>Puulajijakauma ${tip('puulajijakauma')}</h3>
+            <h3>${T.puulajijakauma} ${tip('puulajijakauma')}</h3>
             <div class="species-bar">
                 ${stats.speciesPercent.pine > 0 ? `<div class="pine" style="width: ${stats.speciesPercent.pine}%"></div>` : ''}
                 ${stats.speciesPercent.spruce > 0 ? `<div class="spruce" style="width: ${stats.speciesPercent.spruce}%"></div>` : ''}
                 ${stats.speciesPercent.birch > 0 ? `<div class="birch" style="width: ${stats.speciesPercent.birch}%"></div>` : ''}
             </div>
             <div class="species-legend">
-                <span><span class="dot" style="background: #3498db"></span> Mänty ${stats.speciesPercent.pine}%</span>
-                <span><span class="dot" style="background: #27ae60"></span> Kuusi ${stats.speciesPercent.spruce}%</span>
-                <span><span class="dot" style="background: #f1c40f"></span> Lehtipuut ${stats.speciesPercent.birch}%</span>
+                <span><span class="dot" style="background: #3498db"></span> ${T.manty} ${stats.speciesPercent.pine}%</span>
+                <span><span class="dot" style="background: #27ae60"></span> ${T.kuusi} ${stats.speciesPercent.spruce}%</span>
+                <span><span class="dot" style="background: #f1c40f"></span> ${T.lehtipuut} ${stats.speciesPercent.birch}%</span>
             </div>
         </div>
 
         <div class="summary-section group-puusto">
-            <h3>Puusto</h3>
+            <h3>${T.puusto}</h3>
             <div class="stat-grid">
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.avgAge, 0)}</div>
-                    <div class="stat-label">Keski-ikä (v) ${tip('keskiIka')}</div>
-                    <div class="stat-range">${formatNumber(stats.minAge, 0)} – ${formatNumber(stats.maxAge, 0)}</div>
+                    <div class="stat-value">${fmt(stats.avgAge, 0)}</div>
+                    <div class="stat-label">${T.keskiIka} ${tip('keskiIka')}</div>
+                    <div class="stat-range">${fmt(stats.minAge, 0)} – ${fmt(stats.maxAge, 0)}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.avgHeight, 1)}</div>
-                    <div class="stat-label">Keskipituus (m) ${tip('keskipituus')}</div>
-                    <div class="stat-range">${formatNumber(stats.minHeight, 1)} – ${formatNumber(stats.maxHeight, 1)}</div>
+                    <div class="stat-value">${fmt(stats.avgHeight, 1)}</div>
+                    <div class="stat-label">${T.keskipituus} ${tip('keskipituus')}</div>
+                    <div class="stat-range">${fmt(stats.minHeight, 1)} – ${fmt(stats.maxHeight, 1)}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.avgDiameter, 1)}</div>
-                    <div class="stat-label">Keskiläpimitta (cm) ${tip('keskilapimitta')}</div>
-                    <div class="stat-range">${formatNumber(stats.minDiameter, 1)} – ${formatNumber(stats.maxDiameter, 1)}</div>
+                    <div class="stat-value">${fmt(stats.avgDiameter, 1)}</div>
+                    <div class="stat-label">${T.keskilapimitta} ${tip('keskilapimitta')}</div>
+                    <div class="stat-range">${fmt(stats.minDiameter, 1)} – ${fmt(stats.maxDiameter, 1)}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.avgGrowth, 1)}</div>
-                    <div class="stat-label">Kasvu (m³/ha/v) ${tip('kasvu')}</div>
-                    <div class="stat-range">${formatNumber(stats.minGrowth, 1)} – ${formatNumber(stats.maxGrowth, 1)}</div>
+                    <div class="stat-value">${fmt(stats.avgGrowth, 1)}</div>
+                    <div class="stat-label">${T.kasvu} ${tip('kasvu')}</div>
+                    <div class="stat-range">${fmt(stats.minGrowth, 1)} – ${fmt(stats.maxGrowth, 1)}</div>
                 </div>
             </div>
         </div>
 
         <div class="summary-section group-puusto">
-            <h3>Tukkipuu / Kuitupuu</h3>
+            <h3>${T.tukkiKuitu}</h3>
             <div class="stat-grid">
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.avgSawlog, 0)}</div>
-                    <div class="stat-label">Tukkia (m³/ha) ${tip('tukkipuu')}</div>
+                    <div class="stat-value">${fmt(stats.avgSawlog, 0)}</div>
+                    <div class="stat-label">${T.tukkia} ${tip('tukkipuu')}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.avgPulpwood, 0)}</div>
-                    <div class="stat-label">Kuitua (m³/ha) ${tip('kuitupuu')}</div>
+                    <div class="stat-value">${fmt(stats.avgPulpwood, 0)}</div>
+                    <div class="stat-label">${T.kuitua} ${tip('kuitupuu')}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.totalSawlog, 0)}</div>
-                    <div class="stat-label">Tukkia yht. (m³)</div>
+                    <div class="stat-value">${fmt(stats.totalSawlog, 0)}</div>
+                    <div class="stat-label">${T.tukkiaYht}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.totalPulpwood, 0)}</div>
-                    <div class="stat-label">Kuitua yht. (m³)</div>
+                    <div class="stat-value">${fmt(stats.totalPulpwood, 0)}</div>
+                    <div class="stat-label">${T.kuituaYht}</div>
                 </div>
             </div>
         </div>
 
         <div class="summary-section group-maa">
-            <h3>Kasvupaikka</h3>
+            <h3>${T.kasvupaikka}</h3>
             <div class="stat-grid">
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.avgBasalArea, 1)}</div>
-                    <div class="stat-label">Pohjapinta-ala (m²/ha) ${tip('pohjapintaAla')}</div>
+                    <div class="stat-value">${fmt(stats.avgBasalArea, 1)}</div>
+                    <div class="stat-label">${T.pohjapintaAla} ${tip('pohjapintaAla')}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${formatNumber(stats.avgStemCount, 0)}</div>
-                    <div class="stat-label">Runkoluku (kpl/ha) ${tip('runkoluku')}</div>
+                    <div class="stat-value">${fmt(stats.avgStemCount, 0)}</div>
+                    <div class="stat-label">${T.runkoluku} ${tip('runkoluku')}</div>
                 </div>
             </div>
             ${stats.fertilityDistribution.length > 0 ? `
             <div class="distribution-list">
-                <strong>Kasvupaikkatyypit:</strong>
+                <strong>${T.kasvupaikkatyypit}</strong>
                 ${stats.fertilityDistribution.map(f => `<span class="dist-item">${f.name} (${f.area} ha)</span>`).join('')}
             </div>
             ` : ''}
             ${stats.developmentDistribution.length > 0 ? `
             <div class="distribution-list">
-                <strong>Kehitysluokat:</strong>
-                ${stats.developmentDistribution.map(d => `<span class="dist-item">${d.name} (${d.count} kpl)</span>`).join('')}
+                <strong>${T.kehitysluokat}</strong>
+                ${stats.developmentDistribution.map(d => `<span class="dist-item">${d.name} (${T.kplSulkeissa(d.count)})</span>`).join('')}
             </div>
             ` : ''}
         </div>
@@ -226,13 +230,13 @@ export function showSummary(features, parcel, partCount = 1) {
         ${hasRecs ? '<section class="tab-panel" data-tab="recs">' : ''}
         ${stats.cuttingRecommendations.length > 0 ? `
         <div class="summary-section group-hakkuu">
-            <h3>Hakkuuehdotukset ${tip('hakkuuehdotus')}</h3>
+            <h3>${T.hakkuuehdotukset} ${tip('hakkuuehdotus')}</h3>
             <ul class="recommendations-list clickable">
                 ${stats.cuttingRecommendations.map(r => `
                     <li data-filter="cutting" data-value="${r.code}">
                         <span class="recommendation-type">${r.name}</span>
                         <span class="recommendation-info">
-                            <span class="recommendation-count">${r.count} ${r.count === 1 ? 'kuvio' : 'kuviota'}</span>
+                            <span class="recommendation-count">${T.kuvioLkm(r.count)}</span>
                             ${r.year ? `<span class="recommendation-year${isSoon(r.year) ? ' soon' : ''}">${r.year}</span>` : ''}
                         </span>
                     </li>
@@ -243,13 +247,13 @@ export function showSummary(features, parcel, partCount = 1) {
 
         ${stats.silvicultureRecommendations.length > 0 ? `
         <div class="summary-section group-hoito">
-            <h3>Metsänhoitoehdotukset ${tip('metsanhoitoehdotus')}</h3>
+            <h3>${T.metsanhoitoehdotukset} ${tip('metsanhoitoehdotus')}</h3>
             <ul class="recommendations-list clickable">
                 ${stats.silvicultureRecommendations.map(r => `
                     <li data-filter="silviculture" data-value="${r.code}">
                         <span class="recommendation-type">${r.name}</span>
                         <span class="recommendation-info">
-                            <span class="recommendation-count">${r.count} ${r.count === 1 ? 'kuvio' : 'kuviota'}</span>
+                            <span class="recommendation-count">${T.kuvioLkm(r.count)}</span>
                             ${r.year ? `<span class="recommendation-year">${r.year}</span>` : ''}
                         </span>
                     </li>
@@ -263,7 +267,7 @@ export function showSummary(features, parcel, partCount = 1) {
 
         <section class="tab-panel" data-tab="stands">
         <div class="summary-section stands-section">
-            <h3>Kuviot <span class="stands-count">(${features.length} kpl)</span></h3>
+            <h3>${T.kuviot} <span class="stands-count">${T.kplYhteensa(features.length)}</span></h3>
             <div class="stands-list">
                 ${features.map((f, idx) => renderStandItem(f, idx)).join('')}
             </div>
@@ -272,7 +276,7 @@ export function showSummary(features, parcel, partCount = 1) {
         ` : `
         <div class="no-data">
             <div class="no-data-icon">🌲</div>
-            <p>Ei metsävaratietoja tällä kiinteistöllä.</p>
+            <p>${T.eiMetsavaratietojaKiinteistolla}</p>
         </div>
         </section>
         `}

@@ -2,7 +2,9 @@
  * Forest statistics calculation
  */
 
-import { CODES } from './config.js';
+import { codeName } from './koodit.js';
+import { locale } from './i18n.js';
+import { T } from './ui/teksti.js';
 import { formatNumber } from './utils.js';
 
 /**
@@ -125,7 +127,7 @@ export function calculateStatistics(features) {
 
         if (p.CUTTINGTYPE) {
             const code = p.CUTTINGTYPE;
-            const name = CODES.cuttingType[code] || `Tyyppi ${code}`;
+            const name = codeName('cuttingType', code) || T.tyyppi(code);
             const year = p.CUTTINGPROPOSALYEAR;
             const key = `${code}`;
             if (!cuttingCounts[key]) {
@@ -137,7 +139,7 @@ export function calculateStatistics(features) {
 
         if (p.SILVICULTURETYPE) {
             const code = p.SILVICULTURETYPE;
-            const name = CODES.silvicultureType[code] || `Tyyppi ${code}`;
+            const name = codeName('silvicultureType', code) || T.tyyppi(code);
             const year = p.SILVICULTUREPROPOSALYEAR;
             const key = `${code}`;
             if (!silvicultureCounts[key]) {
@@ -149,7 +151,7 @@ export function calculateStatistics(features) {
 
         if (p.FERTILITYCLASS) {
             const code = p.FERTILITYCLASS;
-            const name = CODES.fertilityClass[code] || `Tyyppi ${code}`;
+            const name = codeName('fertilityClass', code) || T.tyyppi(code);
             if (!fertilityCounts[code]) {
                 fertilityCounts[code] = { name, area: 0 };
             }
@@ -158,7 +160,7 @@ export function calculateStatistics(features) {
 
         if (p.DEVELOPMENTCLASS) {
             const code = p.DEVELOPMENTCLASS;
-            const name = CODES.developmentClass[code] || code;
+            const name = codeName('developmentClass', code) || code;
             if (!developmentCounts[code]) {
                 developmentCounts[code] = { name, count: 0 };
             }
@@ -206,8 +208,8 @@ export function calculateStatistics(features) {
         .sort((a, b) => b.count - a.count);
 
     stats.fertilityDistribution = Object.values(fertilityCounts)
-        .map(f => ({ name: f.name, area: formatNumber(f.area, 2) }))
-        .sort((a, b) => parseFloat(b.area) - parseFloat(a.area));
+        .sort((a, b) => b.area - a.area)
+        .map(f => ({ name: f.name, area: formatNumber(f.area, 2, locale()) }));
 
     stats.developmentDistribution = Object.values(developmentCounts)
         .sort((a, b) => b.count - a.count);
