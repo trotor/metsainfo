@@ -11,7 +11,8 @@
 
 import { CODES } from '../config.js';
 import { formatNumber } from '../utils.js';
-import { mainShare, clearlyDominant, INDICATOR } from './paikka.js';
+import { INDICATOR } from './paikka.js';
+import { speciesGroup, mainShare, clearlyDominant } from '../kuviotieto.js';
 
 export const LEVELS = ['helppo', 'keski', 'vaikea'];
 export const POINTS = { helppo: 10, keski: 20, vaikea: 30, havainto: 5, uusiKuvio: 5, putkiBonus: 5 };
@@ -19,18 +20,7 @@ export const STREAK_BONUS_FROM = 3;
 
 /* ---------- Luokittelut ---------- */
 
-const CONIFERS = new Set([1, 2, 8, 10, 11, 12, 14, 16, 19, 22, 23, 30]);
-const BIRCHES = new Set([3, 4, 27]);
-
-/** Puulajiryhmä visaan: manty, kuusi, koivu, lehti tai null (ei kysytä). */
-export function speciesGroup(code) {
-    if (code === 1) return 'manty';
-    if (code === 2) return 'kuusi';
-    if (BIRCHES.has(code)) return 'koivu';
-    if (code === 29) return null; // "Lehtipuu" ilman lajia: voi olla koivu, ei kysytä
-    if (code != null && !CONIFERS.has(code)) return 'lehti';
-    return null;
-}
+export { speciesGroup };
 
 const SPECIES_OPTIONS = [
     { value: 'manty', label: 'Mänty' },

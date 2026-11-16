@@ -46,7 +46,8 @@ export function applyAndroidVersion(gradle, { name, code }) {
         .replace(/versionName "[^"]*"/, `versionName "${name}"`);
 }
 
-export const KOKEILU_MARKER = 'maasto-kortti';
+// Kunkin kokeilutoiminnon kortin luokka (js/maasto/, js/lahihaku/)
+export const KOKEILU_MARKERS = ['maasto-kortti', 'lahihaku-kortti'];
 export const KOKEILU_PATCH_OFFSET = 900;
 
 /** Kokeilubuildin oma versiojono: 4.0.2 → 4.0.902, 4.1 → 4.1.900. */
@@ -55,9 +56,9 @@ export function kokeiluVersion(version) {
     return `${major}.${minor}.${Number(patch) + KOKEILU_PATCH_OFFSET}`;
 }
 
-/** Sisältääkö buildin tiedostot kokeilukoodia (merkkijono KOKEILU_MARKER). */
+/** Sisältääkö buildin tiedostot kokeilukoodia (jokin KOKEILU_MARKERS). */
 export function containsKokeilu(files) {
-    return files.some(text => text.includes(KOKEILU_MARKER));
+    return files.some(text => KOKEILU_MARKERS.some(m => text.includes(m)));
 }
 
 function distFiles(root) {

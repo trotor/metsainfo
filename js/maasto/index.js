@@ -14,6 +14,7 @@ import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
 import { onPositionChange, requestLocation } from '../ui/location-ui.js';
 import { tip, initTips } from '../ui/tips.js';
 import { tileKey, neighbourKeys, tileCache } from '../rest2.js';
+import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
 import { standAt, placeStatus, describePlace } from './paikka.js';
 import { LEVELS, nextQuestion, questionsFor, scoreAnswer, answerLabel } from './visa.js';
 import { createStore } from './tila.js';
@@ -61,43 +62,22 @@ export function startMaasto() {
         coordsToLatLng: coordsEPSG3067ToLatLng
     }).addTo(state.map);
 
-    const Control = L.Control.extend({
-        onAdd() {
-            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control maasto-control');
-            const btn = L.DomUtil.create('a', 'maasto-btn', container);
-            btn.href = '#';
-            btn.setAttribute('role', 'button');
-            btn.setAttribute('aria-label', T.nappi);
-            btn.title = T.nappi;
-            btn.innerHTML = ICON;
-            L.DomEvent.disableClickPropagation(container);
-            L.DomEvent.on(btn, 'click', (e) => {
-                L.DomEvent.preventDefault(e);
-                toggle();
-            });
-            return container;
-        }
+    const button = addMapButton({
+        map: state.map, label: T.nappi, icon: ICON, onClick: () => toggle(),
+        isMobile: isMobileLayout, onLayoutChange
     });
-    const position = () => (isMobileLayout() ? 'topright' : 'topleft');
-    const control = new Control({ position: position() }).addTo(state.map);
-    onLayoutChange(() => control.setPosition(position()));
 
     /* ---------- Kortti ---------- */
 
-    const card = document.createElement('section');
-    card.className = 'maasto-kortti';
-    card.hidden = true;
-    card.setAttribute('role', 'dialog');
-    card.setAttribute('aria-label', T.nappi);
-    document.body.appendChild(card);
-    initTips(card);
+    const card = createCard({ id: 'maasto', label: T.nappi, className: 'maasto-kortti', onClose: () => toggle(false) });
+    initTips(card.el);
 
-    card.addEventListener('click', (e) => {
+    card.el.addEventListener('click', (e) => {
+        if (e.target.closest('[data-close]')) return toggle(false);
         const el = e.target.closest('[data-mk]');
         if (!el) return;
         const action = el.dataset.mk;
-        if (action === 'close') toggle(false);
-        else if (action === 'quiz' && !locked()) { ui.view = 'quiz'; pickQuestion(); render(); }
+        if (action === 'quiz' && !locked()) { ui.view = 'quiz'; pickQuestion(); render(); }
         else if (action === 'place') { ui.view = 'place'; ui.feedback = null; render(); }
         else if (action === 'retry') update(); // virheruutu haetaan uudelleen
         else if (action === 'level') { store.setLevel(el.dataset.level); ui.feedback = null; pickQuestion(); render(); }
@@ -107,8 +87,8 @@ export function startMaasto() {
 
     function toggle(force) {
         ui.open = force ?? !ui.open;
-        card.hidden = !ui.open;
-        document.documentElement.classList.toggle('maasto-auki', ui.open);
+        if (ui.open) card.open(); else card.close();
+        button.setPressed(ui.open);
         if (ui.open) {
             requestLocation();
             update();
@@ -238,7 +218,7 @@ export function startMaasto() {
         case 'waiting': return `<p class="mk-status">${esc(T.haetaanSijaintia)}</p>`;
         case 'inaccurate': return `<p class="mk-status">${esc(T.epatarkka(acc))}</p>`;
         case 'loading': return `<p class="mk-status">${esc(T.haetaanKuvioita)}</p>`;
-        case 'error': return `<p class="mk-status">${esc(T.eiVerkkoa)}</p><button type="button" class="mk-btn" data-mk="retry">Yritä uudelleen</button>`;
+        case 'error': return `<p class="mk-status">${esc(T.eiVerkkoa)}</p><button type="button" class="kortti-btn" data-mk="retry">Yritä uudelleen</button>`;
         case 'none': return `<p class="mk-status">${esc(T.eiKuviota)}</p>`;
         default: return '';
         }
@@ -255,9 +235,9 @@ export function startMaasto() {
             <p class="mk-kuvio">${esc(T.kuvio(p.STANDNUMBER ?? '–', area))}</p>
             <p class="mk-lead">${esc(d.lead)}</p>
             ${edge}
-            <div class="mk-locked">
+            <div class="kortti-lukittu">
                 <p>${esc(T.lukittu)}</p>
-                <button type="button" class="mk-btn mk-primary" data-est="paywall">${esc(T.avaaLisaosa)}</button>
+                <button type="button" class="kortti-btn kortti-primary" data-est="paywall">${esc(T.avaaLisaosa)}</button>
             </div>`;
         }
         const facts = d.facts.map(f => `<div class="mk-fact"><dt>${esc(f.label)} ${tip(f.tip)}</dt><dd>${esc(f.value)}</dd></div>`).join('');
@@ -271,7 +251,7 @@ export function startMaasto() {
             <p class="mk-source">${esc(T.lahde(d.source.inventory || '–', d.source.current))}</p>
             <div class="mk-actions">
                 ${ui.status === 'ok'
-                    ? `<button type="button" class="mk-btn mk-primary" data-mk="quiz">${esc(T.kysyMinulta)}</button>`
+                    ? `<button type="button" class="kortti-btn kortti-primary" data-mk="quiz">${esc(T.kysyMinulta)}</button>`
                     : `<p class="mk-note">${esc(T.reunallaEiKysymyksia)}</p>`}
             </div>`;
     }
@@ -279,7 +259,7 @@ export function startMaasto() {
     function quizHtml() {
         const levels = LEVELS.map(l => `<button type="button" class="mk-level" data-mk="level" data-level="${l}" aria-pressed="${store.level === l}">${esc(T.tasot[l])}</button>`).join('');
         const head = `<div class="mk-levels" role="group" aria-label="${esc(T.taso)}">${levels}</div>`;
-        const back = `<button type="button" class="mk-btn mk-link" data-mk="place">${esc(T.takaisin)}</button>`;
+        const back = `<button type="button" class="kortti-btn kortti-link" data-mk="place">${esc(T.takaisin)}</button>`;
 
         if (ui.status !== 'ok' && !ui.feedback) {
             const note = ui.status === 'edge' ? `<p class="mk-note">${esc(T.reunallaEiKysymyksia)}</p>` : statusHtml();
@@ -307,7 +287,7 @@ export function startMaasto() {
                 <p>${esc(fb.text)}</p>
                 ${fb.points ? `<p class="mk-plus">+${fb.points}${fb.bonus ? ` (putkibonus +${fb.bonus})` : ''}</p>` : ''}
             </div>
-            <button type="button" class="mk-btn mk-primary" data-mk="next">${esc(T.seuraava)}</button>` : '';
+            <button type="button" class="kortti-btn kortti-primary" data-mk="next">${esc(T.seuraava)}</button>` : '';
 
         const label = q.kind === 'observe' ? 'Havainto' : T.tasot[q.level];
         return `${head}
@@ -325,14 +305,8 @@ export function startMaasto() {
             : statusHtml();
         const flash = ui.flash ? `<p class="mk-flash" role="status">${esc(ui.flash)}</p>` : '';
         ui.flash = null;
-        card.innerHTML = `
-            <header class="mk-head">
-                <div>
-                    <h2>${esc(T.otsikko)}</h2>
-                    <span class="mk-kokeilu">${esc(T.kokeilu)}</span>
-                </div>
-                <button type="button" class="mk-close" data-mk="close" aria-label="${esc(T.sulje)}">×</button>
-            </header>
+        card.el.innerHTML = `
+            ${cardHeader({ title: T.otsikko, badge: T.kokeilu, closeLabel: T.sulje })}
             ${locked() ? '' : scoreBar()}
             ${flash}
             <div class="mk-body">${body}</div>`;

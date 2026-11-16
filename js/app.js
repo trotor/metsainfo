@@ -59,6 +59,7 @@ function init() {
     // build karsii haaran ja dynaamisen importin pois kokonaan.
     if (import.meta.env?.VITE_KOKEILU === '1') {
         import('./maasto/index.js').then(m => m.startMaasto());
+        import('./lahihaku/index.js').then(m => m.startLahihaku());
     }
 }
 

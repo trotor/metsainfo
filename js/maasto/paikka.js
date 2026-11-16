@@ -7,6 +7,7 @@
 import { CODES } from '../config.js';
 import { formatNumber } from '../utils.js';
 import { containsPoint } from '../location/logic.js';
+import { mainShare, clearlyDominant } from '../kuviotieto.js';
 
 export const MAX_ACCURACY = 50; // m; tätä epätarkemmalla sijainnilla ei kerrota kuviota
 
@@ -80,23 +81,7 @@ export const INDICATOR = {
     6: 'Karukkokankaalla maata peittävät jäkälät.'
 };
 
-/**
- * Pääpuulajin (MAINTREESPECIES) oma osuus puustosta (0–1), null jos
- * osuuksia ei ole. Metsäkeskuksen pääpuulaji voi olla eri kuin runsain
- * laji (esim. kuusitaimikko, jossa lehtipuuta on enemmän), joten osuus
- * lasketaan nimenomaan pääpuulajista.
- */
-export function mainShare(p) {
-    const shares = p?.SPECIESSHARES;
-    if (!shares?.length || p.MAINTREESPECIES == null) return null;
-    return shares.find(s => s.species === p.MAINTREESPECIES)?.share ?? 0;
-}
-
-/** Onko pääpuulaji selvästi vallitseva (vähintään 60 % ja runsain laji). */
-export function clearlyDominant(p) {
-    const share = mainShare(p);
-    return share != null && share >= 0.6 && p.SPECIESSHARES[0].species === p.MAINTREESPECIES;
-}
+export { mainShare, clearlyDominant };
 
 function speciesWord(p) {
     if (mainShare(p) == null) return SPECIES_ADJ[p.MAINTREESPECIES] || '';

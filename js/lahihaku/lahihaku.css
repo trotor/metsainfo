@@ -1,0 +1,71 @@
+/* Lähihaku (kokeilu): vain VITE_KOKEILU=1 -buildissa. Kortin runko: js/ui/kortti.css */
+
+.lh-body { margin-top: 8px; }
+.lh-ohje { margin: 0 0 6px; }
+.lh-ryhma {
+    margin: 10px 0 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sammal);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+.lh-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.lh-chip {
+    border: 1px solid #d5dbd1;
+    background: #fff;
+    color: var(--kaarna);
+    border-radius: 999px;
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.lh-chip[aria-pressed="true"] { background: var(--havu); border-color: var(--havu); color: #fff; font-weight: 600; }
+
+.lh-note, .lh-status { color: var(--sammal); margin: 8px 0; font-size: 14px; }
+.lh-haku { font-weight: 600; color: var(--kuusikko); margin: 0; }
+.lh-maara { font-size: 13px; font-weight: 600; color: var(--sammal); margin: 8px 0 4px; }
+
+.lh-varoitus {
+    margin: 8px 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--hakkuu-bg);
+    color: var(--hakkuu);
+    font-size: 14px;
+}
+.lh-varoitus p { margin: 0; }
+
+.lh-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.lh-tulos {
+    display: grid;
+    width: 100%;
+    text-align: left;
+    border: 1px solid #d5dbd1;
+    background: #fff;
+    color: var(--kaarna);
+    border-radius: 12px;
+    min-height: 44px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.lh-tulos-nimi { font-weight: 600; color: var(--kuusikko); }
+.lh-tulos-tiedot { font-size: 13px; color: var(--sammal); }
+
+.lh-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.lh-actions .kortti-btn { flex: 1; }
+
+.lh-kuvio { font-size: 13px; color: var(--sammal); font-weight: 600; margin: 0; }
+.lh-lead { font-size: 17px; font-weight: 600; color: var(--kuusikko); margin: 4px 0; }
+.lh-facts { margin: 0; }
+.lh-fact {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid #eef0ec;
+}
+.lh-fact dt { font-weight: 600; color: var(--sammal); font-size: 13px; }
+.lh-fact dd { margin: 0; }
+.lh-source { margin: 10px 0 0; font-size: 12px; color: var(--sammal); }

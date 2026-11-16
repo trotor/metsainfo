@@ -452,7 +452,7 @@ async function openPaywall() {
         <ul>
             <li>Alueen tuoreet kantohinnat tai omat hinnat, esim. puukauppatarjouksen mukaan</li>
             <li>Arvio vuosittain ja jaettava raportti, esim. kuolinpesän osakkaille</li>
-            ${import.meta.env?.VITE_KOKEILU === '1' ? '<li>Kokeilu: maastotila – kerro tästä paikasta ja metsävisa</li>' : ''}
+            ${import.meta.env?.VITE_KOKEILU === '1' ? '<li>Kokeilu: maastotila – kerro tästä paikasta ja metsävisa</li><li>Kokeilu: etsi läheltä – tietynlaiset metsät ympäriltäsi kartalle</li>' : ''}
             <li>Kertaosto, ei tilausta – kaikki kiinteistöt</li>
         </ul>
         <button type="button" class="est-btn-outline pw-wide" data-est="demo">Kokeile esimerkkimetsällä</button>
