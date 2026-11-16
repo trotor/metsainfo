@@ -98,3 +98,15 @@
     color: #fff;
     background: var(--havu);
 }
+
+/*
+ * Työpöydällä tietopaneeli on kartan vasemmassa reunassa ja peitti vasemman
+ * reunan karttapainikkeet (myös kokeilujen). Kokeilubuildissa painikkeet
+ * siirtyvät paneelin viereen, kun paneeli on auki. Ehto on MOBILE_QUERYn
+ * (js/ui/layout.js) vastakohta.
+ */
+@media (min-width: 769px) and (min-height: 501px), (min-width: 769px) and (pointer: fine) {
+    body:has(#info-panel:not(.hidden)) .leaflet-left {
+        margin-left: 440px;
+    }
+}
