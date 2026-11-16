@@ -30,7 +30,7 @@ const PARCEL_MARGIN_MIN_ZOOM = 13;
 const PARCEL_WFS_LIMIT = 2000;
 let lastParcelFetch = null; // { bbox, labels }
 import * as state from './state.js';
-import { KUVAUSTILA, loadEsimerkkimetsa } from './demo/kuvaustila.js';
+import { KUVAUSTILA, loadEsimerkkimetsa, createKuvitteellinenKartta } from './demo/kuvaustila.js';
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
 import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels, fetchForestUseDeclarations } from './data.js';
@@ -139,6 +139,14 @@ function initMap() {
     });
 
     state.setState('map', map);
+
+    if (KUVAUSTILA) {
+        // Kauppakuvat: ei oikeaa karttaa, vain kuvitteellinen saari
+        const saari = createKuvitteellinenKartta(map, coordsEPSG3067ToLatLng).addTo(map);
+        state.setState('layersControl', L.control.layers({ 'Kuvitteellinen kartta': saari }, null, { position: 'topright' }).addTo(map));
+        map.attributionControl.addAttribution('Kuvitteellinen kartta');
+        return;
+    }
 
     const attribution = 'Kartta: <a href="https://www.maanmittauslaitos.fi/" target="_blank">MML</a> / <a href="https://kartat.kapsi.fi/" target="_blank">Kapsi</a>';
 

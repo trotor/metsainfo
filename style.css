@@ -2260,3 +2260,6 @@ html.platform-ios .store-generic, html.platform-android .store-generic { display
 .pw-preview .est-result { margin-bottom: 4px; }
 .pw-preview .est-muted { margin: 0 4px; }
 .est-toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 3100; max-width: calc(100% - 32px); background: var(--kuusikko); color: #fff; font-size: 14px; font-weight: 600; padding: 12px 16px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+
+/* Kuvaustila: kuvitteellisen saaren nimi (vain build:kuvat) */
+.kuvitteellinen-nimi { font: italic 600 15px/1 Georgia, serif; color: #1d1d1d; white-space: nowrap; letter-spacing: .03em; }

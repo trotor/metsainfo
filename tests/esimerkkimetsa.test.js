@@ -33,6 +33,12 @@ describe('kuvitteellinen Esimerkkimetsä', () => {
         }
     });
 
+    it('kuvitteellinen saari ympäröi tilan, joten kuviin ei tarvita oikeaa karttaa', () => {
+        const island = data.map.features.find(f => f.properties.kind === 'island').geometry;
+        for (const p of data.parcel.geometry.coordinates[0]) expect(pointInPolygon3067(p, island)).toBe(true);
+        expect(data.map.features.some(f => f.properties.kind === 'contour')).toBe(true);
+    });
+
     it('kuvionumerot ovat yksilöllisiä', () => {
         const numbers = data.features.map(f => f.properties.STANDNUMBER);
         expect(new Set(numbers).size).toBe(numbers.length);
