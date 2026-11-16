@@ -8,10 +8,18 @@
  *   git-committien määrä, joka kasvaa aina (molemmat kaupat vaativat
  *   kasvavan numeron)
  *
+ * Kokeilubuild (METSAINFO_KOKEILU=1, npm run ios:sync:kokeilu): iOS-versioksi
+ * tulee kokeiluVersion() eli patch + 900 (4.0.2 → 4.0.902). Se on oma
+ * TestFlight-versiojononsa, joten fastlanen release_settings (joka liittää
+ * uusimman buildin *saman versionumeron* buildeista) ei voi liittää
+ * kokeilubuildia kauppaversioon. Android jätetään kokeilussa ennalleen.
+ * Tavallinen ajo kieltäytyy, jos dist/ sisältää kokeilukoodia, ja
+ * kokeiluajo, jos ei sisällä.
+ *
  * Käyttö: node scripts/sync-version.mjs
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -38,6 +46,29 @@ export function applyAndroidVersion(gradle, { name, code }) {
         .replace(/versionName "[^"]*"/, `versionName "${name}"`);
 }
 
+export const KOKEILU_MARKER = 'maasto-kortti';
+export const KOKEILU_PATCH_OFFSET = 900;
+
+/** Kokeilubuildin oma versiojono: 4.0.2 → 4.0.902, 4.1 → 4.1.900. */
+export function kokeiluVersion(version) {
+    const [major, minor, patch = '0'] = version.split('.');
+    return `${major}.${minor}.${Number(patch) + KOKEILU_PATCH_OFFSET}`;
+}
+
+/** Sisältääkö buildin tiedostot kokeilukoodia (merkkijono KOKEILU_MARKER). */
+export function containsKokeilu(files) {
+    return files.some(text => text.includes(KOKEILU_MARKER));
+}
+
+function distFiles(root) {
+    const dir = new URL('dist/assets/', root);
+    try {
+        return readdirSync(dir).filter(f => /\.(js|css)$/.test(f)).map(f => readFileSync(new URL(f, dir), 'utf8'));
+    } catch {
+        return [];
+    }
+}
+
 function updateFile(url, transform) {
     let before;
     try {
@@ -52,12 +83,23 @@ function updateFile(url, transform) {
 
 function main() {
     const root = new URL('..', import.meta.url);
-    const marketing = parseVersionJs(readFileSync(new URL('public/version.js', root), 'utf8'));
+    const kokeilu = process.env.METSAINFO_KOKEILU === '1';
+    const hasKokeilu = containsKokeilu(distFiles(root));
+    if (kokeilu && !hasKokeilu) {
+        throw new Error('Kokeiluversio, mutta dist/ ei sisällä kokeilukoodia: aja npm run build:kokeilu');
+    }
+    if (!kokeilu && hasKokeilu) {
+        throw new Error('dist/ sisältää kokeilukoodia (VITE_KOKEILU=1). Aja tavallinen npm run build ennen kauppabuildia.');
+    }
+
+    const base = parseVersionJs(readFileSync(new URL('public/version.js', root), 'utf8'));
+    const marketing = kokeilu ? kokeiluVersion(base) : base;
     const build = Number(execSync('git rev-list --count HEAD', { cwd: fileURLToPath(root) }).toString().trim());
     if (updateFile(new URL('ios/App/App.xcodeproj/project.pbxproj', root),
         (s) => applyVersion(s, { marketing, build }))) {
-        console.log(`iOS-versio ${marketing} (${build})`);
+        console.log(`iOS-versio ${marketing} (${build})${kokeilu ? ' – KOKEILU, vain TestFlightiin' : ''}`);
     }
+    if (kokeilu) return; // Android ei saa kokeiluversiota
     if (updateFile(new URL('android/app/build.gradle', root),
         (s) => applyAndroidVersion(s, { name: marketing, code: build }))) {
         console.log(`Android-versio ${marketing} (${build})`);

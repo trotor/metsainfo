@@ -1,0 +1,178 @@
+/* Maastotila (kokeilu): vain VITE_KOKEILU=1 -buildissa */
+
+.maasto-control .maasto-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: var(--havu);
+    background: #fff;
+}
+html.maasto-auki .maasto-control .maasto-btn {
+    color: #fff;
+    background: var(--havu);
+}
+
+.maasto-kortti {
+    position: fixed;
+    z-index: 2050;
+    left: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    width: 380px;
+    max-width: calc(100% - 24px);
+    max-height: min(72vh, 640px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #fff;
+    color: var(--kaarna);
+    border-radius: 16px;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+    padding: 14px 16px 16px;
+    font-size: 15px;
+    line-height: 1.45;
+}
+.maasto-kortti[hidden] { display: none; }
+
+@media (max-width: 768px) {
+    .maasto-kortti {
+        left: 8px;
+        right: 8px;
+        width: auto;
+        max-width: none;
+        bottom: calc(8px + env(safe-area-inset-bottom));
+        max-height: 64vh;
+    }
+}
+
+.mk-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.mk-head h2 { font-size: 18px; color: var(--kuusikko); line-height: 1.2; }
+.mk-kokeilu {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--arvo);
+    background: var(--arvo-bg);
+    border-radius: 999px;
+    padding: 2px 8px;
+}
+.mk-close {
+    border: 0;
+    background: var(--jakala);
+    color: var(--kaarna);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    flex: none;
+}
+
+.mk-score {
+    margin: 10px 0 4px;
+    font-size: 13px;
+    color: var(--sammal);
+}
+.mk-score strong { color: var(--havu); }
+
+.mk-flash {
+    margin: 6px 0;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: var(--arvo-bg);
+    color: var(--arvo);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.mk-body { margin-top: 8px; }
+.mk-status, .mk-note { color: var(--sammal); margin: 8px 0; }
+.mk-kuvio { font-size: 13px; color: var(--sammal); font-weight: 600; }
+.mk-lead { font-size: 17px; font-weight: 600; color: var(--kuusikko); margin: 4px 0 8px; }
+.mk-edge {
+    background: var(--hakkuu-bg);
+    color: var(--hakkuu);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.mk-facts { margin: 0; }
+.mk-fact {
+    display: grid;
+    grid-template-columns: 108px 1fr;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid #eef0ec;
+}
+.mk-fact dt { font-weight: 600; color: var(--sammal); font-size: 13px; }
+.mk-fact dd { margin: 0; }
+
+.mk-hint {
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--puusto-bg);
+    color: var(--puusto);
+    font-size: 14px;
+}
+.mk-proposal { margin: 8px 0 0; font-size: 14px; color: var(--hakkuu); }
+.mk-source { margin: 10px 0 0; font-size: 12px; color: var(--sammal); }
+
+.mk-actions { margin-top: 12px; }
+.mk-btn {
+    border: 1px solid var(--havu);
+    background: #fff;
+    color: var(--havu);
+    border-radius: 12px;
+    min-height: 44px;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+}
+.mk-primary { background: var(--havu); color: #fff; width: 100%; }
+.mk-link { border: 0; background: none; padding: 8px 0; min-height: 0; text-decoration: underline; }
+
+.mk-levels { display: flex; gap: 6px; margin: 4px 0 10px; }
+.mk-level {
+    flex: 1;
+    border: 1px solid #d5dbd1;
+    background: #fff;
+    color: var(--kaarna);
+    border-radius: 10px;
+    min-height: 36px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.mk-level[aria-pressed="true"] { background: var(--havu); border-color: var(--havu); color: #fff; }
+
+.mk-qlevel { font-size: 12px; font-weight: 600; color: var(--sammal); text-transform: uppercase; letter-spacing: .03em; }
+.mk-question { font-size: 17px; font-weight: 600; color: var(--kuusikko); margin: 4px 0 10px; }
+.mk-options { display: grid; gap: 8px; }
+.mk-option {
+    text-align: left;
+    border: 1px solid #d5dbd1;
+    background: #fff;
+    color: var(--kaarna);
+    border-radius: 12px;
+    min-height: 44px;
+    padding: 10px 14px;
+    font-size: 15px;
+    cursor: pointer;
+}
+.mk-option:disabled { cursor: default; opacity: 1; }
+.mk-option.oikea { border-color: var(--puusto); background: var(--puusto-bg); color: var(--puusto); font-weight: 600; }
+.mk-option.vaara { border-color: var(--hakkuu-reuna); background: var(--hakkuu-bg); color: var(--hakkuu); }
+.mk-option.valittu { border-color: var(--hoito-reuna); background: var(--hoito-bg); color: var(--hoito); font-weight: 600; }
+
+.mk-feedback { margin-top: 12px; padding: 10px 12px; border-radius: 12px; font-size: 14px; }
+.mk-feedback.oikea { background: var(--puusto-bg); color: var(--puusto); }
+.mk-feedback.vaara { background: var(--hakkuu-bg); color: var(--hakkuu); }
+.mk-plus { font-weight: 700; margin-top: 4px; }

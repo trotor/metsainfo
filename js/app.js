@@ -55,6 +55,11 @@ function init() {
     initLocation({ selectParcel });
     initEventListeners();
     checkUrlParams();
+    // Kokeilutoiminnot vain kokeilubuildissa (TestFlight, kehitys). Tavallinen
+    // build karsii haaran ja dynaamisen importin pois kokonaan.
+    if (import.meta.env?.VITE_KOKEILU === '1') {
+        import('./maasto/index.js').then(m => m.startMaasto());
+    }
 }
 
 /**

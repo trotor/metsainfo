@@ -41,6 +41,22 @@ let marker = null;
 let accuracyCircle = null;
 let headingMarker = null;
 let hereLayer = null;
+const positionListeners = new Set();
+
+/**
+ * Sijainnin kuuntelija (maastotila). Kutsutaan jokaisella sijainnilla ja
+ * null-arvolla, kun paikannus lopetetaan. Palauttaa poistofunktion.
+ */
+export function onPositionChange(fn) {
+    positionListeners.add(fn);
+    if (last) fn(last);
+    return () => positionListeners.delete(fn);
+}
+
+/** Käynnistää paikannuksen kuten painikkeesta, jos se ei ole päällä. */
+export function requestLocation() {
+    if (mode === 'off') onButton();
+}
 
 export function showToast(text, ms = 5000) {
     const el = document.getElementById('toast');
@@ -146,6 +162,7 @@ function stop() {
     marker = accuracyCircle = headingMarker = null;
     setMode('off');
     refreshHereRow();
+    positionListeners.forEach(fn => fn(null));
 }
 
 let warnedUnavailable = false;
@@ -180,6 +197,7 @@ function onPosition(pos) {
     firstFix = false;
     autoSelect();
     refreshHereRow();
+    positionListeners.forEach(fn => fn(pos));
 }
 
 function drawPosition(pos) {

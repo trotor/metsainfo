@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseVersionJs, applyVersion, applyAndroidVersion } from '../scripts/sync-version.mjs';
+import { parseVersionJs, applyVersion, applyAndroidVersion, kokeiluVersion, containsKokeilu } from '../scripts/sync-version.mjs';
 
 const PBX = `
 				CURRENT_PROJECT_VERSION = 1;
@@ -41,5 +41,18 @@ describe('sync-version', () => {
         expect(out).toContain('versionCode 80\n');
         expect(out).toContain('versionName "1.0.1"\n');
         expect(out).toContain('applicationId "fi.inetor.metsainfo"');
+    });
+});
+
+describe('kokeilubuildin versiojono', () => {
+    it('patch + 900, jotta kokeilubuildia ei voi liittää kauppaversioon', () => {
+        expect(kokeiluVersion('4.0.2')).toBe('4.0.902');
+        expect(kokeiluVersion('4.1')).toBe('4.1.900');
+        expect(kokeiluVersion('5.2.13')).toBe('5.2.913');
+    });
+    it('tunnistaa kokeilukoodin buildista', () => {
+        expect(containsKokeilu(['a', 'b .maasto-kortti{}'])).toBe(true);
+        expect(containsKokeilu(['a', 'b'])).toBe(false);
+        expect(containsKokeilu([])).toBe(false);
     });
 });
