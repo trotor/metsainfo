@@ -5,6 +5,7 @@ Ported from js/data.js, js/utils.js, js/statistics.js — keep in sync with brow
 
 import json
 import logging
+import math
 import re
 import ssl
 import urllib.request
@@ -104,25 +105,88 @@ def point_in_polygon(point: list, geometry: dict) -> bool:
     return False
 
 
-def feature_belongs_to_parcel(feature_geom: dict, parcel_geom: dict) -> bool:
-    """Check if a forest stand belongs to a parcel (centroid must be inside)."""
-    geom_type = feature_geom.get("type", "")
+def _in_ring(ring: list, point: list) -> bool:
+    px, py = point[0], point[1]
+    inside = False
+    j = len(ring) - 1
+    for i in range(len(ring)):
+        xi, yi = ring[i][0], ring[i][1]
+        xj, yj = ring[j][0], ring[j][1]
+        if ((yi > py) != (yj > py)) and (px < (xj - xi) * (py - yi) / (yj - yi) + xi):
+            inside = not inside
+        j = i
+    return inside
 
+
+def contains_point(geometry: dict, point: list) -> bool:
+    """Point inside a Polygon/MultiPolygon, holes excluded (js/location/logic.js containsPoint)."""
+    geom_type = geometry.get("type", "")
+    if geom_type == "Polygon":
+        polygons = [geometry["coordinates"]]
+    elif geom_type == "MultiPolygon":
+        polygons = geometry["coordinates"]
+    else:
+        return False
+    return any(
+        _in_ring(poly[0], point) and not any(_in_ring(h, point) for h in poly[1:])
+        for poly in polygons
+    )
+
+
+def _js_round(v: float) -> int:
+    # JavaScriptin Math.round (puolikkaat ylöspäin), ei Pythonin pankkiiripyöristys
+    return math.floor(v + 0.5)
+
+
+def point_inside(geometry: dict) -> list | None:
+    """Point inside the stand (js/kuviotieto.js pointInside)."""
+    geom_type = geometry.get("type", "")
+    if geom_type == "Polygon":
+        rings = geometry["coordinates"]
+    elif geom_type == "MultiPolygon":
+        rings = [r for poly in geometry["coordinates"] for r in poly]
+    else:
+        return None
+    pts = [p for r in rings for p in r]
+    if not pts:
+        return None
+    xs = [p[0] for p in pts]
+    ys = [p[1] for p in pts]
+    min_x, max_x, min_y, max_y = min(xs), max(xs), min(ys), max(ys)
+    center = [(min_x + max_x) / 2, (min_y + max_y) / 2]
+    if contains_point(geometry, center):
+        return [_js_round(center[0]), _js_round(center[1])]
+    n = 15
+    for i in range(1, n):
+        for j in range(1, n):
+            p = [min_x + (max_x - min_x) * i / n, min_y + (max_y - min_y) * j / n]
+            if contains_point(geometry, p):
+                return [_js_round(p[0]), _js_round(p[1])]
+    return [_js_round(center[0]), _js_round(center[1])]
+
+
+def stand_anchor(feature_geom: dict) -> list | None:
+    """Stand's anchor point for parcel assignment (js/data.js standCentroid):
+    vertex average of the outer ring if it lies on the stand, otherwise a point inside (#30)."""
+    geom_type = feature_geom.get("type", "")
     if geom_type == "Polygon":
         ring = feature_geom["coordinates"][0]
     elif geom_type == "MultiPolygon":
         ring = feature_geom["coordinates"][0][0]
     else:
-        return False
-
+        return None
     if not ring:
-        return False
+        return None
+    centroid = [sum(c[0] for c in ring) / len(ring), sum(c[1] for c in ring) / len(ring)]
+    if contains_point(feature_geom, centroid):
+        return centroid
+    return point_inside(feature_geom) or centroid
 
-    sum_x = sum(c[0] for c in ring)
-    sum_y = sum(c[1] for c in ring)
-    centroid = [sum_x / len(ring), sum_y / len(ring)]
 
-    return point_in_polygon(centroid, parcel_geom)
+def feature_belongs_to_parcel(feature_geom: dict, parcel_geom: dict) -> bool:
+    """Check if a forest stand belongs to a parcel (its anchor point must be inside)."""
+    anchor = stand_anchor(feature_geom)
+    return point_in_polygon(anchor, parcel_geom) if anchor else False
 
 
 def filter_features_by_parcels(features: list, parcels: list) -> list:

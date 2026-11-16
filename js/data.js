@@ -4,6 +4,8 @@
 
 import { CONFIG, CODES } from './config.js';
 import { pointInPolygon3067 } from './utils.js';
+import { containsPoint } from './location/logic.js';
+import { pointInside } from './kuviotieto.js';
 
 /**
  * Fetch forest data by bounding box (EPSG:3067)
@@ -196,7 +198,7 @@ export function filterFeaturesByParcels(features, parcels) {
 }
 
 /**
- * Check if a forest stand belongs to a parcel (centroid must be inside)
+ * Check if a forest stand belongs to a parcel (its anchor point must be inside, see standCentroid)
  */
 function featureBelongsToParcel(featureGeom, parcelGeom) {
     const centroid = standCentroid(featureGeom);
@@ -204,9 +206,12 @@ function featureBelongsToParcel(featureGeom, parcelGeom) {
 }
 
 /**
- * Kuvion "keskipiste" kiinteistölle kohdistusta varten: ulkorenkaan kärkien
- * keskiarvo. Kuvio näytetään sen kiinteistön kuvioissa, jolla tämä piste on,
- * joten kuvion kiinteistö löytyy samalla pisteellä (suosikit, lähihaku).
+ * Kuvion kohdistuspiste kiinteistölle: ulkorenkaan kärkien keskiarvo, jos se
+ * on kuviolla, muuten piste kuvion sisältä (pointInside). Kaarevan tai niemen
+ * muotoisen kuvion keskiarvo voi osua veteen, jolloin kuvio puuttui kaikilta
+ * kiinteistöiltä (#30). Kuvio näytetään sen kiinteistön kuvioissa, jolla tämä
+ * piste on, joten kuvion kiinteistö löytyy samalla pisteellä (suosikit,
+ * lähihaku). Sama sääntö mcp-server/pipeline.py:ssä (stand_anchor).
  */
 export function standCentroid(featureGeom) {
     const ring = featureGeom?.type === 'Polygon' ? featureGeom.coordinates[0] :
@@ -217,5 +222,7 @@ export function standCentroid(featureGeom) {
         sumX += x;
         sumY += y;
     }
-    return [sumX / ring.length, sumY / ring.length];
+    const centroid = [sumX / ring.length, sumY / ring.length];
+    if (containsPoint(featureGeom, centroid)) return centroid;
+    return pointInside(featureGeom) || centroid;
 }
