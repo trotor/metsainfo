@@ -176,3 +176,13 @@ html.maasto-auki .maasto-control .maasto-btn {
 .mk-feedback.oikea { background: var(--puusto-bg); color: var(--puusto); }
 .mk-feedback.vaara { background: var(--hakkuu-bg); color: var(--hakkuu); }
 .mk-plus { font-weight: 700; margin-top: 4px; }
+
+.mk-locked {
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--arvo-bg);
+    color: var(--arvo);
+    font-size: 14px;
+}
+.mk-locked .mk-btn { margin-top: 10px; }

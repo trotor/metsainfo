@@ -18,13 +18,25 @@ import { standAt, placeStatus, describePlace } from './paikka.js';
 import { LEVELS, nextQuestion, questionsFor, scoreAnswer, answerLabel } from './visa.js';
 import { createStore } from './tila.js';
 import { T, arvonimi } from './teksti.js';
+import { purchases } from '../platform/purchases.js';
 
 const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 2 6 10h3l-4 6h5v6h4v-6h5l-4-6h3z" fill="currentColor"/></svg>';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+/**
+ * Maastotila kuuluu kokeiluvaiheessa hinta-arvion lisäosaan (sama kertaosto).
+ * Ilman ostoa näkyy kuvio ja pääkappale, ja ostonäkymä aukeaa hinta-arvion
+ * omasta painikkeesta (data-est="paywall", js/ui/estimate.js). Verkossa
+ * ostoja ei ole, joten kehitysselaimessa tila on auki.
+ */
+function locked() {
+    return purchases.isAvailable() && !purchases.isEntitled();
+}
+
 export function startMaasto() {
     const store = createStore();
+    purchases.onChange(() => update());
     const tiles = new Map(); // key → { status: 'loading' | 'ok' | 'error', stands }
 
     const ui = {
@@ -84,7 +96,7 @@ export function startMaasto() {
         if (!el) return;
         const action = el.dataset.mk;
         if (action === 'close') toggle(false);
-        else if (action === 'quiz') { ui.view = 'quiz'; pickQuestion(); render(); }
+        else if (action === 'quiz' && !locked()) { ui.view = 'quiz'; pickQuestion(); render(); }
         else if (action === 'place') { ui.view = 'place'; ui.feedback = null; render(); }
         else if (action === 'retry') { tiles.delete(tileKey(ui.point)); update(); }
         else if (action === 'level') { store.setLevel(el.dataset.level); ui.feedback = null; pickQuestion(); render(); }
@@ -172,7 +184,8 @@ export function startMaasto() {
             if (ui.stand) highlight.addData(ui.stand);
             if (!ui.feedback) ui.question = null;
         }
-        if (status === 'ok') {
+        if (locked()) ui.view = 'place';
+        if (status === 'ok' && !locked()) {
             const gained = store.visit(stand.properties.STANDID);
             if (gained) ui.flash = T.uusiKuvio(gained);
         }
@@ -247,6 +260,16 @@ export function startMaasto() {
         const area = p.AREA != null ? formatNumber(p.AREA, 1) : '–';
         const edge = ui.status === 'edge'
             ? `<p class="mk-edge">${esc(T.reunalla(Math.round(ui.pos.accuracy)))}</p>` : '';
+        if (locked()) {
+            return `
+            <p class="mk-kuvio">${esc(T.kuvio(p.STANDNUMBER ?? '–', area))}</p>
+            <p class="mk-lead">${esc(d.lead)}</p>
+            ${edge}
+            <div class="mk-locked">
+                <p>${esc(T.lukittu)}</p>
+                <button type="button" class="mk-btn mk-primary" data-est="paywall">${esc(T.avaaLisaosa)}</button>
+            </div>`;
+        }
         const facts = d.facts.map(f => `<div class="mk-fact"><dt>${esc(f.label)} ${tip(f.tip)}</dt><dd>${esc(f.value)}</dd></div>`).join('');
         return `
             <p class="mk-kuvio">${esc(T.kuvio(p.STANDNUMBER ?? '–', area))}</p>
@@ -320,7 +343,7 @@ export function startMaasto() {
                 </div>
                 <button type="button" class="mk-close" data-mk="close" aria-label="${esc(T.sulje)}">×</button>
             </header>
-            ${scoreBar()}
+            ${locked() ? '' : scoreBar()}
             ${flash}
             <div class="mk-body">${body}</div>`;
     }

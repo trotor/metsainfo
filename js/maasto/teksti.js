@@ -30,7 +30,9 @@ export const T = {
     kuviot: (n) => `${n} ${n === 1 ? 'kuvio' : 'kuviota'}`,
     putki: (n) => `putki ${n}`,
     uusiKuvio: (p) => `Uusi kuvio löydetty! +${p}`,
-    kokeilu: 'Kokeilu · vain testiversiossa'
+    kokeilu: 'Kokeilu · vain testiversiossa',
+    lukittu: 'Koko kuvaus, metsävisa ja pisteet kuuluvat Puukaupan hinta-arvio -lisäosaan (sama kertaosto).',
+    avaaLisaosa: 'Avaa lisäosa'
 };
 
 /** Pistemäärään perustuva arvonimi (vain tällä laitteella). */
