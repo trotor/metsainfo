@@ -11,6 +11,7 @@
 
 import './korkeusmalli.css';
 import * as state from '../state.js';
+import { addHelpSection } from '../ui/ohje-osiot.js';
 import { T } from './teksti.js';
 import { isUnlocked } from '../features.js';
 
@@ -34,6 +35,7 @@ function wmsLayer(extra = {}) {
 }
 
 export function startKorkeusmalli() {
+    addHelpSection({ id: 'korkeusmalli', title: T.ohjeOsio.otsikko, html: T.ohjeOsio.html });
     const control = state.layersControl;
     if (!control || !isUnlocked('korkeusmalli')) return;
     // Taustakartaksi: pelkkä maaston muoto

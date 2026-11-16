@@ -179,4 +179,39 @@ const sv = {
 };
 
 export const TEKSTIT = { fi, sv, en };
+// Käyttöohjeen osio (js/ui/ohje-osiot.js)
+const OHJE = {
+    fi: {
+        otsikko: "Etsi läheltä",
+        html: `<p>Karttapainike <strong>Etsi läheltä</strong> etsii tietynlaisia metsiä 1 km × 1 km alueelta sijaintisi ympäriltä tai kartan keskeltä, jos sijaintia ei ole.</p>
+<ul>
+<li>Valitse vaihe (esim. taimikko tai uudistuskypsä), puulaji tai hakkuuehdotus lähivuosina ja paina Hae.</li>
+<li>Löydetyt kuviot näkyvät kartalla ja listassa etäisyyksineen. Kuvion napautus näyttää sen tiedot.</li>
+<li>Haun ja kuvion voi tallentaa suosikkeihin.</li>
+</ul>
+<p>Kartan ja listan kuviot kuuluvat puukaupan hinta-arvion lisäosaan (sama kertaosto).</p>`
+    },
+    sv: {
+        otsikko: "Sök i närheten",
+        html: `<p>Kartknappen <strong>Sök i närheten</strong> söker skogar av ett visst slag inom 1 km × 1 km runt din position, eller mitt på kartan om positionen saknas.</p>
+<ul>
+<li>Välj skede (t.ex. plantbestånd eller förnyelsemogen skog), trädslag eller avverkningsförslag de närmaste åren och tryck Sök.</li>
+<li>Figurerna som hittas visas på kartan och i listan med avstånd. Tryck på en figur för att se uppgifterna.</li>
+<li>Sökningen och figuren kan sparas bland favoriterna.</li>
+</ul>
+<p>Figurerna på kartan och i listan ingår i tillägget Prisuppskattning för virkesaffär (samma engångsköp).</p>`
+    },
+    en: {
+        otsikko: "Search nearby",
+        html: `<p>The map button <strong>Search nearby</strong> finds forests of a certain kind within 1 km × 1 km around your location, or around the map centre if your location is not available.</p>
+<ul>
+<li>Choose a stage (e.g. sapling stand or mature forest), tree species or a cutting proposal in the coming years, and press Search.</li>
+<li>The stands found are shown on the map and in a list with distances. Tap a stand to see its details.</li>
+<li>The search and the stand can be saved to favourites.</li>
+</ul>
+<p>The stands on the map and in the list are part of the timber sale price estimate add-on (same one-time purchase).</p>`
+    }
+};
+for (const lang of Object.keys(OHJE)) TEKSTIT[lang].ohjeOsio = OHJE[lang];
+
 export const T = pick(TEKSTIT);

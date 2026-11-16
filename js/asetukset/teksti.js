@@ -36,6 +36,26 @@ export const TEKSTIT = {
         vainLaitteella: 'Settings are saved on this device only.'
     }
 };
+// Käyttöohjeen osio (js/ui/ohje-osiot.js)
+const OHJE = {
+    fi: {
+        otsikko: "Asetukset ja kieli",
+        html: `<p>Karttapainike <strong>Asetukset</strong> (ratas) avaa asetukset. Kieleksi voi valita suomen, ruotsin, englannin tai laitteen kielen. Sovellus latautuu uudelleen valitulla kielellä.</p>
+<p>Osa ruotsin- ja englanninkielisistä puulajien ja koodien nimistä on epävirallisia käännöksiä. Asetukset tallentuvat vain tälle laitteelle. Maksuton.</p>`
+    },
+    sv: {
+        otsikko: "Inställningar och språk",
+        html: `<p>Kartknappen <strong>Inställningar</strong> (kugghjulet) öppnar inställningarna. Som språk kan du välja finska, svenska, engelska eller enhetens språk. Appen laddas om på det valda språket.</p>
+<p>En del svenska och engelska namn på trädslag och koder är inofficiella översättningar. Inställningarna sparas bara på den här enheten. Avgiftsfri.</p>`
+    },
+    en: {
+        otsikko: "Settings and language",
+        html: `<p>The map button <strong>Settings</strong> (gear) opens the settings. You can choose Finnish, Swedish, English or the device language. The app reloads in the chosen language.</p>
+<p>Some Swedish and English names of tree species and codes are unofficial translations. Settings are saved on this device only. Free of charge.</p>`
+    }
+};
+for (const lang of Object.keys(OHJE)) TEKSTIT[lang].ohjeOsio = OHJE[lang];
+
 export const T = pick(TEKSTIT);
 
 /** Kielten nimet omalla kielellään, jotta ne löytyvät kielestä riippumatta. */

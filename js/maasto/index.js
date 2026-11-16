@@ -19,6 +19,7 @@ import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
 import { standAt, placeStatus, describePlace } from './paikka.js';
 import { LEVELS, nextQuestion, questionsFor, scoreAnswer, answerLabel } from './visa.js';
 import { createStore } from './tila.js';
+import { addHelpSection } from '../ui/ohje-osiot.js';
 import { T, arvonimi } from './teksti.js';
 import { purchases } from '../platform/purchases.js';
 import { isUnlocked } from '../features.js';
@@ -41,6 +42,7 @@ function locked() {
 }
 
 export function startMaasto() {
+    addHelpSection({ id: 'maasto', title: T.ohjeOsio.otsikko, html: T.ohjeOsio.html });
     const store = createStore();
     purchases.onChange(() => update());
     const watched = new WeakSet(); // ruudut, joiden valmistumista kortti jo odottaa

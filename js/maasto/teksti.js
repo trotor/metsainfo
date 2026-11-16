@@ -423,6 +423,41 @@ const sv = {
 };
 
 export const TEKSTIT = { fi, sv, en };
+// Käyttöohjeen osio (js/ui/ohje-osiot.js)
+const OHJE = {
+    fi: {
+        otsikko: "Kerro tästä paikasta ja metsävisa",
+        html: `<p>Karttapainike <strong>Kerro tästä paikasta</strong> kertoo, millaisessa metsässä seisot: kuvion puulajit, iän, kehitysluokan ja puuston. Tiedot tulevat Metsäkeskuksen metsävaratiedoista sijaintisi kohdalta, eikä kiinteistöä tarvitse valita.</p>
+<ul>
+<li><strong>Metsävisa</strong>: <em>Kysy minulta</em> antaa kysymyksiä kuviosta, jossa olet. Valitse taso: helppo, keskitaso, vaikea tai havainto. Pisteitä saa oikeista vastauksista, uusista kuvioista ja vastausputkista.</li>
+<li><strong>Kokeile kartalta</strong>: ilman maastoa voit siirtää karttaa niin, että risti on haluamassasi kohdassa.</li>
+<li>Pisteet ja havainnot tallentuvat vain tälle laitteelle.</li>
+</ul>
+<p>Koko kuvaus, metsävisa ja pisteet kuuluvat puukaupan hinta-arvion lisäosaan (sama kertaosto).</p>`
+    },
+    sv: {
+        otsikko: "Berätta om den här platsen och skogsquiz",
+        html: `<p>Kartknappen <strong>Berätta om den här platsen</strong> visar vilken slags skog du står i: figurens trädslag, ålder, utvecklingsklass och virkesförråd. Uppgifterna kommer från Skogscentralens skogsdata för din position, och du behöver inte välja en fastighet.</p>
+<ul>
+<li><strong>Skogsquiz</strong>: <em>Fråga mig</em> ger frågor om figuren där du är. Välj nivå: lätt, medel, svår eller observation. Poäng får du för rätta svar, nya figurer och svit av rätta svar.</li>
+<li><strong>Testa på kartan</strong>: utan att vara i terrängen kan du flytta kartan så att krysset är där du vill.</li>
+<li>Poäng och observationer sparas bara på den här enheten.</li>
+</ul>
+<p>Hela beskrivningen, skogsquizet och poängen ingår i tillägget Prisuppskattning för virkesaffär (samma engångsköp).</p>`
+    },
+    en: {
+        otsikko: "Tell me about this place and forest quiz",
+        html: `<p>The map button <strong>Tell me about this place</strong> describes the forest you are standing in: the stand’s tree species, age, development class and volume. The data comes from the Finnish Forest Centre’s forest data at your location, and you do not need to select a property.</p>
+<ul>
+<li><strong>Forest quiz</strong>: <em>Quiz me</em> gives questions about the stand you are in. Choose a level: easy, medium, hard or observation. You earn points for correct answers, new stands and answer streaks.</li>
+<li><strong>Try it on the map</strong>: without going outdoors, move the map so that the crosshair is where you want.</li>
+<li>Points and observations are saved on this device only.</li>
+</ul>
+<p>The full description, the quiz and the points are part of the timber sale price estimate add-on (same one-time purchase).</p>`
+    }
+};
+for (const lang of Object.keys(OHJE)) TEKSTIT[lang].ohjeOsio = OHJE[lang];
+
 export const T = pick(TEKSTIT);
 
 /** Pistemäärään perustuva arvonimi (vain tällä laitteella). */

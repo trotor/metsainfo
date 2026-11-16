@@ -30,6 +30,7 @@ import { isUnlocked } from '../features.js';
 import {
     VAIHEET, PUULAJIT, emptyCriteria, hasCriteria, searchBox, boxTileKeys, search, tilesStatus
 } from './haku.js';
+import { addHelpSection } from '../ui/ohje-osiot.js';
 import { T } from './teksti.js';
 
 const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="m15 15 5.5 5.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
@@ -44,6 +45,7 @@ const STYLE_SELECTED = { color: '#e8a317', weight: 4, fillColor: '#e8a317', fill
 const locked = () => !isUnlocked('lahihaku');
 
 export function startLahihaku() {
+    addHelpSection({ id: 'lahihaku', title: T.ohjeOsio.otsikko, html: T.ohjeOsio.html });
     const ui = {
         open: false,
         view: 'form',            // form | results | detail

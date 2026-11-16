@@ -21,6 +21,7 @@ import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
 import { on, emit, VIESTIT } from '../vayla.js';
 import { pointInside } from '../kuviotieto.js';
 import { createFavorites, filterFavorites, TYYPIT } from './varasto.js';
+import { addHelpSection } from '../ui/ohje-osiot.js';
 import { T } from './teksti.js';
 
 const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z" fill="currentColor"/></svg>';
@@ -36,6 +37,7 @@ function standIdOf(feature) {
 const centerOf = (geometry) => pointInside(geometry);
 
 export function startSuosikit() {
+    addHelpSection({ id: 'suosikit', title: T.ohjeOsio.otsikko, html: T.ohjeOsio.html });
     if (!isUnlocked('suosikit')) return;
     const store = createFavorites();
     const ui = {

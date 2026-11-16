@@ -101,4 +101,39 @@ const sv = {
 };
 
 export const TEKSTIT = { fi, sv, en };
+// Käyttöohjeen osio (js/ui/ohje-osiot.js)
+const OHJE = {
+    fi: {
+        otsikko: "Suosikit ja muistiinpanot",
+        html: `<p>Lisää kiinteistö tai kuvio suosikkeihin tähdellä (☆) kiinteistön tiedoista tai tallenna lähihaku. Karttapainike <strong>Suosikit</strong> avaa listan.</p>
+<ul>
+<li>Suosikille voi antaa nimen ja oman muistiinpanon, esim. rajapyykki, marjapaikka tai sovittu harvennus.</li>
+<li>Listaa voi rajata tyypin mukaan ja hakea nimestä tai muistiinpanosta. <em>Avaa</em> vie kiinteistölle, kuviolle tai hakuun.</li>
+<li>Suosikit tallentuvat vain tälle laitteelle.</li>
+</ul>
+<p>Maksuton.</p>`
+    },
+    sv: {
+        otsikko: "Favoriter och anteckningar",
+        html: `<p>Lägg till en fastighet eller figur bland favoriterna med stjärnan (☆) i fastighetens uppgifter, eller spara en närsökning. Kartknappen <strong>Favoriter</strong> öppnar listan.</p>
+<ul>
+<li>Favoriten kan få ett namn och en egen anteckning, t.ex. rårör, bärställe eller överenskommen gallring.</li>
+<li>Listan kan avgränsas efter typ och sökas på namn eller anteckning. <em>Öppna</em> tar dig till fastigheten, figuren eller sökningen.</li>
+<li>Favoriterna sparas bara på den här enheten.</li>
+</ul>
+<p>Avgiftsfri.</p>`
+    },
+    en: {
+        otsikko: "Favourites and notes",
+        html: `<p>Add a property or stand to favourites with the star (☆) in the property details, or save a nearby search. The map button <strong>Favourites</strong> opens the list.</p>
+<ul>
+<li>A favourite can have a name and your own note, e.g. a boundary marker, a berry spot or an agreed thinning.</li>
+<li>Filter the list by type and search by name or note. <em>Open</em> takes you to the property, stand or search.</li>
+<li>Favourites are saved on this device only.</li>
+</ul>
+<p>Free of charge.</p>`
+    }
+};
+for (const lang of Object.keys(OHJE)) TEKSTIT[lang].ohjeOsio = OHJE[lang];
+
 export const T = pick(TEKSTIT);
