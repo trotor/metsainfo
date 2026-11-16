@@ -2,8 +2,8 @@
  * Kielivalinta (#24). Oletuksena laitteen kieli, valinta tallennetaan
  * laitteelle. Suomi on varakieli: puuttuva käännös näytetään suomeksi.
  *
- * Kokeiluvaiheessa käännetty vain kokeilutoiminnot (js/maasto/, js/lahihaku/,
- * js/suosikit/, js/korkeusmalli/, js/asetukset/); muu sovellus on suomeksi.
+ * Käännetty koko sovellus (js/ui/teksti.js, estimate-teksti.js, sivu-teksti.js,
+ * ohje-en.js ja kunkin toiminnon teksti.js). Kielivalinta on vain kokeilubuildissa.
  * Tekstit luetaan moduulien latautuessa, joten kielen vaihto lataa sivun uudelleen.
  */
 

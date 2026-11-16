@@ -6,7 +6,7 @@
  * muutetaan tarkoituksella.
  */
 import '../js/vendor/index.js';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { emptyTable } from '../js/pricing/prices.js';
 import { STANDS } from './fixtures/stands.js';
@@ -52,6 +52,15 @@ const parcel = { properties: { nationalCadastralReference: '99900100010001', lab
 function fakeLayer() {
     return { bindPopup(c) { this.popup = c; return this; }, openPopup() { return this; }, bindTooltip(t) { this.tooltip = t; return this; } };
 }
+
+// Tuloste riippuu kuluvasta vuodesta (lähivuosien hakkuut, vanhat tiedot):
+// kello kiinnitetään tilannekuvien tallennuspäivään. Vain Date, jotta
+// setTimeout (flush) toimii.
+beforeAll(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-16T12:00:00Z'));
+});
+afterAll(() => vi.useRealTimers());
 
 beforeEach(() => {
     document.body.innerHTML = '<div id="info-panel"><div id="sheet-peek"></div><div id="info-content"></div></div>';

@@ -8,7 +8,7 @@
 import './maasto.css';
 import * as state from '../state.js';
 import { formatNumber } from '../utils.js';
-import { getLang, locale } from '../i18n.js';
+import { locale } from '../i18n.js';
 import { latLonTo3067 } from '../location/logic.js';
 import { coordsEPSG3067ToLatLng } from '../utils.js';
 import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
@@ -25,8 +25,7 @@ import { isUnlocked } from '../features.js';
 
 const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 2 6 10h3l-4 6h5v6h4v-6h5l-4-6h3z" fill="currentColor"/></svg>';
 
-// Termien selitykset (TOOLTIPS) ovat vain suomeksi
-const tipFor = (key) => (getLang() === 'fi' ? tip(key) : '');
+const tipFor = (key) => tip(key);
 const fmt = (v, d = 0) => formatNumber(v, d, locale());
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

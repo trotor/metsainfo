@@ -9,7 +9,7 @@ export const TEKSTIT = {
         kokeilu: 'Kokeilu · vain testiversiossa',
         kieli: 'Kieli · Language',
         laite: 'Laitteen kieli',
-        kattavuus: 'Englanniksi on toistaiseksi käännetty vain kokeilutoiminnot (maastotila, lähihaku, suosikit, korkeusmalli). Muu sovellus, termien selitykset ja ostonäkymä ovat suomeksi.',
+        kattavuus: 'Kielivalinta on kokeilu. Suomeksi jäävät vielä tietosuojaseloste, kaupan ostodialogi sekä hintojen lähde ja viikko.',
         epavirallinen: 'Englanninkieliset puulajien ja koodiston nimet ovat epävirallisia käännöksiä.',
         vainLaitteella: 'Asetukset tallentuvat vain tälle laitteelle.'
     },
@@ -20,7 +20,7 @@ export const TEKSTIT = {
         kokeilu: 'Trial · test version only',
         kieli: 'Language · Kieli',
         laite: 'Device language',
-        kattavuus: 'So far only the trial features are in English (field mode, nearby search, favourites, terrain map). The rest of the app, term explanations and the purchase screen are in Finnish.',
+        kattavuus: 'Language choice is a trial. Still in Finnish: the privacy policy, the store purchase dialog, and the price source and week.',
         epavirallinen: 'English names of tree species and other codes are unofficial translations.',
         vainLaitteella: 'Settings are saved on this device only.'
     }
