@@ -464,6 +464,7 @@ async function openPaywall() {
         <button type="button" class="est-btn pw-wide pw-buy" data-est="buy" disabled>${T.osta}</button>
         <button type="button" class="est-link pw-restore" data-est="restore">${T.palautaOsto}</button>
         <div class="pw-msg" aria-live="polite"><span class="est-loading pw-wait"><span class="est-spinner"></span>${T.haetaanHintaa}</span></div>
+        <p class="est-fine">${T.pwLisat}</p>
         <p class="est-fine">${T.pwHieno}</p>
     </div>`;
     document.body.appendChild(el);

@@ -23,6 +23,7 @@ PUUKAUPAN HINTA-ARVIO (LISÄOSA)
 • Omat hinnat esimerkiksi puukauppatarjouksen mukaan
 • Koko puuston kantoraha-arvo ja jaettava arvioraportti, esimerkiksi kuolinpesän osakkaille
 • Kertaosto, ei tilausta. Kokeile ilmaiseksi kuvitteellisella esimerkkimetsällä.
+• Kertaosto sisältää hinta-arvion ja sen nykyiset toiminnot. Uusiin lisäominaisuuksiin voi liittyä erillisiä maksuja.
 
 KARTAT JA TASOT
 • Peruskartta, taustakartta ja ilmakuva
