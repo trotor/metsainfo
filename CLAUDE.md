@@ -31,6 +31,12 @@ npm run android:open # avaa android/ Android Studiossa
 - Kauppakuvat otetaan vain kuvitteellisesta Esimerkkimetsästä kuvitteellisella saarella (ei oikeaa karttaa) kuvaustilassa (`npm run build:kuvat` / `dev:kuvat`, `js/demo/kuvaustila.js`), ei koskaan oikealta kiinteistöltä. Ohje: `docs/kauppa/kauppatekstit.md` → Kuvakaappaukset.
 - Paikannus: `js/platform/location.js` (Capacitor Geolocation / navigator.geolocation), `js/platform/compass.js`, puhdas logiikka `js/location/logic.js`, käyttöliittymä `js/ui/location-ui.js`. Vain evätty lupa lopettaa seurannan; tilapäiset katkot eivät. Sijaintipiste piirretään omaan paneeliin `locationPane` kuviotasojen yläpuolelle.
 
+### Lisäosat ja kokeilut (eriytettävät toiminnot)
+- Maksulliset ja kokeilussa olevat toiminnot pidetään irrotettavina omaksi lisäosakseen tai omaan sovellukseensa. Rekisteri ja säännöt: `js/features.js`. Vertailu: `docs/plans/2026-11-16-maastotila-erillinen-sovellus.md`.
+- Jokainen toiminto omassa hakemistossaan (`js/maasto/`, tuleva `js/lahihaku/`) omine teksteineen (`teksti.js`, kielivalinta #24). Yhteinen tieto vain jaetuista moduuleista: REST 2.0 ja ruutuvälimuisti `js/rest2.js`, paikannus `js/location/` ja `js/ui/location-ui.js` (`onPositionChange`, `requestLocation`), koodistot `js/config.js`. Ei tuonteja toisen toiminnon hakemistosta.
+- Avaus aina `isUnlocked(id)`:llä. Nyt kaikki kuuluvat hinta-arvion kertaostoon.
+- Kokeilut vain kokeilubuildissa: `VITE_KOKEILU=1` (`npm run dev:kokeilu`, `build:kokeilu`, `ios:sync:kokeilu`), dynaaminen import `app.js`:ssä, ei merkintöjä `index.html`:ään. Tavallinen build ei sisällä koodia; `sync-version.mjs` kieltäytyy kauppabuildista, jos `dist/` sisältää kokeilukoodia. iOS-kokeilubuild menee omaan TestFlight-versiojonoon (patch + 900, esim. 4.0.902), ei koskaan kauppaversioon. Palautus latauksen jälkeen: `git checkout ios/App/App.xcodeproj/project.pbxproj`, `npm run build`, `npx cap copy ios`.
+
 ### Android-sovellus (Capacitor 8)
 - `android/` on versionhallinnassa: applicationId `fi.inetor.metsainfo`, minSdk 24, target 36. Komentoriviltä `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`.
 - Versio: `scripts/sync-version.mjs` kirjoittaa saman `number`-version `versionName`ksi ja committien määrän `versionCode`ksi (`npm run android:sync`).

@@ -13,12 +13,13 @@ import { coordsEPSG3067ToLatLng } from '../utils.js';
 import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
 import { onPositionChange, requestLocation } from '../ui/location-ui.js';
 import { tip, initTips } from '../ui/tips.js';
-import { tileKey, neighbourKeys, fetchTile } from './rest.js';
+import { tileKey, neighbourKeys, tileCache } from '../rest2.js';
 import { standAt, placeStatus, describePlace } from './paikka.js';
 import { LEVELS, nextQuestion, questionsFor, scoreAnswer, answerLabel } from './visa.js';
 import { createStore } from './tila.js';
 import { T, arvonimi } from './teksti.js';
 import { purchases } from '../platform/purchases.js';
+import { isUnlocked } from '../features.js';
 
 const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 2 6 10h3l-4 6h5v6h4v-6h5l-4-6h3z" fill="currentColor"/></svg>';
 
@@ -31,13 +32,13 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<'
  * ostoja ei ole, joten kehitysselaimessa tila on auki.
  */
 function locked() {
-    return purchases.isAvailable() && !purchases.isEntitled();
+    return !isUnlocked('maastotila');
 }
 
 export function startMaasto() {
     const store = createStore();
     purchases.onChange(() => update());
-    const tiles = new Map(); // key → { status: 'loading' | 'ok' | 'error', stands }
+    const watched = new WeakSet(); // ruudut, joiden valmistumista kortti jo odottaa
 
     const ui = {
         open: false,
@@ -98,7 +99,7 @@ export function startMaasto() {
         if (action === 'close') toggle(false);
         else if (action === 'quiz' && !locked()) { ui.view = 'quiz'; pickQuestion(); render(); }
         else if (action === 'place') { ui.view = 'place'; ui.feedback = null; render(); }
-        else if (action === 'retry') { tiles.delete(tileKey(ui.point)); update(); }
+        else if (action === 'retry') update(); // virheruutu haetaan uudelleen
         else if (action === 'level') { store.setLevel(el.dataset.level); ui.feedback = null; pickQuestion(); render(); }
         else if (action === 'answer') answer(el.dataset.value);
         else if (action === 'next') { ui.feedback = null; pickQuestion(); render(); }
@@ -119,18 +120,14 @@ export function startMaasto() {
     /* ---------- Sijainti → kuvio ---------- */
 
     function ensureTile(key) {
-        if (tiles.has(key)) return tiles.get(key);
-        const entry = { status: 'loading', stands: [] };
-        tiles.set(key, entry);
-        fetchTile(key).then(stands => {
-            entry.status = 'ok';
-            entry.stands = stands;
-        }).catch(() => {
-            entry.status = 'error';
-        }).finally(() => {
-            update();
-            if (entry.status === 'ok') prefetch(key);
-        });
+        const entry = tileCache.get(key);
+        if (!watched.has(entry)) {
+            watched.add(entry);
+            entry.promise.then(() => {
+                update();
+                if (entry.status === 'ok') prefetch(key);
+            });
+        }
         return entry;
     }
 
@@ -139,20 +136,13 @@ export function startMaasto() {
     const queue = [];
     let prefetching = false;
     async function prefetch(key) {
-        for (const k of neighbourKeys(key)) if (!tiles.has(k) && !queue.includes(k)) queue.push(k);
+        for (const k of neighbourKeys(key)) if (!tileCache.peek(k) && !queue.includes(k)) queue.push(k);
         if (prefetching) return;
         prefetching = true;
         while (queue.length) {
             const k = queue.shift();
-            if (tiles.has(k)) continue;
-            const entry = { status: 'loading', stands: [] };
-            tiles.set(k, entry);
-            try {
-                entry.stands = await fetchTile(k);
-                entry.status = 'ok';
-            } catch {
-                tiles.delete(k); // yritetään uudelleen, kun ruutuun tullaan
-            }
+            if (tileCache.peek(k)?.status === 'ok') continue;
+            await tileCache.get(k).promise;
             // Käyttäjä ehti ruutuun, jota esihaettiin
             if (ui.point && tileKey(ui.point) === k) update();
         }

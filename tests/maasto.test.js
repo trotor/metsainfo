@@ -1,6 +1,6 @@
 import "../js/vendor/index.js";
 import { describe, it, expect } from 'vitest';
-import { tileKey, tileWkt, neighbourKeys, toStand, speciesShares, fetchTile } from '../js/maasto/rest.js';
+import { tileKey, tileWkt, neighbourKeys, toStand, speciesShares, fetchTile } from '../js/rest2.js';
 import { standAt, distanceToEdge, placeStatus, leadSentence, describePlace, speciesMix } from '../js/maasto/paikka.js';
 import { questionsFor, nextQuestion, scoreAnswer, bucketOf, speciesGroup, POINTS } from '../js/maasto/visa.js';
 import { createStore } from '../js/maasto/tila.js';
@@ -268,5 +268,45 @@ describe('maastotilan tallennus', () => {
         expect(arvonimi(0)).toBe('Metsäretkeläinen');
         expect(arvonimi(350)).toBe('Kuvioiden tuntija');
         expect(arvonimi(5000)).toBe('Metsämestari');
+    });
+});
+
+describe('toimintojen avaus (features.js)', () => {
+    const store = (available, entitled) => ({ isAvailable: () => available, isEntitled: () => entitled });
+    it('kokeilu auki kehitysselaimessa ilman kauppaa, hinta-arvio ei', async () => {
+        const { isUnlocked } = await import('../js/features.js');
+        expect(isUnlocked('maastotila', store(false, false))).toBe(true);
+        expect(isUnlocked('hintaArvio', store(false, false))).toBe(false);
+    });
+    it('sovelluksessa vaatii hinta-arvion oston', async () => {
+        const { isUnlocked } = await import('../js/features.js');
+        expect(isUnlocked('maastotila', store(true, false))).toBe(false);
+        expect(isUnlocked('maastotila', store(true, true))).toBe(true);
+        expect(isUnlocked('lahihaku', store(true, true))).toBe(true);
+        expect(isUnlocked('tuntematon', store(true, true))).toBe(false);
+    });
+});
+
+describe('jaettu ruutuvälimuisti', () => {
+    it('hakee ruudun kerran ja yhdistää kuviot', async () => {
+        const { createTileCache } = await import('../js/rest2.js');
+        let calls = 0;
+        const fetchFn = async () => { calls++; return { ok: true, json: async () => ({ features: [restFeature()] }) }; };
+        const cache = createTileCache({ fetchFn });
+        await cache.get('1:1').promise;
+        await cache.get('1:1').promise;
+        await cache.get('1:2').promise;
+        expect(calls).toBe(2);
+        // Sama kuvio kahdessa ruudussa (raja ylittyy) vain kerran
+        expect(cache.stands(['1:1', '1:2'])).toHaveLength(1);
+    });
+    it('epäonnistunut ruutu haetaan uudelleen', async () => {
+        const { createTileCache } = await import('../js/rest2.js');
+        let fail = true;
+        const fetchFn = async () => (fail ? { ok: false, status: 500 } : { ok: true, json: async () => ({ features: [] }) });
+        const cache = createTileCache({ fetchFn });
+        expect((await cache.get('5:5').promise).status).toBe('error');
+        fail = false;
+        expect((await cache.get('5:5').promise).status).toBe('ok');
     });
 });

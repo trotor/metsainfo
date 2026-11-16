@@ -1,5 +1,8 @@
 /**
  * Metsäkeskuksen REST 2.0 (https://avoin.metsakeskus.fi/rest/data/docs).
+ * Jaettu tietokerros toiminnoille, jotka hakevat kuvioita sijainnin
+ * ympäriltä (maastotila, lähihaku). Ei riipu yhdestäkään toiminnosta,
+ * jotta ne voi irrottaa omiksi lisäosikseen tai sovelluksikseen.
  *
  * Kuviot haetaan kiinteän 500 m ruudukon ruutuina, ei käyttäjän tarkalla
  * sijainnilla: sijainti ei lähde verkkoon, ja ruudun kuviot toimivat
@@ -151,3 +154,48 @@ export async function fetchTile(key, { fetchFn = fetch, signal } = {}) {
     const data = await response.json();
     return (data.features || []).map(toStand).filter(f => f.geometry);
 }
+
+/* ---------- Jaettu ruutuvälimuisti ---------- */
+
+/**
+ * Ruutuvälimuisti: { status: 'loading' | 'ok' | 'error', stands, promise }.
+ * Sama ruutu haetaan vain kerran, vaikka useampi toiminto pyytää sitä.
+ * Epäonnistunut ruutu haetaan uudelleen seuraavalla pyynnöllä.
+ */
+export function createTileCache({ fetchFn = fetch } = {}) {
+    const entries = new Map();
+
+    function get(key) {
+        const existing = entries.get(key);
+        if (existing && existing.status !== 'error') return existing;
+        const entry = { status: 'loading', stands: [] };
+        entry.promise = fetchTile(key, { fetchFn }).then(
+            (stands) => { entry.status = 'ok'; entry.stands = stands; return entry; },
+            () => { entry.status = 'error'; return entry; }
+        );
+        entries.set(key, entry);
+        return entry;
+    }
+
+    return {
+        get,
+        peek: (key) => entries.get(key) || null,
+        /** Kaikki ladatut kuviot annetuista ruuduista, kukin kuvio kerran. */
+        stands(keys) {
+            const seen = new Set();
+            const out = [];
+            for (const k of keys) {
+                for (const f of entries.get(k)?.stands || []) {
+                    const id = f.properties.STANDID;
+                    if (id != null && seen.has(id)) continue;
+                    seen.add(id);
+                    out.push(f);
+                }
+            }
+            return out;
+        }
+    };
+}
+
+/** Sovelluksen yhteinen välimuisti. */
+export const tileCache = createTileCache();
