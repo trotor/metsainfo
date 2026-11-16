@@ -29,7 +29,17 @@ export function deviceLang(languages = globalThis.navigator?.languages || [globa
     return 'fi';
 }
 
-let current = KIELET.includes(stored()) ? stored() : deviceLang();
+// Tavallinen build (verkko, App Store, Google Play) on aina suomeksi, kunnes
+// kielivalinta julkaistaan: laitteen kieli tai TestFlightissa tallennettu
+// valinta (sama bundle id) ei vaikuta siihen.
+export const KIELIVALINTA = import.meta.env?.VITE_KOKEILU === '1';
+
+export function initialLang({ enabled = KIELIVALINTA, saved = stored(), device = deviceLang } = {}) {
+    if (!enabled) return 'fi';
+    return KIELET.includes(saved) ? saved : device();
+}
+
+let current = initialLang();
 
 export function getLang() {
     return current;

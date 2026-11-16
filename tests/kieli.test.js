@@ -72,3 +72,16 @@ describe('kielet', () => {
         expect(formatNumber(1234.5, 1, 'en-GB')).toBe('1,234.5');
     });
 });
+
+import { initialLang, getLang } from '../js/i18n.js';
+
+describe('julkaisu pysyy suomeksi', () => {
+    it('ilman kielivalintaa aina fi, vaikka tallennettu tai laitteen kieli olisi en', () => {
+        expect(initialLang({ enabled: false, saved: 'en', device: () => 'en' })).toBe('fi');
+        expect(initialLang({ enabled: true, saved: 'en', device: () => 'fi' })).toBe('en');
+        expect(initialLang({ enabled: true, saved: null, device: () => 'en' })).toBe('en');
+        expect(initialLang({ enabled: true, saved: 'xx', device: () => 'fi' })).toBe('fi');
+        // Testit ajetaan tavallisena buildina
+        expect(getLang()).toBe('fi');
+    });
+});
