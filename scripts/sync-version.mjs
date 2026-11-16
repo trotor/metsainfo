@@ -9,10 +9,15 @@
  *   kasvavan numeron)
  *
  * Kokeilubuild (METSAINFO_KOKEILU=1, npm run ios:sync:kokeilu): iOS-versioksi
- * tulee kokeiluVersion() eli patch + 900 (4.0.2 → 4.0.902). Se on oma
+ * tulee version.js:n kokeilu-kenttä (oma jono 4.0.9xx). Se on oma
  * TestFlight-versiojononsa, joten fastlanen release_settings (joka liittää
  * uusimman buildin *saman versionumeron* buildeista) ei voi liittää
  * kokeilubuildia kauppaversioon. Android jätetään kokeilussa ennalleen.
+ *
+ * Näkyvää versionumeroa ei käytetä kahdesti (Teron sääntö 16.11.2026):
+ * ladatut versiot ovat scripts/kaytetyt-versiot.json:ssa, ja skripti
+ * kieltäytyy käytetystä numerosta. Latauksen jälkeen:
+ * node scripts/sync-version.mjs --kaytetty (kauppa) tai --kaytetty-kokeilu.
  * Tavallinen ajo kieltäytyy, jos dist/ sisältää kokeilukoodia, ja
  * kokeiluajo, jos ei sisällä.
  *
@@ -50,10 +55,39 @@ export function applyAndroidVersion(gradle, { name, code }) {
 export const KOKEILU_MARKERS = ['maasto-kortti', 'lahihaku-kortti', 'suosikit-kortti', 'korkeusmalli-taso', 'asetukset-kortti', 'saavutettavuus-kortti'];
 export const KOKEILU_PATCH_OFFSET = 900;
 
-/** Kokeilubuildin oma versiojono: 4.0.2 → 4.0.902, 4.1 → 4.1.900. */
-export function kokeiluVersion(version) {
-    const [major, minor, patch = '0'] = version.split('.');
-    return `${major}.${minor}.${Number(patch) + KOKEILU_PATCH_OFFSET}`;
+/** version.js:n kokeilu-kenttä (TestFlight-kokeilun näkyvä versio). */
+export function parseKokeiluVersion(source) {
+    const match = source.match(/kokeilu:\s*'([^']+)'/);
+    if (!match) throw new Error('version.js: kokeilu-kenttää ei löytynyt');
+    const version = match[1];
+    if (!/^\d+\.\d+\.\d+$/.test(version) || Number(version.split('.')[2]) < KOKEILU_PATCH_OFFSET) {
+        throw new Error(`version.js: kokeiluversion "${version}" pitää olla muotoa x.y.9zz (oma jono)`);
+    }
+    return version;
+}
+
+export function compareVersions(a, b) {
+    const pa = a.split('.').map(Number), pb = b.split('.').map(Number);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        const d = (pa[i] || 0) - (pb[i] || 0);
+        if (d) return d;
+    }
+    return 0;
+}
+
+/**
+ * Näkyvä versio ei saa olla jo käytetty, ja sen pitää olla suurempi kuin
+ * saman jonon aiemmat. Heittää virheen, jos sääntö rikkoutuu.
+ */
+export function assertUnusedVersion(version, used, jono) {
+    const list = used[jono] || [];
+    if (list.some(v => compareVersions(v, version) === 0)) {
+        throw new Error(`Versio ${version} on jo käytetty (${jono}). Kasvata public/version.js:n ${jono === 'kokeilu' ? 'kokeilu' : 'number'}-kenttää.`);
+    }
+    const max = list.reduce((m, v) => (compareVersions(v, m) > 0 ? v : m), '0');
+    if (compareVersions(version, max) < 0) {
+        throw new Error(`Versio ${version} on pienempi kuin jo käytetty ${max} (${jono}).`);
+    }
 }
 
 /** Sisältääkö buildin tiedostot kokeilukoodia (jokin KOKEILU_MARKERS). */
@@ -84,6 +118,22 @@ function updateFile(url, transform) {
 
 function main() {
     const root = new URL('..', import.meta.url);
+    const versionJs = readFileSync(new URL('public/version.js', root), 'utf8');
+    const base = parseVersionJs(versionJs);
+    const usedUrl = new URL('scripts/kaytetyt-versiot.json', root);
+    const used = JSON.parse(readFileSync(usedUrl, 'utf8'));
+
+    // Latauksen jälkeen: merkitään näkyvä versio käytetyksi
+    const markJono = process.argv.includes('--kaytetty-kokeilu') ? 'kokeilu'
+        : process.argv.includes('--kaytetty') ? 'kauppa' : null;
+    if (markJono) {
+        const v = markJono === 'kokeilu' ? parseKokeiluVersion(versionJs) : base;
+        if (!used[markJono].includes(v)) used[markJono].push(v);
+        writeFileSync(usedUrl, JSON.stringify(used, null, 2) + '\n');
+        console.log(`Merkitty käytetyksi: ${v} (${markJono})`);
+        return;
+    }
+
     const kokeilu = process.env.METSAINFO_KOKEILU === '1';
     const hasKokeilu = containsKokeilu(distFiles(root));
     if (kokeilu && !hasKokeilu) {
@@ -93,8 +143,9 @@ function main() {
         throw new Error('dist/ sisältää kokeilukoodia (VITE_KOKEILU=1). Aja tavallinen npm run build ennen kauppabuildia.');
     }
 
-    const base = parseVersionJs(readFileSync(new URL('public/version.js', root), 'utf8'));
-    const marketing = kokeilu ? kokeiluVersion(base) : base;
+    const marketing = kokeilu ? parseKokeiluVersion(versionJs) : base;
+    const jono = kokeilu ? 'kokeilu' : 'kauppa';
+    assertUnusedVersion(marketing, used, jono);
     const build = Number(execSync('git rev-list --count HEAD', { cwd: fileURLToPath(root) }).toString().trim());
     if (updateFile(new URL('ios/App/App.xcodeproj/project.pbxproj', root),
         (s) => applyVersion(s, { marketing, build }))) {

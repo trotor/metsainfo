@@ -1,0 +1,5 @@
+{
+  "ohje": "Kauppoihin ja TestFlightiin ladatut näkyvät versionumerot. Samaa numeroa ei käytetä uudelleen: lisää versio tänne latauksen jälkeen (node scripts/sync-version.mjs --kaytetty tai --kaytetty-kokeilu).",
+  "kauppa": ["1.0", "4.0.0", "4.0.1"],
+  "kokeilu": ["4.0.902"]
+}

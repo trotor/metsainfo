@@ -52,6 +52,13 @@ window.toggleHelp = toggleHelp;
  */
 function init() {
     applyPageTexts();
+    // Kokeilubuildin näkyvä versio on oma (version.js kokeilu, esim. 4.0.903), jotta
+    // testaaja näkee saman numeron kuin TestFlightissa
+    if (import.meta.env?.VITE_KOKEILU === '1' && typeof VERSION !== 'undefined' && VERSION.kokeilu) {
+        VERSION.number = VERSION.kokeilu;
+        const badge = document.getElementById('version-badge');
+        if (badge) badge.textContent = 'v' + VERSION.number;
+    }
     if (isNative()) initNative();
     initMap();
     initLayers();

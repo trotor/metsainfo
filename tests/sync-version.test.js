@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseVersionJs, applyVersion, applyAndroidVersion, kokeiluVersion, containsKokeilu } from '../scripts/sync-version.mjs';
+import { parseVersionJs, applyVersion, applyAndroidVersion, parseKokeiluVersion, assertUnusedVersion, compareVersions, containsKokeilu } from '../scripts/sync-version.mjs';
 
 const PBX = `
 				CURRENT_PROJECT_VERSION = 1;
@@ -45,11 +45,23 @@ describe('sync-version', () => {
 });
 
 describe('kokeilubuildin versiojono', () => {
-    it('patch + 900, jotta kokeilubuildia ei voi liittää kauppaversioon', () => {
-        expect(kokeiluVersion('4.0.2')).toBe('4.0.902');
-        expect(kokeiluVersion('4.1')).toBe('4.1.900');
-        expect(kokeiluVersion('5.2.13')).toBe('5.2.913');
+    it('kokeiluversio version.js:n kokeilu-kentästä, oma jono x.y.9zz', () => {
+        expect(parseKokeiluVersion("const VERSION = { number: '4.0.2', kokeilu: '4.0.903' };")).toBe('4.0.903');
+        expect(() => parseKokeiluVersion("kokeilu: '4.0.3'")).toThrow();
+        expect(() => parseKokeiluVersion("number: '4.0.2'")).toThrow();
     });
+
+    it('samaa näkyvää versiota ei käytetä uudelleen eikä pienempää', () => {
+        const used = { kauppa: ['4.0.0', '4.0.1'], kokeilu: ['4.0.902'] };
+        expect(() => assertUnusedVersion('4.0.902', used, 'kokeilu')).toThrow(/jo käytetty/);
+        expect(() => assertUnusedVersion('4.0.901', used, 'kokeilu')).toThrow(/pienempi/);
+        expect(() => assertUnusedVersion('4.0.903', used, 'kokeilu')).not.toThrow();
+        expect(() => assertUnusedVersion('4.0.1', used, 'kauppa')).toThrow(/jo käytetty/);
+        expect(() => assertUnusedVersion('4.0.2', used, 'kauppa')).not.toThrow();
+        expect(compareVersions('4.0.10', '4.0.9')).toBeGreaterThan(0);
+        expect(compareVersions('4.1', '4.1.0')).toBe(0);
+    });
+
     it('tunnistaa kokeilukoodin buildista', () => {
         expect(containsKokeilu(['a', 'b .maasto-kortti{}'])).toBe(true);
         expect(containsKokeilu(['a', 'lahihaku-kortti'])).toBe(true);
