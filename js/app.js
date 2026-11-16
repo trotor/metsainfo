@@ -65,6 +65,7 @@ function init() {
             .catch(() => showToast('Kiinteistön haku epäonnistui')));
         import('./maasto/index.js').then(m => m.startMaasto());
         import('./suosikit/index.js').then(m => m.startSuosikit());
+        import('./korkeusmalli/index.js').then(m => m.startKorkeusmalli());
         import('./lahihaku/index.js').then(m => m.startLahihaku());
     }
 }

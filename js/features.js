@@ -28,7 +28,9 @@ export const FEATURES = {
     // Suunniteltu #28: tietynlaiset metsät 1 km × 1 km alueelta (js/lahihaku/)
     lahihaku: { product: PRODUCT_ID, kokeilu: true },
     // Kokeilu #25: suosikit ja omat muistiinpanot, maksuton (js/suosikit/)
-    suosikit: { product: null, kokeilu: true }
+    suosikit: { product: null, kokeilu: true },
+    // Kokeilu #29: laserkeilauksen korkeusmalli taustakartaksi, maksuton (js/korkeusmalli/)
+    korkeusmalli: { product: null, kokeilu: true }
 };
 
 /**
