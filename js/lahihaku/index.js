@@ -13,7 +13,8 @@
 
 import './lahihaku.css';
 import * as state from '../state.js';
-import { CODES } from '../config.js';
+import { codeName } from '../koodit.js';
+import { locale } from '../i18n.js';
 import { formatNumber, coordsEPSG3067ToLatLng, getGeometryBounds3067 } from '../utils.js';
 import { on, emit, has, VIESTIT } from '../vayla.js';
 import { latLonTo3067 } from '../location/logic.js';
@@ -30,6 +31,8 @@ import {
 import { T } from './teksti.js';
 
 const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="m15 15 5.5 5.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+
+const fmt = (v, d = 0) => formatNumber(v, d, locale());
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -199,7 +202,7 @@ export function startLahihaku() {
             const b = getGeometryBounds3067(r.stand.geometry);
             emit(VIESTIT.tallennaSuosikki, {
                 type: 'kuvio',
-                name: `${T.kuvio(p.STANDNUMBER ?? '–', formatNumber(p.AREA, 1))} · ${standLabel(p)}`,
+                name: `${T.kuvio(p.STANDNUMBER ?? '–', fmt(p.AREA, 1))} · ${standLabel(p)}`,
                 ref: { standId: p.STANDID, standNumber: String(p.STANDNUMBER ?? ''), center: [Math.round((b.minX + b.maxX) / 2), Math.round((b.minY + b.maxY) / 2)] }
             });
         } else {
@@ -254,12 +257,12 @@ export function startLahihaku() {
 
     function distanceText(r) {
         if (r.distance === 0) return T.tallaKuviolla;
-        return T.etaisyys(formatNumber(Math.round(r.distance / 10) * 10, 0), T.suunnat[r.direction] || '');
+        return T.etaisyys(fmt(Math.round(r.distance / 10) * 10), T.suunnat[r.direction] || '');
     }
 
     function standLabel(p) {
-        const dev = CODES.developmentClass[p.DEVELOPMENTCLASS] || p.DEVELOPMENTCLASS || '';
-        const sp = CODES.treeSpecies[p.MAINTREESPECIES] || '';
+        const dev = codeName('developmentClass', p.DEVELOPMENTCLASS) || p.DEVELOPMENTCLASS || '';
+        const sp = codeName('treeSpecies', p.MAINTREESPECIES) || '';
         return [dev, sp].filter(Boolean).join(' · ');
     }
 
@@ -290,7 +293,7 @@ export function startLahihaku() {
         if (!s.results.length) return `${head}${partial}<p class="lh-status">${esc(T.eiTuloksia)}</p>${actions}`;
         const items = s.results.map(r => {
             const p = r.stand.properties;
-            const ha = p.AREA != null ? formatNumber(p.AREA, 1) : '–';
+            const ha = p.AREA != null ? fmt(p.AREA, 1) : '–';
             return `<li><button type="button" class="lh-tulos" data-lh="valitse" data-id="${esc(p.STANDID)}">
                 <span class="lh-tulos-nimi">${esc(standLabel(p))}</span>
                 <span class="lh-tulos-tiedot">${esc(T.kuvio(p.STANDNUMBER ?? '–', ha))}</span>
@@ -311,22 +314,22 @@ export function startLahihaku() {
         const r = ui.search.results.find(x => x.stand.properties.STANDID === ui.selected);
         if (!r) { ui.view = 'results'; return resultsHtml(); }
         const p = r.stand.properties;
-        const ha = p.AREA != null ? formatNumber(p.AREA, 1) : '–';
+        const ha = p.AREA != null ? fmt(p.AREA, 1) : '–';
         const share = mainShare(p);
-        const species = CODES.treeSpecies[p.MAINTREESPECIES];
+        const species = codeName('treeSpecies', p.MAINTREESPECIES);
         const cutting = p.CUTTINGTYPE != null
-            ? `${CODES.cuttingType[p.CUTTINGTYPE] || p.CUTTINGTYPE}${p.CUTTINGPROPOSALYEAR ? ` ${p.CUTTINGPROPOSALYEAR}` : ''}` : null;
+            ? `${codeName('cuttingType', p.CUTTINGTYPE) || p.CUTTINGTYPE}${p.CUTTINGPROPOSALYEAR ? ` ${p.CUTTINGPROPOSALYEAR}` : ''}` : null;
         const year = p.TREESTANDDATE ? String(p.TREESTANDDATE).slice(0, 4) : null;
         return `
             <p class="lh-kuvio">${esc(T.kuvio(p.STANDNUMBER ?? '–', ha))}</p>
             <p class="lh-lead">${esc(standLabel(p))}</p>
             <p class="lh-note">${esc(distanceText(r))}</p>
             <dl class="lh-facts">
-                ${fact(T.kehitysluokka, CODES.developmentClass[p.DEVELOPMENTCLASS] || p.DEVELOPMENTCLASS)}
-                ${fact(T.paapuulaji, species ? `${species}${share != null ? ` ${formatNumber(share * 100, 0)} %` : ''}` : null)}
-                ${fact(T.ika, p.MEANAGE != null ? `${formatNumber(p.MEANAGE, 0)} v` : null)}
-                ${fact(T.pituus, p.MEANHEIGHT != null ? `${formatNumber(p.MEANHEIGHT, 1)} m` : null)}
-                ${fact(T.tilavuus, p.VOLUME != null ? `${formatNumber(p.VOLUME, 0)} m³/ha` : null)}
+                ${fact(T.kehitysluokka, codeName('developmentClass', p.DEVELOPMENTCLASS) || p.DEVELOPMENTCLASS)}
+                ${fact(T.paapuulaji, species ? `${species}${share != null ? ` ${T.prosentti(fmt(share * 100))}` : ''}` : null)}
+                ${fact(T.ika, p.MEANAGE != null ? T.vuotta(fmt(p.MEANAGE)) : null)}
+                ${fact(T.pituus, p.MEANHEIGHT != null ? `${fmt(p.MEANHEIGHT, 1)} m` : null)}
+                ${fact(T.tilavuus, p.VOLUME != null ? `${fmt(p.VOLUME)} m³/ha` : null)}
                 ${fact(T.hakkuuehdotus, cutting)}
             </dl>
             <p class="lh-source">${esc(T.lahde(year))}</p>

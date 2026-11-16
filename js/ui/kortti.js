@@ -6,6 +6,7 @@
  */
 
 import './kortti.css';
+import { getLang } from '../i18n.js';
 
 const OPEN_EVENT = 'metsainfo:kortti-auki';
 
@@ -19,6 +20,7 @@ export function createCard({ id, label, className = '', onClose }) {
     el.hidden = true;
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-label', label);
+    el.lang = getLang(); // muu sovellus on suomeksi, kortti valitulla kielellä
     document.body.appendChild(el);
 
     const card = {

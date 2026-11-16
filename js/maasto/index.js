@@ -8,6 +8,7 @@
 import './maasto.css';
 import * as state from '../state.js';
 import { formatNumber } from '../utils.js';
+import { getLang, locale } from '../i18n.js';
 import { latLonTo3067 } from '../location/logic.js';
 import { coordsEPSG3067ToLatLng } from '../utils.js';
 import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
@@ -23,6 +24,10 @@ import { purchases } from '../platform/purchases.js';
 import { isUnlocked } from '../features.js';
 
 const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 2 6 10h3l-4 6h5v6h4v-6h5l-4-6h3z" fill="currentColor"/></svg>';
+
+// Termien selitykset (TOOLTIPS) ovat vain suomeksi
+const tipFor = (key) => (getLang() === 'fi' ? tip(key) : '');
+const fmt = (v, d = 0) => formatNumber(v, d, locale());
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -205,7 +210,7 @@ export function startMaasto() {
     function scoreBar() {
         const parts = [
             `<strong>${esc(arvonimi(store.points))}</strong>`,
-            esc(T.pisteet(formatNumber(store.points, 0))),
+            esc(T.pisteet(fmt(store.points))),
             esc(T.kuviot(store.standCount))
         ];
         if (store.streak >= 2) parts.push(esc(T.putki(store.streak)));
@@ -218,7 +223,7 @@ export function startMaasto() {
         case 'waiting': return `<p class="mk-status">${esc(T.haetaanSijaintia)}</p>`;
         case 'inaccurate': return `<p class="mk-status">${esc(T.epatarkka(acc))}</p>`;
         case 'loading': return `<p class="mk-status">${esc(T.haetaanKuvioita)}</p>`;
-        case 'error': return `<p class="mk-status">${esc(T.eiVerkkoa)}</p><button type="button" class="kortti-btn" data-mk="retry">Yritä uudelleen</button>`;
+        case 'error': return `<p class="mk-status">${esc(T.eiVerkkoa)}</p><button type="button" class="kortti-btn" data-mk="retry">${esc(T.yritaUudelleen)}</button>`;
         case 'none': return `<p class="mk-status">${esc(T.eiKuviota)}</p>`;
         default: return '';
         }
@@ -227,7 +232,7 @@ export function startMaasto() {
     function placeHtml() {
         const p = ui.stand.properties;
         const d = describePlace(p);
-        const area = p.AREA != null ? formatNumber(p.AREA, 1) : '–';
+        const area = p.AREA != null ? fmt(p.AREA, 1) : '–';
         const edge = ui.status === 'edge'
             ? `<p class="mk-edge">${esc(T.reunalla(Math.round(ui.pos.accuracy)))}</p>` : '';
         if (locked()) {
@@ -240,14 +245,14 @@ export function startMaasto() {
                 <button type="button" class="kortti-btn kortti-primary" data-est="paywall">${esc(T.avaaLisaosa)}</button>
             </div>`;
         }
-        const facts = d.facts.map(f => `<div class="mk-fact"><dt>${esc(f.label)} ${tip(f.tip)}</dt><dd>${esc(f.value)}</dd></div>`).join('');
+        const facts = d.facts.map(f => `<div class="mk-fact"><dt>${esc(f.label)} ${tipFor(f.tip)}</dt><dd>${esc(f.value)}</dd></div>`).join('');
         return `
             <p class="mk-kuvio">${esc(T.kuvio(p.STANDNUMBER ?? '–', area))}</p>
             <p class="mk-lead">${esc(d.lead)}</p>
             ${edge}
             <dl class="mk-facts">${facts}</dl>
             ${d.hint ? `<p class="mk-hint">${esc(d.hint)}</p>` : ''}
-            ${d.proposal ? `<p class="mk-proposal">${esc(d.proposal)} ${tip('hakkuuehdotus')}</p>` : ''}
+            ${d.proposal ? `<p class="mk-proposal">${esc(d.proposal)} ${tipFor('hakkuuehdotus')}</p>` : ''}
             <p class="mk-source">${esc(T.lahde(d.source.inventory || '–', d.source.current))}</p>
             <div class="mk-actions">
                 ${ui.status === 'ok'
@@ -285,11 +290,11 @@ export function startMaasto() {
         const feedback = fb ? `
             <div class="mk-feedback ${fb.correct === false ? 'vaara' : 'oikea'}" role="status">
                 <p>${esc(fb.text)}</p>
-                ${fb.points ? `<p class="mk-plus">+${fb.points}${fb.bonus ? ` (putkibonus +${fb.bonus})` : ''}</p>` : ''}
+                ${fb.points ? `<p class="mk-plus">+${fb.points}${fb.bonus ? ` (${esc(T.putkibonus(fb.bonus))})` : ''}</p>` : ''}
             </div>
             <button type="button" class="kortti-btn kortti-primary" data-mk="next">${esc(T.seuraava)}</button>` : '';
 
-        const label = q.kind === 'observe' ? 'Havainto' : T.tasot[q.level];
+        const label = T.tasot[q.kind === 'observe' ? 'havainto' : q.level];
         return `${head}
             <p class="mk-qlevel">${esc(label)} · +${q.points}</p>
             <p class="mk-question">${esc(q.text)}</p>

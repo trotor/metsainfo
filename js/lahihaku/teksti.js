@@ -1,9 +1,10 @@
 /**
- * Lähihaun tekstit yhdessä paikassa kielivalintaa (#24) varten.
- * Toistaiseksi vain suomi.
+ * Lähihaun tekstit suomeksi ja englanniksi (#24).
  */
 
-export const T = {
+import { pick } from '../i18n.js';
+
+const fi = {
     nappi: 'Etsi läheltä',
     otsikko: 'Etsi läheltä',
     sulje: 'Sulje',
@@ -51,6 +52,8 @@ export const T = {
     kehitysluokka: 'Kehitysluokka',
     paapuulaji: 'Pääpuulaji',
     ika: 'Ikä',
+    vuotta: (n) => `${n} v`,
+    prosentti: (n) => `${n} %`,
     pituus: 'Keskipituus',
     tilavuus: 'Puuston määrä',
     hakkuuehdotus: 'Hakkuuehdotus',
@@ -58,3 +61,64 @@ export const T = {
     lukittu: (n) => `Alueelta löytyi ${n === 1 ? '1 kuvio' : `${n} kuviota`}. Kuviot kartalla ja listana kuuluvat Puukaupan hinta-arvio -lisäosaan (sama kertaosto).`,
     avaaLisaosa: 'Avaa lisäosa'
 };
+
+const en = {
+    nappi: 'Search nearby',
+    otsikko: 'Search nearby',
+    sulje: 'Close',
+    kokeilu: 'Trial · test version only',
+    ohje: 'Find forests of a certain kind within 1 km × 1 km around you.',
+    vaihe: 'Stage',
+    puulaji: 'Tree species',
+    muuta: 'Other',
+    vaiheet: {
+        taimikko: 'Sapling stand',
+        nuori: 'Young thinning stand',
+        varttunut: 'Advanced thinning stand',
+        uudistuskypsa: 'Mature forest',
+        vanha: 'Old forest (over 100 years)'
+    },
+    puulajit: { manty: 'Pine forest', kuusi: 'Spruce forest', koivu: 'Birch forest', lehti: 'Other broadleaf forest', seka: 'Mixed forest' },
+    hakkuu: 'Cutting proposed in the next few years',
+    hae: 'Search',
+    valitseEhto: 'Choose at least one option.',
+    keskiSijainti: 'Search area: around your location.',
+    keskiKartta: 'No location yet, so searching around the map centre.',
+    keskiLahde: {
+        sijainti: 'Search area: around your location.',
+        kartta: 'Search area: around the map centre (no location).',
+        tallennettu: 'Search area: the saved search area.'
+    },
+    tallennaHaku: 'Save search as a favourite',
+    tallennaKuvio: 'Save stand as a favourite',
+    haetaan: (n, kaikki) => `Loading forest data… ${n}/${kaikki}`,
+    eiVerkkoa: 'Could not load forest data. Check your connection.',
+    osittain: (n, kaikki) => `Part of the area could not be loaded (${n}/${kaikki} tiles missing), so some stands may be missing.`,
+    yritaUudelleen: 'Try again',
+    tulokset: (n) => (n === 1 ? '1 stand' : `${n} stands`),
+    eiTuloksia: 'No such stands in this area. Try a broader search.',
+    muutaHakua: 'Change search',
+    haeTasta: 'Search again here',
+    takaisinListaan: 'Back to the list',
+    tallaKuviolla: 'you are in this stand',
+    etaisyys: (m, suunta) => `${m} m ${suunta}`,
+    suunnat: {
+        pohjoinen: 'north', koillinen: 'north-east', 'itä': 'east', kaakko: 'south-east',
+        'etelä': 'south', lounas: 'south-west', 'länsi': 'west', luode: 'north-west'
+    },
+    kuvio: (n, ha) => `Stand ${n} · ${ha} ha`,
+    kehitysluokka: 'Development class',
+    paapuulaji: 'Main species',
+    ika: 'Age',
+    vuotta: (n) => `${n} years`,
+    prosentti: (n) => `${n}%`,
+    pituus: 'Mean height',
+    tilavuus: 'Volume',
+    hakkuuehdotus: 'Proposed cutting',
+    lahde: (nyt) => `Finnish Forest Centre${nyt ? `, current state calculated for ${nyt}` : ''}.`,
+    lukittu: (n) => `Found ${n === 1 ? '1 stand' : `${n} stands`} in this area. Stands on the map and as a list are part of the Timber sale estimate add-on (one purchase).`,
+    avaaLisaosa: 'Unlock the add-on'
+};
+
+export const TEKSTIT = { fi, en };
+export const T = pick(TEKSTIT);

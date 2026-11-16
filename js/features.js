@@ -30,7 +30,9 @@ export const FEATURES = {
     // Kokeilu #25: suosikit ja omat muistiinpanot, maksuton (js/suosikit/)
     suosikit: { product: null, kokeilu: true },
     // Kokeilu #29: laserkeilauksen korkeusmalli taustakartaksi, maksuton (js/korkeusmalli/)
-    korkeusmalli: { product: null, kokeilu: true }
+    korkeusmalli: { product: null, kokeilu: true },
+    // Kokeilu #24: asetukset ja kielivalinta, maksuton (js/asetukset/, js/i18n.js)
+    asetukset: { product: null, kokeilu: true }
 };
 
 /**

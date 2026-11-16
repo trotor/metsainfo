@@ -126,9 +126,9 @@ export function calculateParcelArea(parcel, partCount) {
 /**
  * Format number with specified decimals
  */
-export function formatNumber(value, decimals = 0) {
+export function formatNumber(value, decimals = 0, locale = 'fi-FI') {
     if (value === null || value === undefined || isNaN(value)) return '-';
-    return value.toLocaleString('fi-FI', {
+    return value.toLocaleString(locale, {
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals
     });

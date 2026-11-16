@@ -63,10 +63,17 @@ function init() {
         on(VIESTIT.avaaKiinteisto, ({ reference }) => openParcelByReference(reference)
             .then(ok => { if (!ok) showToast('Kiinteistöä ei löytynyt'); })
             .catch(() => showToast('Kiinteistön haku epäonnistui')));
-        import('./maasto/index.js').then(m => m.startMaasto());
-        import('./suosikit/index.js').then(m => m.startSuosikit());
-        import('./korkeusmalli/index.js').then(m => m.startKorkeusmalli());
-        import('./lahihaku/index.js').then(m => m.startLahihaku());
+        // Ladataan rinnakkain, käynnistetään aina samassa järjestyksessä (karttapainikkeet)
+        Promise.all([
+            import('./maasto/index.js'), import('./lahihaku/index.js'), import('./suosikit/index.js'),
+            import('./korkeusmalli/index.js'), import('./asetukset/index.js')
+        ]).then(([maasto, lahihaku, suosikit, korkeusmalli, asetukset]) => {
+            maasto.startMaasto();
+            lahihaku.startLahihaku();
+            suosikit.startSuosikit();
+            korkeusmalli.startKorkeusmalli();
+            asetukset.startAsetukset();
+        });
     }
 }
 

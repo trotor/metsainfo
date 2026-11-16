@@ -11,7 +11,10 @@
 
 import { CODES } from '../config.js';
 import { formatNumber } from '../utils.js';
+import { locale } from '../i18n.js';
+import { codeName } from '../koodit.js';
 import { INDICATOR } from './paikka.js';
+import { T } from './teksti.js';
 import { speciesGroup, mainShare, clearlyDominant } from '../kuviotieto.js';
 
 export const LEVELS = ['helppo', 'keski', 'vaikea'];
@@ -22,26 +25,13 @@ export const STREAK_BONUS_FROM = 3;
 
 export { speciesGroup };
 
-const SPECIES_OPTIONS = [
-    { value: 'manty', label: 'Mänty' },
-    { value: 'kuusi', label: 'Kuusi' },
-    { value: 'koivu', label: 'Koivu' },
-    { value: 'lehti', label: 'Muu lehtipuu (esim. haapa tai leppä)' }
-];
+const fmt = (v, d = 0) => formatNumber(v, d, locale());
+
+const SPECIES_OPTIONS = T.lajit;
 
 const STAGE = { T1: 'taimikko', T2: 'taimikko', Y1: 'taimikko', '02': 'nuori', '03': 'varttunut', '04': 'kypsa' };
-const STAGE_OPTIONS = [
-    { value: 'taimikko', label: 'Taimikko' },
-    { value: 'nuori', label: 'Nuori kasvatusmetsä' },
-    { value: 'varttunut', label: 'Varttunut kasvatusmetsä' },
-    { value: 'kypsa', label: 'Uudistuskypsä metsä' }
-];
-const STAGE_EXPLAIN = {
-    taimikko: 'Taimikossa puut ovat nuoria ja ohuita, rinnankorkeudelta alle 8 cm.',
-    nuori: 'Nuoressa kasvatusmetsässä puiden keskiläpimitta on noin 8–16 cm. Ensiharvennus tehdään tässä vaiheessa.',
-    varttunut: 'Varttuneessa kasvatusmetsässä puiden keskiläpimitta on yli 16 cm, mutta metsä ei ole vielä uudistuskypsä.',
-    kypsa: 'Uudistuskypsä metsä on niin vanha tai järeä, että se voidaan uudistaa.'
-};
+const STAGE_OPTIONS = T.vaiheet;
+const STAGE_EXPLAIN = T.vaiheSelitys;
 
 /**
  * Lukuarvon luokat [raja, raja, …]. Arvo luokitellaan vain, jos se on
@@ -56,12 +46,11 @@ export function bucketOf(value, bounds, margin) {
 }
 
 function bucketOptions(bounds, unit) {
-    const fmt = (v) => formatNumber(v, 0);
-    const opts = [{ value: 0, label: `alle ${fmt(bounds[0])} ${unit}` }];
+    const opts = [{ value: 0, label: T.alle(fmt(bounds[0]), unit) }];
     for (let i = 1; i < bounds.length; i++) {
         opts.push({ value: i, label: `${fmt(bounds[i - 1])}–${fmt(bounds[i])} ${unit}` });
     }
-    opts.push({ value: bounds.length, label: `yli ${fmt(bounds[bounds.length - 1])} ${unit}` });
+    opts.push({ value: bounds.length, label: T.yli(fmt(bounds[bounds.length - 1]), unit) });
     return opts;
 }
 
@@ -86,58 +75,58 @@ export function questionsFor(p) {
     const group = speciesGroup(p.MAINTREESPECIES);
     const share = mainShare(p);
     if (forest && group && clearlyDominant(p)) {
-        const name = CODES.treeSpecies[p.MAINTREESPECIES];
-        qs.push(choice('puulaji', 'helppo', 'Mikä puulaji on tällä kuviolla vallitseva?', SPECIES_OPTIONS, group,
-            `Tietojen mukaan pääpuulaji on ${name.toLowerCase()}, noin ${formatNumber(share * 100, 0)} % puustosta.`));
+        const name = codeName('treeSpecies', p.MAINTREESPECIES);
+        qs.push(choice('puulaji', 'helppo', T.q.puulaji, SPECIES_OPTIONS, group,
+            T.q.puulajiSelitys(name, fmt(share * 100))));
     }
     const stage = STAGE[p.DEVELOPMENTCLASS];
     if (forest && stage) {
-        qs.push(choice('vaihe', 'helppo', 'Missä kehitysvaiheessa tämä metsä on?', STAGE_OPTIONS, stage, STAGE_EXPLAIN[stage]));
+        qs.push(choice('vaihe', 'helppo', T.q.vaihe, STAGE_OPTIONS, stage, STAGE_EXPLAIN[stage]));
     }
 
     // Keskitaso: pituus, ikä, maaperä
     const h = bucketOf(p.MEANHEIGHT, HEIGHT_BOUNDS, 1);
     if (forest && h != null) {
-        qs.push(choice('pituus', 'keski', 'Kuinka pitkiä puut ovat täällä keskimäärin?', bucketOptions(HEIGHT_BOUNDS, 'm'), h,
-            `Puiden keskipituus on tietojen mukaan ${formatNumber(p.MEANHEIGHT, 1)} m.`));
+        qs.push(choice('pituus', 'keski', T.q.pituus, bucketOptions(HEIGHT_BOUNDS, 'm'), h,
+            T.q.pituusSelitys(fmt(p.MEANHEIGHT, 1))));
     }
     const a = bucketOf(p.MEANAGE, AGE_BOUNDS, 3);
     if (forest && a != null) {
-        qs.push(choice('ika', 'keski', 'Kuinka vanhaa puusto on keskimäärin?', bucketOptions(AGE_BOUNDS, 'vuotta'), a,
-            `Puuston keski-ikä on tietojen mukaan noin ${formatNumber(p.MEANAGE, 0)} vuotta.`));
+        qs.push(choice('ika', 'keski', T.q.ika, bucketOptions(AGE_BOUNDS, T.vuotta), a,
+            T.q.ikaSelitys(fmt(p.MEANAGE))));
     }
     if (p.SOILTYPE != null && CODES.soilType[p.SOILTYPE]) {
         const peat = p.SOILTYPE >= 60 && p.SOILTYPE < 70;
-        qs.push(choice('maa', 'keski', 'Onko maa tässä kivennäismaata vai turvetta?', [
-            { value: 'kivennainen', label: 'Kivennäismaata (hiekkaa, moreenia)' },
-            { value: 'turve', label: 'Turvetta (suota tai ojitettua suota)' }
-        ], peat ? 'turve' : 'kivennainen', `Maalaji on tietojen mukaan ${CODES.soilType[p.SOILTYPE].toLowerCase()}.`));
+        qs.push(choice('maa', 'keski', T.q.maa, [
+            { value: 'kivennainen', label: T.q.kivennainen },
+            { value: 'turve', label: T.q.turve }
+        ], peat ? 'turve' : 'kivennainen', T.q.maaSelitys(codeName('soilType', p.SOILTYPE))));
     }
 
     // Vaikea: kasvupaikka (vain kankailla) ja tilavuus
     if (forest && p.SUBGROUP === 1 && FERTILITY_ORDER.includes(p.FERTILITYCLASS)) {
         const i = FERTILITY_ORDER.indexOf(p.FERTILITYCLASS);
         const start = Math.max(0, Math.min(i - 1, FERTILITY_ORDER.length - 4));
-        const options = FERTILITY_ORDER.slice(start, start + 4).map(c => ({ value: c, label: CODES.fertilityClass[c] }));
-        qs.push(choice('kasvupaikka', 'vaikea', 'Mikä kasvupaikka tämä on? Katso varvikkoa ja aluskasvillisuutta.', options, p.FERTILITYCLASS,
-            `Tietojen mukaan kasvupaikka on ${CODES.fertilityClass[p.FERTILITYCLASS].toLowerCase()}. ${INDICATOR[p.FERTILITYCLASS]}`));
+        const options = FERTILITY_ORDER.slice(start, start + 4).map(c => ({ value: c, label: codeName('fertilityClass', c) }));
+        qs.push(choice('kasvupaikka', 'vaikea', T.q.kasvupaikka, options, p.FERTILITYCLASS,
+            T.q.kasvupaikkaSelitys(codeName('fertilityClass', p.FERTILITYCLASS), INDICATOR[p.FERTILITYCLASS])));
     }
     const v = bucketOf(p.VOLUME, VOLUME_BOUNDS, 10);
     if (forest && v != null && p.VOLUME >= 1) {
-        qs.push(choice('tilavuus', 'vaikea', 'Paljonko puuta tällä kuviolla on hehtaarilla?', bucketOptions(VOLUME_BOUNDS, 'm³'), v,
-            `Tietojen mukaan puuta on ${formatNumber(p.VOLUME, 0)} m³ hehtaarilla. Hehtaari on 100 × 100 metrin alue.`));
+        qs.push(choice('tilavuus', 'vaikea', T.q.tilavuus, bucketOptions(VOLUME_BOUNDS, 'm³'), v,
+            T.q.tilavuusSelitys(fmt(p.VOLUME))));
     }
 
     // Havainto: tieto vs. mitä käyttäjä näkee (kaikilla tasoilla)
-    const nameLower = CODES.treeSpecies[p.MAINTREESPECIES]?.toLowerCase();
-    if (forest && nameLower && p.MEANHEIGHT) {
+    const mainName = codeName('treeSpecies', p.MAINTREESPECIES);
+    if (forest && mainName && p.MEANHEIGHT) {
         qs.push({
             id: 'havainto', level: 'havainto', kind: 'observe', points: POINTS.havainto,
-            text: `Tietojen mukaan ${mainShare(p) == null || clearlyDominant(p) ? `pääpuulaji on ${nameLower}` : 'täällä on sekapuustoa'} ja puut ovat noin ${formatNumber(p.MEANHEIGHT, 0)} m pitkiä. Vastaako tämä sitä, mitä näet?`,
+            text: T.q.havainto(mainShare(p) == null || clearlyDominant(p) ? mainName : null, fmt(p.MEANHEIGHT)),
             options: [
-                { value: 'kylla', label: 'Kyllä, vastaa' },
-                { value: 'ei', label: 'Ei vastaa' },
-                { value: 'eos', label: 'En osaa sanoa' }
+                { value: 'kylla', label: T.q.kylla },
+                { value: 'ei', label: T.q.ei },
+                { value: 'eos', label: T.q.eos }
             ]
         });
     }

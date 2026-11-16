@@ -10,6 +10,7 @@ export default defineConfig({
     },
     test: {
         environment: 'jsdom',
-        include: ['tests/**/*.test.js']
+        include: ['tests/**/*.test.js'],
+        setupFiles: ['tests/setup-kieli.js']
     }
 });

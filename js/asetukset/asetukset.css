@@ -1,0 +1,17 @@
+/* Asetukset (kokeilu): vain VITE_KOKEILU=1 -buildissa. Kortin runko: js/ui/kortti.css */
+.as-ryhma { border: 0; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
+.as-ryhma legend { font-size: 12px; font-weight: 600; color: var(--sammal); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
+.as-valinta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #d5dbd1;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.as-valinta:has(input:checked) { border-color: var(--havu); background: var(--puusto-bg); font-weight: 600; }
+.as-valinta input { width: 20px; height: 20px; accent-color: var(--havu); }
+.as-huom { font-size: 13px; color: var(--sammal); margin: 8px 0 0; }

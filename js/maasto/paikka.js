@@ -4,10 +4,12 @@
  * Geometria EPSG:3067:ssä.
  */
 
-import { CODES } from '../config.js';
 import { formatNumber } from '../utils.js';
+import { locale } from '../i18n.js';
+import { codeName } from '../koodit.js';
 import { containsPoint } from '../location/logic.js';
 import { mainShare, clearlyDominant } from '../kuviotieto.js';
+import { T } from './teksti.js';
 
 export const MAX_ACCURACY = 50; // m; tätä epätarkemmalla sijainnilla ei kerrota kuviota
 
@@ -48,80 +50,53 @@ export function placeStatus({ stand, point, accuracy }) {
     return distanceToEdge(stand.geometry, point) < accuracy ? 'edge' : 'ok';
 }
 
-/* ---------- Kuvaus tavallisella kielellä ---------- */
+/* ---------- Kuvaus tavallisella kielellä (lauseet: teksti.js) ---------- */
 
-// Kehitysluokka sisäpaikallisjona: "Seisot … metsässä"
-const DEV_PHRASE = {
-    T1: 'taimikossa, jonka taimet ovat alle 1,3 metrin',
-    T2: 'taimikossa',
-    Y1: 'taimikossa, jonka yllä kasvaa vanhoja puita',
-    '02': 'nuoressa kasvatusmetsässä',
-    '03': 'varttuneessa kasvatusmetsässä',
-    '04': 'uudistuskypsässä metsässä',
-    '05': 'suojuspuumetsikössä',
-    S0: 'siemenpuumetsikössä',
-    ER: 'eri-ikäisessä metsässä'
-};
-
-const SPECIES_ADJ = {
-    1: 'mäntyvaltaisessa', 2: 'kuusivaltaisessa', 3: 'koivuvaltaisessa', 4: 'koivuvaltaisessa',
-    5: 'haapavaltaisessa', 6: 'leppävaltaisessa', 7: 'leppävaltaisessa', 29: 'lehtipuuvaltaisessa'
-};
+const fmt = (v, d = 0) => formatNumber(v, d, locale());
 
 /**
  * Kasvupaikan tunnuskasvit kankailla (Cajanderin metsätyypit). Vain
  * kivennäismailla (alaryhmä 1, kangas); soilla luokka tarkoittaa vastaavaa suota.
  */
-export const INDICATOR = {
-    1: 'Lehdossa kasvaa runsaasti ruohoja ja saniaisia.',
-    2: 'Lehtomaisella kankaalla kasvaa käenkaalia, oravanmarjaa ja mustikkaa.',
-    3: 'Tuoreen kankaan tunnuskasvi on mustikka.',
-    4: 'Kuivahkon kankaan tunnuskasvi on puolukka.',
-    5: 'Kuivalla kankaalla kasvaa kanervaa ja jäkäliä.',
-    6: 'Karukkokankaalla maata peittävät jäkälät.'
-};
+export const INDICATOR = T.tunnuskasvi;
 
 export { mainShare, clearlyDominant };
 
 function speciesWord(p) {
-    if (mainShare(p) == null) return SPECIES_ADJ[p.MAINTREESPECIES] || '';
-    if (!clearlyDominant(p)) return 'sekapuustoisessa';
-    return SPECIES_ADJ[p.MAINTREESPECIES] || '';
+    if (mainShare(p) != null && !clearlyDominant(p)) return T.seka;
+    return T.valtainen[p.MAINTREESPECIES] || '';
 }
 
 /** Pääkappale: "Seisot noin 76-vuotiaassa mäntyvaltaisessa uudistuskypsässä metsässä." */
 export function leadSentence(p) {
     if (p.MAINGROUP != null && p.MAINGROUP !== 1) {
-        const group = CODES.mainGroup[p.MAINGROUP] || `maaluokka ${p.MAINGROUP}`;
-        return `Seisot alueella, joka ei ole kasvavaa metsämaata (${group.toLowerCase()}).`;
+        return T.eiMetsamaata(codeName('mainGroup', p.MAINGROUP) || T.maaluokka(p.MAINGROUP));
     }
-    if (p.DEVELOPMENTCLASS === 'A0') return 'Seisot aukealla. Puusto on hakattu tai paikka odottaa uudistamista.';
-    const dev = DEV_PHRASE[p.DEVELOPMENTCLASS];
-    if (!dev) return 'Seisot metsäkuviolla.';
-    const age = p.MEANAGE && !['T1', 'T2'].includes(p.DEVELOPMENTCLASS) ? `noin ${formatNumber(p.MEANAGE, 0)}-vuotiaassa ` : '';
-    const species = speciesWord(p);
-    // "mäntyvaltaisessa taimikossa" / "noin 76-vuotiaassa mäntyvaltaisessa uudistuskypsässä metsässä"
-    return `Seisot ${age}${species ? `${species} ` : ''}${dev}.`;
+    if (p.DEVELOPMENTCLASS === 'A0') return T.aukea;
+    const stage = T.vaiheessa[p.DEVELOPMENTCLASS];
+    if (!stage) return T.metsakuvio;
+    const age = p.MEANAGE && !['T1', 'T2'].includes(p.DEVELOPMENTCLASS) ? fmt(p.MEANAGE) : null;
+    return T.seisot({ age, species: speciesWord(p), stage });
 }
 
 function pct(share) {
-    return `${formatNumber(share * 100, 0)} %`;
+    return T.prosentti(fmt(share * 100));
 }
 
 /** Puulajien osuudet tekstinä: "mänty 73 %, kuusi 21 %, muut 6 %". */
 export function speciesMix(p) {
     const shares = (p.SPECIESSHARES || []).filter(s => s.share >= 0.05);
     if (!shares.length) return null;
-    const parts = shares.slice(0, 3).map(s => `${(CODES.treeSpecies[s.species] || `puulaji ${s.species}`).toLowerCase()} ${pct(s.share)}`);
+    const parts = shares.slice(0, 3).map(s => `${T.lower(codeName('treeSpecies', s.species) || T.puulaji(s.species))} ${pct(s.share)}`);
     const rest = 1 - shares.slice(0, 3).reduce((a, s) => a + s.share, 0);
-    if (rest >= 0.05) parts.push(`muut ${pct(rest)}`);
+    if (rest >= 0.05) parts.push(`${T.muut} ${pct(rest)}`);
     return parts.join(', ');
 }
 
-function dateFi(iso) {
+function dateText(iso) {
     if (!iso) return null;
     const [y, m, d] = String(iso).slice(0, 10).split('-').map(Number);
-    return y && m && d ? `${d}.${m}.${y}` : null;
+    return y && m && d ? T.paiva(y, m, d) : null;
 }
 
 /**
@@ -131,27 +106,28 @@ function dateFi(iso) {
 export function describePlace(p) {
     const facts = [];
     const add = (label, value, tip) => { if (value) facts.push({ label, value, tip }); };
+    const F = T.faktat;
 
     if (p.MEANHEIGHT && p.MEANDIAMETER) {
-        add('Puut', `keskimäärin ${formatNumber(p.MEANHEIGHT, 0)} m pitkiä ja ${formatNumber(p.MEANDIAMETER, 0)} cm paksuja`, 'keskipituus');
+        add(F.puut, T.puutKokoJaPaksuus(fmt(p.MEANHEIGHT), fmt(p.MEANDIAMETER)), 'keskipituus');
     } else if (p.MEANHEIGHT) {
-        add('Puut', `keskimäärin ${formatNumber(p.MEANHEIGHT, 1)} m pitkiä`, 'keskipituus');
+        add(F.puut, T.puutKoko(fmt(p.MEANHEIGHT, 1)), 'keskipituus');
     }
-    add('Puulajit', speciesMix(p), 'puulajijakauma');
-    if (p.STEMCOUNT) add('Puita', `noin ${formatNumber(Math.round(p.STEMCOUNT / 10) * 10, 0)} hehtaarilla`, 'runkoluku');
-    if (p.VOLUME >= 1) add('Puuta', `${formatNumber(p.VOLUME, 0)} m³ hehtaarilla`, 'tilavuus');
-    if (p.VOLUMEGROWTH > 0) add('Kasvu', `${formatNumber(p.VOLUMEGROWTH, 1)} m³ hehtaarilla vuodessa`, 'kasvu');
+    add(F.puulajit, speciesMix(p), 'puulajijakauma');
+    if (p.STEMCOUNT) add(F.puita, T.puitaHehtaarilla(fmt(Math.round(p.STEMCOUNT / 10) * 10)), 'runkoluku');
+    if (p.VOLUME >= 1) add(F.puuta, T.puutaHehtaarilla(fmt(p.VOLUME)), 'tilavuus');
+    if (p.VOLUMEGROWTH > 0) add(F.kasvu, T.kasvuHehtaarilla(fmt(p.VOLUMEGROWTH, 1)), 'kasvu');
 
-    const fertility = CODES.fertilityClass[p.FERTILITYCLASS] ?? (p.FERTILITYCLASS != null ? `luokka ${p.FERTILITYCLASS}` : null);
-    add('Kasvupaikka', fertility, 'kasvupaikka');
-    add('Maaperä', CODES.soilType[p.SOILTYPE] ?? (p.SOILTYPE != null ? `luokka ${p.SOILTYPE}` : null), 'maalaji');
+    const fertility = codeName('fertilityClass', p.FERTILITYCLASS) ?? (p.FERTILITYCLASS != null ? T.luokka(p.FERTILITYCLASS) : null);
+    add(F.kasvupaikka, fertility, 'kasvupaikka');
+    add(F.maapera, codeName('soilType', p.SOILTYPE) ?? (p.SOILTYPE != null ? T.luokka(p.SOILTYPE) : null), 'maalaji');
 
     const hint = p.SUBGROUP === 1 ? INDICATOR[p.FERTILITYCLASS] : null;
 
     let proposal = null;
     if (p.CUTTINGTYPE != null && p.CUTTINGPROPOSALYEAR) {
-        const type = CODES.cuttingType[p.CUTTINGTYPE] || `hakkuu ${p.CUTTINGTYPE}`;
-        proposal = `Laskennallinen ehdotus: ${type.toLowerCase()} vuonna ${p.CUTTINGPROPOSALYEAR}.`;
+        const type = codeName('cuttingType', p.CUTTINGTYPE) || T.hakkuu(p.CUTTINGTYPE);
+        proposal = T.ehdotus(type, p.CUTTINGPROPOSALYEAR);
     }
 
     return {
@@ -160,8 +136,8 @@ export function describePlace(p) {
         hint,
         proposal,
         source: {
-            inventory: dateFi(p.MEASUREMENTDATE),
-            current: dateFi(p.TREESTANDDATE)
+            inventory: dateText(p.MEASUREMENTDATE),
+            current: dateText(p.TREESTANDDATE)
         }
     };
 }
