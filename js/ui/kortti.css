@@ -23,8 +23,8 @@
 
 @media (max-width: 768px) {
     .kortti {
-        left: 8px;
-        right: 8px;
+        left: calc(env(safe-area-inset-left) + 8px);
+        right: calc(env(safe-area-inset-right) + 8px);
         width: auto;
         max-width: none;
         bottom: calc(8px + env(safe-area-inset-bottom));

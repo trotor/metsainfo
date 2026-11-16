@@ -1231,6 +1231,15 @@ h3 .info-tip-icon {
         margin-top: calc(env(safe-area-inset-top) + 60px);
     }
 
+    /* Sivujen suojamarginaali: vaakasuunta, ja iPhone Duon suljetulla
+       näytöllä tilarivi on pystypillerinä oikeassa yläkulmassa */
+    .leaflet-right {
+        margin-right: env(safe-area-inset-right);
+    }
+    .leaflet-left {
+        margin-left: env(safe-area-inset-left);
+    }
+
     /* Tietopaneeli alareunan bottom sheetinä: peek / half / full */
     #info-panel {
         position: fixed;
