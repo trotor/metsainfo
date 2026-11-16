@@ -34,6 +34,7 @@
     "@capacitor/geolocation": "8.2.4",
     "@capacitor/ios": "8.6.0",
     "@capacitor/share": "8.0.3",
+    "flatbush": "4.7.0",
     "leaflet": "1.9.4",
     "proj4": "2.9.0",
     "proj4leaflet": "1.0.2"
