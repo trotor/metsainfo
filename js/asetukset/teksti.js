@@ -1,4 +1,4 @@
-/** Asetusten tekstit suomeksi ja englanniksi (#24). */
+/** Asetusten tekstit suomeksi, ruotsiksi ja englanniksi (#24). */
 import { pick } from '../i18n.js';
 
 export const TEKSTIT = {
@@ -12,6 +12,17 @@ export const TEKSTIT = {
         kattavuus: 'Kielivalinta on kokeilu. Suomeksi jäävät vielä tietosuojaseloste, kaupan ostodialogi sekä hintojen lähde ja viikko.',
         epavirallinen: 'Englanninkieliset puulajien ja koodiston nimet ovat epävirallisia käännöksiä.',
         vainLaitteella: 'Asetukset tallentuvat vain tälle laitteelle.'
+    },
+    sv: {
+        nappi: 'Inställningar',
+        otsikko: 'Inställningar',
+        sulje: 'Stäng',
+        kokeilu: 'Försöksfunktion · endast i testversionen',
+        kieli: 'Språk · Kieli',
+        laite: 'Enhetens språk',
+        kattavuus: 'Språkvalet är ett försök. Fortfarande på finska: integritetspolicyn, butikens köpdialog samt prisernas källa och vecka.',
+        epavirallinen: 'De flesta svenska namnen på trädslag och koder kommer från de officiella kodlistorna i Metsärekisteri, men en del är inofficiella översättningar.',
+        vainLaitteella: 'Inställningarna sparas endast på den här enheten.'
     },
     en: {
         nappi: 'Settings',
@@ -28,4 +39,4 @@ export const TEKSTIT = {
 export const T = pick(TEKSTIT);
 
 /** Kielten nimet omalla kielellään, jotta ne löytyvät kielestä riippumatta. */
-export const KIELTEN_NIMET = { fi: 'Suomi', en: 'English' };
+export const KIELTEN_NIMET = { fi: 'Suomi', sv: 'Svenska', en: 'English' };

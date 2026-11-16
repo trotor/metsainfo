@@ -1,11 +1,12 @@
 /**
- * Puukaupan hinta-arvion tekstit suomeksi ja englanniksi (#24):
+ * Puukaupan hinta-arvion tekstit suomeksi, ruotsiksi ja englanniksi (#24):
  * Arvio-välilehti, yhteenvedon kortti, ostonäkymä, esimerkkimetsä
  * (js/ui/estimate.js) sekä hakkuutavat, puulajit ja jaettava raportti
  * (js/pricing/format.js).
  *
  * Kaupan tuote on vain suomeksi ("Puukaupan hinta-arvio"); englanniksi
- * toiminto on "Timber sale estimate". Hinta tulee aina kaupasta.
+ * toiminto on "Timber sale estimate", ruotsiksi
+ * "Prisuppskattning för virkesaffär". Hinta tulee aina kaupasta.
  */
 
 import { pick } from '../i18n.js';
@@ -141,6 +142,148 @@ const fi = {
         hintaSarakkeet: ['Hakkuutapa', 'Puulaji', 'Tukki (€/m³)', 'Kuitu (€/m³)'],
         kuvioSarakkeet: ['Kuvio', 'Vuosi', 'Hakkuutapa', 'Pinta-ala (ha)', 'Arvio (€)'],
         loppu: 'Arvio on suuntaa-antava eikä korvaa puukauppatarjousta. Tukki- ja kuitupuu on jaettu puulajiosuuksien mukaan; harvennuksissa poistuma 30 %, ensiharvennuksissa 35 %.'
+    }
+};
+
+const sv = {
+    /* ---------- Flik och kort ---------- */
+    uutta: 'Nytt',
+    valilehti: 'Uppskattning',
+    korttiOtsikko: 'Värde till aktuella priser',
+    hakkuidenArvo: 'Avverkningarnas värde till veckans rotpriser',
+    avaa: 'Öppna',
+    naytaArvo: 'Visa värdet',
+    nayta: 'Visa',
+    hinnatPuuttuvat: 'Priser saknas.',
+    korttiVajaa: 'Priser saknas för en del figurer, så uppskattningen är ofullständig.',
+    korttiHakkuut: (range) => `föreslagna avverkningar${range ? ` ${range}` : ''}`,
+
+    /* ---------- Lockbete (utan köp) ---------- */
+    vuonna: (year) => `År ${year}. `,
+    vuosina: (first, last) => `Åren ${first}–${last}. `,
+    ehdotuksia: (n, volume) => `${n} avverkningsförslag, ca&nbsp;${volume}&nbsp;m³`,
+    ehdotusKysymys: (years, n) => `${years}Hur mycket är ${n === 1 ? 'det' : 'de'} värda till veckans rotpriser?`,
+    eiEhdotuksia: (volume) => `Inga avverkningsförslag, trädbestånd ca&nbsp;${volume}&nbsp;m³`,
+    puustoKysymys: 'Hur mycket är trädbeståndet värt till veckans rotpriser?',
+
+    /* ---------- Laddning och fel ---------- */
+    selvitetaanAluetta: 'Ett ögonblick – prisområdet tas reda på…',
+    haetaanHintoja: 'Ett ögonblick – rotpriserna hämtas…',
+    paivitysEpaonnistui: 'Priserna kunde inte uppdateras. Tidigare hämtade priser används.',
+    hintojaEiSaatu: 'Priserna kunde inte hämtas. Kontrollera nätverksanslutningen eller ange priserna själv.',
+
+    /* ---------- Låst Uppskattning-flik ---------- */
+    nimi: 'Prisuppskattning för virkesaffär',
+    esittely: 'Se hur mycket fastighetens föreslagna avverkningar är värda till färska rotpriser i området. Du kan också använda egna priser, till exempel enligt ett anbud på virkesaffär som du har fått.',
+    kokeileEsimerkilla: 'Prova med en exempelskog',
+    avaaArvio: 'Lås upp prisuppskattningen',
+
+    /* ---------- Uppskattning-fliken ---------- */
+    haetaan: 'Hämtas…',
+    eiHaettujaHintoja: 'Inga hämtade priser',
+    taydennetty: (sources) => `En del priser har kompletterats: ${sources}.`,
+    haetaanPieni: 'hämtas…',
+    eiHintoja: 'inga priser',
+    omiaHintoja: 'egna priser',
+    ehdotetutHakkuut: 'Föreslagna avverkningar',
+    hinnatPuuttuvatHae: 'Priser saknas. Hämta dem från nätet eller ange dem själv nedan.',
+    kokoPuusto: 'Hela trädbeståndet till priser för förnyelseavverkning',
+    kantoraha: 'Rotvärde, kan inte avverkas på en gång.',
+    puustoVajaa: (n) => `Priser för förnyelseavverkning saknas för ${n} ${n === 1 ? 'figur' : 'figurer'}, så värdet är ofullständigt.`,
+    hinnat: 'Priser',
+    piilota: 'Dölj',
+    muokkaa: 'Redigera',
+    hintaAlue: 'Prisområde',
+    kunta: (name) => ` · kommun ${name}`,
+    haeVerkosta: '↻ Hämta från nätet',
+    tukki: 'Stockvirke',
+    kuitu: 'Massaved',
+    // Priskolumnens aria-label: "Tall stockvirke €/m³"
+    lajite: { tukki: 'stockvirke', kuitu: 'massaved' },
+    omatSyotetty: 'De markerade priserna har du angett själv.',
+    palautaVerkon: 'Återställ priserna från nätet',
+    jaa: 'Dela uppskattningen',
+    hienoArvio: (harvennus, ensiharvennus) => `En riktgivande uppskattning som inte ersätter ett anbud på virkesaffär. Stockvirke och massaved har fördelats enligt trädslagsandelarna; uttaget vid gallring är ${harvennus}, vid första gallring ${ensiharvennus} och vid förnyelseavverkning hela trädbeståndet.`,
+    hienoLahteet: (source, ccLink) => `Priser: ${source} och Naturresursinstitutet (statistikdatabasen), kommun: Statistikcentralen. Lukes och Statistikcentralens material ${ccLink}.`,
+    oletusLahde: 'Skogsindustrin rf:s veckouppföljning av virkeshandeln',
+    ccBy: 'https://creativecommons.org/licenses/by/4.0/deed.sv',
+    eiEhdotuksiaKiinteistolla: 'Fastigheten har inga avverkningsförslag.',
+    summaVajaa: (n) => `En del priser saknas för ${n} ${n === 1 ? 'figur' : 'figurer'}, så summan är ofullständig. Kontrollera priserna för avverkningssätten i tabellen.`,
+    prosentti: (n) => `${n} %`,
+    viikko: (week, year) => `v. ${week}/${year}`,
+    alueet: {
+        'etela-suomi': 'Södra Finland',
+        'keski-suomi': 'Mellersta Finland',
+        'savo-karjala': 'Savolax-Karelen',
+        'kymi-savo': 'Kymmene-Savolax',
+        'etela-pohjanmaa': 'Södra Österbotten',
+        'pohjois-pohjanmaa': 'Norra Österbotten',
+        'kainuu-koillismaa': 'Kajanaland-Koillismaa',
+        'lappi': 'Lappland',
+        'koko-maa': 'Hela landet'
+    },
+
+    /* ---------- Delbar rapport ---------- */
+    tiedosto: (label) => `prisuppskattning_${label}.csv`,
+    tiedostoEsimerkki: 'exempelskog',
+    tiedostoKiinteisto: 'fastighet',
+    esimerkkiRaportissa: 'Exempelskog (fiktiv)',
+
+    /* ---------- Köpvy ---------- */
+    sulje: 'Stäng',
+    pwEsittely: 'Se hur mycket fastighetens föreslagna avverkningar är värda till färska rotpriser i området.',
+    esimerkkiAria: 'Exempel på en prisuppskattning',
+    esikatselu: 'Så här ser uppskattningen ut · exempelskog',
+    lasketaanEsimerkkia: 'Ett ögonblick – exemplet räknas ut…',
+    etuHinnat: 'Färska rotpriser för området eller egna priser, t.ex. enligt ett anbud på virkesaffär',
+    etuRaportti: 'Uppskattning per år och en rapport att dela, t.ex. med delägarna i ett dödsbo',
+    etuMaasto: 'Försök: terrängläge – berätta om den här platsen och skogsquiz',
+    etuLahihaku: 'Försök: sök i närheten – skogar av ett visst slag runt dig på kartan',
+    etuKertaosto: 'Engångsköp, ingen prenumeration – alla fastigheter',
+    kertamaksu: 'Engångsavgift',
+    osta: 'Köp prisuppskattningen',
+    palautaOsto: 'Återställ tidigare köp',
+    haetaanHintaa: 'Ett ögonblick – priset hämtas från butiken…',
+    pwHieno: 'Priser: Skogsindustrin rf:s veckouppföljning av virkeshandeln och Naturresursinstitutets statistik. Uppskattningen är riktgivande.',
+    eiTuotetta: 'Produkten kunde inte hämtas från butiken just nu. Försök igen senare.',
+    eiYhteytta: 'Ingen anslutning till butiken.',
+    avattu: 'Prisuppskattningen har låsts upp för alla fastigheter.',
+    odottaa: 'Köpet väntar på godkännande.',
+    ostoEpaonnistui: 'Köpet misslyckades. Försök igen.',
+    palautettu: 'Köpet har återställts – prisuppskattningen är i bruk.',
+    eiAiempaa: 'Inget tidigare köp hittades på det här butikskontot.',
+    palautusEpaonnistui: 'Återställningen misslyckades. Försök igen.',
+
+    /* ---------- Exempelskog ---------- */
+    esimerkkimetsa: 'Exempelskog',
+    kuvitteellinen: 'En fiktiv fastighet för att prova prisuppskattningen',
+    avaaOmille: 'Lås upp prisuppskattningen för dina egna fastigheter',
+
+    /* ---------- js/pricing/format.js ---------- */
+    euro: (amount) => `≈ ${amount} €`,
+    hakkuutavat: {
+        uudistus: 'Förnyelseavverkning',
+        harvennus: 'Gallring',
+        ensiharvennus: 'Första gallring'
+    },
+    puulajit: {
+        manty: 'Tall',
+        kuusi: 'Gran',
+        koivu: 'Björk och övriga'
+    },
+    raportti: {
+        otsikko: 'Metsäinfo – prisuppskattning för virkesaffär',
+        kiinteisto: 'Fastighet',
+        hintaAlue: 'Prisområde',
+        hinnat: 'Priser',
+        omatHinnat: 'egna priser',
+        yhteensa: 'Föreslagna avverkningar sammanlagt (€)',
+        kokoPuusto: 'Hela trädbeståndet till priser för förnyelseavverkning (€)',
+        huom: 'Obs',
+        vajaa: (n) => `Priser saknas för en del figurer (${n} ${n === 1 ? 'figur' : 'figurer'}), så uppskattningen är ofullständig`,
+        hintaSarakkeet: ['Avverkningssätt', 'Trädslag', 'Stockvirke (€/m³)', 'Massaved (€/m³)'],
+        kuvioSarakkeet: ['Figur', 'År', 'Avverkningssätt', 'Areal (ha)', 'Uppskattning (€)'],
+        loppu: 'Uppskattningen är riktgivande och ersätter inte ett anbud på virkesaffär. Stockvirke och massaved har fördelats enligt trädslagsandelarna; uttaget vid gallring är 30 %, vid första gallring 35 %.'
     }
 };
 
@@ -285,5 +428,5 @@ const en = {
     }
 };
 
-export const TEKSTIT = { fi, en };
+export const TEKSTIT = { fi, sv, en };
 export const T = pick(TEKSTIT);

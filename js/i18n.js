@@ -7,9 +7,9 @@
  * Tekstit luetaan moduulien latautuessa, joten kielen vaihto lataa sivun uudelleen.
  */
 
-export const KIELET = ['fi', 'en'];
+export const KIELET = ['fi', 'sv', 'en'];
 const KEY = 'metsainfo.kieli';
-const LOCALES = { fi: 'fi-FI', en: 'en-GB' };
+const LOCALES = { fi: 'fi-FI', sv: 'sv-FI', en: 'en-GB' };
 
 function stored() {
     try {
@@ -19,11 +19,12 @@ function stored() {
     }
 }
 
-/** Laitteen kieli: suomi, jos jokin laitteen kielistä on suomi tai ruotsi ennen englantia. */
+/** Laitteen kieli: ensimmäinen laitteen kielistä, joka on suomi, ruotsi tai englanti; muuten suomi. */
 export function deviceLang(languages = globalThis.navigator?.languages || [globalThis.navigator?.language]) {
     for (const l of languages || []) {
         const code = String(l || '').slice(0, 2).toLowerCase();
-        if (code === 'fi' || code === 'sv') return 'fi'; // ruotsi myöhemmin omana kielenään
+        if (code === 'fi') return 'fi';
+        if (code === 'sv') return 'sv';
         if (code === 'en') return 'en';
     }
     return 'fi';

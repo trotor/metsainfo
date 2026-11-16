@@ -1,6 +1,6 @@
 /**
- * Maastotilan tekstit suomeksi ja englanniksi (#24). Myös paikan kuvauksen
- * ja visan lauseet ovat täällä, koska suomen taivutus ja englannin
+ * Maastotilan tekstit suomeksi, ruotsiksi ja englanniksi (#24). Myös paikan kuvauksen
+ * ja visan lauseet ovat täällä, koska suomen taivutus, ruotsin suku ja englannin
  * artikkelit vaativat omat lauserakenteensa: paikka.js ja visa.js antavat
  * vain tiedot, ja lause muodostetaan tämän kielen funktiolla.
  */
@@ -275,7 +275,154 @@ const en = {
     }
 };
 
-export const TEKSTIT = { fi, en };
+// Ruotsissa adjektiivi taipuu substantiivin suvun mukaan: en talldominerad
+// skog, ett talldominerat bestånd. Kehitysvaiheen teksti alkaa artikkelilla
+// (en/ett), josta seisot päättelee suvun; puulajin adjektiivit ovat
+// en-suvun muodossa.
+const SV_SEKA = 'blandad';
+const svNeutrum = (adj) => adj.replace(/ad$/, 'at');
+
+const sv = {
+    nappi: 'Berätta om den här platsen',
+    otsikko: 'Just här',
+    sulje: 'Stäng',
+    haetaanSijaintia: 'Söker din position…',
+    haetaanKuvioita: 'Hämtar skogsdata…',
+    eiVerkkoa: 'Skogsdata kunde inte hämtas. Kontrollera nätverksanslutningen.',
+    yritaUudelleen: 'Försök igen',
+    epatarkka: (m) => `Positionen är ännu inte exakt (±${m} m). Vänta en stund på en öppen plats.`,
+    eiKuviota: 'Det finns ingen skogsdata för den här platsen. Det kan vara en åker, en gårdsplan, en väg eller vatten.',
+    reunalla: (m) => `Du är vid kanten av en figur (GPS ±${m} m). Uppgifterna kan gälla grannfiguren.`,
+    kuvio: (n, ha) => `Figur ${n} · ${ha} ha`,
+    lahde: (inv, nyt) => `Skogscentralen: inventering ${inv}${nyt ? `, nuläget beräknat som prognos ${nyt}` : ''}.`,
+    kysyMinulta: 'Fråga mig',
+    takaisin: 'Tillbaka till platsen',
+    seuraava: 'Nästa fråga',
+    oikein: 'Rätt!',
+    vaarin: (oikea) => `Inte riktigt. Rätt svar: ${oikea}.`,
+    kiitosHavainnosta: 'Tack för din observation! Den sparades på den här enheten.',
+    kaikkiVastattu: 'Du har svarat på alla frågor om den här figuren. Gå vidare till nästa figur!',
+    tasoVastattu: 'Du har svarat på frågorna på den här nivån. Byt nivå eller gå vidare till nästa figur.',
+    reunallaEiKysymyksia: 'Frågorna väntar tills du är tydligt inne i en figur.',
+    taso: 'Nivå',
+    tasot: { helppo: 'Lätt', keski: 'Medel', vaikea: 'Svår', havainto: 'Observation' },
+    putkibonus: (n) => `svitbonus +${n}`,
+    pisteet: (p) => `${p} poäng`,
+    kuviot: (n) => `${n} ${n === 1 ? 'figur' : 'figurer'}`,
+    putki: (n) => `svit ${n}`,
+    uusiKuvio: (p) => `Ny figur hittad! +${p}`,
+    kokeilu: 'Försöksfunktion · endast i testversionen',
+    lukittu: 'Hela beskrivningen, skogsquizet och poängen ingår i tillägget Prisuppskattning för virkesaffär (samma engångsköp).',
+    avaaLisaosa: 'Lås upp tillägget',
+    kartalta: 'Testa på kartan (utan att gå ut i skogen)',
+    karttaOhje: 'Test på kartan: flytta kartan så att krysset är på platsen du vill veta mer om och få frågor om.',
+    omaSijainti: 'Använd min position',
+    arvonimet: ['Skogsvandrare', 'Stigtrampare', 'Figurkännare', 'Skogsläsare', 'Skogsmästare'],
+
+    lower: (s) => s.toLowerCase(),
+    prosentti: (n) => `${n} %`,
+    paiva: (y, m, d) => `${d}.${m}.${y}`,
+    eiMetsamaata: (group) => `Du står på mark som inte är skogsmark (${group.toLowerCase()}).`,
+    maaluokka: (n) => `markklass ${n}`,
+    aukea: 'Du står på en öppen plats. Träden har avverkats eller platsen väntar på förnyelse.',
+    metsakuvio: 'Du står i en skogsfigur.',
+    vaiheessa: {
+        T1: 'ett plantbestånd där plantorna är under 1,3 meter höga',
+        T2: 'ett plantbestånd',
+        Y1: 'ett plantbestånd med överståndare',
+        '02': 'ett klenare gallringsbestånd',
+        '03': 'ett grövre gallringsbestånd',
+        '04': 'en förnyelsemogen skog',
+        '05': 'ett bestånd i skärmställning',
+        S0: 'ett bestånd i fröträdsställning',
+        ER: 'ett olikåldrigt bestånd'
+    },
+    valtainen: {
+        1: 'talldominerad', 2: 'grandominerad', 3: 'björkdominerad', 4: 'björkdominerad',
+        5: 'aspdominerad', 6: 'aldominerad', 7: 'aldominerad', 29: 'lövträdsdominerad'
+    },
+    seka: SV_SEKA,
+    // "Du står i en cirka 76 år gammal talldominerad förnyelsemogen skog."
+    // "Du står i ett cirka 35 år gammalt grandominerat klenare gallringsbestånd."
+    // Blandade trädslag efter substantivet, om vaiheessa inte redan har en bisats.
+    seisot: ({ age, species, stage }) => {
+        const [, art, noun] = /^(en|ett) (.+)$/.exec(stage) || [null, 'en', stage];
+        const ett = art === 'ett';
+        const efter = species === SV_SEKA && !/ (med|där|i) /.test(noun);
+        const adj = [
+            age ? `cirka ${age} år ${ett ? 'gammalt' : 'gammal'}` : '',
+            species && !efter ? (ett ? svNeutrum(species) : species) : ''
+        ].filter(Boolean);
+        return `Du står i ${[art, ...adj, noun].join(' ')}${efter ? ' med blandade trädslag' : ''}.`;
+    },
+    tunnuskasvi: {
+        1: 'I lundar växer rikligt med örter och ormbunkar.',
+        2: 'På lundartad mo växer harsyra, ekorrbär och blåbär.',
+        3: 'Karaktärsväxten för frisk mo är blåbär.',
+        4: 'Karaktärsväxten för torr mo är lingon.',
+        5: 'På karg mo växer ljung och lavar.',
+        6: 'På lavmo täcker lavarna marken.'
+    },
+    puulaji: (n) => `trädslag ${n}`,
+    muut: 'övriga',
+    luokka: (n) => `klass ${n}`,
+    hakkuu: (n) => `avverkning ${n}`,
+    faktat: {
+        puut: 'Träd', puulajit: 'Trädslag', puita: 'Stamantal', puuta: 'Virkesförråd', kasvu: 'Tillväxt',
+        kasvupaikka: 'Växtplats', maapera: 'Jordart'
+    },
+    puutKokoJaPaksuus: (h, d) => `i genomsnitt ${h} m höga och ${d} cm grova`,
+    puutKoko: (h) => `i genomsnitt ${h} m höga`,
+    puitaHehtaarilla: (n) => `cirka ${n} per hektar`,
+    puutaHehtaarilla: (v) => `${v} m³ per hektar`,
+    kasvuHehtaarilla: (v) => `${v} m³ per hektar och år`,
+    ehdotus: (type, year) => `Beräknat förslag: ${type.toLowerCase()} år ${year}.`,
+
+    lajit: [
+        { value: 'manty', label: 'Tall' },
+        { value: 'kuusi', label: 'Gran' },
+        { value: 'koivu', label: 'Björk' },
+        { value: 'lehti', label: 'Annat lövträd (t.ex. asp eller al)' }
+    ],
+    vaiheet: [
+        { value: 'taimikko', label: 'Plantbestånd' },
+        { value: 'nuori', label: 'Klenare gallringsbestånd' },
+        { value: 'varttunut', label: 'Grövre gallringsbestånd' },
+        { value: 'kypsa', label: 'Förnyelsemogen skog' }
+    ],
+    vaiheSelitys: {
+        taimikko: 'I ett plantbestånd är träden unga och klena, under 8 cm i brösthöjd.',
+        nuori: 'I ett klenare gallringsbestånd är trädens medeldiameter cirka 8–16 cm. Första gallringen görs i det här skedet.',
+        varttunut: 'I ett grövre gallringsbestånd är trädens medeldiameter över 16 cm, men skogen är ännu inte förnyelsemogen.',
+        kypsa: 'En förnyelsemogen skog är så gammal eller grov att den kan förnyas.'
+    },
+    alle: (v, unit) => `under ${v} ${unit}`,
+    yli: (v, unit) => `över ${v} ${unit}`,
+    vuotta: 'år',
+    q: {
+        puulaji: 'Vilket trädslag dominerar på den här figuren?',
+        puulajiSelitys: (name, pct) => `Enligt uppgifterna är huvudträdslaget ${name.toLowerCase()}, cirka ${pct} % av trädbeståndet.`,
+        vaihe: 'Vilken utvecklingsklass hör den här skogen till?',
+        pituus: 'Hur höga är träden här i genomsnitt?',
+        pituusSelitys: (h) => `Enligt uppgifterna är trädens medelhöjd ${h} m.`,
+        ika: 'Hur gammalt är trädbeståndet i genomsnitt?',
+        ikaSelitys: (a) => `Enligt uppgifterna är trädbeståndets medelålder cirka ${a} år.`,
+        maa: 'Är marken här mineraljord eller torv?',
+        kivennainen: 'Mineraljord (sand, morän)',
+        turve: 'Torv (myr eller dikad myr)',
+        maaSelitys: (soil) => `Enligt uppgifterna är jordarten ${soil.toLowerCase()}.`,
+        kasvupaikka: 'Vilken växtplats är det här? Titta på riset och markvegetationen.',
+        kasvupaikkaSelitys: (site, hint) => `Enligt uppgifterna är växtplatsen ${site.toLowerCase()}. ${hint}`,
+        tilavuus: 'Hur mycket virke finns det per hektar på den här figuren?',
+        tilavuusSelitys: (v) => `Enligt uppgifterna finns det ${v} m³ virke per hektar. En hektar är ett område på 100 × 100 meter.`,
+        havainto: (main, h) => `Enligt uppgifterna ${main ? `är huvudträdslaget ${main.toLowerCase()}` : 'växer här blandade trädslag'} och träden är cirka ${h} m höga. Stämmer det med det du ser?`,
+        kylla: 'Ja, det stämmer',
+        ei: 'Nej, det stämmer inte',
+        eos: 'Jag kan inte säga'
+    }
+};
+
+export const TEKSTIT = { fi, sv, en };
 export const T = pick(TEKSTIT);
 
 /** Pistemäärään perustuva arvonimi (vain tällä laitteella). */

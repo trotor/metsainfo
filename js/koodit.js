@@ -6,6 +6,7 @@
  * (koodistot.suomi.fi, metsarek) on vain suomi ja ruotsi (tarkistettu
  * 16.11.2026). Ruotsinkieliset nimet kannattaa hakea sieltä, kun ruotsi
  * otetaan mukaan. Puuttuva englanninkielinen nimi näytetään suomeksi.
+ * Ruotsi: ks. CODES_SV_VIRALLINEN ja CODES_SV_EPAVIRALLINEN alla.
  */
 
 import { CODES } from './config.js';
@@ -81,12 +82,68 @@ export const CODES_EN_EPAVIRALLINEN = {
     }
 };
 
+/**
+ * Ruotsinkieliset nimet. VIRALLISET: Metsärekisterin koodistot
+ * (koodistot.suomi.fi, metsarek: paapuulaji, kehitysluokka, kasvupaikkaluokka,
+ * maalaji, hakkuutapa, paaryhma), haettu 16.11.2026; vain koodit, joiden
+ * suomenkielinen nimi vastaa CODESia. Kasvupaikoista vain pääsana (kuten CODES),
+ * maalajeista ilman von Post -tarkennusta.
+ */
+export const CODES_SV_VIRALLINEN = {
+    treeSpecies: { 1: "Tall", 2: "Gran", 3: "Vårtbjörk", 4: "Glasbjörk", 5: "Asp", 6: "Gråal", 7: "Klibbal", 8: "Annat barrträdslag", 9: "Annat lövträdslag", 10: "Douglasgran", 11: "En", 12: "Contortatall", 13: "Vresalm", 14: "Lärkträd", 15: "Skogslind", 16: "Svartgran", 17: "Vide", 18: "Rönn", 19: "Pichtagran", 20: "Sälg", 21: "Ask", 22: "Cembratall", 23: "Omorikagran", 24: "Ek", 25: "Hägg", 26: "Lönn", 27: "Masurbjörk", 28: "Skogsalm", 29: "Lövträd", 30: "Barrträd" },
+    developmentClass: { "A0": "Kalmark", "S0": "Bestånd i fröträdsställning", "Y1": "Plantbestånd med överståndare", "02": "Klenare gallringsbestånd", "03": "Grövre gallringsbestånd", "04": "Förnyelsemogen skog", "05": "Bestånd i skärmställning", "T1": "Yngre plantbestånd", "T2": "Äldre plantbestånd", "ER": "Olikåldrigt bestånd" },
+    fertilityClass: { 1: "Lund", 2: "Lundartad mo", 3: "Frisk mo", 4: "Torr mo", 5: "Karg mo", 6: "Lavmo", 7: "Bergbundna marker och sandfält", 8: "Skog i höjdläge och fjäll" },
+    soilType: { 11: "Grov morän", 12: "Grov sorterad jordart", 20: "Finkornig momark", 21: "Finjordsmorän", 22: "Finkornig sorterad jordart", 23: "Silthaltig jordart", 24: "Lerjord", 31: "Stenig grov morän", 32: "Stenig grov sorterad jordart", 40: "Stenig finkornig momark", 60: "Torvjord", 61: "Starrtorv", 62: "Vitmosstorv", 63: "Trädtorv", 64: "Erosionskänslig starrtorv", 65: "Erosionskänslig sphagnumtorv", 66: "Svagt förmultnad starrtorv", 67: "Svagt förmultnad sphagnumtorv", 70: "Mulljord", 80: "Gyttjejord", 10: "Medelgrov och grov momark", 30: "Stenig medelgrov eller grov momark", 50: "Berg eller stenbunden mark" },
+    cuttingType: { 0: "Vila för viss tid", 1: "Avlägsnande av överståndare", 2: "Första gallring", 3: "Gallring", 4: "Kant- och teghuggning", 5: "Kalavverkning", 6: "Avverkning i lågskärm", 7: "Avverkning i skärmställning", 8: "Avverkning i fröträdsställning", 9: "Specialavverkning", 11: "Höggallring", 12: "Ljushuggning", 13: "Iståndsättningsavverkning", 14: "Plockhuggning", 15: "Luckhuggning" },
+    mainGroup: { 1: "Skogsmark", 2: "Tvinmark", 3: "Impediment", 4: "Annan skogsbruksmark", 5: "Tomtmark", 6: "Jordbruksmark", 7: "Annan mark", 8: "Vattendrag" }
+};
+
+/**
+ * EPÄVIRALLISET ruotsinkieliset nimet tauluille, joiden WFS-koodit eivät
+ * vastaa Metsärekisterin koodistoa (kulkukelpoisuus, metsänkäyttöilmoituksen
+ * hakkuutarkoitus) tai joita koodistossa ei ole.
+ */
+export const CODES_SV_EPAVIRALLINEN = {
+    cuttingType: {
+        20: 'Gallring av energived', 90: 'Avverkning för ändrad markanvändning', 91: 'Specialavverkning (6 §)',
+        92: 'Annan avverkning', 93: 'Förnyelseavverkning på skadeområde', 94: 'Gallring på skadeområde'
+    },
+    silvicultureType: {
+        1: 'Anläggning av plantbestånd', 2: 'Tidig plantskogsvård', 3: 'Plantskogsvård',
+        4: 'Vård av ungskog', 5: 'Övriga skogsvårdsarbeten'
+    },
+    drainageState: {
+        1: 'Odikad mo', 2: 'Försumpad mo', 3: 'Dikad mo',
+        6: 'Orörd myr', 7: 'Nydikad myr', 8: 'Omvandlingsmyr', 9: 'Torvmo'
+    },
+    accessibility: {
+        1: 'Året runt', 2: 'Barmark (ej menföre)', 3: 'Torr period',
+        4: 'Endast tjälad mark', 5: 'Inte definierad'
+    },
+    cuttingPurpose: {
+        1: 'Beståndsvårdande avverkning', 2: 'Förnyelseavverkning', 3: 'Annan avverkning',
+        4: 'Specialavverkning (6 §)', 5: 'Ändrad markanvändning', 6: 'Skogsskadeområde'
+    },
+    habitatType: {
+        530: 'Brant', 540: 'Berg', 543: 'Berg', 545: 'Stenbunden mark',
+        570: 'Torr lund', 571: 'Frisk lund', 572: 'Fuktig lund',
+        577: 'Rikkärr', 578: 'Frodig kärr',
+        600: 'Skogsholme', 602: 'Trädfattig myr',
+        613: 'Tjärn', 614: 'Källa', 615: 'Källområde',
+        618: 'Bäck', 620: 'Strandäng', 623: 'Rännil', 624: 'Sippervatten', 625: 'Vattendrag'
+    }
+};
+
 /** Koodin nimi valitulla kielellä, tai null jos koodia ei tunneta. */
 export function codeName(table, code, lang = getLang()) {
     if (code == null) return null;
     if (lang === 'en') {
         const en = CODES_EN_EPAVIRALLINEN[table]?.[code];
         if (en) return en;
+    }
+    if (lang === 'sv') {
+        const sv = CODES_SV_VIRALLINEN[table]?.[code] ?? CODES_SV_EPAVIRALLINEN[table]?.[code];
+        if (sv) return sv;
     }
     return CODES[table]?.[code] ?? null;
 }

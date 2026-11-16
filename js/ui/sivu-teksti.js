@@ -1,8 +1,8 @@
 /**
- * Sivun (index.html) staattiset tekstit suomeksi ja englanniksi (#24).
+ * Sivun (index.html) staattiset tekstit suomeksi, ruotsiksi ja englanniksi (#24).
  * Avaimet vastaavat index.html:n data-i18n- ja data-i18n-attr-merkintöjä.
  * Suomenkieliset tekstit ovat täsmälleen samat kuin index.html:ssä; sivu.js
- * ei koske sivuun suomeksi. Käyttöohjeen englanninkielinen versio: ohje-en.js.
+ * ei koske sivuun suomeksi. Käyttöohjeen englanninkielinen versio: ohje-en.js, ruotsinkielinen ohje-sv.js.
  */
 
 import { pick } from '../i18n.js';
@@ -37,6 +37,36 @@ const fi = {
     alaMml: 'MML'
 };
 
+const sv = {
+    sivuOtsikko: 'Metsäinfo – Finlands skogsdata på kartan',
+    sivuKuvaus: 'Interaktiv kartapplikation för att granska uppgifter om skogstillgångar i Finland. Sök med fastighetsbeteckning eller klicka på kartan.',
+    kayttoohje: 'Bruksanvisning',
+    alaotsikko: 'Finlands skogsdata på kartan – sök med fastighetsbeteckning eller klicka på kartan',
+    muutaPaneelinKokoa: 'Ändra storlek på informationspanelen',
+    kopioiLinkki: 'Kopiera länk',
+    lataaCsv: 'Ladda ner CSV',
+    tulosta: 'Skriv ut',
+    poistaValinta: 'Ta bort val',
+    sulje: 'Stäng',
+    metsavaratiedot: 'Skogsdata',
+    haetaanTietoja: 'Uppgifter hämtas...',
+    variTilavuus: 'Virkesförråd (m³/ha)',
+    variIka: 'Ålder (år)',
+    variPaapuulaji: 'Huvudträdslag',
+    variKehitysluokka: 'Utvecklingsklass',
+    mkiVuosi: 'Enligt år',
+    mkiTarkoitus: 'Avverkningens syfte',
+    haeTunnuksella: 'Sök med fastighetsbeteckning',
+    hakuEsimerkki: 't.ex. 91-416-1-123',
+    hae: 'Sök',
+    ohjeOtsikko: 'Metsäinfo — Bruksanvisning',
+    alaMetsatiedot: 'Skogsdata:',
+    alaMetsakeskus: 'Skogscentralen',
+    alaKartta: 'Karta:',
+    alaKiinteistot: 'Fastigheter:',
+    alaMml: 'LMV'
+};
+
 const en = {
     sivuOtsikko: 'Metsäinfo – Finnish forest data on a map',
     sivuKuvaus: 'Interactive map app for viewing Finnish forest resource data. Search by property ID or click the map.',
@@ -67,5 +97,5 @@ const en = {
     alaMml: 'NLS'
 };
 
-export const TEKSTIT = { fi, en };
+export const TEKSTIT = { fi, sv, en };
 export const T = pick(TEKSTIT);

@@ -14,10 +14,11 @@
 import { getLang, pick } from '../i18n.js';
 import { TEKSTIT } from './sivu-teksti.js';
 import { OHJE_EN } from './ohje-en.js';
+import { OHJE_SV } from './ohje-sv.js';
 
-// Englanninkielinen ohje vain kokeilubuildiin ja testeihin: tavallinen build
-// on aina suomeksi, joten Rollup karsii ohjeen siitä pois.
-const OHJEET = import.meta.env.VITE_KOKEILU === '1' || import.meta.env.MODE === 'test' ? { en: OHJE_EN } : {};
+// Ruotsin- ja englanninkielinen ohje vain kokeilubuildiin ja testeihin: tavallinen build
+// on aina suomeksi, joten Rollup karsii ohjeet siitä pois.
+const OHJEET = import.meta.env.VITE_KOKEILU === '1' || import.meta.env.MODE === 'test' ? { sv: OHJE_SV, en: OHJE_EN } : {};
 
 /** Purkaa "title:avain;aria-label:avain2" → [['title', 'avain'], ['aria-label', 'avain2']]. */
 export function parseAttrSpec(spec) {

@@ -1,5 +1,5 @@
 /**
- * Sovelluksen käyttöliittymän tekstit suomeksi ja englanniksi (#24):
+ * Sovelluksen käyttöliittymän tekstit suomeksi, ruotsiksi ja englanniksi (#24):
  * tietopaneeli, kuviolista, karttapopupit, selitteet, termien selitykset,
  * paikannus. Suomenkieliset tekstit ovat täsmälleen samat kuin ennen
  * käännöstä (tests/suomi-snapshot.test.js).
@@ -322,7 +322,167 @@ const en = {
     }
 };
 
-export const TEKSTIT = { fi, en };
+const sv = {
+    toiminnot: 'Åtgärder',
+    kuviotaYksikko: 'figurer',
+    eiMetsavaratietoja: 'Ingen skogsdata',
+    palstaa: (n) => `${n} skiften`,
+    palstaaSulkeissa: (n) => ` (${n} skiften)`,
+    haetaanTietoja: 'Hämtar uppgifter…',
+
+    yhteenveto: 'Sammandrag',
+    kuviotTab: (n) => `Figurer (${n})`,
+    ehdotukset: 'Förslag',
+
+    kiinteisto: 'Fastighet',
+    kopioiLinkki: 'Kopiera länk',
+    lataaCsv: 'Ladda ner CSV',
+    tulosta: 'Skriv ut',
+    mittausvuosi: (v) => `Uppgifterna inventerade: ${v}`,
+    vanhentuneita: 'Uppgifterna kan vara föråldrade',
+    metsavaratYhteenveto: 'Sammandrag av skogsdata',
+    kuviota: 'Figurer',
+    hehtaaria: 'Hektar',
+    keskiarvoTilavuus: 'm³/ha i medeltal',
+    yhteensaTilavuus: 'm³ totalt',
+    puulajijakauma: 'Trädslagsfördelning',
+    manty: 'Tall',
+    kuusi: 'Gran',
+    lehtipuut: 'Lövträd',
+    puusto: 'Trädbestånd',
+    keskiIka: 'Medelålder (år)',
+    keskipituus: 'Medelhöjd (m)',
+    keskilapimitta: 'Medeldiameter (cm)',
+    kasvu: 'Tillväxt (m³/ha/år)',
+    tukkiKuitu: 'Stockvirke / Massaved',
+    tukkia: 'Stockvirke (m³/ha)',
+    kuitua: 'Massaved (m³/ha)',
+    tukkiaYht: 'Stockvirke totalt (m³)',
+    kuituaYht: 'Massaved totalt (m³)',
+    kasvupaikka: 'Växtplats',
+    pohjapintaAla: 'Grundyta (m²/ha)',
+    runkoluku: 'Stamantal (st./ha)',
+    kasvupaikkatyypit: 'Växtplatstyper:',
+    kehitysluokat: 'Utvecklingsklasser:',
+    kplSulkeissa: (n) => `${n} st.`,
+    hakkuuehdotukset: 'Avverkningsförslag',
+    metsanhoitoehdotukset: 'Skogsvårdsförslag',
+    kuvioLkm: (n) => `${n} ${n === 1 ? 'figur' : 'figurer'}`,
+    kuviot: 'Figurer',
+    kplYhteensa: (n) => `(${n} st.)`,
+    eiMetsavaratietojaKiinteistolla: 'Ingen skogsdata för den här fastigheten.',
+    tyyppi: (c) => `Typ ${c}`,
+
+    kuvio: (n) => `Figur ${n}`,
+    perustiedot: 'Grunduppgifter',
+    kehitysluokka: 'Utvecklingsklass',
+    maalaji: 'Jordart',
+    ojitustilanne: 'Dikningsstatus',
+    kulkukelpoisuus: 'Framkomlighet',
+    ika: 'Ålder:',
+    pituus: 'Höjd:',
+    lapimitta: 'Diameter:',
+    pohjapintaAlaLyhyt: 'Grundyta:',
+    runkolukuLyhyt: 'Stamantal:',
+    kasvuLyhyt: 'Tillväxt:',
+    vuotta: 'år',
+    kplHa: 'st./ha',
+    m3haV: 'm³/ha/år',
+    lehtipuutLyhyt: 'Lövträd',
+    puutavaralajit: 'Virkessortiment',
+    tukkipuu: 'Stockvirke:',
+    kuitupuu: 'Massaved:',
+    yhteensa: 'Totalt:',
+    kuviollaYht: 'Hela figuren:',
+    toimenpideEhdotukset: 'Åtgärdsförslag',
+    hakkuu: 'Avverkning:',
+    hoito: 'Skogsvård:',
+    mitattu: (d) => `Inventerad: ${d}`,
+
+    pintaAla: 'Areal',
+    tilavuus: 'Virkesförråd',
+    paapuulaji: 'Huvudträdslag',
+    ikaPopup: 'Ålder',
+    luontokohde: 'Naturobjekt',
+    metsalaki: 'Särskilt viktig livsmiljö enligt 10 § i skogslagen',
+    metsankayttoilmoitus: 'Anmälan om användning av skog',
+    hakkuutapa: 'Avverkningssätt',
+    vuosi: 'År',
+    puulaji: 'Trädslag',
+    koodi: (c) => `Kod ${c}`,
+
+    varitila: {
+        volume: { label: 'Virkesförråd (m³/ha)' },
+        age: { label: 'Ålder (år)' },
+        species: { label: 'Huvudträdslag', legend: ['Tall', 'Gran', 'Björk', 'Annat lövträd'] },
+        devclass: { label: 'Utvecklingsklass', legend: ['Kalmark', 'Plantbestånd', 'Klenare gallring', 'Grövre gallring', 'Förnyelsemogen', 'Överståndare / olikåldrig'] }
+    },
+    mkiVaritila: {
+        year: { label: 'Enligt år', legend: ['I år', 'För 1 år sedan', 'För 2 år sedan', 'För 3 år sedan', 'För 4–5 år sedan'] },
+        purpose: { label: 'Avverkningens syfte', legend: ['Gallring', 'Förnyelseavverkning', 'Annan avverkning', 'Specialavverkning', 'Ändrad markanvändning', 'Skogsskadeområde'] }
+    },
+
+    kopioitu: 'Kopierad!',
+    eiLadattavia: 'Inga figuruppgifter att ladda ner.',
+    csvJakoEpaonnistui: 'CSV-filen kunde inte delas.',
+
+    sijainti: {
+        off: 'Visa min position',
+        show: 'Centrera på min position',
+        followKompassi: 'Visa färdriktning',
+        lopeta: 'Sluta visa positionen',
+        estettyNatiivi: 'Platsen är inte tillåten. Tillåt den under Inställningar → Metsäinfo → Plats.',
+        estettySelain: 'Platsen är inte tillåten. Tillåt platsen i webbläsarens inställningar.',
+        palvelutPois: 'Platstjänster är avstängda. Slå på dem under Inställningar → Integritet och säkerhet → Platstjänster.',
+        eiSaatu: 'Positionen kunde inte fastställas. Kontrollera att platstjänster är påslagna.',
+        haetaan: 'Positionen söks. Kontrollera att platstjänster är påslagna.',
+        olet: (t) => `Du är i: ${t}`,
+        eiKiinteistoa: 'Ingen fastighet hittades här. Zooma in närmare.',
+        ulkopuolella: 'Utanför den valda fastigheten',
+        eiKuviotietoa: 'Inga figuruppgifter här'
+    },
+
+    sovellus: {
+        eiLoytynyt: 'Fastigheten hittades inte',
+        hakuEpaonnistui: 'Sökningen efter fastigheten misslyckades',
+        jaaLinkki: 'Dela länk',
+        kuvitteellinenKartta: 'Fiktiv karta',
+        taustakartta: 'Bakgrundskarta',
+        peruskartta: 'Grundkarta',
+        ortokuva: 'Ortofoto',
+        luontokohteet: 'Naturobjekt',
+        metsankayttoilmoitukset: 'Anmälningar om användning av skog',
+        syotaTunnus: 'Ange en fastighetsbeteckning',
+        virheellinenMuoto: 'Felaktigt format. Använd formatet 91-416-1-123',
+        haetaan: 'Söker...',
+        hakuEpaonnistuiYrita: 'Sökningen misslyckades. Försök igen.',
+        hae: 'Sök',
+        metsatietojenHakuEpaonnistui: 'Skogsdata kunde inte hämtas.'
+    },
+
+    tooltips: {
+        kuvio: 'En skogsfigur är ett enhetligt skogsområde där trädbeståndet och växtplatsen är likartade.',
+        tilavuus: 'Trädbeståndets virkesförråd per hektar (m³/ha). Omfattar alla virkessortiment.',
+        puulajijakauma: 'Trädslagens andelar viktade med arealen. Baserar sig på laserskanning.',
+        keskiIka: 'Trädbeståndets medelålder i år, viktad med grundytan.',
+        keskipituus: 'Trädbeståndets medelhöjd i meter, viktad med grundytan.',
+        keskilapimitta: 'Trädbeståndets medeldiameter i brösthöjd (1,3 m) i centimeter, viktad med grundytan.',
+        kasvu: 'Trädbeståndets årliga volymtillväxt per hektar (m³/ha/år).',
+        tukkipuu: 'Råvara för sågindustrin. Rotdiametern är vanligen över 15 cm (tall) eller 16 cm (gran).',
+        kuitupuu: 'Råvara för massa- och pappersindustrin. Klenare virke än stockvirke.',
+        pohjapintaAla: 'Trädstammarnas sammanlagda tvärsnittsyta i brösthöjd (1,3 m), enhet m²/ha.',
+        runkoluku: 'Antalet träd per hektar.',
+        kehitysluokka: 'Beståndets utvecklingsskede: kalmark, plantbestånd, gallringsbestånd, förnyelsemogen skog osv.',
+        kasvupaikka: 'Klassificering enligt markens näringsrikedom. Lund är den näringsrikaste, lavmo den kargaste.',
+        maalaji: 'Markens beskaffenhet: mineraljord (sand, morän) eller torvmark (vitmosstorv, starrtorv).',
+        ojitustilanne: 'Skogsmarkens dikningsstatus: odikad, dikad eller nydikad myr.',
+        kulkukelpoisuus: 'Skogsmaskinernas framkomlighet: året runt, sommar/vinter eller endast på frusen mark.',
+        hakkuuehdotus: 'Skogscentralens beräknade förslag om avverkningsbehov. Ersätter inte en bedömning av en skogsexpert.',
+        metsanhoitoehdotus: 'Skogscentralens beräknade förslag om skogsvårdsbehov, t.ex. plantskogsvård eller stamkvistning.'
+    }
+};
+
+export const TEKSTIT = { fi, sv, en };
 export const T = pick(TEKSTIT);
 
 /** Termin selitys valitulla kielellä (suomi varalla). */

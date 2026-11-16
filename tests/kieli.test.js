@@ -1,7 +1,7 @@
 import "../js/vendor/index.js";
 import { describe, it, expect } from 'vitest';
 import { deviceLang, pick } from '../js/i18n.js';
-import { codeName, CODES_EN_EPAVIRALLINEN } from '../js/koodit.js';
+import { codeName, CODES_EN_EPAVIRALLINEN, CODES_SV_VIRALLINEN, CODES_SV_EPAVIRALLINEN } from '../js/koodit.js';
 import { CODES } from '../js/config.js';
 import { TEKSTIT as MAASTO } from '../js/maasto/teksti.js';
 import { TEKSTIT as LAHIHAKU } from '../js/lahihaku/teksti.js';
@@ -30,14 +30,16 @@ describe('kielet', () => {
         ['maasto', MAASTO], ['lähihaku', LAHIHAKU], ['suosikit', SUOSIKIT],
         ['korkeusmalli', KORKEUSMALLI], ['asetukset', ASETUKSET], ['käyttöliittymä', UI],
         ['hinta-arvio', ESTIMATE], ['sivu', SIVU]
-    ])('%s: suomella ja englannilla samat avaimet', (_, t) => {
+    ])('%s: kaikilla kielillä samat avaimet', (_, t) => {
         expect(shape(t.en)).toEqual(shape(t.fi));
+        expect(t.sv, 'ruotsinkieliset tekstit puuttuvat').toBeDefined();
+        expect(shape(t.sv)).toEqual(shape(t.fi));
     });
 
-    it('laitteen kieli: suomi tai ruotsi → fi, englanti → en, muu → fi', () => {
+    it('laitteen kieli: suomi, ruotsi tai englanti, muu → fi', () => {
         expect(deviceLang(['fi-FI', 'en-US'])).toBe('fi');
         expect(deviceLang(['en-GB', 'fi'])).toBe('en');
-        expect(deviceLang(['sv-FI'])).toBe('fi');
+        expect(deviceLang(['sv-FI'])).toBe('sv');
         expect(deviceLang(['de-DE', 'en-US'])).toBe('en');
         expect(deviceLang(['de-DE'])).toBe('fi');
         expect(deviceLang([])).toBe('fi');
@@ -55,8 +57,11 @@ describe('kielet', () => {
         expect(codeName('tuntematon', 1, 'en')).toBeNull();
         expect(codeName('treeSpecies', 999, 'en')).toBeNull();
         expect(codeName('treeSpecies', null, 'en')).toBeNull();
-        // Jokainen englanninkielinen koodi on myös virallisessa koodistossa
-        for (const [table, codes] of Object.entries(CODES_EN_EPAVIRALLINEN)) {
+        expect(codeName('treeSpecies', 2, 'sv')).toBe('Gran');
+        expect(codeName('developmentClass', '04', 'sv')).toBe('Förnyelsemogen skog');
+        expect(codeName('accessibility', 1, 'sv')).toBe('Året runt');
+        // Jokainen käännetty koodi on myös virallisessa koodistossa
+        for (const [table, codes] of [...Object.entries(CODES_EN_EPAVIRALLINEN), ...Object.entries(CODES_SV_VIRALLINEN), ...Object.entries(CODES_SV_EPAVIRALLINEN)]) {
             for (const code of Object.keys(codes)) expect(CODES[table][code], `${table} ${code}`).toBeDefined();
         }
     });

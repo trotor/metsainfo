@@ -1,5 +1,5 @@
 /**
- * Lähihaun tekstit suomeksi ja englanniksi (#24).
+ * Lähihaun tekstit suomeksi, ruotsiksi ja englanniksi (#24).
  */
 
 import { pick } from '../i18n.js';
@@ -120,5 +120,63 @@ const en = {
     avaaLisaosa: 'Unlock the add-on'
 };
 
-export const TEKSTIT = { fi, en };
+const sv = {
+    nappi: 'Sök i närheten',
+    otsikko: 'Sök i närheten',
+    sulje: 'Stäng',
+    kokeilu: 'Försöksfunktion · endast i testversionen',
+    ohje: 'Hitta skogar av ett visst slag inom 1 km × 1 km runt dig.',
+    vaihe: 'Skede',
+    puulaji: 'Trädslag',
+    muuta: 'Övrigt',
+    vaiheet: {
+        taimikko: 'Plantbestånd',
+        nuori: 'Klenare gallringsbestånd',
+        varttunut: 'Grövre gallringsbestånd',
+        uudistuskypsa: 'Förnyelsemogen skog',
+        vanha: 'Gammal skog (över 100 år)'
+    },
+    puulajit: { manty: 'Tallskog', kuusi: 'Granskog', koivu: 'Björkskog', lehti: 'Annan lövskog', seka: 'Blandskog' },
+    hakkuu: 'Avverkningsförslag inom de närmaste åren',
+    hae: 'Sök',
+    valitseEhto: 'Välj minst ett villkor.',
+    keskiSijainti: 'Sökområde: runt din position.',
+    keskiKartta: 'Ingen position ännu, så sökningen görs från kartans mitt.',
+    keskiLahde: {
+        sijainti: 'Sökområde: runt din position.',
+        kartta: 'Sökområde: kartans mitt (position saknades).',
+        tallennettu: 'Sökområde: den sparade sökningens område.'
+    },
+    tallennaHaku: 'Spara sökningen som favorit',
+    tallennaKuvio: 'Spara figuren som favorit',
+    haetaan: (n, kaikki) => `Hämtar skogsdata… ${n}/${kaikki}`,
+    eiVerkkoa: 'Skogsdata kunde inte hämtas. Kontrollera nätverksanslutningen.',
+    osittain: (n, kaikki) => `En del av området kunde inte hämtas (${n}/${kaikki} rutor saknas), så alla figurer hittades kanske inte.`,
+    yritaUudelleen: 'Försök igen',
+    tulokset: (n) => (n === 1 ? '1 figur' : `${n} figurer`),
+    eiTuloksia: 'Inga sådana figurer hittades i området. Prova en bredare sökning.',
+    muutaHakua: 'Ändra sökningen',
+    haeTasta: 'Sök på nytt här',
+    takaisinListaan: 'Tillbaka till listan',
+    tallaKuviolla: 'du är på den här figuren',
+    etaisyys: (m, suunta) => `${m} m ${suunta}`,
+    suunnat: {
+        pohjoinen: 'norrut', koillinen: 'åt nordost', 'itä': 'österut', kaakko: 'åt sydost',
+        'etelä': 'söderut', lounas: 'åt sydväst', 'länsi': 'västerut', luode: 'åt nordväst'
+    },
+    kuvio: (n, ha) => `Figur ${n} · ${ha} ha`,
+    kehitysluokka: 'Utvecklingsklass',
+    paapuulaji: 'Huvudträdslag',
+    ika: 'Ålder',
+    vuotta: (n) => `${n} år`,
+    prosentti: (n) => `${n} %`,
+    pituus: 'Medelhöjd',
+    tilavuus: 'Virkesförråd',
+    hakkuuehdotus: 'Avverkningsförslag',
+    lahde: (nyt) => `Skogscentralen${nyt ? `, nuläget beräknat för ${nyt}` : ''}.`,
+    lukittu: (n) => `${n === 1 ? '1 figur' : `${n} figurer`} hittades i området. Figurerna på kartan och i listan ingår i tillägget Prisuppskattning för virkesaffär (samma engångsköp).`,
+    avaaLisaosa: 'Lås upp tillägget'
+};
+
+export const TEKSTIT = { fi, sv, en };
 export const T = pick(TEKSTIT);
