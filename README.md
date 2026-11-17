@@ -1,78 +1,96 @@
 # Metsäinfo
 
-[![MCP Server](https://img.shields.io/badge/MCP-Server-blue?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PGxpbmUgeDE9IjEyIiB5MT0iMiIgeDI9IjEyIiB5Mj0iMjIiLz48bGluZSB4MT0iMiIgeTE9IjEyIiB4Mj0iMjIiIHkyPSIxMiIvPjwvc3ZnPg==)](https://modelcontextprotocol.io/)
-[![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-blueviolet?logo=anthropic)](https://claude.ai/code)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-orange?logo=github)](https://trotor.github.io/metsainfo/)
+**Suomen metsävaratiedot kartalla – iPhonelle, Androidille ja selaimeen.**
 
-Interaktiivinen karttasovellus Suomen metsävaratietojen tarkasteluun. Hae kiinteistötunnuksella tai klikkaa karttaa ja saat yhteenvedon alueen metsäkuvioista. Sisältää MCP-palvelimen metsätietojen hakuun tekoälytyökaluissa.
+Näe minkä tahansa metsäkiinteistön puusto, kuviot ja hakkuuehdotukset kartalta muutamalla napautuksella. Metsäinfo kokoaa Metsäkeskuksen ja Maanmittauslaitoksen avoimen datan selkeäksi yhteenvedoksi metsänomistajalle, kiinteistöä harkitsevalle ja metsästä kiinnostuneelle.
 
-**[Kokeile sovellusta](https://trotor.github.io/metsainfo/)**
+<p>
+  <a href="https://apps.apple.com/fi/app/id6832988855"><img src="docs/kuvat/app-store-badge-fi.svg" alt="Lataa App Storesta" height="54"></a>
+  &nbsp;
+  <a href="https://play.google.com/store/apps/details?id=fi.inetor.metsainfo"><img src="docs/kuvat/google-play-badge-fi.png" alt="Lataa Google Playsta" height="80"></a>
+</p>
 
-![Metsäinfo screenshot](screenshot.png)
+**[Avaa verkkoversio selaimessa →](https://trotor.github.io/metsainfo/)**
 
-## Ominaisuudet
+<p>
+  <img src="fastlane/screenshots/fi/1_iphone69_sijainti.png" alt="Oma sijainti ja kuvio kartalla" width="200">
+  <img src="fastlane/screenshots/fi/3_iphone69_yhteenveto.png" alt="Kiinteistön yhteenveto" width="200">
+  <img src="fastlane/screenshots/fi/2_iphone69_hinta-arvio.png" alt="Puukaupan hinta-arvio" width="200">
+</p>
 
-### Karttasovellus
+<sub>Kuvissa on kuvitteellinen Esimerkkimetsä kuvitteellisella saarella, ei oikeaa kiinteistöä.</sub>
 
-- **Kiinteistöhaku** - Hae kiinteistötunnuksella (esim. 999-1-1-1)
-- **Kiinteistörajat** - MML:n kiinteistörajat näkyvät kartalla zoomattaessa
-- **Metsävaratiedot** - Kuviokohtaiset tiedot Metsäkeskuksen avoimesta datasta
-- **Yhteenveto** sisältäen:
-  - Kuvioiden lukumäärä ja pinta-ala
-  - Puuston tilavuus (m³/ha ja yhteensä)
-  - Puulajijakauma (mänty, kuusi, lehtipuut)
-  - Puuston keski-ikä, -pituus, -läpimitta ja kasvu
-  - Tukkipuu/kuitupuu -jako (keskiarvo ja kokonaismäärä)
-  - Kasvupaikkatyypit ja kehitysluokat
-  - Hakkuu- ja metsänhoitoehdotukset vuosineen
-- **Kuviokohtaiset tiedot** - Laajennettava lista kaikista kuvioista yksityiskohtineen
-- **Karttakorostukset** - Klikkaa kuviota tai ehdotusta korostaaksesi sen kartalla
-- **Väritysvaihtoehdot** - Kuvioiden väritys tilavuuden, iän, puulajin tai kehitysluokan mukaan
-- **Luontotietokerros** - Metsälain erityisen tärkeät elinympäristöt (METE-kohteet)
-- **Metsänkäyttöilmoitukset** - Ilmoitetut hakkuualueet kartalla, väritys vuoden tai hakkuutarkoituksen mukaan
-- **Sanasto-tooltipit** - (i)-kuvake selittää metsäalan termit selkokielellä
-- **URL-jako** - Kopioi suora linkki kiinteistöön jaettavaksi
-- **Mittausvuosi-indikaattori** - Näyttää aineiston mittausvuoden ja varoittaa vanhasta datasta
-- **CSV-lataus** - Lataa kuviotiedot taulukkolaskentaohjelmaan
-- **Tulostus** - Tulosta yhteenveto paperille
-- **Käyttöohje** - Otsikkorivin ?-napista aukeava ohjeikkuna
+---
 
-### MCP-palvelin (AI-integraatio)
+## Mitä Metsäinfolla voi tehdä?
 
-- **Metsävarahaku tekoälyllä** - Hae kiinteistön metsätiedot suoraan AI-keskustelussa
-- **Claude Code & Claude Desktop** - Valmis MCP-konfiguraatio
-- **Kattava yhteenveto** - Puusto, puulajit, kehitysluokat, hakkuu- ja hoitoehdotukset
+### Kiinteistö ja sen metsä yhdellä silmäyksellä
+- **Kiinteistöhaku** – kirjoita kiinteistötunnus (esim. `999-1-1-1`) tai napauta kiinteistöä kartalla. Moniosaiset kiinteistöt kootaan yhteen.
+- **Yhteenveto** – pinta-ala, kuvioiden määrä, puuston tilavuus (m³/ha ja yhteensä), puulajijakauma, keski-ikä, -pituus ja -läpimitta, kasvu, tukki- ja kuitupuu, kasvupaikat ja kehitysluokat.
+- **Hakkuu- ja hoitoehdotukset** – Metsäkeskuksen ehdotukset vuosineen omalla välilehdellään. Lähivuosien hakkuut korostetaan.
+- **Kuviot** – jokaisen metsikkökuvion tiedot listana. Napautus korostaa kuvion kartalla ja näyttää yksityiskohdat.
+- **Mittausvuosi** – näet, minkä ikäistä aineisto on, ja sovellus varoittaa vanhentuneesta tiedosta.
 
-## Käyttö
+### Kartta
+- **Väritys** – kuviot värjätään tilavuuden, iän, pääpuulajin tai kehitysluokan mukaan.
+- **Karttatasot** – peruskartta, taustakartta tai ilmakuva, sekä Metsälain erityisen tärkeät elinympäristöt ja metsänkäyttöilmoitukset (ilmoitetut hakkuut).
+- **Oma sijainti** – näyttää paikkasi ja kulkusuuntasi sekä kertoo, millä kuviolla seisot. Sijainti pysyy laitteella.
+- **Termien selitykset** – (i)-kuvake selittää metsäalan sanat selkokielellä.
 
-1. Avaa sovellus selaimessa
-2. **Hae kiinteistötunnuksella** oikeasta yläkulmasta (esim. 999-1-1-1)
-3. Tai zoomaa haluamallesi alueelle ja **klikkaa kiinteistöä** kartalla
-4. Tarkastele metsätietoja infoikkunassa
-5. Klikkaa kuviota listassa nähdäksesi yksityiskohdat ja korostaaksesi kartalla
+### Jakaminen
+- **Linkki** suoraan kiinteistöön, **CSV-taulukko** kuviotiedoista ja **tulostettava yhteenveto**.
 
-Kiinteistörajat ja -tunnukset näkyvät zoomattaessa lähemmäs (noin 1:50000 mittakaavasta alkaen).
+### Puukaupan hinta-arvio (lisäosa sovelluksissa)
+- Kertoo, paljonko kiinteistön ehdotetut hakkuut ovat arvoltaan **alueen tuoreilla kantohinnoilla** (Metsäteollisuus ry:n puukaupan viikkoseuranta ja Luonnonvarakeskuksen tilastot), sekä koko puuston arvon.
+- Hinta-alue päätellään kiinteistön kunnasta. Omat hinnat voi syöttää esimerkiksi saamasi puukauppatarjouksen mukaan.
+- **Jaa arvio** luo taulukon, jonka voi lähettää vaikkapa kuolinpesän osakkaille.
+- **Kokeile esimerkkimetsällä** maksutta ennen ostoa. Kertaosto, ei tilausta – ajantasainen hinta näkyy sovelluksessa. Sama lisäosa iPhonella ja Androidilla.
+- Arvio on suuntaa-antava eikä korvaa puukauppatarjousta.
 
-Lisätietoja löytyy sovelluksen otsikkorivin **?**-napista.
+### Tulossa – testiversiossa nyt
+Seuraavia toimintoja kokeillaan testiversiossa. Ne voivat vielä muuttua ennen julkaisua.
+- **Työkalut-valikko** – työkalut yhden napin takana nimineen ja kuvauksineen; päällä oleva työkalu näkyy kartan yläreunassa.
+- **Kerro tästä paikasta** – napauta karttaa tai käytä sijaintia: kuvion tiedot maastossa ja metsävisa.
+- **Etsi läheltä** – tietynlaiset metsät (esim. uudistuskypsä kuusikko) 1 km × 1 km alueelta.
+- **Valitse kuvioita** – kokoa kuvioita valinnaksi myös kiinteistörajojen yli ja katso valinnan yhteenveto ja hinta-arvio, esimerkiksi kun harkitset kiinteistön osan ostamista.
+- **Saavutettavuus** – kuvion arvioitu saavutettavuus metsäkuljetusmatkan, maaperän korjuukelpoisuuden ja tieyhteyden perusteella (Digiroad), kartalla väreinä.
+- **Korkeusmalli** – laserkeilauksen vinovalaistu maastomalli taustakartaksi.
+- **Suosikit ja omat muistiinpanot** kiinteistöille, kuvioille ja hauille.
+- **Kielet** – suomi, ruotsi ja englanti.
 
-## MCP-palvelin (tekoälyintegraatio)
+---
 
-Metsäinfon metsävaratiedot ovat käytettävissä myös tekoälytyökaluissa [MCP-palvelimen](https://modelcontextprotocol.io/) kautta. MCP (Model Context Protocol) mahdollistaa metsätietojen hakemisen suoraan tekoälykeskustelussa.
+## Kiinnostuitko yhteistyöstä tai kaipaatko ominaisuuksia?
 
-### Esimerkki
+Metsäinfon on tehnyt **[Inetor Oy](https://inetor.fi)**, joka kehittää mobiili-, kartta- ja tietosovelluksia avoimen datan ja tekoälyn päälle.
 
-Kysy tekoälyltä esimerkiksi:
+- Tarvitsetko Metsäinfoon toiminnon omaan käyttöösi tai organisaatiollesi?
+- Haluatko vastaavan sovelluksen tai karttapalvelun omasta aineistostasi?
+- Kiinnostaako metsätiedon tuominen omiin järjestelmiisi tai tekoälytyökaluihin?
+
+**Ota yhteyttä: [inetoroy@gmail.com](mailto:inetoroy@gmail.com) · [inetor.fi](https://inetor.fi)**
+
+Palautteet ja toiveet voi jättää myös [GitHub-issueina](https://github.com/trotor/metsainfo/issues).
+
+---
+
+## Metsätieto tekoälylle (MCP-palvelin)
+
+Metsäinfon tiedot ovat käytettävissä tekoälytyökaluissa [MCP-palvelimen](https://modelcontextprotocol.io/) kautta. Kysy esimerkiksi:
+
 - *"Hae metsävaratiedot kiinteistölle 999-1-1-1"*
 - *"Paljonko tukkipuuta on kiinteistöllä 999-1-1-1?"*
 
-### Asennus Claude Codeen
+| Työkalu | Kuvaus |
+|---------|--------|
+| `hae_metsavaratieto(kiinteistotunnus)` | Ihmisluettava yhteenveto: pinta-ala, tilavuus, puulajit, hakkuuehdotukset |
+| `hae_raakadata(kiinteistotunnus)` | JSON-raakadata: kuviokohtaiset mittaustiedot tekoälymallin analysoitavaksi |
 
-MCP-palvelin on valmiiksi konfiguroitu `.mcp.json`-tiedostossa. Kun avaat projektin [Claude Codessa](https://claude.ai/code), palvelin käynnistyy automaattisesti.
+Kiinteistötunnus voi olla muodossa `999-1-1-1` tai `99900100010001`.
 
-### Asennus Claude Desktopiin
+**Claude Code:** palvelin on valmiiksi määritelty `.mcp.json`-tiedostossa ja käynnistyy, kun avaat projektin [Claude Codessa](https://claude.ai/code).
 
-Lisää `claude_desktop_config.json`-tiedostoon:
+**Claude Desktop:** lisää `claude_desktop_config.json`-tiedostoon (vaatii [uv](https://docs.astral.sh/uv/):n):
 
 ```json
 {
@@ -85,116 +103,55 @@ Lisää `claude_desktop_config.json`-tiedostoon:
 }
 ```
 
-Korvaa `/polku/metsainfo/` projektin todellisella polulla. Vaatii [uv](https://docs.astral.sh/uv/):n asennuksen.
+---
 
-### Työkalut
+## Tietosuoja
 
-| Työkalu | Kuvaus |
-|---------|--------|
-| `hae_metsavaratieto(kiinteistotunnus)` | Ihmisluettava yhteenveto: pinta-ala, tilavuus, puulajit, hakkuuehdotukset |
-| `hae_raakadata(kiinteistotunnus)` | JSON-raakadata: kuviokohtaiset mittaustiedot tekoälymallin analysoitavaksi |
-
-Kiinteistötunnus voi olla muodossa `999-1-1-1` tai `99900100010001`.
-
-**hae_raakadata** palauttaa JSON-muotoisen vastauksen, joka sisältää `statistics`-yhteenvedon ja `features`-taulukon kuviokohtaisine mittaustietoineen (ilman geometriaa). Sopii laskelmien, vertailujen ja räätälöityjen suositusten tuottamiseen.
-
-## Tekniikka
-
-Sovellus toimii kokonaan selaimessa ilman backendiä. Koodi on jaettu ES6-moduuleihin.
-
-- **Leaflet.js** - Karttakirjasto
-- **Proj4js** - Koordinaatistomuunnokset (EPSG:3067 ↔ WGS84)
-- **Proj4Leaflet** - EPSG:3067 natiivituki Leafletille
-- **Kapsi/MML** - Suomalaiset taustakartat (peruskartta, taustakartta, ortokuva)
-
-### Tiedostorakenne
-
-```
-├── index.html          # HTML-runko (Vite-entry)
-├── js/
-│   ├── app.js          # Päämoduuli: alustus, tapahtumat
-│   ├── config.js       # Asetukset, koodistot, värimoodit
-│   ├── state.js        # Sovelluksen tila
-│   ├── utils.js        # Koordinaatit, geometria, muotoilu
-│   ├── styles.js       # Karttatasojen tyylit
-│   ├── data.js         # WFS-haut ja suodatus
-│   ├── statistics.js   # Tilastolaskenta
-│   └── ui/             # Käyttöliittymä
-│       ├── index.js        # Julkinen rajapinta
-│       ├── summary.js      # Yhteenveto ja kurkistusrivi
-│       ├── stands.js       # Kuviolista ja korostukset
-│       ├── panel.js        # Tietopaneeli, välilehdet, valikko
-│       ├── sheet.js        # Mobiilin bottom sheet
-│       ├── layout.js       # Mobiiliasettelun tunnistus, kartan täytteet
-│       ├── tips.js         # Termien selitteet
-│       ├── map-features.js # Karttakohteiden popupit
-│       ├── legend.js       # Väritys ja selitteet
-│       └── actions.js      # Ohje, linkki, CSV
-├── style.css           # Tyylit
-├── public/             # Sellaisenaan buildiin kopioitavat (version.js, tietosuoja.html)
-└── mcp-server/
-    ├── server.py       # MCP-palvelin (FastMCP)
-    ├── pipeline.py     # WFS-haut ja tilastolaskenta
-    └── codes.py        # Koodistomääritykset
-```
+Metsäinfo ei kerää eikä jaa henkilötietoja. Sijainti käsitellään vain laitteella, ja karttapyynnöt sisältävät vain katsotun alueen. Lue [tietosuojaseloste](https://trotor.github.io/metsainfo/tietosuoja.html).
 
 ## Datalähteet
 
-| Data | Lähde | Rajapinta |
-|------|-------|-----------|
-| Metsävaratiedot | [Metsäkeskus](https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto) | WFS |
-| Luontokohteet | [Metsäkeskus](https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto) | WFS |
-| Metsänkäyttöilmoitukset | [Metsäkeskus](https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto) | WFS |
-| Kiinteistörajat | [MML INSPIRE](https://www.maanmittauslaitos.fi/) | WFS |
-| Taustakartat | [Kapsi](https://kartat.kapsi.fi/) / [MML](https://www.maanmittauslaitos.fi/) | TMS (EPSG:3067) |
+| Data | Lähde |
+|------|-------|
+| Metsävaratiedot, luontokohteet, metsänkäyttöilmoitukset, korjuukelpoisuus | [Suomen metsäkeskus](https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto) (CC BY 4.0) |
+| Kiinteistörajat | [Maanmittauslaitos](https://www.maanmittauslaitos.fi/) (INSPIRE WFS) |
+| Taustakartat | [Kapsi](https://kartat.kapsi.fi/) / [MML](https://www.maanmittauslaitos.fi/) |
+| Kantohinnat | Metsäteollisuus ry:n puukaupan viikkoseuranta, [Luonnonvarakeskus](https://www.luke.fi/) (CC BY 4.0) |
+| Tieverkko (testiversio) | [Väylävirasto, Digiroad](https://vayla.fi/) (CC BY 4.0) |
 
-## Kehitys
+---
 
-Kloonaa repositorio, asenna riippuvuudet ja käynnistä kehityspalvelin:
+## Kehittäjille
+
+Verkkosovellus toimii kokonaan selaimessa ilman omaa palvelinta. iOS- ja Android-sovellukset on rakennettu samasta koodista [Capacitorilla](https://capacitorjs.com/).
+
+- **Leaflet**, **Proj4js** ja **Proj4Leaflet** – kartta suoraan Suomen ETRS-TM35FIN-koordinaatistossa (EPSG:3067)
+- **Vite** ja **Vitest** – build ja yksikkötestit
+- **Capacitor 8** – iOS (StoreKit 2) ja Android (Play Billing)
+- **FastMCP** – MCP-palvelin (`mcp-server/`)
 
 ```bash
 git clone git@github.com:trotor/metsainfo.git
 cd metsainfo
 npm install
-npm run dev
+npm run dev        # kehityspalvelin, oletuksena http://localhost:5173
+npm test           # yksikkötestit
+npm run build      # tuotantobuild dist/-hakemistoon
 ```
 
-Avaa selaimessa osoite, jonka Vite tulostaa (oletuksena http://localhost:5173).
+Arkkitehtuuri, laajennuspisteet ja kehityskäytännöt: [CLAUDE.md](CLAUDE.md). Sovellus on kehitetty [Claude Code](https://claude.ai/code) -työkalulla; kehitysprosessista ja esimerkkiprompteista kertoo [CLAUDE-HOWTO.md](CLAUDE-HOWTO.md).
 
-Muut komennot: `npm test` ajaa yksikkötestit, `npm run build` rakentaa
-tuotantoversion `dist/`-hakemistoon ja `npm run preview` esikatselee sen.
+## Versiot
 
-### Tekoälyavusteinen kehitys
+Verkkoversio, App Store ja Google Play käyttävät samaa versionumeroa. Muutokset näkyvät sovelluksen käyttöohjeen kohdassa *Uutta versiossa*.
 
-Tämä sovellus on kehitetty kokonaan [Claude Code](https://claude.ai/code) -työkalulla. Claude Code on Anthropicin CLI-työkalu tekoälyavusteiseen ohjelmistokehitykseen.
+- **4.0.x** (marraskuu 2026) – sovellukset App Storeen ja Google Playhin, puukaupan hinta-arvio, värikoodatut tietoruudut
+- **3.x** – oma sijainti ja kulkusuunta, mobiilikäyttöliittymä, metsänkäyttöilmoitukset
+- **2.x** – käyttöohje, MCP-palvelin, ES-moduulit
+- **1.x** – ensimmäinen julkaisu, kiinteistöhaku, väritykset, luontokohteet, CSV ja tulostus
 
-Katso [CLAUDE-HOWTO.md](CLAUDE-HOWTO.md) jossa on:
-- Kuvaus kehitysprosessista
-- Esimerkkiprompteja sovelluksen jatkokehittämiseen
-- Ideoita tekoälyominaisuuksien lisäämiseen sovellukseen
-- Ohjeet Claude API:n integrointiin
+## Lisenssi ja tekijä
 
-## Versiohistoria
+Lähdekoodi: [MIT](LICENSE). © Tero Rönkkö / [Inetor Oy](https://inetor.fi).
 
-- **v3.0.0** (2026-03-05) - Metsänkäyttöilmoitukset karttataso
-- **v2.3.0** (2026-02-21) - MCP-palvelimen dokumentaatio
-- **v2.1.0** (2026-02-19) - Käyttöohjeet ja versiohistoria sovelluksessa
-- **v2.0.0** (2026-02-19) - Koodin modularisointi ES6-moduuleiksi
-- **v1.9.0** (2026-02-19) - Luontotietokerros, sanasto-tooltipit, väritysvaihtoehdot, tulostustuki
-- **v1.8.0** (2026-02-19) - URL-jako ja mittausvuosi-indikaattori
-- **v1.6.0** (2026-01-22) - EPSG:3067 projektio, Kapsi/MML taustakartat, karttatasojen valitsin
-- **v1.5.0** (2026-01-22) - Koodistojen korjaus Metsäkeskuksen virallisen määrityksen mukaiseksi
-- **v1.4.0** (2026-01-22) - CSV-lataus metsäkuviotiedoille
-- **v1.3.0** (2026-01-21) - Moniosaisten kiinteistöjen tuki, min/max-tilastot
-- **v1.1.0** (2026-01-20) - Kiinteistöhaku, kuviokohtaiset tiedot, karttakorostukset
-- **v1.0.0** (2026-01-19) - Ensimmäinen julkaisu
-
-## Lisenssi
-
-MIT
-
-## Tekijä
-
-**Tero Rönkkö**
-
-Tehty [Claude Code](https://claude.ai/code) -työkalun avustuksella.
+<sub>Apple ja Apple-logo ovat Apple Inc.:n Yhdysvalloissa ja muissa maissa rekisteröityjä tavaramerkkejä. App Store on Apple Inc.:n palvelumerkki. Google Play ja Google Play -logo ovat Google LLC:n tavaramerkkejä.</sub>
