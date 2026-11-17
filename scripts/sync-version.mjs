@@ -52,7 +52,7 @@ export function applyAndroidVersion(gradle, { name, code }) {
 }
 
 // Kunkin kokeilutoiminnon tunnusluokka (js/maasto/, js/lahihaku/, js/suosikit/, js/korkeusmalli/, js/asetukset/, js/saavutettavuus/, js/valinta/, js/rajoitteet/, js/retkeily/, js/arvovari/)
-export const KOKEILU_MARKERS = ['maasto-kortti', 'lahihaku-kortti', 'suosikit-kortti', 'korkeusmalli-taso', 'asetukset-kortti', 'sv-laatikko', 'valinta-kortti', 'rj-laatikko', 'rk-taso', 'av-selite', 'tyokalut-control'];
+export const KOKEILU_MARKERS = ['maasto-kortti', 'lahihaku-kortti', 'suosikit-kortti', 'korkeusmalli-taso', 'asetukset-kortti', 'sv-laatikko', 'valinta-kortti', 'rj-laatikko', 'rk-taso', 'av-selite', 'tyokalut-control', 'huomiot-kortti'];
 export const KOKEILU_PATCH_OFFSET = 900;
 
 /** version.js:n kokeilu-kenttä (TestFlight-kokeilun näkyvä versio). */

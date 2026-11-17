@@ -44,7 +44,9 @@ export const FEATURES = {
     // Kokeilu: LIPAS-retkeilykohteet karttatasona, maksuton (js/retkeily/)
     retkeily: { product: null, kokeilu: true },
     // Kokeilu #34: puuston arvo €/ha kartan värityksenä (js/arvovari/), hinta-arvion kertaostossa
-    arvovari: { product: PRODUCT_ID, kokeilu: true }
+    arvovari: { product: PRODUCT_ID, kokeilu: true },
+    // Kokeilu #33: pistemuotoiset huomiot kartalle (js/huomiot/), hinta-arvion kertaostossa
+    huomiot: { product: PRODUCT_ID, kokeilu: true }
 };
 
 /**

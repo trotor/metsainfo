@@ -1,0 +1,60 @@
+/* Huomiot (kokeilu, #33) */
+
+/* Napautustila: vektoritasot ja merkit läpäisevät napautuksen, piste asetetaan kartalle */
+.hu-napautus .leaflet-interactive { pointer-events: none !important; }
+.hu-napautus.leaflet-container { cursor: crosshair; }
+
+.hu-body { display: flex; flex-direction: column; gap: 10px; }
+.hu-teksti { margin: 0; color: var(--kaarna); font-size: 0.85rem; line-height: 1.45; }
+.hu-pieni { color: var(--sammal); font-size: 0.75rem; line-height: 1.4; }
+.hu-huom { margin: 4px 0 0; }
+
+.hu-nayta { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--kaarna); }
+
+.hu-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 45vh; overflow-y: auto; }
+.hu-rivi {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 8px 10px; border: 1px solid #dfe5dc; border-radius: 8px;
+    background: #fff; text-align: left; cursor: pointer; font: inherit; color: var(--kaarna);
+}
+.hu-rivi:hover, .hu-rivi:focus-visible { border-color: var(--havu); }
+.hu-rivi-teksti { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hu-rivi-teksti strong { font-size: 0.9rem; overflow-wrap: anywhere; }
+
+.hu-valinta { display: flex; flex-direction: column; gap: 8px; }
+
+.hu-lomake { display: flex; flex-direction: column; gap: 10px; }
+.hu-lomake label { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; font-weight: 600; color: var(--kaarna); }
+.hu-lomake input, .hu-lomake select, .hu-lomake textarea {
+    font: inherit; font-weight: 400; font-size: 16px; /* iOS ei zoomaa */
+    padding: 8px 10px; border: 1px solid #cfd8cb; border-radius: 6px; background: #fff; color: var(--kaarna);
+}
+.hu-lomake textarea { resize: vertical; }
+.hu-rivi-tieto { display: flex; justify-content: space-between; gap: 12px; font-size: 0.8rem; color: var(--kaarna); }
+.hu-rivi-tieto > span:first-child { font-weight: 600; }
+.hu-rivi-tieto > span:last-child { text-align: right; }
+.hu-actions { display: flex; gap: 8px; }
+.hu-actions .kortti-btn { flex: 1; }
+.hu-poista { color: #9a3a0b; }
+
+/* Karttamerkit ja niiden värit tyypin mukaan */
+.hu-merkki, .hu-ikoni {
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; color: #fff; font-weight: 700; line-height: 1;
+}
+.hu-merkki { width: 28px; height: 28px; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); font-size: 15px; }
+.hu-merkki.hu-muokattava { outline: 3px solid #f59e0b; outline-offset: 1px; cursor: grab; }
+.hu-ikoni { flex: none; width: 24px; height: 24px; font-size: 13px; }
+.hu-tuulenkaato { background: #9a3a0b; }
+.hu-rajapyykki { background: #7c3aed; }
+.hu-oja { background: #1d6fa5; }
+.hu-varasto { background: #b45309; }
+.hu-muu { background: #2d5a27; }
+
+/* Kiinteistön ja kuvion tiedoissa */
+.hu-yhteenveto { margin-top: 6px; }
+.hu-linkki {
+    padding: 0; border: none; background: none; font: inherit; font-size: 0.85rem;
+    color: var(--havu); text-decoration: underline; cursor: pointer;
+}
+.hu-kuvio p { margin: 0; font-size: 0.85rem; }

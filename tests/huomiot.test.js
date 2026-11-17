@@ -2,7 +2,7 @@ import '../js/vendor/index.js';
 import '../js/config.js';
 import { describe, it, expect } from 'vitest';
 import { TYYPIT, createNotes } from '../js/huomiot/varasto.js';
-import { standAt, linkFromSummary, formatCoords, notesFor } from '../js/huomiot/logiikka.js';
+import { standAt, standRefOf, linkFromSummary, formatCoords, notesFor } from '../js/huomiot/logiikka.js';
 
 function memoryStorage(initial = {}) {
     const data = { ...initial };
@@ -122,6 +122,11 @@ describe('huomion kuvio ja kiinteistö', () => {
         expect(standAt(features, [150, 50])).toEqual({ standId: 13, standNumber: '3', index: 2 });
         expect(standAt(features, [500, 500])).toBeNull();
         expect(standAt(undefined, [1, 1])).toBeNull();
+    });
+
+    it('kuvion viite listan valinnasta', () => {
+        expect(standRefOf(features[0], 0)).toEqual({ standId: 11, standNumber: '1' });
+        expect(standRefOf(features[2], 2)).toEqual({ standId: 13, standNumber: '3' });
     });
 
     it('piste kiinteistöllä: kiinteistö ja kuvio', () => {

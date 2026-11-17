@@ -11,14 +11,17 @@ function standIdOf(feature) {
     return Number.isFinite(fromId) && fromId > 0 ? fromId : feature?.properties?.STANDID ?? null;
 }
 
+/** Kuvion viite huomiolle: { standId, standNumber } (numero listan järjestyksestä, jos puuttuu). */
+export function standRefOf(feature, index) {
+    return { standId: standIdOf(feature), standNumber: String(feature?.properties?.STANDNUMBER ?? index + 1) };
+}
+
 /** Kuvio, jolla piste on: { standId, standNumber, index } tai null. */
 export function standAt(features, point) {
     if (!Array.isArray(features)) return null;
     const index = features.findIndex(f => containsPoint(f?.geometry, point));
     if (index < 0) return null;
-    const f = features[index];
-    const number = f.properties?.STANDNUMBER;
-    return { standId: standIdOf(f), standNumber: String(number ?? index + 1), index };
+    return { ...standRefOf(features[index], index), index };
 }
 
 function parcelGeometries(parcel) {

@@ -85,6 +85,7 @@ Seuraavia toimintoja kokeillaan testiversiossa. Ne voivat vielä muuttua ennen j
 - **Retkeilykohteet** – laavut, kodat, tulentekopaikat, retkeilyreitit ja luontopolut kartalla (LIPAS).
 - **Korkeusmalli** – laserkeilauksen vinovalaistu maastomalli taustakartaksi.
 - **Suosikit ja omat muistiinpanot** kiinteistöille, kuvioille ja hauille.
+- **Huomiot** – tallenna huomio tarkkaan paikkaan kartalle (esim. tuulenkaato, rajapyykki tai ojan tukos); huomio liitetään kiinteistöön ja kuvioon ja näkyy kartalla. Osa hinta-arvion lisäosaa.
 - **Kielet** – suomi, ruotsi ja englanti.
 
 ---

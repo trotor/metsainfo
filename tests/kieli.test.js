@@ -14,6 +14,7 @@ import { TEKSTIT as TYOKALUT } from '../js/ui/tyokalut-teksti.js';
 import { TEKSTIT as RAJOITTEET } from '../js/rajoitteet/teksti.js';
 import { TEKSTIT as RETKEILY } from '../js/retkeily/teksti.js';
 import { TEKSTIT as ARVOVARI } from '../js/arvovari/teksti.js';
+import { TEKSTIT as HUOMIOT } from '../js/huomiot/teksti.js';
 import { TEKSTIT as OHJEOSIOT } from '../js/ui/ohje-osiot.js';
 import { TEKSTIT as ESTIMATE } from '../js/ui/estimate-teksti.js';
 import { formatNumber } from '../js/utils.js';
@@ -36,7 +37,7 @@ describe('kielet', () => {
     it.each([
         ['maasto', MAASTO], ['lähihaku', LAHIHAKU], ['suosikit', SUOSIKIT],
         ['korkeusmalli', KORKEUSMALLI], ['asetukset', ASETUKSET], ['käyttöliittymä', UI],
-        ['hinta-arvio', ESTIMATE], ['sivu', SIVU], ['saavutettavuus', SAAVUTETTAVUUS], ['valinta', VALINTA], ['tyokalut', TYOKALUT], ['rajoitteet', RAJOITTEET], ['retkeily', RETKEILY], ['arvovari', ARVOVARI], ['ohjeosiot', OHJEOSIOT]
+        ['hinta-arvio', ESTIMATE], ['sivu', SIVU], ['saavutettavuus', SAAVUTETTAVUUS], ['valinta', VALINTA], ['tyokalut', TYOKALUT], ['rajoitteet', RAJOITTEET], ['retkeily', RETKEILY], ['arvovari', ARVOVARI], ['huomiot', HUOMIOT], ['ohjeosiot', OHJEOSIOT]
     ])('%s: kaikilla kielillä samat avaimet', (_, t) => {
         expect(shape(t.en)).toEqual(shape(t.fi));
         expect(t.sv, 'ruotsinkieliset tekstit puuttuvat').toBeDefined();
