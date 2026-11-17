@@ -2367,6 +2367,20 @@ html.platform-ios .store-generic, html.platform-android .store-generic { display
 .est-prices-act { flex: none; color: var(--havu); font-weight: 700; text-decoration: underline; }
 .est-prices-body { padding: 0 10px 8px; }
 .est-prices-body .est-src { padding: 0; }
+.est-sovellus { margin: 10px 0 6px; font-weight: 600; color: var(--kaarna); }
+.est-kaupat { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+.est-kaupat .est-kauppa { display: inline-flex; align-items: center; text-decoration: none; }
+.pw-sovellus p { margin: 12px 0 4px; font-weight: 600; }
+.est-erittely h4 { margin: 12px 0 6px; font-size: 13px; color: var(--kuusikko); }
+.est-erittely p.est-muted { margin: 4px 0 8px; }
+.est-erittely-table { font-size: 12.5px; }
+.est-erittely-table th, .est-erittely-table td { padding: 5px 6px; }
+.est-erittely-table td:not(:first-child), .est-erittely-table th:not(:first-child) { text-align: right; white-space: nowrap; }
+.est-erittely-table .est-sum td { font-weight: 700; border-top: 2px solid #dfe5dc; }
+.est-erittely-table .est-txt { text-align: left !important; white-space: normal; }
+.est-erittely-table .est-ryhma td { text-align: left; font-weight: 700; color: var(--kuusikko); background: #f7f8f5; font-size: 12px; }
+.est-huomiot { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.45; color: var(--kaarna); }
+.est-huomiot li { margin-bottom: 4px; }
 .est-actions button:disabled { opacity: .5; }
 .pw-preview { background: var(--jakala); border-radius: 12px; padding: 8px; margin: 10px 0; }
 .pw-preview-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--sammal); margin: 0 4px 6px; }

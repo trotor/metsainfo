@@ -39,26 +39,53 @@ export function speciesShares(p) {
 /**
  * Kuvion arvo yhden hakkuutavan hinnoilla (prices = taulukko[hakkuutapa]).
  * missing = jokin tarvittu hinta puuttuu (sen osuus jää pois).
+ * parts = puutavaralajit { species, assortment, volume, price } erittelyä varten.
  */
 export function standValue(p, prices) {
     const area = p.AREA || 0;
     const log = (p.SAWLOGVOLUME || 0) * area;
     const pulp = (p.PULPWOODVOLUME || 0) * area;
     const shares = speciesShares(p);
-    if (!shares || (log === 0 && pulp === 0)) return { value: 0, missing: false };
+    if (!shares || (log === 0 && pulp === 0)) return { value: 0, missing: false, log, pulp, parts: [] };
     let value = 0;
     let missing = false;
+    const parts = [];
     for (const s of Object.keys(shares)) {
         const share = shares[s];
         if (share === 0) continue;
-        for (const [volume, price] of [[log, prices[s].tukki], [pulp, prices[s].kuitu]]) {
+        for (const [assortment, volume] of [['tukki', log], ['kuitu', pulp]]) {
             if (volume === 0) continue;
-            if (price === null || price === undefined) { missing = true; continue; }
+            const price = prices[s][assortment];
+            const known = price !== null && price !== undefined;
+            parts.push({ species: s, assortment, volume: share * volume, price: known ? price : null });
+            if (!known) { missing = true; continue; }
             value += share * volume * price;
         }
     }
-    return { value, missing };
+    return { value, missing, log, pulp, parts };
 }
+
+/** Kerää puutavaralajirivit (hakkuutapa + puulaji + tukki/kuitu) yhteen; kerroin = poistuma. */
+function addParts(rows, method, parts, factor) {
+    for (const part of parts) {
+        const key = `${method}|${part.species}|${part.assortment}`;
+        let row = rows.get(key);
+        if (!row) {
+            row = { method, species: part.species, assortment: part.assortment, volume: 0, price: part.price, value: part.price === null ? null : 0 };
+            rows.set(key, row);
+        }
+        const volume = part.volume * factor;
+        row.volume += volume;
+        if (row.value !== null && part.price !== null) row.value += volume * part.price;
+    }
+}
+
+const SPECIES_ORDER = ['manty', 'kuusi', 'koivu'];
+const METHOD_ORDER = ['uudistus', 'harvennus', 'ensiharvennus'];
+const sortRows = (rows) => [...rows.values()].filter(r => r.volume > 0).sort((a, b) =>
+    METHOD_ORDER.indexOf(a.method) - METHOD_ORDER.indexOf(b.method)
+    || SPECIES_ORDER.indexOf(a.species) - SPECIES_ORDER.indexOf(b.species)
+    || (a.assortment === 'tukki' ? -1 : 1));
 
 /**
  * Kiinteistön arvio: ehdotetut hakkuut (poistumilla) vuosittain sekä koko
@@ -66,28 +93,39 @@ export function standValue(p, prices) {
  */
 export function estimateParcel(features, table, { removal = DEFAULT_REMOVAL } = {}) {
     const plans = [];
-    const stock = { value: 0, missing: 0 };
+    const stock = { value: 0, missing: 0, volume: 0, area: 0 };
+    const planRows = new Map();
+    const stockRows = new Map();
     let missing = 0;
 
     for (const f of features) {
         const p = f.properties || {};
         const s = standValue(p, table.uudistus);
         stock.value += s.value;
+        stock.volume += s.log + s.pulp;
+        stock.area += p.AREA || 0;
+        addParts(stockRows, 'uudistus', s.parts, 1);
         if (s.missing) stock.missing++;
 
         const method = cuttingMethod(p.CUTTINGTYPE);
         if (!method) continue;
         const v = standValue(p, table[method]);
         if (v.missing) missing++;
+        const share = removal[method] ?? 1;
+        addParts(planRows, method, v.parts, share);
         plans.push({
             standNumber: p.STANDNUMBER ?? null,
             year: p.CUTTINGPROPOSALYEAR ?? null,
             method,
             area: p.AREA || 0,
-            value: v.value * (removal[method] ?? 1),
+            removal: share,
+            log: v.log * share,
+            pulp: v.pulp * share,
+            value: v.value * share,
             missing: v.missing
         });
     }
+    stock.assortments = sortRows(stockRows);
 
     const years = new Map();
     for (const plan of plans) {
@@ -104,6 +142,10 @@ export function estimateParcel(features, table, { removal = DEFAULT_REMOVAL } = 
         plans,
         byYear,
         total: plans.reduce((a, p) => a + p.value, 0),
+        /** Myytävä m³ (poistumilla) ja ehdotettujen kuvioiden pinta-ala keskiarvoja varten */
+        volume: plans.reduce((a, p) => a + p.log + p.pulp, 0),
+        area: plans.reduce((a, p) => a + p.area, 0),
+        assortments: sortRows(planRows),
         stock,
         missing
     };

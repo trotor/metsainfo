@@ -29,8 +29,9 @@ describe('showSummary', () => {
         showSummary(STANDS, null);
         const tabs = [...document.querySelectorAll('.tabbar [data-tab]')].map(b => b.dataset.tab);
         const panels = [...document.querySelectorAll('section.tab-panel')].map(s => s.dataset.tab);
-        expect(tabs).toEqual(['summary', 'stands', 'recs']);
-        expect(panels).toEqual(['summary', 'recs', 'stands']);
+        // Verkossa myös Arvio-välilehti esittelynä (#36)
+        expect(tabs).toEqual(['summary', 'stands', 'recs', 'arvio']);
+        expect(panels).toEqual(['summary', 'recs', 'arvio', 'stands']);
     });
 
     it('ei välilehtiä ilman kuvioita', () => {
@@ -68,12 +69,13 @@ describe('showSummary', () => {
         expect(years.find(y => y.textContent === String(thisYear + 6)).classList.contains('soon')).toBe(false);
     });
 
-    it('verkkoversiossa ei hinta-arviota (ei välilehteä, korttia eikä ostonäkymää)', () => {
+    it('verkkoversio esittelee hinta-arvion: välilehti ja kortti, ei ostonäkymää ennen napautusta (#36)', () => {
         showSummary(STANDS, null);
-        expect(document.querySelector('.tabbar [data-tab="arvio"]')).toBeNull();
-        expect(document.querySelector('.tab-panel[data-tab="arvio"]')).toBeNull();
-        expect(document.querySelector('.estimate-card')).toBeNull();
+        expect(document.querySelector('.tabbar [data-tab="arvio"]')).not.toBeNull();
+        expect(document.querySelector('.tab-panel[data-tab="arvio"]')).not.toBeNull();
+        expect(document.querySelector('.estimate-card')).not.toBeNull();
         expect(document.getElementById('paywall')).toBeNull();
+        expect(document.querySelector('.tab-panel[data-tab="arvio"]').textContent).toContain('Metsäinfo-sovelluksen maksullinen lisäosa');
     });
 
     it('valinta: otsikko Valinta, ei linkkipainiketta, ⋯-valikon linkki piilossa', () => {

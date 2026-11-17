@@ -46,7 +46,7 @@ describe('standValue', () => {
         const p = stand({ PROPORTIONPINE: 0.5, PROPORTIONSPRUCE: 0.5 }).properties;
         // tukki 200 m³, kuitu 100 m³; puolet männyn, puolet kuusen hinnoin
         const expected = 0.5 * (200 * 80 + 100 * 25) + 0.5 * (200 * 86 + 100 * 26);
-        expect(standValue(p, prices().uudistus)).toEqual({ value: expected, missing: false });
+        expect(standValue(p, prices().uudistus)).toMatchObject({ value: expected, missing: false });
     });
     it('puuttuva hinta merkitään, eikä tulos ole NaN', () => {
         const t = prices(); t.uudistus.manty.tukki = null;
@@ -59,7 +59,7 @@ describe('standValue', () => {
         expect(standValue(stand().properties, t.uudistus).missing).toBe(false);
     });
     it('ilman puustotietoa arvo on 0', () => {
-        expect(standValue({ AREA: 1 }, prices().uudistus)).toEqual({ value: 0, missing: false });
+        expect(standValue({ AREA: 1 }, prices().uudistus)).toMatchObject({ value: 0, missing: false });
     });
 });
 
@@ -96,6 +96,50 @@ describe('estimateParcel', () => {
     it('kuviot, joilta hinta puuttuu, lasketaan', () => {
         const t = prices(); t.harvennus.manty.tukki = null;
         expect(estimateParcel(features, t).missing).toBe(1);
+    });
+});
+
+describe('estimateParcel: erittely (mistä arvio koostuu)', () => {
+    const features = [
+        stand({ STANDNUMBER: 1, CUTTINGTYPE: 3, CUTTINGPROPOSALYEAR: 2027 }),  // harvennus 30 %
+        stand({ STANDNUMBER: 2, CUTTINGTYPE: 5, CUTTINGPROPOSALYEAR: 2031 }),  // uudistus
+        stand({ STANDNUMBER: 3, CUTTINGTYPE: 2, CUTTINGPROPOSALYEAR: 2027 }),  // ensiharvennus 35 %
+        stand({ STANDNUMBER: 4, CUTTINGTYPE: 0 }),
+        stand({ STANDNUMBER: 5, PROPORTIONPINE: 0.5, PROPORTIONSPRUCE: 0.5 })
+    ];
+    const r = estimateParcel(features, prices());
+    const row = (rows, method, species, assortment) => rows.find(x => x.method === method && x.species === species && x.assortment === assortment);
+
+    it('ehdotetut hakkuut puutavaralajeittain: myytävä m³ poistumalla × hakkuutavan hinta', () => {
+        expect(row(r.assortments, 'harvennus', 'manty', 'tukki')).toMatchObject({ volume: 60, price: 70, value: 4200 });
+        expect(row(r.assortments, 'harvennus', 'manty', 'kuitu')).toMatchObject({ volume: 30, price: 20, value: 600 });
+        expect(row(r.assortments, 'uudistus', 'manty', 'tukki')).toMatchObject({ volume: 200, price: 80, value: 16000 });
+        expect(row(r.assortments, 'ensiharvennus', 'manty', 'kuitu').volume).toBeCloseTo(35, 6);
+        expect(r.assortments.reduce((a, x) => a + x.value, 0)).toBeCloseTo(r.total, 6);
+    });
+    it('rivit eivät sisällä nollamääriä', () => {
+        expect(r.assortments.every(x => x.volume > 0)).toBe(true);
+        expect(r.assortments).toHaveLength(6);
+    });
+    it('kuvion rivillä myytävä tukki ja kuitu poistumalla', () => {
+        expect(r.plans.find(x => x.standNumber === 1)).toMatchObject({ log: 60, pulp: 30, removal: 0.3 });
+        expect(r.plans.find(x => x.standNumber === 2)).toMatchObject({ log: 200, pulp: 100, removal: 1 });
+    });
+    it('ehdotettujen hakkuiden myytävä m³ ja pinta-ala keskiarvoja varten', () => {
+        expect(r.volume).toBeCloseTo(90 + 300 + 105, 6);
+        expect(r.area).toBe(6);
+    });
+    it('koko puusto puutavaralajeittain uudistushakkuun hinnoin, puulajiosuuksilla jaettuna', () => {
+        expect(row(r.stock.assortments, 'uudistus', 'manty', 'tukki')).toMatchObject({ volume: 900, value: 900 * 80 });
+        expect(row(r.stock.assortments, 'uudistus', 'kuusi', 'tukki')).toMatchObject({ volume: 100, price: 86, value: 8600 });
+        expect(r.stock.volume).toBe(1500);
+        expect(r.stock.area).toBe(10);
+        expect(r.stock.assortments.reduce((a, x) => a + x.value, 0)).toBeCloseTo(r.stock.value, 6);
+    });
+    it('puuttuva hinta: määrä näkyy, hinta ja arvo null', () => {
+        const t = prices(); t.harvennus.manty.tukki = null;
+        const r2 = estimateParcel(features, t);
+        expect(row(r2.assortments, 'harvennus', 'manty', 'tukki')).toMatchObject({ volume: 60, price: null, value: null });
     });
 });
 

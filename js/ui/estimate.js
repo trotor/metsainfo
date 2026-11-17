@@ -7,6 +7,7 @@
  */
 
 import { purchases } from '../platform/purchases.js';
+import { isNative } from '../platform/index.js';
 import { fetchPrices, loadCachedPrices, loadOverrides, saveOverrides, lookupKunta } from '../platform/prices.js';
 import { shareTextFile } from '../platform/share.js';
 import { PRICE_REGIONS, regionForKunta, parcelPoint } from '../pricing/region.js';
@@ -28,12 +29,26 @@ let wired = false;
 const kuntaCache = new Map();
 
 function newCtx() {
-    return { gen: 0, features: [], label: '', region: null, regionAuto: '', prices: null, autoRegion: null, loading: false, resolving: false, error: '', method: 'uudistus', demo: false, valinta: false, pricesOpen: false };
+    return { gen: 0, features: [], label: '', region: null, regionAuto: '', prices: null, autoRegion: null, loading: false, resolving: false, error: '', method: 'uudistus', demo: false, valinta: false, pricesOpen: false, breakdownOpen: false };
 }
 
+/** Julkiset kauppasivut: verkkoversio ohjaa hinta-arvioon sovelluksen kautta (#36). */
+export const STORE_LINKS = {
+    appStore: 'https://apps.apple.com/fi/app/mets%C3%A4info/id6832988855',
+    googlePlay: 'https://play.google.com/store/apps/details?id=fi.inetor.metsainfo'
+};
+
+/** Verkkoversio: ei kauppaa eikä sovellusta. Hinta-arvio näkyy esittelynä ja esimerkkinä. */
+const webOnly = () => !purchases.isAvailable() && !isNative();
+
 export function estimateEnabled() {
-    return purchases.isAvailable();
+    return purchases.isAvailable() || webOnly();
 }
+
+const storeLinksHtml = () => `<div class="est-kaupat">
+    <a class="est-btn est-kauppa" href="${STORE_LINKS.appStore}" target="_blank" rel="noopener">${T.appStore}</a>
+    <a class="est-btn est-kauppa" href="${STORE_LINKS.googlePlay}" target="_blank" rel="noopener">${T.googlePlay}</a>
+</div>`;
 
 const unlocked = (ctx) => ctx.demo || purchases.isEntitled();
 
@@ -244,9 +259,10 @@ function lockedPanelHtml(ctx) {
         <h3>${T.nimi}</h3>
         ${t ? `<div class="est-teaser">${t.line}</div><div class="est-muted">${t.question}</div>` : ''}
         <p>${ctx.valinta ? T.esittelyValinta : T.esittely}</p>
+        ${webOnly() ? `<p class="est-sovellus">${T.sovelluksessa}</p>${storeLinksHtml()}` : ''}
         <div class="est-actions">
             <button type="button" class="est-btn-outline" data-est="demo">${T.kokeileEsimerkilla}</button>
-            <button type="button" class="est-btn" data-est="paywall">${T.avaaArvio}</button>
+            ${webOnly() ? '' : `<button type="button" class="est-btn" data-est="paywall">${T.avaaArvio}</button>`}
         </div>
     </div>`;
 }
@@ -291,6 +307,7 @@ function panelHtml(ctx) {
         <div class="est-muted">${T.kantoraha}</div>
         ${estimate.stock.missing ? `<div class="est-warn">${T.puustoVajaa(estimate.stock.missing)}</div>` : ''}
     </div>` : ''}
+    ${priced ? breakdownHtml(ctx, estimate) : ''}
 
     <div class="est-prices">
         <button type="button" class="est-prices-head" data-est="toggle-prices" aria-expanded="${open}">
@@ -314,6 +331,62 @@ function panelHtml(ctx) {
     </div>
     <p class="est-fine">${T.hienoArvio(pct(DEFAULT_REMOVAL.harvennus), pct(DEFAULT_REMOVAL.ensiharvennus))}
     ${T.hienoLahteet(escapeHtml(p?.source || T.oletusLahde), `<a href="${T.ccBy}" target="_blank" rel="noopener">CC BY 4.0</a>`)}</p>`;
+}
+
+/* ---------- Erittely: mistä arvio koostuu ---------- */
+
+const whole = (v) => formatNumber(Math.round(v || 0), 0, locale());
+
+function assortmentTable(rows, total) {
+    // Useampi hakkuutapa: rivit hakkuutavan väliotsikoiden alle (hinnat eroavat hakkuutavoittain)
+    const grouped = new Set(rows.map(r => r.method)).size > 1;
+    const C = T.sarakkeet;
+    const body = rows.map((r, i) => {
+        const head = grouped && (i === 0 || rows[i - 1].method !== r.method)
+            ? `<tr class="est-ryhma"><td colspan="4">${METHOD_LABELS[r.method]}</td></tr>` : '';
+        return `${head}<tr><td>${SPECIES_LABELS[r.species]}, ${T.lajite[r.assortment]}</td><td>${whole(r.volume)}</td><td>${r.price === null ? '–' : formatPrice(r.price)}</td><td>${r.value === null ? '–' : whole(r.value)}</td></tr>`;
+    }).join('');
+    return `<table class="est-table est-erittely-table">
+        <thead><tr><th>${C.laji}</th><th>${C.m3}</th><th>${C.hinta}</th><th>${C.arvo}</th></tr></thead>
+        <tbody>${body}
+        <tr class="est-sum"><td>${T.yhteensaRivi}</td><td>${whole(rows.reduce((a, r) => a + r.volume, 0))}</td><td></td><td>${whole(total)}</td></tr></tbody>
+    </table>`;
+}
+
+function averageLine(value, volume, area) {
+    if (!(volume > 0) || !(area > 0)) return '';
+    return `<div class="est-muted">${T.keskiarvo(whole(value / volume), whole(value / area), formatNumber(area, 1, locale()))}</div>`;
+}
+
+/** Kokoontaitettava erittely Arvio-välilehdellä: puutavaralajit, kuviot, keskiarvot ja huomiot. */
+function breakdownHtml(ctx, estimate) {
+    const open = ctx.breakdownOpen;
+    const K = T.kuvioSarakkeet;
+    const plans = [...estimate.plans].sort((a, b) => (a.year ?? Infinity) - (b.year ?? Infinity) || (a.standNumber ?? 0) - (b.standNumber ?? 0));
+    const hakkuut = estimate.plans.length ? `
+        <h4>${T.erittelyHakkuut}</h4>
+        ${assortmentTable(estimate.assortments, estimate.total)}
+        ${averageLine(estimate.total, estimate.volume, estimate.area)}
+        <h4>${T.erittelyKuviot}</h4>
+        <table class="est-table est-erittely-table">
+            <thead><tr><th>${K.kuvio}</th><th class="est-txt">${K.hakkuu}</th><th>${K.vuosi}</th><th>${K.ha}</th><th>${K.m3}</th><th>${K.arvo}</th></tr></thead>
+            <tbody>${plans.map(p => `<tr><td>${p.standNumber ?? '–'}</td><td class="est-txt">${METHOD_LABELS[p.method]}${p.removal < 1 ? ` ${pct(p.removal)}` : ''}</td><td>${p.year ?? '–'}</td><td>${formatNumber(p.area, 1, locale())}</td><td>${whole(p.log + p.pulp)}</td><td>${p.missing ? '–' : whole(p.value)}</td></tr>`).join('')}</tbody>
+        </table>
+        <p class="est-muted">${T.poistumaHuom(pct(DEFAULT_REMOVAL.harvennus), pct(DEFAULT_REMOVAL.ensiharvennus))}</p>` : '';
+    return `<div class="est-prices est-erittely">
+        <button type="button" class="est-prices-head" data-est="toggle-breakdown" aria-expanded="${open}">
+            <span><b>${T.erittely}</b></span><span class="est-prices-act">${open ? T.piilota : T.erittelyAvaa}</span>
+        </button>
+        <div class="est-prices-body"${open ? '' : ' hidden'}>
+            <p class="est-muted">${T.laskenta}</p>
+            ${hakkuut}
+            <h4>${T.erittelyPuusto}</h4>
+            ${assortmentTable(estimate.stock.assortments, estimate.stock.value)}
+            ${averageLine(estimate.stock.value, estimate.stock.volume, estimate.stock.area)}
+            <h4>${T.huomOtsikko}</h4>
+            <ul class="est-huomiot">${T.huomiot.map(h => `<li>${h}</li>`).join('')}</ul>
+        </div>
+    </div>`;
 }
 
 /** Ehdotettujen hakkuiden summa ja vuosipalkit (Arvio-välilehti ja ostonäkymän esimerkki). */
@@ -388,6 +461,7 @@ function wireOnce() {
             case 'refresh': ensurePrices(ctx, null, { force: true }); break;
             case 'method': ctx.method = btn.dataset.m; renderAll(); break;
             case 'toggle-prices': ctx.pricesOpen = btn.getAttribute('aria-expanded') !== 'true'; renderAll(); break;
+            case 'toggle-breakdown': ctx.breakdownOpen = btn.getAttribute('aria-expanded') !== 'true'; renderAll(); break;
             case 'reset': saveOverrides({}, overrideScope(ctx)); renderAll(); break;
             case 'share': shareReport(ctx); break;
             case 'buy': buy(btn); break;
@@ -454,6 +528,7 @@ async function openPaywall() {
     markSeen();
     const el = document.createElement('div');
     el.id = 'paywall';
+    const web = webOnly();
     el.innerHTML = `<div class="pw-dim" data-est="close-paywall"></div>
     <div class="pw-sheet" role="dialog" aria-modal="true" aria-labelledby="pw-title">
         <button type="button" class="pw-close" data-est="close-paywall" aria-label="${T.sulje}">×</button>
@@ -470,15 +545,19 @@ async function openPaywall() {
             <li>${T.etuKertaosto}</li>
         </ul>
         <button type="button" class="est-btn-outline pw-wide" data-est="demo">${T.kokeileEsimerkilla}</button>
-        <div class="pw-price"><span>${T.kertamaksu}</span><b class="pw-amount">…</b></div>
+        ${web
+        // Verkossa ei ostoa: kerrotaan sovelluksesta ja ohjataan kauppoihin (#36)
+        ? `<div class="pw-sovellus"><p>${T.sovelluksessa}</p>${storeLinksHtml()}</div>`
+        : `<div class="pw-price"><span>${T.kertamaksu}</span><b class="pw-amount">…</b></div>
         <button type="button" class="est-btn pw-wide pw-buy" data-est="buy" disabled>${T.osta}</button>
         <button type="button" class="est-link pw-restore" data-est="restore">${T.palautaOsto}</button>
         <div class="pw-msg" aria-live="polite"><span class="est-loading pw-wait"><span class="est-spinner"></span>${T.haetaanHintaa}</span></div>
-        <p class="est-fine">${T.pwLisat}</p>
+        <p class="est-fine">${T.pwLisat}</p>`}
         <p class="est-fine">${T.pwHieno}</p>
     </div>`;
     document.body.appendChild(el);
     renderPaywallPreview(el);
+    if (web) return;
     try {
         // Kauppa ei aina vastaa (esim. ei verkkoa): ei jäädä odottamaan loputtomiin
         const product = await Promise.race([

@@ -54,6 +54,25 @@ describe('buildEstimateReport', () => {
         expect(report).toContain('7;2031;Uudistushakkuu;1,98;31215');
         expect(report).toMatch(/suuntaa-antava/i);
     });
+    it('erittely: puutavaralajit ja kuvion myytävä tukki ja kuitu', () => {
+        const report = buildEstimateReport({
+            label: 'X', regionName: 'Keski-Suomi', prices: null, table: emptyTable(),
+            estimate: {
+                total: 4800,
+                stock: { value: 9000, assortments: [{ method: 'uudistus', species: 'kuusi', assortment: 'tukki', volume: 100.4, price: 86.82, value: 8716.7 }] },
+                plans: [{ standNumber: 1, year: 2027, method: 'harvennus', area: 2, value: 4800, log: 60, pulp: 30.25 }],
+                assortments: [
+                    { method: 'harvennus', species: 'manty', assortment: 'tukki', volume: 60, price: 70, value: 4200 },
+                    { method: 'harvennus', species: 'manty', assortment: 'kuitu', volume: 30.25, price: null, value: null }
+                ]
+            }
+        });
+        expect(report).toContain('1;2027;Harvennus;2,00;4800;60;30');
+        expect(report).toContain('Ehdotetut hakkuut puutavaralajeittain');
+        expect(report).toContain('Harvennus;Mänty;tukki;60;70,00;4200');
+        expect(report).toContain('Harvennus;Mänty;kuitu;30;;');
+        expect(report).toContain('Uudistushakkuu;Kuusi;tukki;100;86,82;8717');
+    });
     it('kertoo raportissa puuttuvista hinnoista', () => {
         const report = buildEstimateReport({
             label: 'X', regionName: 'Lappi', prices: null, table: emptyTable(),

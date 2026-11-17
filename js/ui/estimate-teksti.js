@@ -45,6 +45,9 @@ const fi = {
     esittelyValinta: 'Näe, paljonko valinnan ehdotetut hakkuut ovat arvoltaan alueen tuoreilla kantohinnoilla. Voit käyttää myös omia hintoja, esimerkiksi saamasi puukauppatarjouksen mukaan.',
     kokeileEsimerkilla: 'Kokeile esimerkkimetsällä',
     avaaArvio: 'Avaa hinta-arvio',
+    sovelluksessa: 'Hinta-arvio on Metsäinfo-sovelluksen maksullinen lisäosa (kertaosto). Lataa sovellus iPhonelle tai Android-puhelimelle ja katso arvio omille kiinteistöillesi. Verkossa voit kokeilla sitä esimerkkimetsällä.',
+    appStore: 'App Store (iPhone)',
+    googlePlay: 'Google Play (Android)',
 
     /* ---------- Arvio-välilehti ---------- */
     haetaan: 'Haetaan…',
@@ -60,6 +63,24 @@ const fi = {
     puustoVajaa: (n) => `${n} kuviolta puuttuu uudistushakkuun hintoja, joten arvo on vajaa.`,
     hinnat: 'Hinnat',
     piilota: 'Piilota',
+    erittely: 'Mistä arvio koostuu?',
+    erittelyAvaa: 'Näytä',
+    erittelyHakkuut: 'Ehdotetut hakkuut puutavaralajeittain',
+    erittelyKuviot: 'Ehdotetut hakkuut kuvioittain',
+    erittelyPuusto: 'Koko puusto uudistushakkuun hinnoin',
+    sarakkeet: { laji: 'Puutavaralaji', m3: 'm³', hinta: '€/m³', arvo: '€' },
+    kuvioSarakkeet: { kuvio: 'Kuvio', hakkuu: 'Hakkuu', vuosi: 'Vuosi', ha: 'ha', m3: 'm³', arvo: '€' },
+    yhteensaRivi: 'Yhteensä',
+    keskiarvo: (eurM3, eurHa, ha) => `Keskimäärin ${eurM3} €/m³ ja ${eurHa} €/ha (${ha} ha).`,
+    poistumaHuom: (h, e) => `Myytävä määrä: uudistushakkuussa koko tukki- ja kuitupuu, harvennuksessa ${h} ja ensiharvennuksessa ${e} siitä.`,
+    laskenta: 'Laskenta: kuvion tukki- ja kuitupuu (m³/ha) kerrotaan pinta-alalla ja jaetaan puulajiosuuksien mukaan, ja kukin erä kerrotaan hakkuutavan kantohinnalla (€/m³).',
+    huomOtsikko: 'Huomioitavaa',
+    huomiot: [
+        'Kantohinta on hinta pystypuusta ennen veroja. Puun myyntitulo on pääomatuloa (verokanta 30–34 %), ja metsävähennys voi pienentää veroa.',
+        'Tilavuudet ovat Metsäkeskuksen kaukokartoitukseen perustuvia arvioita. Toteutuva kertymä jää usein pienemmäksi, ja tukin osuus voi poiketa.',
+        'Leimikon koko, korjuuolot, kelirikko ja ostajan tarjous vaikuttavat todelliseen hintaan.',
+        'Kuvio voi olla jo hakattu, vaikka ehdotus näkyy aineistossa.'
+    ],
     muokkaa: 'Muokkaa',
     hintaAlue: 'Hinta-alue',
     kunta: (name) => ` · kunta ${name}`,
@@ -146,7 +167,10 @@ const fi = {
         huom: 'Huom',
         vajaa: (n) => `Osalta kuvioista puuttuu hintoja (${n} kuviota), joten arvio on vajaa`,
         hintaSarakkeet: ['Hakkuutapa', 'Puulaji', 'Tukki (€/m³)', 'Kuitu (€/m³)'],
-        kuvioSarakkeet: ['Kuvio', 'Vuosi', 'Hakkuutapa', 'Pinta-ala (ha)', 'Arvio (€)'],
+        kuvioSarakkeet: ['Kuvio', 'Vuosi', 'Hakkuutapa', 'Pinta-ala (ha)', 'Arvio (€)', 'Myytävä tukki (m³)', 'Myytävä kuitu (m³)'],
+        erittely: 'Ehdotetut hakkuut puutavaralajeittain',
+        erittelyPuusto: 'Koko puusto puutavaralajeittain (uudistushakkuun hinnoin)',
+        lajiSarakkeet: ['Hakkuutapa', 'Puulaji', 'Puutavaralaji', 'Määrä (m³)', 'Hinta (€/m³)', 'Arvo (€)'],
         loppu: 'Arvio on suuntaa-antava eikä korvaa puukauppatarjousta. Tukki- ja kuitupuu on jaettu puulajiosuuksien mukaan; harvennuksissa poistuma 30 %, ensiharvennuksissa 35 %.'
     }
 };
@@ -184,6 +208,9 @@ const sv = {
     esittelyValinta: 'Se hur mycket urvalets föreslagna avverkningar är värda till färska rotpriser i området. Du kan också använda egna priser, till exempel enligt ett anbud på virkesaffär som du har fått.',
     kokeileEsimerkilla: 'Prova med en exempelskog',
     avaaArvio: 'Lås upp prisuppskattningen',
+    sovelluksessa: 'Prisuppskattningen är ett avgiftsbelagt tillägg i appen Metsäinfo (engångsköp). Ladda ner appen till iPhone eller Android-telefon och se uppskattningen för dina egna fastigheter. På webben kan du prova den med exempelskogen.',
+    appStore: 'App Store (iPhone)',
+    googlePlay: 'Google Play (Android)',
 
     /* ---------- Uppskattning-fliken ---------- */
     haetaan: 'Hämtas…',
@@ -199,6 +226,24 @@ const sv = {
     puustoVajaa: (n) => `Priser för förnyelseavverkning saknas för ${n} ${n === 1 ? 'figur' : 'figurer'}, så värdet är ofullständigt.`,
     hinnat: 'Priser',
     piilota: 'Dölj',
+    erittely: 'Vad består uppskattningen av?',
+    erittelyAvaa: 'Visa',
+    erittelyHakkuut: 'Föreslagna avverkningar per virkessortiment',
+    erittelyKuviot: 'Föreslagna avverkningar per figur',
+    erittelyPuusto: 'Hela trädbeståndet till priser för förnyelseavverkning',
+    sarakkeet: { laji: 'Sortiment', m3: 'm³', hinta: '€/m³', arvo: '€' },
+    kuvioSarakkeet: { kuvio: 'Figur', hakkuu: 'Avverkning', vuosi: 'År', ha: 'ha', m3: 'm³', arvo: '€' },
+    yhteensaRivi: 'Totalt',
+    keskiarvo: (eurM3, eurHa, ha) => `I genomsnitt ${eurM3} €/m³ och ${eurHa} €/ha (${ha} ha).`,
+    poistumaHuom: (h, e) => `Säljbar volym: vid förnyelseavverkning allt stockvirke och all massaved, vid gallring ${h} och vid första gallring ${e} av den.`,
+    laskenta: 'Beräkning: figurens stockvirke och massaved (m³/ha) multipliceras med arealen och fördelas enligt trädslagsandelarna, och varje post multipliceras med rotpriset för avverkningssättet (€/m³).',
+    huomOtsikko: 'Att beakta',
+    huomiot: [
+        'Rotpriset är priset för virke på rot före skatt. Inkomsten från virkesförsäljning är kapitalinkomst (skattesats 30–34 %), och skogsavdraget kan minska skatten.',
+        'Volymerna är uppskattningar som bygger på Skogscentralens fjärranalys. Det faktiska utfallet blir ofta mindre, och stockandelen kan avvika.',
+        'Stämplingens storlek, drivningsförhållandena, menföret och köparens anbud påverkar det faktiska priset.',
+        'Figuren kan redan vara avverkad även om förslaget syns i materialet.'
+    ],
     muokkaa: 'Redigera',
     hintaAlue: 'Prisområde',
     kunta: (name) => ` · kommun ${name}`,
@@ -294,7 +339,10 @@ const sv = {
         huom: 'Obs',
         vajaa: (n) => `Priser saknas för en del figurer (${n} ${n === 1 ? 'figur' : 'figurer'}), så uppskattningen är ofullständig`,
         hintaSarakkeet: ['Avverkningssätt', 'Trädslag', 'Stockvirke (€/m³)', 'Massaved (€/m³)'],
-        kuvioSarakkeet: ['Figur', 'År', 'Avverkningssätt', 'Areal (ha)', 'Uppskattning (€)'],
+        kuvioSarakkeet: ['Figur', 'År', 'Avverkningssätt', 'Areal (ha)', 'Uppskattning (€)', 'Säljbart stockvirke (m³)', 'Säljbar massaved (m³)'],
+        erittely: 'Föreslagna avverkningar per virkessortiment',
+        erittelyPuusto: 'Hela trädbeståndet per virkessortiment (priser för förnyelseavverkning)',
+        lajiSarakkeet: ['Avverkningssätt', 'Trädslag', 'Sortiment', 'Volym (m³)', 'Pris (€/m³)', 'Värde (€)'],
         loppu: 'Uppskattningen är riktgivande och ersätter inte ett anbud på virkesaffär. Stockvirke och massaved har fördelats enligt trädslagsandelarna; uttaget vid gallring är 30 %, vid första gallring 35 %.'
     }
 };
@@ -332,6 +380,9 @@ const en = {
     esittelyValinta: 'See what the proposed fellings in the selection are worth at recent stumpage prices for the area. You can also use your own prices, for example from a timber sale offer you have received.',
     kokeileEsimerkilla: 'Try with an example forest',
     avaaArvio: 'Unlock timber sale estimate',
+    sovelluksessa: 'The timber sale estimate is a paid add-on in the Metsäinfo app (one-off purchase). Download the app for iPhone or Android and see the estimate for your own properties. On the web you can try it with the example forest.',
+    appStore: 'App Store (iPhone)',
+    googlePlay: 'Google Play (Android)',
 
     /* ---------- Estimate tab ---------- */
     haetaan: 'Fetching…',
@@ -347,6 +398,24 @@ const en = {
     puustoVajaa: (n) => `${n} ${n === 1 ? 'stand is' : 'stands are'} missing regeneration felling prices, so the value is incomplete.`,
     hinnat: 'Prices',
     piilota: 'Hide',
+    erittely: 'What makes up the estimate?',
+    erittelyAvaa: 'Show',
+    erittelyHakkuut: 'Proposed fellings by timber assortment',
+    erittelyKuviot: 'Proposed fellings by stand',
+    erittelyPuusto: 'Whole growing stock at regeneration felling prices',
+    sarakkeet: { laji: 'Assortment', m3: 'm³', hinta: '€/m³', arvo: '€' },
+    kuvioSarakkeet: { kuvio: 'Stand', hakkuu: 'Felling', vuosi: 'Year', ha: 'ha', m3: 'm³', arvo: '€' },
+    yhteensaRivi: 'Total',
+    keskiarvo: (eurM3, eurHa, ha) => `On average ${eurM3} €/m³ and ${eurHa} €/ha (${ha} ha).`,
+    poistumaHuom: (h, e) => `Volume sold: in regeneration fellings all sawlogs and pulpwood, in thinnings ${h} and in first thinnings ${e} of it.`,
+    laskenta: 'Calculation: the stand’s sawlog and pulpwood volumes (m³/ha) are multiplied by its area and split by tree species shares, and each lot is multiplied by the stumpage price for the felling method (€/m³).',
+    huomOtsikko: 'Keep in mind',
+    huomiot: [
+        'The stumpage price is the price for standing timber before tax. In Finland, income from timber sales is capital income (tax rate 30–34%), and the forest deduction can reduce the tax.',
+        'Volumes are estimates based on the Finnish Forest Centre’s remote sensing. The actual harvest is often smaller, and the share of sawlogs may differ.',
+        'The size of the sale, harvesting conditions, the thaw season and the buyer’s offer affect the actual price.',
+        'The stand may already have been felled even if the proposal still shows in the data.'
+    ],
     muokkaa: 'Edit',
     hintaAlue: 'Price region',
     kunta: (name) => ` · municipality ${name}`,
@@ -441,7 +510,10 @@ const en = {
         huom: 'Note',
         vajaa: (n) => `Prices are missing for some stands (${n} ${n === 1 ? 'stand' : 'stands'}), so the estimate is incomplete`,
         hintaSarakkeet: ['Felling method', 'Tree species', 'Sawlog (€/m³)', 'Pulpwood (€/m³)'],
-        kuvioSarakkeet: ['Stand', 'Year', 'Felling method', 'Area (ha)', 'Estimate (€)'],
+        kuvioSarakkeet: ['Stand', 'Year', 'Felling method', 'Area (ha)', 'Estimate (€)', 'Sawlogs sold (m³)', 'Pulpwood sold (m³)'],
+        erittely: 'Proposed fellings by timber assortment',
+        erittelyPuusto: 'Whole growing stock by timber assortment (regeneration felling prices)',
+        lajiSarakkeet: ['Felling method', 'Tree species', 'Assortment', 'Volume (m³)', 'Price (€/m³)', 'Value (€)'],
         loppu: 'The estimate is indicative and does not replace a timber sale offer. Sawlogs and pulpwood are split by tree species shares; removal in thinnings 30%, in first thinnings 35%.'
     }
 };

@@ -133,6 +133,9 @@ ul.tk-ohje { padding-left: 0; }
         z-index: 2100; /* korttien (2050) yllä */
     }
     .tyokalu-siru { top: calc(70px + env(safe-area-inset-top)); }
+    /* Täysikokoinen paneeli alkaa hakupalkin alta: siru peittäisi sen otsikon ja luvut.
+       Siru palaa, kun paneelia pienennetään. */
+    body:has(#info-panel[data-snap="full"]:not(.hidden)) .tyokalu-siru:not([hidden]) { display: none; }
 }
 
 /* Tabletissa lista oikeaan reunaan, ei tietopaneelin päälle (TABLET_QUERY) */
