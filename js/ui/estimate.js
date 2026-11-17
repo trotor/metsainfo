@@ -28,7 +28,7 @@ let wired = false;
 const kuntaCache = new Map();
 
 function newCtx() {
-    return { gen: 0, features: [], label: '', region: null, regionAuto: '', prices: null, autoRegion: null, loading: false, resolving: false, error: '', method: 'uudistus', demo: false, pricesOpen: false };
+    return { gen: 0, features: [], label: '', region: null, regionAuto: '', prices: null, autoRegion: null, loading: false, resolving: false, error: '', method: 'uudistus', demo: false, valinta: false, pricesOpen: false };
 }
 
 export function estimateEnabled() {
@@ -78,7 +78,7 @@ export function initEstimate(contentEl, { features, parcel, label }) {
     if (!estimateEnabled()) return;
     wireOnce();
     // Uusi sukupolvi: edellisen kiinteistön keskeneräiset haut hylätään
-    Object.assign(parcelCtx, newCtx(), { gen: parcelCtx.gen + 1, features, label: label || '' });
+    Object.assign(parcelCtx, newCtx(), { gen: parcelCtx.gen + 1, features, label: label || '', valinta: Boolean(parcel?.properties?.valinta) });
     renderAll();
     if (purchases.isEntitled()) ensurePrices(parcelCtx, parcel);
     else parcelCtx.pendingParcel = parcel;
@@ -243,7 +243,7 @@ function lockedPanelHtml(ctx) {
     return `<div class="summary-section group-arvo est-intro">
         <h3>${T.nimi}</h3>
         ${t ? `<div class="est-teaser">${t.line}</div><div class="est-muted">${t.question}</div>` : ''}
-        <p>${T.esittely}</p>
+        <p>${ctx.valinta ? T.esittelyValinta : T.esittely}</p>
         <div class="est-actions">
             <button type="button" class="est-btn-outline" data-est="demo">${T.kokeileEsimerkilla}</button>
             <button type="button" class="est-btn" data-est="paywall">${T.avaaArvio}</button>
@@ -278,7 +278,7 @@ function panelHtml(ctx) {
         .filter(Boolean).map(escapeHtml).join(' · ');
 
     const result = priced
-        ? resultHtml(estimate)
+        ? resultHtml(estimate, { valinta: ctx.valinta })
         : (busy ? '' : `<div class="summary-section group-arvo est-result"><h3>${T.ehdotetutHakkuut}</h3><div class="est-muted">${T.hinnatPuuttuvatHae}</div></div>`);
 
     return `
@@ -317,14 +317,14 @@ function panelHtml(ctx) {
 }
 
 /** Ehdotettujen hakkuiden summa ja vuosipalkit (Arvio-välilehti ja ostonäkymän esimerkki). */
-function resultHtml(estimate) {
+function resultHtml(estimate, { valinta = false } = {}) {
     const maxYear = Math.max(1, ...estimate.byYear.map(y => y.value));
     const bars = estimate.byYear.map(y => `<div class="est-yr${hasUudistus(estimate, y.year) ? ' u' : ''}">
         <span>${y.year ?? '–'}</span><div style="width:${Math.max(2, Math.round(100 * y.value / maxYear))}%"></div><b>${formatEuro(y.value).replace('≈ ', '')}</b></div>`).join('');
     return `<div class="summary-section group-arvo est-result">
         <h3>${T.ehdotetutHakkuut}${estimate.byYear.length ? ` ${yearRangeLabel(estimate.byYear)}` : ''}</h3>
         ${estimate.plans.length ? `<div class="est-big">${formatEuro(estimate.total)}</div><div class="est-bars">${bars}</div>`
-            : `<div class="est-muted">${T.eiEhdotuksiaKiinteistolla}</div>`}
+            : `<div class="est-muted">${valinta ? T.eiEhdotuksiaValinnalla : T.eiEhdotuksiaKiinteistolla}</div>`}
         ${estimate.missing ? `<div class="est-warn">${T.summaVajaa(estimate.missing)}</div>` : ''}
     </div>`;
 }
@@ -422,13 +422,14 @@ function wireOnce() {
 
 async function shareReport(ctx) {
     const { table, estimate } = compute(ctx);
-    const label = ctx.demo ? T.tiedostoEsimerkki : (ctx.label || T.tiedostoKiinteisto);
+    const label = ctx.demo ? T.tiedostoEsimerkki : (ctx.label || (ctx.valinta ? T.tiedostoValinta : T.tiedostoKiinteisto));
     const report = buildEstimateReport({
         label: ctx.demo ? T.esimerkkiRaportissa : ctx.label,
         regionName: regionName(ctx.region),
         prices: ctx.prices,
         table,
-        estimate
+        estimate,
+        valinta: ctx.valinta
     });
     try {
         await shareTextFile(T.tiedosto(label.replace(/[^\w-]+/g, '_')), report);

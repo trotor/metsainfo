@@ -40,6 +40,9 @@ import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParce
 import { onEachFeature, onEachHabitat, onEachMkiFeature, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, setMkiColorMode, updateMkiLegend, copyParcelLink, downloadCSV, toggleHelp, initPanel, openPanelForSelection, setPeekMessage, mapFitOptions, initLocation, refreshHereRow } from './ui/index.js';
 import { applyPageTexts } from './ui/sivu.js';
 
+// Kuviovalinnan tila (kokeilu, VIESTIT.valintatila)
+let valintatila = false;
+
 // Expose functions for HTML onclick handlers
 window.copyParcelLink = copyParcelLink;
 window.downloadCSV = downloadCSV;
@@ -76,6 +79,8 @@ function init() {
         on(VIESTIT.avaaKiinteisto, ({ reference }) => openParcelByReference(reference)
             .then(ok => { if (!ok) showToast(UI.sovellus.eiLoytynyt); })
             .catch(() => showToast(UI.sovellus.hakuEpaonnistui)));
+        on(VIESTIT.valintatila, ({ paalla }) => { valintatila = Boolean(paalla); });
+        on(VIESTIT.naytaValinta, ({ features, parcel }) => showSelection(features, parcel));
         // Ladataan rinnakkain, käynnistetään aina samassa järjestyksessä (karttapainikkeet)
         Promise.all([
             import('./maasto/index.js'), import('./lahihaku/index.js'), import('./suosikit/index.js'),
@@ -217,7 +222,8 @@ function initLayers() {
 
     state.setState('cadastralLayer', L.geoJSON(null, {
         style: cadastralStyle,
-        onEachFeature: (feature, layer) => onEachParcel(feature, layer, selectParcel),
+        // Kuviovalinnan tilassa napautus valitsee kuvioita, ei kiinteistöä
+        onEachFeature: (feature, layer) => onEachParcel(feature, layer, (f) => { if (!valintatila) selectParcel(f); }),
         coordsToLatLng: coordsEPSG3067ToLatLng
     }).addTo(map));
 
@@ -597,6 +603,29 @@ async function selectParcel(parcel, { auto = false } = {}) {
 
     if (auto && state.currentParcel) return;
     selectParcels([parcel]);
+}
+
+/**
+ * Kuviovalinta (kokeilu): valitut kuviot yhteenvetona kuten kiinteistö.
+ * parcel on valinnan näennäiskiinteistö (properties.valinta, parts =
+ * kuviot Feature-muotoisina); kiinteistö- ja kuviohakuja ei tehdä.
+ */
+function showSelection(features, parcel) {
+    openPanelForSelection();
+    document.getElementById('loading').classList.add('hidden');
+    state.selectedParcelLayer.clearLayers();
+    state.forestLayer.clearLayers();
+    parcel.parts.forEach(part => state.selectedParcelLayer.addData(part));
+    updateUrlParam(null);
+    state.setState('currentParcel', parcel);
+    state.setState('currentFeatures', features);
+    features.forEach(f => state.forestLayer.addData(f));
+    const colorControl = document.getElementById('color-mode-control');
+    colorControl.classList.toggle('hidden', features.length === 0);
+    if (features.length > 0) updateLegend();
+    else document.getElementById('color-legend').classList.add('hidden');
+    showSummary(features, parcel, 1);
+    refreshHereRow();
 }
 
 /**

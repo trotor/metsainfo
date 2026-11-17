@@ -178,12 +178,15 @@ export function startSaavutettavuus() {
         </div>`;
     }
 
+    // Kuviovalinnalla (näennäiskiinteistö) tieteksteissä "valinta" kiinteistön sijaan
+    const tt = () => (ui.ctx?.parcel?.properties?.valinta ? { ...T, ...T.valinta } : T);
+
     function roadLines(r) {
         const t = r.tie;
         if (t.virhe) return [];
-        if (!t.reachesParcel) return [T.eiTieta];
-        const lines = [T.tieTulee];
-        if (t.route?.length === 0) lines.push(T.yleisenTienVarrella);
+        if (!t.reachesParcel) return [tt().eiTieta];
+        const lines = [tt().tieTulee];
+        if (t.route?.length === 0) lines.push(tt().yleisenTienVarrella);
         else if (t.route) lines.push(T.reitti(meters(t.route.length)));
         else lines.push(T.eiReittia);
         if (t.tiekunta) lines.push(T.tiekunta);
@@ -209,7 +212,7 @@ export function startSaavutettavuus() {
         const warn = r.tie.virhe ? T.tieVirhe : r.partial ? T.osittain : null;
         return `${warn ? `<div class="sv-varoitus"><p>${esc(warn)}</p>
                 <button type="button" class="kortti-btn" data-sv="retry">${esc(T.yritaUudelleen)}</button></div>` : ''}
-            ${r.tie.virhe ? '' : `<div class="sv-ryhma">${esc(T.tieKiinteistolle)}</div>`}
+            ${r.tie.virhe ? '' : `<div class="sv-ryhma">${esc(tt().tieKiinteistolle)}</div>`}
             ${roadLines(r).map(l => `<p class="sv-rivi-teksti">${esc(l)}</p>`).join('')}
             ${limits.length ? `<p class="sv-rajoitus"><strong>${esc(T.rajoitukset)}:</strong> ${esc(limits.join(', '))}</p>` : ''}
             <button type="button" class="kortti-btn sv-kartalle" data-sv="varit" aria-pressed="${ui.colors}">${esc(ui.colors ? T.piilotaKartalta : T.naytaKartalla)}</button>
@@ -248,7 +251,7 @@ export function startSaavutettavuus() {
     function connectionText(r) {
         const t = r.tie;
         if (t.virhe) return null;
-        if (!t.reachesParcel) return T.eiTietaLyhyt;
+        if (!t.reachesParcel) return tt().eiTietaLyhyt;
         if (t.route?.length === 0) return T.yleisenTienVarrellaLyhyt;
         if (t.route) return T.reittiLyhyt(meters(t.route.length));
         return T.eiReittiaLyhyt;

@@ -45,11 +45,11 @@ export function yearRangeLabel(byYear) {
 const csvNumber = (v, d) => (v === null || v === undefined ? '' : num(v, d, 'fi-FI').replace(/\s/g, ''));
 
 /** Jaettava raportti (CSV, puolipiste ja desimaalipilkku taulukkolaskentaa varten). */
-export function buildEstimateReport({ label, regionName, prices, table, estimate }) {
+export function buildEstimateReport({ label, regionName, prices, table, estimate, valinta = false }) {
     const R = T.raportti;
     const lines = [
         R.otsikko,
-        `${R.kiinteisto};${label}`,
+        `${valinta ? R.valinta : R.kiinteisto};${label}`,
         `${R.hintaAlue};${regionName}`,
         `${R.hinnat};${prices?.source || R.omatHinnat} ${prices?.periodLabel || ''}`.trim(),
         `${R.yhteensa};${Math.round(estimate.total)}`,

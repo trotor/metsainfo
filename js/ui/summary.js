@@ -53,6 +53,8 @@ export function showSummary(features, parcel, partCount = 1) {
     const stats = calculateStatistics(features);
 
     const parcelProps = parcel ? parcel.properties : null;
+    // Kuviovalinta (kokeilu): näennäiskiinteistö ilman kiinteistötunnusta
+    const valinta = Boolean(parcelProps?.valinta);
     const parcelLabel = parcelProps?.label || formatCadastralReference(parcelProps?.nationalCadastralReference) || '-';
     const parcelArea = calculateParcelArea(parcel, partCount);
     const parcelAreaText = parcelArea ? `${fmt(parcelArea / 10000, 2)} ha` : '';
@@ -85,15 +87,15 @@ export function showSummary(features, parcel, partCount = 1) {
         <section class="tab-panel" data-tab="summary">
         ${parcel ? `
         <div class="summary-section parcel-section">
-            <h3>${T.kiinteisto}</h3>
+            <h3>${valinta ? T.valinta : T.kiinteisto}</h3>
             <div class="parcel-info">
                 <div class="parcel-id">${parcelLabel}</div>
                 <div class="parcel-details">${parcelAreaText}${partsInfo}</div>
             </div>
             <div class="parcel-actions">
-                <button class="action-btn copy-link-btn" id="copy-link-btn" onclick="copyParcelLink()">
+                ${valinta ? '' : `<button class="action-btn copy-link-btn" id="copy-link-btn" onclick="copyParcelLink()">
                     <span class="action-icon">🔗</span> ${T.kopioiLinkki}
-                </button>
+                </button>`}
                 ${features.length > 0 ? `
                 <button class="action-btn download-btn" onclick="downloadCSV()">
                     <span class="action-icon">⬇</span> ${T.lataaCsv}
@@ -276,11 +278,15 @@ export function showSummary(features, parcel, partCount = 1) {
         ` : `
         <div class="no-data">
             <div class="no-data-icon">🌲</div>
-            <p>${T.eiMetsavaratietojaKiinteistolla}</p>
+            <p>${valinta ? T.eiMetsavaratietojaValinnalla : T.eiMetsavaratietojaKiinteistolla}</p>
         </div>
         </section>
         `}
     `;
+
+    // ⋯-valikon linkki ei toimi valinnalle (ei kiinteistötunnusta)
+    const copyItem = document.querySelector('#sheet-menu [data-action="copy"]');
+    if (copyItem) copyItem.hidden = valinta;
 
     attachStandEventListeners(content);
     attachFilterEventListeners(content);

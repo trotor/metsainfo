@@ -61,5 +61,11 @@ describe('buildEstimateReport', () => {
         });
         expect(report).toMatch(/Huom.*puuttuu hintoja/);
     });
+    it('valinnan raportti: otsikkorivi Valinta', () => {
+        const report = buildEstimateReport({
+            label: 'Oma valinta · 2 kuviota', regionName: 'Lappi', prices: null, table: emptyTable(),
+            estimate: { total: 0, stock: { value: 0 }, plans: [] }, valinta: true
+        });
+        expect(report.split('\n')[1]).toBe('Valinta;Oma valinta · 2 kuviota');
+    });
 });
-

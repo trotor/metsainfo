@@ -40,5 +40,9 @@ export const VIESTIT = {
     // Lisäosat → suosikit: tallenna { type, name, ref }
     tallennaSuosikki: 'suosikit:tallenna',
     // Suosikit → lähihaku: avaa tallennettu haku { criteria, center }
-    avaaHaku: 'lahihaku:avaa'
+    avaaHaku: 'lahihaku:avaa',
+    // Kuviovalinta → sovellus: valintatila päällä { paalla }; kiinteistöä ei avata karttanapautuksesta
+    valintatila: 'valinta:tila',
+    // Kuviovalinta → sovellus: näytä valinta yhteenvetona { features, parcel } (parcel = näennäiskiinteistö)
+    naytaValinta: 'sovellus:nayta-valinta'
 };

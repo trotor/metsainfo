@@ -27,6 +27,7 @@ const fi = {
 
     // Yhteenveto
     kiinteisto: 'Kiinteistö',
+    valinta: 'Valinta',
     kopioiLinkki: 'Kopioi linkki',
     lataaCsv: 'Lataa CSV',
     tulosta: 'Tulosta',
@@ -63,6 +64,7 @@ const fi = {
     kuviot: 'Kuviot',
     kplYhteensa: (n) => `(${n} kpl)`,
     eiMetsavaratietojaKiinteistolla: 'Ei metsävaratietoja tällä kiinteistöllä.',
+    eiMetsavaratietojaValinnalla: 'Valinnassa ei ole metsävaratietoja.',
     tyyppi: (c) => `Tyyppi ${c}`,
 
     // Kuviolista
@@ -175,6 +177,7 @@ const en = {
     ehdotukset: 'Proposals',
 
     kiinteisto: 'Property',
+    valinta: 'Selection',
     kopioiLinkki: 'Copy link',
     lataaCsv: 'Download CSV',
     tulosta: 'Print',
@@ -211,6 +214,7 @@ const en = {
     kuviot: 'Stands',
     kplYhteensa: (n) => `(${n})`,
     eiMetsavaratietojaKiinteistolla: 'No forest data for this property.',
+    eiMetsavaratietojaValinnalla: 'The selection has no forest data.',
     tyyppi: (c) => `Type ${c}`,
 
     kuvio: (n) => `Stand ${n}`,
@@ -335,6 +339,7 @@ const sv = {
     ehdotukset: 'Förslag',
 
     kiinteisto: 'Fastighet',
+    valinta: 'Urval',
     kopioiLinkki: 'Kopiera länk',
     lataaCsv: 'Ladda ner CSV',
     tulosta: 'Skriv ut',
@@ -371,6 +376,7 @@ const sv = {
     kuviot: 'Figurer',
     kplYhteensa: (n) => `(${n} st.)`,
     eiMetsavaratietojaKiinteistolla: 'Ingen skogsdata för den här fastigheten.',
+    eiMetsavaratietojaValinnalla: 'Urvalet har ingen skogsdata.',
     tyyppi: (c) => `Typ ${c}`,
 
     kuvio: (n) => `Figur ${n}`,

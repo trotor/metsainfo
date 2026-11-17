@@ -42,6 +42,7 @@ const fi = {
     /* ---------- Lukittu Arvio-välilehti ---------- */
     nimi: 'Puukaupan hinta-arvio',
     esittely: 'Näe, paljonko kiinteistön ehdotetut hakkuut ovat arvoltaan alueen tuoreilla kantohinnoilla. Voit käyttää myös omia hintoja, esimerkiksi saamasi puukauppatarjouksen mukaan.',
+    esittelyValinta: 'Näe, paljonko valinnan ehdotetut hakkuut ovat arvoltaan alueen tuoreilla kantohinnoilla. Voit käyttää myös omia hintoja, esimerkiksi saamasi puukauppatarjouksen mukaan.',
     kokeileEsimerkilla: 'Kokeile esimerkkimetsällä',
     avaaArvio: 'Avaa hinta-arvio',
 
@@ -75,6 +76,7 @@ const fi = {
     oletusLahde: 'Metsäteollisuus ry:n puukaupan viikkoseuranta',
     ccBy: 'https://creativecommons.org/licenses/by/4.0/deed.fi',
     eiEhdotuksiaKiinteistolla: 'Kiinteistöllä ei ole hakkuuehdotuksia.',
+    eiEhdotuksiaValinnalla: 'Valinnassa ei ole hakkuuehdotuksia.',
     summaVajaa: (n) => `${n} kuviolta puuttuu osa hinnoista, joten summa on vajaa. Tarkista hakkuutapojen hinnat taulukosta.`,
     prosentti: (n) => `${n} %`,
     viikko: (week, year) => `vko ${week}/${year}`,
@@ -85,6 +87,7 @@ const fi = {
     tiedosto: (label) => `hinta-arvio_${label}.csv`,
     tiedostoEsimerkki: 'esimerkkimetsa',
     tiedostoKiinteisto: 'kiinteisto',
+    tiedostoValinta: 'valinta',
     esimerkkiRaportissa: 'Esimerkkimetsä (kuvitteellinen)',
 
     /* ---------- Ostonäkymä ---------- */
@@ -134,6 +137,7 @@ const fi = {
     raportti: {
         otsikko: 'Metsäinfo – puukaupan hinta-arvio',
         kiinteisto: 'Kiinteistö',
+        valinta: 'Valinta',
         hintaAlue: 'Hinta-alue',
         hinnat: 'Hinnat',
         omatHinnat: 'omat hinnat',
@@ -177,6 +181,7 @@ const sv = {
     /* ---------- Låst Uppskattning-flik ---------- */
     nimi: 'Prisuppskattning för virkesaffär',
     esittely: 'Se hur mycket fastighetens föreslagna avverkningar är värda till färska rotpriser i området. Du kan också använda egna priser, till exempel enligt ett anbud på virkesaffär som du har fått.',
+    esittelyValinta: 'Se hur mycket urvalets föreslagna avverkningar är värda till färska rotpriser i området. Du kan också använda egna priser, till exempel enligt ett anbud på virkesaffär som du har fått.',
     kokeileEsimerkilla: 'Prova med en exempelskog',
     avaaArvio: 'Lås upp prisuppskattningen',
 
@@ -210,6 +215,7 @@ const sv = {
     oletusLahde: 'Skogsindustrin rf:s veckouppföljning av virkeshandeln',
     ccBy: 'https://creativecommons.org/licenses/by/4.0/deed.sv',
     eiEhdotuksiaKiinteistolla: 'Fastigheten har inga avverkningsförslag.',
+    eiEhdotuksiaValinnalla: 'Urvalet har inga avverkningsförslag.',
     summaVajaa: (n) => `En del priser saknas för ${n} ${n === 1 ? 'figur' : 'figurer'}, så summan är ofullständig. Kontrollera priserna för avverkningssätten i tabellen.`,
     prosentti: (n) => `${n} %`,
     viikko: (week, year) => `v. ${week}/${year}`,
@@ -229,6 +235,7 @@ const sv = {
     tiedosto: (label) => `prisuppskattning_${label}.csv`,
     tiedostoEsimerkki: 'exempelskog',
     tiedostoKiinteisto: 'fastighet',
+    tiedostoValinta: 'urval',
     esimerkkiRaportissa: 'Exempelskog (fiktiv)',
 
     /* ---------- Köpvy ---------- */
@@ -278,6 +285,7 @@ const sv = {
     raportti: {
         otsikko: 'Metsäinfo – prisuppskattning för virkesaffär',
         kiinteisto: 'Fastighet',
+        valinta: 'Urval',
         hintaAlue: 'Prisområde',
         hinnat: 'Priser',
         omatHinnat: 'egna priser',
@@ -321,6 +329,7 @@ const en = {
     /* ---------- Locked Estimate tab ---------- */
     nimi: 'Timber sale estimate',
     esittely: 'See what the proposed fellings on the property are worth at recent stumpage prices for the area. You can also use your own prices, for example from a timber sale offer you have received.',
+    esittelyValinta: 'See what the proposed fellings in the selection are worth at recent stumpage prices for the area. You can also use your own prices, for example from a timber sale offer you have received.',
     kokeileEsimerkilla: 'Try with an example forest',
     avaaArvio: 'Unlock timber sale estimate',
 
@@ -353,6 +362,7 @@ const en = {
     oletusLahde: 'Finnish Forest Industries’ weekly timber trade survey',
     ccBy: 'https://creativecommons.org/licenses/by/4.0/deed.en',
     eiEhdotuksiaKiinteistolla: 'The property has no proposed fellings.',
+    eiEhdotuksiaValinnalla: 'The selection has no proposed fellings.',
     summaVajaa: (n) => `${n} ${n === 1 ? 'stand is' : 'stands are'} missing some prices, so the total is incomplete. Check the prices for each felling method in the table.`,
     prosentti: (n) => `${n}%`,
     viikko: (week, year) => `week ${week}/${year}`,
@@ -372,6 +382,7 @@ const en = {
     tiedosto: (label) => `timber-sale-estimate_${label}.csv`,
     tiedostoEsimerkki: 'example-forest',
     tiedostoKiinteisto: 'property',
+    tiedostoValinta: 'selection',
     esimerkkiRaportissa: 'Example forest (fictional)',
 
     /* ---------- Paywall ---------- */
@@ -421,6 +432,7 @@ const en = {
     raportti: {
         otsikko: 'Metsäinfo – timber sale estimate',
         kiinteisto: 'Property',
+        valinta: 'Selection',
         hintaAlue: 'Price region',
         hinnat: 'Prices',
         omatHinnat: 'own prices',

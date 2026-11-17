@@ -21,6 +21,14 @@ const fi = {
     osittain: 'Osa tiedoista jäi hakematta, joten tulos voi olla puutteellinen.',
     tieVirhe: 'Teitä ei saatu haettua, joten metsäkuljetus ja tieyhteys puuttuvat. Maapohja on laskettu.',
     tieKiinteistolle: 'Tie kiinteistölle',
+    // Kuviovalinnalle (js/valinta/) kiinteistön sijaan
+    valinta: {
+        tieKiinteistolle: 'Tie valinnalle',
+        tieTulee: 'Autotie tulee ainakin yhdelle valituista kuvioista.',
+        eiTieta: 'Autotietä ei ole 50 metrin sisällä valituista kuvioista.',
+        yleisenTienVarrella: 'Valinta on yleisen tien varrella.',
+        eiTietaLyhyt: 'ei autotietä valinnalle'
+    },
     tieTulee: 'Autotie tulee kiinteistölle.',
     eiTieta: 'Autotietä ei ole 50 metrin sisällä kiinteistöstä.',
     yleisenTienVarrella: 'Kiinteistö on yleisen tien varrella.',
@@ -89,6 +97,13 @@ const sv = {
     osittain: 'En del uppgifter kunde inte hämtas, så resultatet kan vara ofullständigt.',
     tieVirhe: 'Vägarna kunde inte hämtas, så terrängtransport och vägförbindelse saknas. Markförhållandena är beräknade.',
     tieKiinteistolle: 'Väg till fastigheten',
+    valinta: {
+        tieKiinteistolle: 'Väg till urvalet',
+        tieTulee: 'En bilväg når minst en av de valda figurerna.',
+        eiTieta: 'Det finns ingen bilväg inom 50 meter från de valda figurerna.',
+        yleisenTienVarrella: 'Urvalet ligger vid en allmän väg.',
+        eiTietaLyhyt: 'ingen bilväg till urvalet'
+    },
     tieTulee: 'En bilväg når fastigheten.',
     eiTieta: 'Det finns ingen bilväg inom 50 meter från fastigheten.',
     yleisenTienVarrella: 'Fastigheten ligger vid en allmän väg.',
@@ -157,6 +172,13 @@ const en = {
     osittain: 'Some data could not be fetched, so the result may be incomplete.',
     tieVirhe: 'Roads could not be fetched, so forwarding and road access are missing. The ground has been assessed.',
     tieKiinteistolle: 'Road to the property',
+    valinta: {
+        tieKiinteistolle: 'Road to the selection',
+        tieTulee: 'A road reaches at least one of the selected stands.',
+        eiTieta: 'There is no road within 50 metres of the selected stands.',
+        yleisenTienVarrella: 'The selection is next to a public road.',
+        eiTietaLyhyt: 'no road to the selection'
+    },
     tieTulee: 'A road reaches the property.',
     eiTieta: 'There is no road within 50 metres of the property.',
     yleisenTienVarrella: 'The property is next to a public road.',

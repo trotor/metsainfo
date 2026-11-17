@@ -3,6 +3,7 @@ import '../js/config.js';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { showSummary } from '../js/ui/summary.js';
 import { STANDS } from './fixtures/stands.js';
+import { toPseudoParcel } from '../js/valinta/logiikka.js';
 
 beforeEach(() => {
     document.body.innerHTML = '<div id="info-panel"><div id="sheet-peek"></div><div id="info-content"></div></div>';
@@ -73,5 +74,28 @@ describe('showSummary', () => {
         expect(document.querySelector('.tab-panel[data-tab="arvio"]')).toBeNull();
         expect(document.querySelector('.estimate-card')).toBeNull();
         expect(document.getElementById('paywall')).toBeNull();
+    });
+
+    it('valinta: otsikko Valinta, ei linkkipainiketta, ⋯-valikon linkki piilossa', () => {
+        document.body.innerHTML += '<div id="sheet-menu"><button data-action="copy"></button></div>';
+        showSummary(STANDS, toPseudoParcel(STANDS, 'Oma valinta · 3 kuviota'), 1);
+        expect(document.querySelector('.parcel-section h3').textContent).toBe('Valinta');
+        expect(document.querySelector('.parcel-id').textContent).toBe('Oma valinta · 3 kuviota');
+        expect(document.getElementById('copy-link-btn')).toBeNull();
+        expect(document.querySelector('#sheet-menu [data-action="copy"]').hidden).toBe(true);
+    });
+
+    it('valinta ilman metsävaratietoja ei puhu kiinteistöstä', () => {
+        showSummary([], toPseudoParcel([], 'Oma valinta'), 1);
+        expect(document.getElementById('info-content').textContent).toContain('Valinnassa ei ole metsävaratietoja.');
+    });
+
+    it('kiinteistö valinnan jälkeen: linkki taas näkyvissä', () => {
+        document.body.innerHTML += '<div id="sheet-menu"><button data-action="copy"></button></div>';
+        showSummary(STANDS, toPseudoParcel(STANDS, 'x'), 1);
+        showSummary(STANDS, { properties: { nationalCadastralReference: '99900100010001' }, geometry: STANDS[0].geometry });
+        expect(document.querySelector('.parcel-section h3').textContent).toBe('Kiinteistö');
+        expect(document.getElementById('copy-link-btn')).not.toBeNull();
+        expect(document.querySelector('#sheet-menu [data-action="copy"]').hidden).toBe(false);
     });
 });
