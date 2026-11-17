@@ -1,6 +1,6 @@
 /**
  * Hinta-arvion muotoilu ja jaettava raportti (puhtaita funktioita).
- * Tekstit: js/ui/estimate-teksti.js (#24).
+ * Tekstit: js/ui/estimate-teksti.js (#23).
  */
 
 import { METHODS, SPECIES } from './prices.js';

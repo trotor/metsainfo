@@ -1,5 +1,5 @@
 /**
- * Sivun (index.html) staattisten tekstien käännös (#24).
+ * Sivun (index.html) staattisten tekstien käännös (#23).
  *
  * index.html on suomeksi. Käännettävät elementit on merkitty:
  *   data-i18n="avain"                       → textContent

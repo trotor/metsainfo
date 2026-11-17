@@ -1,5 +1,5 @@
 /**
- * Lähihaku (kokeilu, #28): tietynlaiset kuviot 1 km × 1 km alueelta
+ * Lähihaku (kokeilu, #27): tietynlaiset kuviot 1 km × 1 km alueelta
  * sijainnin ympäriltä kartalle ja listaksi. Mukana vain kokeilubuildissa
  * (VITE_KOKEILU=1, dynaaminen import app.js:ssä).
  *
@@ -189,7 +189,7 @@ export function startLahihaku() {
         render();
     }
 
-    /* ---------- Suosikit (#25, jos mukana buildissa) ---------- */
+    /* ---------- Suosikit (#24, jos mukana buildissa) ---------- */
 
     // Suosikit avaavat tallennetun haun
     on(VIESTIT.avaaHaku, ({ criteria, center }) => {

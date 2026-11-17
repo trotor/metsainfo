@@ -1,5 +1,5 @@
 /**
- * Kuviovalinnan puhdas logiikka (kokeilu, #32): valinta, sen yhteenveto,
+ * Kuviovalinnan puhdas logiikka (kokeilu, #31): valinta, sen yhteenveto,
  * latausruudut ja näennäiskiinteistö sovelluksen yhteenvedolle. Ei DOM:ia
  * eikä Leafletia, jotta logiikka on testattavissa.
  */

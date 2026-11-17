@@ -1,5 +1,5 @@
 /**
- * Sovelluksen käyttöliittymän tekstit suomeksi, ruotsiksi ja englanniksi (#24):
+ * Sovelluksen käyttöliittymän tekstit suomeksi, ruotsiksi ja englanniksi (#23):
  * tietopaneeli, kuviolista, karttapopupit, selitteet, termien selitykset,
  * paikannus. Suomenkieliset tekstit ovat täsmälleen samat kuin ennen
  * käännöstä (tests/suomi-snapshot.test.js).

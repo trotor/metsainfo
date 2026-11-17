@@ -1,5 +1,5 @@
 /**
- * Puuston arvo kartalla (kokeilu, #35): Väritys-valitsimen vaihtoehto, joka
+ * Puuston arvo kartalla (kokeilu, #34): Väritys-valitsimen vaihtoehto, joka
  * värittää kuviot puuston arvon (€/ha, uudistushakkuun kantohinnoin) mukaan
  * ja näyttää kuvion arvon sen tiedoissa. Hinta-arvion lisäosaa
  * (js/features.js 'arvovari'). Vain kokeilubuildissa (VITE_KOKEILU=1).

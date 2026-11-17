@@ -209,7 +209,7 @@ function featureBelongsToParcel(featureGeom, parcelGeom) {
  * Kuvion kohdistuspiste kiinteistölle: ulkorenkaan kärkien keskiarvo, jos se
  * on kuviolla, muuten piste kuvion sisältä (pointInside). Kaarevan tai niemen
  * muotoisen kuvion keskiarvo voi osua veteen, jolloin kuvio puuttui kaikilta
- * kiinteistöiltä (#30). Kuvio näytetään sen kiinteistön kuvioissa, jolla tämä
+ * kiinteistöiltä (#29). Kuvio näytetään sen kiinteistön kuvioissa, jolla tämä
  * piste on, joten kuvion kiinteistö löytyy samalla pisteellä (suosikit,
  * lähihaku). Sama sääntö mcp-server/pipeline.py:ssä (stand_anchor).
  */

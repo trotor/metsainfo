@@ -1,5 +1,5 @@
 /**
- * Koodiston nimet valitulla kielellä (#24).
+ * Koodiston nimet valitulla kielellä (#23).
  *
  * Suomenkieliset nimet: CODES (js/config.js, Metsäkeskuksen virallinen koodisto).
  * Englanninkieliset nimet ovat EPÄVIRALLISIA: Metsärekisterin koodistoissa

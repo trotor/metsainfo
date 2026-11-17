@@ -1,5 +1,5 @@
 /**
- * Kuviovalinnan tekstit suomeksi, ruotsiksi ja englanniksi (#32).
+ * Kuviovalinnan tekstit suomeksi, ruotsiksi ja englanniksi (#31).
  */
 
 import { pick } from '../i18n.js';

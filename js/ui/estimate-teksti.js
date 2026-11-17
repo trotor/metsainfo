@@ -1,5 +1,5 @@
 /**
- * Puukaupan hinta-arvion tekstit suomeksi, ruotsiksi ja englanniksi (#24):
+ * Puukaupan hinta-arvion tekstit suomeksi, ruotsiksi ja englanniksi (#23):
  * Arvio-välilehti, yhteenvedon kortti, ostonäkymä, esimerkkimetsä
  * (js/ui/estimate.js) sekä hakkuutavat, puulajit ja jaettava raportti
  * (js/pricing/format.js).

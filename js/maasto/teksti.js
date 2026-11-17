@@ -1,5 +1,5 @@
 /**
- * Maastotilan tekstit suomeksi, ruotsiksi ja englanniksi (#24). Myös paikan kuvauksen
+ * Maastotilan tekstit suomeksi, ruotsiksi ja englanniksi (#23). Myös paikan kuvauksen
  * ja visan lauseet ovat täällä, koska suomen taivutus, ruotsin suku ja englannin
  * artikkelit vaativat omat lauserakenteensa: paikka.js ja visa.js antavat
  * vain tiedot, ja lause muodostetaan tämän kielen funktiolla.

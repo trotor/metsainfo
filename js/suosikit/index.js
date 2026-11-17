@@ -1,5 +1,5 @@
 /**
- * Suosikit ja omat muistiinpanot (kokeilu, #25). Mukana vain
+ * Suosikit ja omat muistiinpanot (kokeilu, #24). Mukana vain
  * kokeilubuildissa (VITE_KOKEILU=1, dynaaminen import app.js:ssä).
  *
  * - Tähti (☆/★) kiinteistön yhteenvetoon ja jokaiseen kuvioon: lisätään,

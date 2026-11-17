@@ -1,5 +1,5 @@
 /**
- * Asetukset (kokeilu, #24): ensimmäisenä kielivalinta. Mukana vain
+ * Asetukset (kokeilu, #23): ensimmäisenä kielivalinta. Mukana vain
  * kokeilubuildissa (VITE_KOKEILU=1), maksuton (js/features.js).
  */
 

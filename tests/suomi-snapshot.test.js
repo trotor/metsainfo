@@ -1,5 +1,5 @@
 /**
- * Suomenkielisen käyttöliittymän kultaiset tilannekuvat (#24).
+ * Suomenkielisen käyttöliittymän kultaiset tilannekuvat (#23).
  * Koko sovelluksen käännöksen aikana suomenkielisen tulosteen pitää pysyä
  * täsmälleen samana: tämä korvaa puuttuvat käyttöliittymätestit.
  * Päivitä tilannekuva (vitest -u) vain, kun suomenkielistä tekstiä

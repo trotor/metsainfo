@@ -1,5 +1,5 @@
 /**
- * Suosikit ja omat muistiinpanot (#25). Tallennetaan vain tälle laitteelle
+ * Suosikit ja omat muistiinpanot (#24). Tallennetaan vain tälle laitteelle
  * (localStorage); mitään ei lähetetä, joten tietosuojailmoitukset eivät muutu.
  *
  * Suosikki: { id, type, name, note, created, updated, ref }

@@ -1,5 +1,5 @@
 /**
- * Kuviovalinta (kokeilu, #32): kuvioita valitaan kartalta vapaasti, myös
+ * Kuviovalinta (kokeilu, #31): kuvioita valitaan kartalta vapaasti, myös
  * kiinteistörajojen yli, ja valinnasta avautuu sama yhteenveto kuin
  * kiinteistöstä (VIESTIT.naytaValinta). Mukana vain kokeilubuildissa
  * (VITE_KOKEILU=1, dynaaminen import app.js:ssä).

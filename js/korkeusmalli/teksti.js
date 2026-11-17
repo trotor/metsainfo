@@ -1,4 +1,4 @@
-/** Korkeusmallin tekstit suomeksi, ruotsiksi ja englanniksi (#24). */
+/** Korkeusmallin tekstit suomeksi, ruotsiksi ja englanniksi (#23). */
 import { pick } from '../i18n.js';
 
 export const TEKSTIT = {

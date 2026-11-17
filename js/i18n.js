@@ -1,5 +1,5 @@
 /**
- * Kielivalinta (#24). Oletuksena laitteen kieli, valinta tallennetaan
+ * Kielivalinta (#23). Oletuksena laitteen kieli, valinta tallennetaan
  * laitteelle. Suomi on varakieli: puuttuva käännös näytetään suomeksi.
  *
  * Käännetty koko sovellus (js/ui/teksti.js, estimate-teksti.js, sivu-teksti.js,

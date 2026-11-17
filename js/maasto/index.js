@@ -1,5 +1,5 @@
 /**
- * Maastotila (kokeilu, #26 ja #27): "Kerro tästä paikasta" -kortti ja
+ * Maastotila (kokeilu, #25 ja #26): "Kerro tästä paikasta" -kortti ja
  * metsävisa sijainnin kuviosta. Mukana vain kokeilubuildissa
  * (VITE_KOKEILU=1); app.js lataa tämän dynaamisella importilla, joten
  * tavallinen build (verkko, App Store, Google Play) ei sisällä tätä koodia.

@@ -1,5 +1,5 @@
 /**
- * Käyttöohje englanniksi (#24). Sama rakenne ja luokat kuin index.html:n
+ * Käyttöohje englanniksi (#23). Sama rakenne ja luokat kuin index.html:n
  * suomenkielisessä #help-contentissa, joka pysyy alkuperäisenä. sivu.js
  * vaihtaa tämän paikalleen, kun kieli on englanti.
  *

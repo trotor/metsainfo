@@ -1,5 +1,5 @@
 /**
- * Sivun (index.html) staattiset tekstit suomeksi, ruotsiksi ja englanniksi (#24).
+ * Sivun (index.html) staattiset tekstit suomeksi, ruotsiksi ja englanniksi (#23).
  * Avaimet vastaavat index.html:n data-i18n- ja data-i18n-attr-merkintöjä.
  * Suomenkieliset tekstit ovat täsmälleen samat kuin index.html:ssä; sivu.js
  * ei koske sivuun suomeksi. Käyttöohjeen englanninkielinen versio: ohje-en.js, ruotsinkielinen ohje-sv.js.

@@ -23,27 +23,27 @@ import { purchases, PRODUCT_ID } from './platform/purchases.js';
 export const FEATURES = {
     // Julkaistu: hinta-arvio (js/ui/estimate.js, js/pricing/)
     hintaArvio: { product: PRODUCT_ID, kokeilu: false },
-    // Kokeilu #26/#27: "Kerro tästä paikasta" ja metsävisa (js/maasto/)
+    // Kokeilu #25/#26: "Kerro tästä paikasta" ja metsävisa (js/maasto/)
     maastotila: { product: PRODUCT_ID, kokeilu: true },
-    // Suunniteltu #28: tietynlaiset metsät 1 km × 1 km alueelta (js/lahihaku/)
+    // Suunniteltu #27: tietynlaiset metsät 1 km × 1 km alueelta (js/lahihaku/)
     lahihaku: { product: PRODUCT_ID, kokeilu: true },
-    // Kokeilu #25: suosikit ja omat muistiinpanot, maksuton (js/suosikit/)
+    // Kokeilu #24: suosikit ja omat muistiinpanot, maksuton (js/suosikit/)
     suosikit: { product: null, kokeilu: true },
-    // Kokeilu #29: laserkeilauksen korkeusmalli taustakartaksi, maksuton (js/korkeusmalli/)
+    // Kokeilu #28: laserkeilauksen korkeusmalli taustakartaksi, maksuton (js/korkeusmalli/)
     korkeusmalli: { product: null, kokeilu: true },
-    // Kokeilu #24: asetukset ja kielivalinta, maksuton (js/asetukset/, js/i18n.js)
+    // Kokeilu #23: asetukset ja kielivalinta, maksuton (js/asetukset/, js/i18n.js)
     asetukset: { product: null, kokeilu: true },
     // Kokeilu: kuvion saavutettavuus ja tieyhteys (js/saavutettavuus/); nyt hinta-arvion
     // kertaostossa, voi myöhemmin olla oma maksullinen lisäosa
     saavutettavuus: { product: PRODUCT_ID, kokeilu: true },
-    // Kokeilu #32: kuviovalinta kiinteistörajojen yli, maksuton (js/valinta/); hinta-arvio
+    // Kokeilu #31: kuviovalinta kiinteistörajojen yli, maksuton (js/valinta/); hinta-arvio
     // ja saavutettavuus pysyvät kertaoston takana
     valinta: { product: null, kokeilu: true },
     // Kokeilu: metsätöiden rajoitteet (muinaisjäännökset, suojelualueet …), maksuton (js/rajoitteet/)
     rajoitteet: { product: null, kokeilu: true },
     // Kokeilu: LIPAS-retkeilykohteet karttatasona, maksuton (js/retkeily/)
     retkeily: { product: null, kokeilu: true },
-    // Kokeilu #35: puuston arvo €/ha kartan värityksenä (js/arvovari/), hinta-arvion kertaostossa
+    // Kokeilu #34: puuston arvo €/ha kartan värityksenä (js/arvovari/), hinta-arvion kertaostossa
     arvovari: { product: PRODUCT_ID, kokeilu: true }
 };
 

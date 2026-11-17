@@ -1,5 +1,5 @@
 /**
- * Korkeusmalli (kokeilu, #29): laserkeilauksesta tehty vinovalaistu
+ * Korkeusmalli (kokeilu, #28): laserkeilauksesta tehty vinovalaistu
  * korkeusmalli (GTK:n karttapalvelu, aineisto © Maanmittauslaitos)
  * taustakartaksi ja läpikuultavaksi varjosteeksi peruskartan päälle.
  * Mukana vain kokeilubuildissa (VITE_KOKEILU=1), maksuton (js/features.js).

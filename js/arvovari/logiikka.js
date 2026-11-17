@@ -1,5 +1,5 @@
 /**
- * Puuston arvo €/ha kuvion värittämiseen (kokeilu, #35). Sama laskenta kuin
+ * Puuston arvo €/ha kuvion värittämiseen (kokeilu, #34). Sama laskenta kuin
  * hinta-arvion "Koko puusto uudistushakkuun hinnoin" (js/pricing/estimate.js).
  */
 

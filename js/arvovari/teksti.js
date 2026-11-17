@@ -1,5 +1,5 @@
 /**
- * Puuston arvo -värityksen tekstit suomeksi, ruotsiksi ja englanniksi (#35).
+ * Puuston arvo -värityksen tekstit suomeksi, ruotsiksi ja englanniksi (#34).
  */
 
 import { pick } from '../i18n.js';

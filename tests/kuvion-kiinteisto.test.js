@@ -2,14 +2,14 @@ import "../js/vendor/index.js";
 import { describe, it, expect } from 'vitest';
 import { standCentroid, filterFeaturesByParcels } from '../js/data.js';
 
-// U:n muotoinen kuvio (niemi): kärkien keskiarvo osuu aukkoon eli kuvion ulkopuolelle (#30)
+// U:n muotoinen kuvio (niemi): kärkien keskiarvo osuu aukkoon eli kuvion ulkopuolelle (#29)
 const U = {
     type: 'Polygon',
     coordinates: [[[0, 0], [300, 0], [300, 300], [200, 300], [200, 100], [100, 100], [100, 300], [0, 300], [0, 0]]]
 };
 const square = (x, y, s) => ({ type: 'Polygon', coordinates: [[[x, y], [x + s, y], [x + s, y + s], [x, y + s], [x, y]]] });
 
-describe('kuvion kiinteistö (#30)', () => {
+describe('kuvion kiinteistö (#29)', () => {
     it('tavallinen kuvio: kärkien keskiarvo kuten ennen', () => {
         expect(standCentroid(square(0, 0, 100))).toEqual([40, 40]); // 5 kärkeä, sulkeva kärki mukana
     });

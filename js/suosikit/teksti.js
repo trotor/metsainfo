@@ -1,5 +1,5 @@
 /**
- * Suosikkien tekstit suomeksi, ruotsiksi ja englanniksi (#24).
+ * Suosikkien tekstit suomeksi, ruotsiksi ja englanniksi (#23).
  */
 
 import { pick } from '../i18n.js';

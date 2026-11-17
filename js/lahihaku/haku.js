@@ -1,9 +1,9 @@
 /**
- * Lähihaku (#28): tietynlaiset kuviot 1 km × 1 km alueelta hakupisteen
+ * Lähihaku (#27): tietynlaiset kuviot 1 km × 1 km alueelta hakupisteen
  * ympäriltä. Puhdas logiikka ilman karttaa ja verkkoa, jotta sen voi
  * testata ja irrottaa (js/features.js).
  *
- * Hakuehdot ovat tavallinen, tallennettava olio (suosikit #25):
+ * Hakuehdot ovat tavallinen, tallennettava olio (suosikit #24):
  *   { vaihe: 'taimikko' | 'nuori' | 'varttunut' | 'uudistuskypsa' | 'vanha' | null,
  *     puulaji: 'manty' | 'kuusi' | 'koivu' | 'lehti' | 'seka' | null,
  *     hakkuu: boolean }
