@@ -59,7 +59,9 @@ export function createConstraintSource({ fetchFn = fetch } = {}) {
     async function one(source, bbox) {
         const res = await fetchFn(wfsUrl(source, bbox));
         if (!res.ok) throw new Error(`${source.typeName} HTTP ${res.status}`);
-        return toItems(source, await res.json());
+        const json = await res.json();
+        // Yläraja täynnä: alueella voi olla enemmän kohteita kuin palautettiin
+        return { items: toItems(source, json), capped: (json?.features?.length || 0) >= MAX_FEATURES };
     }
     return {
         async items(bbox) {
@@ -69,8 +71,8 @@ export function createConstraintSource({ fetchFn = fetch } = {}) {
                 // Kaikki epäonnistuivat (esim. ei verkkoa): virhe, ei "ei kohteita"
                 if (results.every(r => r.status === 'rejected')) throw new Error('Rajoitteiden haku epäonnistui');
                 return {
-                    items: results.flatMap(r => (r.status === 'fulfilled' ? r.value : [])),
-                    partial: results.some(r => r.status === 'rejected')
+                    items: results.flatMap(r => (r.status === 'fulfilled' ? r.value.items : [])),
+                    partial: results.some(r => r.status === 'rejected' || r.value.capped)
                 };
             });
             cache.set(key, p);

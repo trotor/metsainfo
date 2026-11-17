@@ -23,13 +23,11 @@ export function startAsetukset() {
 
     // ☰-valikkoon (js/ui/tyokalut.js)
     registerMenuItem({ id: 'asetukset', label: T.nappi, icon: ICON, order: 20, onSelect: () => toggle(true) });
-    const button = { setPressed() {} };
     const card = createCard({ id: 'asetukset', label: T.nappi, className: 'asetukset-kortti', onClose: () => toggle(false) });
 
     function toggle(force) {
         open = force ?? !open;
         if (open) { card.open(); render(); } else card.close();
-        button.setPressed(open);
     }
 
     card.el.addEventListener('click', (e) => {

@@ -104,6 +104,16 @@ describe('työkalut', () => {
         expect(list().style.left).toBe('128px');
     });
 
+    it('lista pysyy näytön sisällä matalassa ikkunassa', () => {
+        registerTool(tool());
+        toolButton().getBoundingClientRect = () => ({ right: 60, top: 500, bottom: 544, left: 16 });
+        Object.defineProperty(window, 'innerHeight', { value: 600, configurable: true });
+        openList();
+        list().getBoundingClientRect = () => ({ height: 400, top: 380, bottom: 780 });
+        list().querySelector('[data-tk="kiinnita"]').click(); // piirtää ja sijoittaa uudelleen
+        expect(parseInt(list().style.top, 10) + 400).toBeLessThanOrEqual(600 - 8);
+    });
+
     it('kiinnitys muistetaan ja lista pysyy auki valinnan jälkeen', () => {
         const t = tool();
         registerTool(t);
@@ -135,6 +145,18 @@ describe('valikko', () => {
         document.getElementById('mobile-help-toggle').click();
         menu.querySelector('[data-menu="ohje"]').click();
         expect(window.toggleHelp).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe('valikko ja muut valikot', () => {
+    it('☰-napin painallus kulkee dokumentille, jotta ⋯-valikko ja hakukenttä sulkeutuvat', () => {
+        registerMenuItem({ id: 'suosikit', label: 'Suosikit', icon: ICON, onSelect: vi.fn() });
+        const seen = vi.fn();
+        document.addEventListener('click', seen);
+        document.getElementById('help-toggle').click();
+        document.removeEventListener('click', seen);
+        expect(seen).toHaveBeenCalled();
+        expect(document.getElementById('sovellus-valikko').hidden).toBe(false);
     });
 });
 

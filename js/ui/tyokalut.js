@@ -191,7 +191,10 @@ function position() {
     }
     const r = ui.button.getBoundingClientRect();
     ui.list.style.left = `${Math.round(r.right + 8)}px`;
-    ui.list.style.top = `${Math.round(Math.max(8, r.top - 120))}px`;
+    // Napin viereen, mutta matalassa ikkunassa kokonaan näkyviin
+    const h = ui.list.getBoundingClientRect().height || 0;
+    const top = Math.min(r.top - 120, window.innerHeight - h - 8);
+    ui.list.style.top = `${Math.round(Math.max(8, top))}px`;
 }
 
 function openList() {
@@ -291,9 +294,10 @@ function ensureMenu() {
         btn.setAttribute('aria-label', T.valikko);
         btn.title = T.valikko;
         btn.setAttribute('aria-haspopup', 'menu');
+        // Painallus saa kulkea dokumentille: ⋯-valikko ja hakukenttä sulkeutuvat
+        // omilla kuuntelijoillaan; oma kuuntelija (wireDocument) ohittaa napit.
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            e.stopPropagation();
             if (!ui.menu.hidden) closeMenu();
             else openMenu(btn);
         });

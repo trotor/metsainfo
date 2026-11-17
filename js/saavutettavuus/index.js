@@ -70,11 +70,15 @@ export function startSaavutettavuus() {
         standLayer.clearLayers();
         const r = ui.result;
         const show = Boolean(ui.colors && r && !locked());
-        document.body.classList.toggle('sv-varit', show);
-        legend.hidden = !show;
+        // Väritys valittu, mutta analyysi kesken tai epäonnistui: selite kertoo sen,
+        // eikä tilavuuden selite näy Saavutettavuus-valinnan alla
+        const pending = Boolean(ui.colors && !r && !locked() && ui.ctx?.features?.length);
+        document.body.classList.toggle('sv-varit', show || pending);
+        legend.hidden = !(show || pending);
         if (!show) {
             roadLayer.remove();
             standLayer.remove();
+            if (pending) legend.innerHTML = `<div class="sv-selite-otsikko">${esc(T.selite)}</div><div>${esc(ui.status === 'error' ? T.virhe : T.lasketaan)}</div>`;
             return;
         }
         for (const l of r.tiet) {
@@ -230,7 +234,7 @@ export function startSaavutettavuus() {
             <button type="button" class="kortti-btn sv-kartalle" data-sv="varit" aria-pressed="${ui.colors}">${esc(ui.colors ? T.piilotaKartalta : T.naytaKartalla)}</button>
             <p class="sv-huom">${esc(T.kuvionLaatikko)}</p>
             <p class="sv-huom">${esc(T.lisamaksu)}</p>
-            <p class="sv-lahde">${esc(T.lahteet(r.lahteet.alue))}</p>`;
+            <p class="sv-lahde">${esc(T.lahteet(r.lahteet.alue, { dtw: r.lahteet.dtw, dem: r.lahteet.dem }))}</p>`;
     }
 
     function renderSummaryBox() {

@@ -73,7 +73,7 @@ const fi = {
     lisamaksu: 'Kuuluu nyt hinta-arvion lisäosaan. Saavutettavuudesta voi myöhemmin tulla erillinen maksullinen lisäosa.',
     lukittu: 'Saavutettavuus arvioi jokaisen kuvion metsäkuljetusmatkan, maapohjan korjuukelpoisuuden ja tieyhteyden kiinteistölle sekä värittää kuviot kartalla. Toiminto kuuluu puukaupan hinta-arvion lisäosaan (sama kertaosto). Saavutettavuudesta voi myöhemmin tulla erillinen maksullinen lisäosa.',
     avaaLisaosa: 'Avaa lisäosa',
-    lahteet: (alue) => `Lähteet: © Väylävirasto, Digiroad (CC BY 4.0). Sisältää Suomen metsäkeskuksen korjuukelpoisuuskartta-aineistoa${alue ? ` (alue ${alue})` : ''} ja metsävaratietoja (CC BY 4.0), Luonnonvarakeskuksen DTW-kosteusindeksiä ja Maanmittauslaitoksen korkeusmallia (CC BY 4.0, CSC Paituli); muokattu: luokat pisteytetty indeksiksi.`,
+    lahteet: (alue, { dtw = true, dem = true } = {}) => `Lähteet: © Väylävirasto, Digiroad (CC BY 4.0). Sisältää Suomen metsäkeskuksen korjuukelpoisuuskartta-aineistoa${alue ? ` (alue ${alue})` : ''} ja metsävaratietoja (CC BY 4.0)${dtw || dem ? `, ${[dtw && 'Luonnonvarakeskuksen DTW-kosteusindeksiä', dem && 'Maanmittauslaitoksen korkeusmallia'].filter(Boolean).join(' ja ')} (CC BY 4.0, CSC Paituli)` : ''}; muokattu: luokat pisteytetty indeksiksi.`,
     ohjeOsio: {
         otsikko: 'Saavutettavuus',
         html: `<p>Saavutettavuus arvioi, kuinka helposti kuvion puut saadaan korjattua ja kuljetettua.</p>
@@ -153,7 +153,7 @@ const sv = {
     lisamaksu: 'Ingår nu i tillägget Prisuppskattning. Åtkomligheten kan senare bli ett separat avgiftsbelagt tillägg.',
     lukittu: 'Åtkomligheten uppskattar varje figurs terrängtransportavstånd, markens drivningsförhållanden och vägförbindelsen till fastigheten och färglägger figurerna på kartan. Funktionen ingår i tillägget Prisuppskattning för virkesaffär (samma engångsköp). Åtkomligheten kan senare bli ett separat avgiftsbelagt tillägg.',
     avaaLisaosa: 'Lås upp tillägget',
-    lahteet: (alue) => `Källor: © Trafikledsverket, Digiroad (CC BY 4.0). Innehåller data från Finlands skogscentrals karta över drivningsförhållanden${alue ? ` (område ${alue})` : ''} och skogsdata (CC BY 4.0), Naturresursinstitutets DTW-fuktighetsindex och Lantmäteriverkets höjdmodell (CC BY 4.0, CSC Paituli); bearbetat: klasserna poängsatta till ett index.`,
+    lahteet: (alue, { dtw = true, dem = true } = {}) => `Källor: © Trafikledsverket, Digiroad (CC BY 4.0). Innehåller data från Finlands skogscentrals karta över drivningsförhållanden${alue ? ` (område ${alue})` : ''} och skogsdata (CC BY 4.0)${dtw || dem ? `, ${[dtw && 'Naturresursinstitutets DTW-fuktighetsindex', dem && 'Lantmäteriverkets höjdmodell'].filter(Boolean).join(' och ')} (CC BY 4.0, CSC Paituli)` : ''}; bearbetat: klasserna poängsatta till ett index.`,
     ohjeOsio: {
         otsikko: 'Åtkomlighet',
         html: `<p>Åtkomligheten uppskattar hur lätt virket på en figur kan avverkas och transporteras.</p>
@@ -233,7 +233,7 @@ const en = {
     lisamaksu: 'Currently part of the price estimate add-on. Accessibility may later become a separate paid add-on.',
     lukittu: 'Accessibility estimates the forwarding distance, the ground’s harvesting conditions and the road access to the property for every stand, and colours the stands on the map. It is part of the timber sale price estimate add-on (same one-time purchase). Accessibility may later become a separate paid add-on.',
     avaaLisaosa: 'Unlock add-on',
-    lahteet: (alue) => `Sources: © Finnish Transport Infrastructure Agency, Digiroad (CC BY 4.0). Contains data from the Finnish Forest Centre’s harvesting conditions map${alue ? ` (area ${alue})` : ''} and forest data (CC BY 4.0), the Natural Resources Institute Finland’s DTW wetness index and the National Land Survey’s elevation model (CC BY 4.0, CSC Paituli); modified: classes scored into an index.`,
+    lahteet: (alue, { dtw = true, dem = true } = {}) => `Sources: © Finnish Transport Infrastructure Agency, Digiroad (CC BY 4.0). Contains data from the Finnish Forest Centre’s harvesting conditions map${alue ? ` (area ${alue})` : ''} and forest data (CC BY 4.0)${dtw || dem ? `, ${[dtw && 'the Natural Resources Institute Finland’s DTW wetness index', dem && 'the National Land Survey’s elevation model'].filter(Boolean).join(' and ')} (CC BY 4.0, CSC Paituli)` : ''}; modified: classes scored into an index.`,
     ohjeOsio: {
         otsikko: 'Accessibility',
         html: `<p>Accessibility estimates how easily the timber on a stand can be harvested and transported.</p>

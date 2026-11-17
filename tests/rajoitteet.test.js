@@ -35,6 +35,13 @@ describe('aineisto', () => {
         await expect(src.items({ minX: 0, minY: 0, maxX: 10, maxY: 10 })).rejects.toThrow();
     });
 
+    it('yläraja täynnä: tulos merkitään osittaiseksi', async () => {
+        const many = Array.from({ length: 500 }, (_, k) => ({ geometry: pt(k, 0), properties: { nimi: `K${k}` } }));
+        const src = createConstraintSource({ fetchFn: async (url) => ({ ok: true, json: async () => ({ features: url.includes('museovirasto') && url.includes('muinaisjaannos_piste') ? many : [] }) }) });
+        const res = await src.items({ minX: 0, minY: 0, maxX: 10, maxY: 10 });
+        expect(res.partial).toBe(true);
+    });
+
     it('yhden lähteen virhe ei kaada muita: osittainen tulos', async () => {
         const fetchFn = async (url) => {
             if (url.includes('museovirasto')) throw new Error('verkko');

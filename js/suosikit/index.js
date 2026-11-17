@@ -55,7 +55,6 @@ export function startSuosikit() {
     const marker = L.layerGroup().addTo(state.map);
     // ☰-valikkoon (js/ui/tyokalut.js)
     registerMenuItem({ id: 'suosikit', label: T.nappi, icon: ICON, order: 10, onSelect: () => toggle(true) });
-    const button = { setPressed() {} };
 
     /* ---------- Kortti ---------- */
 
@@ -70,7 +69,6 @@ export function startSuosikit() {
             card.close();
             ui.editing = null;
         }
-        button.setPressed(ui.open);
     }
 
     function openEditor(id) {
