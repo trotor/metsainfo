@@ -40,14 +40,40 @@ Näe minkä tahansa metsäkiinteistön puusto, kuviot ja hakkuuehdotukset kartal
 ### Jakaminen
 - **Linkki** suoraan kiinteistöön, **CSV-taulukko** kuviotiedoista ja **tulostettava yhteenveto**.
 
-### Puukaupan hinta-arvio (lisäosa sovelluksissa)
-- Kertoo, paljonko kiinteistön ehdotetut hakkuut ovat arvoltaan **alueen tuoreilla kantohinnoilla** (Metsäteollisuus ry:n puukaupan viikkoseuranta ja Luonnonvarakeskuksen tilastot), sekä koko puuston arvon.
-- Hinta-alue päätellään kiinteistön kunnasta. Omat hinnat voi syöttää esimerkiksi saamasi puukauppatarjouksen mukaan.
-- **Jaa arvio** luo taulukon, jonka voi lähettää vaikkapa kuolinpesän osakkaille.
-- **Kokeile esimerkkimetsällä** maksutta ennen ostoa. Kertaosto, ei tilausta – ajantasainen hinta näkyy sovelluksessa. Sama lisäosa iPhonella ja Androidilla.
-- Arvio on suuntaa-antava eikä korvaa puukauppatarjousta.
+---
 
-### Tulossa – testiversiossa nyt
+## Ilmainen ja maksullinen
+
+**Ilmaiseksi** – verkossa, iPhonella ja Androidilla – saat kaiken edellä kuvatun: kiinteistöhaun, yhteenvedon, kuviot, hakkuuehdotukset, väritykset, karttatasot, oman sijainnin ja jakamisen. Ei mainoksia, ei rekisteröitymistä.
+
+**Puukaupan hinta-arvio** on sovellusten maksullinen lisäosa. Se vastaa kysymykseen, jota pelkkä kuviotieto ei kerro: **mitä metsä on euroina juuri nyt?**
+
+- **Arvo ehdotetuille hakkuille ja koko puustolle** alueen tuoreilla kantohinnoilla, vuosittain eriteltynä. Tukki- ja kuitupuu jaetaan puulajeittain, ja harvennukset ja uudistushakkuut lasketaan omilla poistumillaan.
+- **Hinnat päivittyvät itsestään.** Sovellus hakee Metsäteollisuus ry:n puukaupan viikkoseurannan ja Luonnonvarakeskuksen tilastot ja valitsee hinta-alueen kiinteistön kunnasta. Sinun ei tarvitse etsiä hintoja, laskea taulukossa eikä tietää, mihin hinta-alueeseen kiinteistö kuuluu.
+- **Omat hinnat**: kirjoita saamasi puukauppatarjous, niin näet sen vaikutuksen heti ja voit verrata tarjouksia.
+- **Jaa arvio** taulukkona esimerkiksi kuolinpesän osakkaille, perheelle tai pankille.
+
+### Miksi maksaa, kun data on avointa?
+
+Metsäinfon lähdekoodi ja käyttämät aineistot ovat avoimia, ja juuri siksi se on luotettava: jokainen luku perustuu julkiseen lähteeseen, ja laskentatapa on kuvattu ohjeessa. Maksullinen lisäosa on **valmis, kokonainen tuote**:
+
+- **Toimii heti puhelimessa.** Lataa App Storesta tai Google Playsta, avaa kiinteistö ja näe arvo. Ei asennuksia, ohjelmointia, tunnuksia eikä taulukoita.
+- **Pysyy ajan tasalla.** Kantohinnat haetaan automaattisesti, ja sovellus päivittyy kaupan kautta, kun rajapinnat tai aineistot muuttuvat.
+- **Kertaosto, ei tilausta.** Yksi osto avaa hinta-arvion kaikille kiinteistöille. Hintojen päivittyminen ei maksa lisää. Ostoksen voi palauttaa uuteen laitteeseen.
+- **Kokeile ennen kuin ostat.** *Kokeile esimerkkimetsällä* näyttää koko toiminnon maksutta kuvitteellisella kiinteistöllä.
+- **Tukee kehitystä.** Ostot rahoittavat uusia ominaisuuksia, joita testiversiossa jo kokeillaan (alla).
+
+Ajantasainen hinta näkyy sovelluksen ostonäkymässä. Osto tehdään App Storen tai Google Playn kautta, eikä Metsäinfo saa maksu- tai henkilötietojasi. Arvio on suuntaa-antava eikä korvaa puukauppatarjousta.
+
+<p>
+  <a href="https://apps.apple.com/fi/app/id6832988855"><img src="docs/kuvat/app-store-badge-fi.svg" alt="Lataa App Storesta" height="44"></a>
+  &nbsp;
+  <a href="https://play.google.com/store/apps/details?id=fi.inetor.metsainfo"><img src="docs/kuvat/google-play-badge-fi.png" alt="Lataa Google Playsta" height="65"></a>
+</p>
+
+---
+
+## Tulossa – testiversiossa nyt
 Seuraavia toimintoja kokeillaan testiversiossa. Ne voivat vielä muuttua ennen julkaisua.
 - **Työkalut-valikko** – työkalut yhden napin takana nimineen ja kuvauksineen; päällä oleva työkalu näkyy kartan yläreunassa.
 - **Kerro tästä paikasta** – napauta karttaa tai käytä sijaintia: kuvion tiedot maastossa ja metsävisa.
