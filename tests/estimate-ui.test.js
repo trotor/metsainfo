@@ -131,13 +131,34 @@ describe('käyttöönotto', () => {
         initEstimate(null, { features: stands, parcel: parcel('L', 3), label: 'L' });
         await flush(); await flush();
         const root = document.querySelector('.estimate-root');
-        const body = root.querySelector('.est-prices-body');
+        const prices = '.est-prices:not(.est-erittely)';
+        const body = root.querySelector(`${prices} .est-prices-body`);
         // Tulos ennen hintataulukkoa
         expect(root.querySelector('.est-result').compareDocumentPosition(body) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
         expect(body.hidden).toBe(true);
-        expect(root.querySelector('.est-prices-head').textContent).toContain('Lappi');
+        expect(root.querySelector(`${prices} .est-prices-head`).textContent).toContain('Lappi');
         root.querySelector('[data-est="toggle-prices"]').click();
-        expect(document.querySelector('.estimate-root .est-prices-body').hidden).toBe(false);
+        expect(document.querySelector(`.estimate-root ${prices} .est-prices-body`).hidden).toBe(false);
+    });
+
+    it('erittely "Mistä arvio koostuu?" on suljettu, kunnes sen avaa', async () => {
+        mocks.cache.set('lappi', pricesFor('lappi', 70));
+        mocks.lookupKunta = () => Promise.resolve({ kunta: '698', nimi: 'Rovaniemi' });
+        mocks.fetchPrices = (region) => Promise.resolve(pricesFor(region, 70));
+        initEstimate(null, { features: stands, parcel: parcel('E', 3), label: 'E' });
+        await flush(); await flush();
+        const section = () => document.querySelector('.estimate-root .est-erittely');
+        expect(section().querySelector('.est-prices-head').textContent).toContain('Mistä arvio koostuu?');
+        expect(section().querySelector('.est-prices-body').hidden).toBe(true);
+        section().querySelector('[data-est="toggle-breakdown"]').click();
+        const body = section().querySelector('.est-prices-body');
+        expect(body.hidden).toBe(false);
+        expect(body.textContent).toContain('Yhteensä');
+        expect(body.textContent).toContain('Koko puusto uudistushakkuun hinnoin');
+        expect(body.textContent).toMatch(/pääomatuloa/);
+        // Avoin tila säilyy uudelleenpiirrossa (esim. hinnan muokkaus)
+        document.querySelector('[data-est="toggle-prices"]').click();
+        expect(section().querySelector('.est-prices-body').hidden).toBe(false);
     });
 
     it('ilman hintoja hintataulukko on auki', async () => {

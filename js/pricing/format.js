@@ -65,8 +65,20 @@ export function buildEstimateReport({ label, regionName, prices, table, estimate
     }
     lines.push('', R.kuvioSarakkeet.join(';'));
     for (const p of estimate.plans) {
-        lines.push(`${p.standNumber ?? ''};${p.year ?? ''};${METHOD_LABELS[p.method]};${csvNumber(p.area, 2)};${Math.round(p.value)}`);
+        const volumes = p.log === undefined ? '' : `;${Math.round(p.log)};${Math.round(p.pulp)}`;
+        lines.push(`${p.standNumber ?? ''};${p.year ?? ''};${METHOD_LABELS[p.method]};${csvNumber(p.area, 2)};${Math.round(p.value)}${volumes}`);
     }
+    // Erittely: mistä arvio koostuu (puutavaralajit)
+    const assortmentLines = (title, rows) => {
+        if (!rows?.length) return;
+        lines.push('', title, R.lajiSarakkeet.join(';'));
+        for (const r of rows) {
+            lines.push([METHOD_LABELS[r.method], SPECIES_LABELS[r.species].split(' ')[0], T.lajite[r.assortment],
+                Math.round(r.volume), csvNumber(r.price, 2), r.value === null ? '' : Math.round(r.value)].join(';'));
+        }
+    };
+    assortmentLines(R.erittely, estimate.assortments);
+    assortmentLines(R.erittelyPuusto, estimate.stock?.assortments);
     lines.push('', R.loppu);
     return lines.join('\n');
 }
