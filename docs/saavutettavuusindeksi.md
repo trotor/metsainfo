@@ -41,7 +41,7 @@ Kuvion pisteiden (20 m välein, enintään 400) **keskimääräinen suora etäis
 
 ### W – märkyys (15 %)
 
-Luonnonvarakeskuksen **DTW-kosteusindeksi** (depth-to-water, 2 m, 1 ha:n uomaverkko, 2023): arvioitu korkeus pohjaveden pinnasta. Näytteet otetaan kuviolta ja **metsäkuljetuksen linjoilta**: enintään 25 suoraa linjaa kuvion pisteistä lähimpään autotiehen (enintään 300 m), näytteet 8 m välein.
+Luonnonvarakeskuksen **DTW-kosteusindeksi** (depth-to-water, 2 m, 1 ha:n uomaverkko, 2023): arvioitu korkeus pohjaveden pinnasta. Palvelin piirtää luokan yli 150 cm läpinäkyvänä, joten läpinäkyvä kohta lasketaan kuivaksi (myös vesistöt, joita metsäkuljetuslinjat harvoin ylittävät). Näytteet otetaan kuviolta ja **metsäkuljetuksen linjoilta**: enintään 25 suoraa linjaa kuvion pisteistä lähimpään autotiehen (enintään 300 m), näytteet 8 m välein.
 
 ```
 märkyysosuus = (märät + 0,5 × kosteat) / näytteet
@@ -92,7 +92,7 @@ Kaikki haut tehdään laitteelta suoraan julkaisijan rajapintaan. Pyynnöissä o
 
 - **Suora linja** tiehen ei ole todellinen ajoura. Kiertämistä vaativat esteet, kuten järvet, kalliot ja naapurin pellot, eivät näy matkassa.
 - **DTW** haetaan vain, kun kuvan tarkkuus on enintään 5 m/px (kiinteistön ja 300 m reunuksen pidempi sivu enintään noin 10 km). **Korkeusmalli** haetaan enintään 6 × 6 km alueelta. Isommilla alueilla osat puuttuvat.
-- **Metsätiet**, joita ei ole Digiroadissa, puuttuvat tieverkosta. Kemera-tuella tehdyt metsätiehankkeet näkyvät erikseen kohdassa "Huomioitavaa metsätöissä".
+- **Metsätiet**, joita ei ole Digiroadissa, puuttuvat tieverkosta. (Metsäkeskuksen Kemera-tukitiedoista ei saa metsäteitä luotettavasti: rajapinnan kohteet ovat kuviotason töitä.)
 - Kelirikko, routa ja lumi vaihtelevat vuodenajan mukaan. Indeksi kuvaa tavanomaista sulan maan tilannetta, ja talvikorjuun mahdollisuus näkyy maapohjan luokassa.
 - Painot on asetettu asiantuntija-arviona. Niitä säädetään, kun tuloksia verrataan toteutuneisiin korjuisiin.
 

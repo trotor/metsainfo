@@ -48,6 +48,16 @@ export function startRajoitteet() {
     const ui = { ctx: null, status: 'idle', items: [], partial: false, showMap: true };
     let token = 0;
 
+    // Alueet kuviotasojen alle (omassa paneelissa), jotta kuvion napautus avaa kuvion;
+    // pisteet (muinaisjäännökset) kuvioiden päällä ja napautettavina.
+    const pane = state.map.createPane('rajoitteetPane');
+    pane.style.zIndex = 390;
+    const areaLayer = L.geoJSON(null, {
+        pane: 'rajoitteetPane',
+        coordsToLatLng: coordsEPSG3067ToLatLng,
+        style: (f) => ({ color: VARIT[f.properties.ryhma], weight: 2, dashArray: '5 4', fillOpacity: 0.12 }),
+        onEachFeature: (f, l) => l.bindPopup(popupHtml(f.properties))
+    });
     const layer = L.geoJSON(null, {
         coordsToLatLng: coordsEPSG3067ToLatLng,
         // style koskee myös pistemerkkejä (CircleMarker), joten pisteille oma tyyli
@@ -57,13 +67,22 @@ export function startRajoitteet() {
         pointToLayer: (f, latlng) => L.circleMarker(latlng, {
             radius: 7, color: '#fff', weight: 2, fillColor: VARIT[f.properties.ryhma], fillOpacity: 0.95
         }),
-        onEachFeature: (f, l) => l.bindPopup(`<strong>${esc(T.ryhmat[f.properties.ryhma])}</strong><br>${esc(f.properties.nimi || '–')}${f.properties.laji ? `<br><span class="rj-laji">${esc(f.properties.laji)}</span>` : ''}`)
+        onEachFeature: (f, l) => l.bindPopup(popupHtml(f.properties))
     });
+
+    function popupHtml(p) {
+        return `<strong>${esc(T.ryhmat[p.ryhma])}</strong><br>${esc(p.nimi || '–')}${p.laji ? `<br><span class="rj-laji">${esc(p.laji)}</span>` : ''}`;
+    }
 
     function drawMap() {
         layer.clearLayers();
-        if (!ui.ctx || !ui.showMap || !ui.items.length) { layer.remove(); return; }
-        for (const i of ui.items) layer.addData({ type: 'Feature', geometry: i.geometry, properties: { ryhma: i.ryhma, nimi: i.nimi, laji: i.laji } });
+        areaLayer.clearLayers();
+        if (!ui.ctx || !ui.showMap || !ui.items.length) { layer.remove(); areaLayer.remove(); return; }
+        for (const i of ui.items) {
+            const f = { type: 'Feature', geometry: i.geometry, properties: { ryhma: i.ryhma, nimi: i.nimi, laji: i.laji } };
+            (i.geometry.type === 'Point' || i.geometry.type === 'MultiPoint' ? layer : areaLayer).addData(f);
+        }
+        areaLayer.addTo(state.map);
         layer.addTo(state.map);
     }
 

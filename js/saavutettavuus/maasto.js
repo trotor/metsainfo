@@ -21,7 +21,8 @@ export const DEM_MAX_CELLS = 600;  // solua kumpaankin suuntaan (10 m)
 export const STEEP = 20;           // %, metsäkuljetusta hidastava rinne
 export const VERY_STEEP = 35;      // %, vaikea tai mahdoton ajaa
 
-// GetLegendGraphic (intervals): yläraja cm → väri; 151 = yli 150 cm
+// GetLegendGraphic (intervals): yläraja cm → väri; 151 = yli 150 cm (palvelin piirtää
+// sen läpinäkyvänä, ks. dtwAt)
 const DTW_LEGEND = [
     [0, [0x08, 0x30, 0x6b]], [25, [0x08, 0x51, 0x9c]], [50, [0x21, 0x71, 0xb5]],
     [75, [0x42, 0x92, 0xc6]], [100, [0x6b, 0xae, 0xd6]], [125, [0x9e, 0xca, 0xe1]],
@@ -137,6 +138,11 @@ function dtwAt(raster, [x, y]) {
     const j = Math.floor(((bbox.maxY - y) / (bbox.maxY - bbox.minY)) * height);
     if (i < 0 || j < 0 || i >= width || j >= height) return null;
     const o = (j * width + i) * 4;
+    // Palvelin piirtää luokan "yli 150 cm" läpinäkyvänä (selitteessä opacity 0),
+    // joten läpinäkyvä pikseli rasterin sisällä on kuivaa maata. Myös vesistöt ja
+    // aineiston ulkopuoli ovat läpinäkyviä; metsäkuljetuksen linjat ylittävät
+    // niitä harvoin.
+    if (!data[o + 3]) return 151;
     return classifyDtw(data[o], data[o + 1], data[o + 2], data[o + 3]);
 }
 

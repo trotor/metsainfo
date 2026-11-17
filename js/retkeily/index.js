@@ -6,13 +6,14 @@
 
 import './retkeily.css';
 import * as state from '../state.js';
-import { coordsEPSG3067ToLatLng } from '../utils.js';
+import { coordsEPSG3067ToLatLng, formatNumber } from '../utils.js';
+import { locale } from '../i18n.js';
 import { showToast } from '../ui/location-ui.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { LAYERS, wfsUrl, toSites, viewKey } from './aineisto.js';
 import { T } from './teksti.js';
 
-export const MIN_ZOOM = 9;
+export const MIN_ZOOM = 10; // kuten kiinteistörajat; laajempi näkymä katkaisisi haun (enintään 1000 kohdetta)
 const VARIT = { laavu: '#b45309', tuli: '#dc2626', reitti: '#7c2d12', polku: '#15803d' };
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -21,7 +22,7 @@ const safeUrl = (u) => (/^https?:\/\//i.test(u || '') ? u : null);
 function popupHtml(s) {
     const url = safeUrl(s.www);
     return `<div class="rk-taso"><strong>${esc(s.nimi || T.lajit[s.laji])}</strong>
-        <div class="rk-laji">${esc(T.lajit[s.laji])}${s.pituusKm ? ` · ${esc(T.pituus(s.pituusKm))}` : ''}${s.kunta ? ` · ${esc(s.kunta)}` : ''}</div>
+        <div class="rk-laji">${esc(T.lajit[s.laji])}${s.pituusKm ? ` · ${esc(T.pituus(formatNumber(s.pituusKm, s.pituusKm < 10 ? 1 : 0, locale())))}` : ''}${s.kunta ? ` · ${esc(s.kunta)}` : ''}</div>
         ${url ? `<div><a href="${esc(url)}" target="_blank" rel="noopener">${esc(T.lisatietoja)}</a></div>` : ''}
         <div class="rk-lahde">${esc(T.lahde)}</div></div>`;
 }

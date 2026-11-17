@@ -30,6 +30,11 @@ describe('aineisto', () => {
         expect(toItems(n, { features: [{ geometry: pt(0, 0), properties: { nimisuomi: 'Jurvon alue', aluetyyppi: 'SAC' } }] })[0]).toMatchObject({ nimi: 'Jurvon alue', laji: 'SAC' });
     });
 
+    it('kaikki lähteet epäonnistuvat: virhe, ei "ei kohteita"', async () => {
+        const src = createConstraintSource({ fetchFn: async () => { throw new Error('offline'); } });
+        await expect(src.items({ minX: 0, minY: 0, maxX: 10, maxY: 10 })).rejects.toThrow();
+    });
+
     it('yhden lähteen virhe ei kaada muita: osittainen tulos', async () => {
         const fetchFn = async (url) => {
             if (url.includes('museovirasto')) throw new Error('verkko');
@@ -63,8 +68,39 @@ describe('päättely', () => {
         expect(matchStand(items, square(0, 0, 10)).map(i => i.nimi)).toEqual(['A']);
     });
 
+    it('kuviolla: pelkkä yhteinen raja tai kulma ei ole osuma', () => {
+        const stand = square(0, 0, 100);
+        const items = [item('mete', square(100, 0, 100), 'reuna'), item('mete', square(100, 100, 50), 'kulma'),
+            item('mete', square(99.8, 0, 100), 'digitointivirhe'), item('mete', square(50, 50, 100), 'osuu')];
+        expect(matchStand(items, stand).map(i => i.nimi)).toEqual(['osuu']);
+    });
+
+    it('iso monikulmio ja monta kuviota: nopea (rajausesikarsinta)', () => {
+        const big = { type: 'Polygon', coordinates: [Array.from({ length: 13001 }, (_, k) => {
+            const a = (k / 13000) * 2 * Math.PI;
+            return [100000 + 5000 * Math.cos(a), 100000 + 5000 * Math.sin(a)];
+        })] };
+        const items = [item('suojelu', big, 'Iso')];
+        // 60 kulmapisteen kuviot kuten oikeissa aineistoissa
+        const ring = (cx, cy) => ({ type: 'Polygon', coordinates: [Array.from({ length: 61 }, (_, k) => {
+            const a = (k / 60) * 2 * Math.PI;
+            return [cx + 50 * Math.cos(a), cy + 50 * Math.sin(a)];
+        })] });
+        const stands = Array.from({ length: 150 }, (_, k) => ring(200000 + k * 200, 200000));
+        const inside = Array.from({ length: 150 }, (_, k) => ring(98000 + (k % 15) * 200, 98000 + Math.floor(k / 15) * 200));
+        const t0 = performance.now();
+        expect(stands.every(st => matchStand(items, st).length === 0)).toBe(true);
+        expect(inside.every(st => matchStand(items, st).length === 1)).toBe(true);
+        expect(performance.now() - t0).toBeLessThan(500);
+    });
+
     it('ryhmittely: sama nimi kerran, ryhmien järjestys', () => {
         const g = groupItems([item('suojelu', pt(0, 0), 'S'), item('muinais', pt(0, 0), 'M'), item('muinais', pt(0, 0), 'M')]);
         expect(g.map(x => [x.ryhma, x.nimet])).toEqual([['muinais', ['M']], ['suojelu', ['S']]]);
+    });
+
+    it('sama Natura-alue SAC- ja SPA-tasolta lasketaan kerran', () => {
+        const g = groupItems([item('natura', pt(0, 0), 'Nuuksio'), item('natura', pt(0, 0), 'Nuuksio'), item('natura', pt(0, 0), '')]);
+        expect(g[0].maara).toBe(2);
     });
 });

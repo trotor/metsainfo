@@ -41,6 +41,14 @@ describe('DTW-kosteusindeksi', () => {
         expect(dtwRequest({ minX: 0, minY: 0, maxX: 20000, maxY: 1000 })).toBeNull();
     });
 
+    it('läpinäkyvä pikseli on kuivaa maata (palvelin piirtää yli 150 cm läpinäkyvänä)', () => {
+        const raster = { width: 2, height: 1, bbox: { minX: 0, minY: 0, maxX: 20, maxY: 10 },
+            data: new Uint8ClampedArray([0x08, 0x30, 0x6b, 255, 255, 255, 255, 0]) };
+        const s = wetnessStats(raster, [[5, 5], [15, 5], [15, 5], [15, 5]]);
+        expect(s.n).toBe(4);
+        expect(s.share).toBeCloseTo(0.25);
+    });
+
     it('märkyysosuus näytteistä: märkä 1, kostea 0,5', () => {
         const raster = { width: 2, height: 1, bbox: { minX: 0, minY: 0, maxX: 20, maxY: 10 },
             data: new Uint8ClampedArray([0x08, 0x30, 0x6b, 255, 0x21, 0x71, 0xb5, 255]) };

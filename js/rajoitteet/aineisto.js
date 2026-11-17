@@ -65,12 +65,22 @@ export function createConstraintSource({ fetchFn = fetch } = {}) {
         async items(bbox) {
             const key = [bbox.minX, bbox.minY, bbox.maxX, bbox.maxY].map(Math.round).join(',');
             if (cache.has(key)) return cache.get(key);
-            const p = Promise.allSettled(SOURCES.map(s => one(s, bbox))).then(results => ({
-                items: results.flatMap(r => (r.status === 'fulfilled' ? r.value : [])),
-                partial: results.some(r => r.status === 'rejected')
-            }));
+            const p = Promise.allSettled(SOURCES.map(s => one(s, bbox))).then(results => {
+                // Kaikki epäonnistuivat (esim. ei verkkoa): virhe, ei "ei kohteita"
+                if (results.every(r => r.status === 'rejected')) throw new Error('Rajoitteiden haku epäonnistui');
+                return {
+                    items: results.flatMap(r => (r.status === 'fulfilled' ? r.value : [])),
+                    partial: results.some(r => r.status === 'rejected')
+                };
+            });
             cache.set(key, p);
-            const out = await p;
+            let out;
+            try {
+                out = await p;
+            } catch (err) {
+                cache.delete(key);
+                throw err;
+            }
             if (out.partial) cache.delete(key); // yritetään uudelleen seuraavalla kerralla
             return out;
         }
