@@ -103,5 +103,3 @@ Kaikki haut tehdään laitteelta suoraan julkaisijan rajapintaan. Pyynnöissä o
 - Märkyys ja kaltevuus: `js/saavutettavuus/maasto.js`
 - Tieverkko: `js/saavutettavuus/tieverkko.js`
 - Testit: `tests/saavutettavuus.test.js` ja `tests/saavutettavuus-maasto.test.js`
-
-Suunnitelmat: `docs/plans/2026-11-16-saavutettavuus-kokeilu.md` ja `docs/plans/2026-11-17-saavutettavuus-v2-rajoitteet-retkeily.md`.

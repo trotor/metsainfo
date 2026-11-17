@@ -115,7 +115,7 @@ Metsäinfon tiedot ovat käytettävissä tekoälytyökaluissa [MCP-palvelimen](h
 | `hae_metsavaratieto(kiinteistotunnus)` | Ihmisluettava yhteenveto: pinta-ala, tilavuus, puulajit, hakkuuehdotukset |
 | `hae_raakadata(kiinteistotunnus)` | JSON-raakadata: kuviokohtaiset mittaustiedot tekoälymallin analysoitavaksi |
 
-Kiinteistötunnus voi olla muodossa `999-1-1-1` tai `99900100010001`.
+Kiinteistötunnus voi olla muodossa `999-1-1-1` tai `99900100010001` (esimerkkien tunnus on kuvitteellinen).
 
 **Claude Code:** palvelin on valmiiksi määritelty `.mcp.json`-tiedostossa ja käynnistyy, kun avaat projektin [Claude Codessa](https://claude.ai/code).
 

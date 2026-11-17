@@ -31,3 +31,10 @@ fastlane/README.md
 fastlane/Preview.html
 fastlane/test_output
 /kuvaus/
+
+# Suunnitelmat ja julkaisupolun tiedot ovat yksityisessä repossa trotor/metsainfo-julkaisu
+# (docs/plans on paikallinen symlinkki sinne). Ei koskaan tähän julkiseen repoon.
+docs/plans
+docs/superpowers
+docs/kauppa
+fastlane/metadata/review_information

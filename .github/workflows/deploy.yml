@@ -70,3 +70,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: gh-pages
+          # Vain uusin build: gh-pages-haaraan ei jää vanhaa historiaa
+          force_orphan: true
