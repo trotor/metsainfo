@@ -51,8 +51,8 @@ export function applyAndroidVersion(gradle, { name, code }) {
         .replace(/versionName "[^"]*"/, `versionName "${name}"`);
 }
 
-// Kunkin kokeilutoiminnon tunnusluokka (js/maasto/, js/lahihaku/, js/suosikit/, js/korkeusmalli/, js/asetukset/)
-export const KOKEILU_MARKERS = ['maasto-kortti', 'lahihaku-kortti', 'suosikit-kortti', 'korkeusmalli-taso', 'asetukset-kortti', 'sv-laatikko'];
+// Kunkin kokeilutoiminnon tunnusluokka (js/maasto/, js/lahihaku/, js/suosikit/, js/korkeusmalli/, js/asetukset/, js/saavutettavuus/, js/valinta/)
+export const KOKEILU_MARKERS = ['maasto-kortti', 'lahihaku-kortti', 'suosikit-kortti', 'korkeusmalli-taso', 'asetukset-kortti', 'sv-laatikko', 'valinta-kortti'];
 export const KOKEILU_PATCH_OFFSET = 900;
 
 /** version.js:n kokeilu-kenttä (TestFlight-kokeilun näkyvä versio). */

@@ -5,6 +5,7 @@ import {
     MAX_EXTENT, standKey, tileKeys, tileBounds, createSelection, selectionSummary, canShow, toPseudoParcel
 } from '../js/valinta/logiikka.js';
 import { calculateParcelArea } from '../js/utils.js';
+import { parcelPoint } from '../js/pricing/region.js';
 
 const SQ = (x, y, s = 100) => ({
     type: 'Polygon',
@@ -100,5 +101,8 @@ describe('canShow ja toPseudoParcel', () => {
         expect(p.parts[0].type).toBe('Feature');
         expect(p.parts[0].geometry).toBe(A.geometry);
         expect(calculateParcelArea(p, 1)).toBeCloseTo(10000);
+    });
+    it('hinta-alueen piste ensimmäisestä kuviosta (ei koko maa)', () => {
+        expect(parcelPoint(toPseudoParcel([A], 'x'))).toEqual([430050, 6935050]);
     });
 });

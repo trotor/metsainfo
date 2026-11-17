@@ -35,7 +35,10 @@ export const FEATURES = {
     asetukset: { product: null, kokeilu: true },
     // Kokeilu: kuvion saavutettavuus ja tieyhteys (js/saavutettavuus/); nyt hinta-arvion
     // kertaostossa, voi myöhemmin olla oma maksullinen lisäosa
-    saavutettavuus: { product: PRODUCT_ID, kokeilu: true }
+    saavutettavuus: { product: PRODUCT_ID, kokeilu: true },
+    // Kokeilu #32: kuviovalinta kiinteistörajojen yli, maksuton (js/valinta/); hinta-arvio
+    // ja saavutettavuus pysyvät kertaoston takana
+    valinta: { product: null, kokeilu: true }
 };
 
 /**
