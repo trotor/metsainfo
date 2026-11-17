@@ -13,6 +13,8 @@ export const MAX_EXTENT = 10000;
 export const TILE = 1000;
 /** Ruutuja kerralla enintään (muuten pyydetään zoomaamaan). */
 export const MAX_TILES = 30;
+/** Valintatason paneeli: kuviotasojen (overlayPane 400) yläpuolella, sijaintipisteen (450) alla. */
+export const PANE_Z_INDEX = 440;
 /** Kuviot ladataan tästä zoomista alkaen. */
 export const MIN_ZOOM = 12;
 

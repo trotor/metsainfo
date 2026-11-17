@@ -11,10 +11,12 @@ import { getLang } from '../i18n.js';
 const OPEN_EVENT = 'metsainfo:kortti-auki';
 
 /**
- * Luo kortin. onClose kutsutaan, kun toinen kortti avautuu.
+ * Luo kortin. onClose kutsutaan, kun toinen kortti avautuu. notifyHidden:
+ * kutsutaan myös, kun kortti on piilossa (toiminto, jonka tila jatkuu kortin
+ * ollessa piilossa, kuten kuviovalinta mobiilissa yhteenvedon aikana).
  * Palauttaa { el, open(), close(), isOpen }.
  */
-export function createCard({ id, label, className = '', onClose }) {
+export function createCard({ id, label, className = '', onClose, notifyHidden = false }) {
     const el = document.createElement('section');
     el.className = `kortti ${className}`.trim();
     el.hidden = true;
@@ -36,7 +38,7 @@ export function createCard({ id, label, className = '', onClose }) {
     };
 
     document.addEventListener(OPEN_EVENT, (e) => {
-        if (e.detail !== id && !el.hidden) onClose?.();
+        if (e.detail !== id && (notifyHidden || !el.hidden)) onClose?.();
     });
     return card;
 }

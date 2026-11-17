@@ -15,7 +15,7 @@ const fi = {
     virhe: 'Osa kuvioista jäi lataamatta. Siirrä karttaa yrittääksesi uudelleen.',
     liianLaaja: 'Valinta saa olla enintään 10 km × 10 km.',
     tyhja: 'Ei vielä valittuja kuvioita.',
-    yhteenveto: (n, ha, m3) => `${n} kuviota · ${ha} ha · ${m3} m³`,
+    yhteenveto: (n, ha, m3) => `${n} ${n === 1 ? 'kuvio' : 'kuviota'} · ${ha} ha · ${m3} m³`,
     kuvio: (nro) => `Kuvio ${nro}`,
     poista: 'Poista valinnasta',
     nayta: 'Näytä yhteenveto',
@@ -23,7 +23,7 @@ const fi = {
     muuttunut: 'Valinta muuttunut näytetystä yhteenvedosta.',
     tyhjenna: 'Tyhjennä',
     lopeta: 'Lopeta valinta',
-    valintaOtsikko: (n) => `Oma valinta · ${n} kuviota`,
+    valintaOtsikko: (n) => `Oma valinta · ${n} ${n === 1 ? 'kuvio' : 'kuviota'}`,
     huom: 'Valitaan kokonaisia kuvioita. Hinta-arvio koskee vain puustoa, ei maapohjaa. Valintaa ei tallenneta.'
 };
 
@@ -38,7 +38,7 @@ const sv = {
     virhe: 'En del figurer kunde inte laddas. Flytta kartan för att försöka igen.',
     liianLaaja: 'Urvalet får vara högst 10 km × 10 km.',
     tyhja: 'Inga valda figurer ännu.',
-    yhteenveto: (n, ha, m3) => `${n} figurer · ${ha} ha · ${m3} m³`,
+    yhteenveto: (n, ha, m3) => `${n} ${n === 1 ? 'figur' : 'figurer'} · ${ha} ha · ${m3} m³`,
     kuvio: (nro) => `Figur ${nro}`,
     poista: 'Ta bort ur urvalet',
     nayta: 'Visa sammandrag',
@@ -46,7 +46,7 @@ const sv = {
     muuttunut: 'Urvalet har ändrats sedan sammandraget visades.',
     tyhjenna: 'Töm',
     lopeta: 'Avsluta urvalet',
-    valintaOtsikko: (n) => `Eget urval · ${n} figurer`,
+    valintaOtsikko: (n) => `Eget urval · ${n} ${n === 1 ? 'figur' : 'figurer'}`,
     huom: 'Hela figurer väljs. Prisuppskattningen gäller endast trädbeståndet, inte marken. Urvalet sparas inte.'
 };
 
@@ -61,7 +61,7 @@ const en = {
     virhe: 'Some stands could not be loaded. Move the map to try again.',
     liianLaaja: 'The selection can be at most 10 km × 10 km.',
     tyhja: 'No stands selected yet.',
-    yhteenveto: (n, ha, m3) => `${n} stands · ${ha} ha · ${m3} m³`,
+    yhteenveto: (n, ha, m3) => `${n} ${n === 1 ? 'stand' : 'stands'} · ${ha} ha · ${m3} m³`,
     kuvio: (nro) => `Stand ${nro}`,
     poista: 'Remove from selection',
     nayta: 'Show summary',
@@ -69,7 +69,7 @@ const en = {
     muuttunut: 'The selection has changed since the summary was shown.',
     tyhjenna: 'Clear',
     lopeta: 'Stop selecting',
-    valintaOtsikko: (n) => `Own selection · ${n} stands`,
+    valintaOtsikko: (n) => `Own selection · ${n} ${n === 1 ? 'stand' : 'stands'}`,
     huom: 'Whole stands are selected. The price estimate covers the trees only, not the land. The selection is not saved.'
 };
 

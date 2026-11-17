@@ -2,10 +2,11 @@ import '../js/vendor/index.js';
 import '../js/config.js';
 import { describe, it, expect } from 'vitest';
 import {
-    MAX_EXTENT, standKey, tileKeys, tileBounds, createSelection, selectionSummary, canShow, toPseudoParcel
+    MAX_EXTENT, PANE_Z_INDEX, standKey, tileKeys, tileBounds, createSelection, selectionSummary, canShow, toPseudoParcel
 } from '../js/valinta/logiikka.js';
 import { calculateParcelArea } from '../js/utils.js';
 import { parcelPoint } from '../js/pricing/region.js';
+import { TEKSTIT } from '../js/valinta/teksti.js';
 
 const SQ = (x, y, s = 100) => ({
     type: 'Polygon',
@@ -104,5 +105,20 @@ describe('canShow ja toPseudoParcel', () => {
     });
     it('hinta-alueen piste ensimmäisestä kuviosta (ei koko maa)', () => {
         expect(parcelPoint(toPseudoParcel([A], 'x'))).toEqual([430050, 6935050]);
+    });
+});
+
+describe('kartan paneeli ja tekstit', () => {
+    it('valintataso kuviotasojen (400) yläpuolella mutta sijaintipisteen (450) alla', () => {
+        expect(PANE_Z_INDEX).toBeGreaterThan(400);
+        expect(PANE_Z_INDEX).toBeLessThan(450);
+    });
+    it('yksikkö ja monikko', () => {
+        const fi = TEKSTIT.fi;
+        expect(fi.valintaOtsikko(1)).toBe('Oma valinta · 1 kuvio');
+        expect(fi.valintaOtsikko(3)).toBe('Oma valinta · 3 kuviota');
+        expect(fi.yhteenveto(1, '1,20', '150')).toBe('1 kuvio · 1,20 ha · 150 m³');
+        expect(TEKSTIT.sv.valintaOtsikko(1)).toBe('Eget urval · 1 figur');
+        expect(TEKSTIT.en.yhteenveto(1, '1.20', '150')).toBe('1 stand · 1.20 ha · 150 m³');
     });
 });

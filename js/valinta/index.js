@@ -22,7 +22,7 @@ import { showToast } from '../ui/location-ui.js';
 import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import {
-    MIN_ZOOM, MAX_TILES, standKey, tileKeys, tileBounds, createSelection, selectionSummary, canShow, toPseudoParcel
+    MIN_ZOOM, MAX_TILES, PANE_Z_INDEX, standKey, tileKeys, tileBounds, createSelection, selectionSummary, canShow, toPseudoParcel
 } from './logiikka.js';
 import { T } from './teksti.js';
 
@@ -51,7 +51,7 @@ export function startValinta() {
     /* ---------- Kartta ---------- */
 
     const pane = state.map.createPane(PANE);
-    pane.style.zIndex = 450; // kuviotasojen (overlayPane 400) yläpuolella
+    pane.style.zIndex = PANE_Z_INDEX;
 
     const layer = L.geoJSON(null, {
         pane: PANE,
@@ -143,7 +143,9 @@ export function startValinta() {
 
     /* ---------- Kortti ---------- */
 
-    const card = createCard({ id: 'valinta', label: T.nappi, className: 'valinta-kortti', onClose: () => setMode(false) });
+    // notifyHidden: mobiilissa kortti on piilossa yhteenvedon ajan, mutta tila päättyy silti,
+    // kun toinen kortti (lähihaku, maastotila …) avautuu: tasot eivät saa olla päällä yhtä aikaa
+    const card = createCard({ id: 'valinta', label: T.nappi, className: 'valinta-kortti', onClose: () => setMode(false), notifyHidden: true });
 
     card.el.addEventListener('click', (e) => {
         if (e.target.closest('[data-close]')) return setMode(false);
