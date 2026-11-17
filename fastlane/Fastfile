@@ -38,6 +38,9 @@ platform :ios do
     builds.each { |b| UI.message("Build #{b.version} (#{b.app_version}): #{b.processing_state}") }
   end
 
+  # Tarkastusmuistiinpanot ovat yksityisessä repossa trotor/metsainfo-julkaisu
+  JULKAISU = File.expand_path(ENV.fetch("METSAINFO_JULKAISU", "~/code/metsainfo-julkaisu"))
+
   desc "Päivittää kauppatekstit (fastlane/metadata)"
   lane :metadata do
     asc_key
@@ -56,7 +59,7 @@ platform :ios do
         email_address: ENV.fetch("ASC_REVIEW_EMAIL"),
         phone_number: ENV.fetch("ASC_REVIEW_PHONE"),
         demo_required: false,
-        notes: File.read(File.expand_path("metadata/review_information/notes.txt", __dir__))
+        notes: File.read(File.join(JULKAISU, "review_information/notes.txt"))
       }
     )
   end

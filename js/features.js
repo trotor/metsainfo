@@ -3,7 +3,7 @@
  *
  * Jokainen toiminto on oma kokonaisuutensa, jonka voi myöhemmin myydä
  * omana lisäosanaan tai siirtää omaan sovellukseen
- * (docs/plans/2026-11-16-maastotila-erillinen-sovellus.md):
+ * (vertailu yksityisessä julkaisurepossa):
  *
  * - koodi omassa hakemistossaan (js/maasto/, js/lahihaku/, js/suosikit/ …) ja tekstit
  *   sen omassa teksti.js:ssä
