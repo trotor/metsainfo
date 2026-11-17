@@ -2,6 +2,10 @@
  * Configuration, code mappings, tooltips, and color modes
  */
 
+// Vendor (L, proj4, L.Proj) ennen alla olevia latausaikaisia kutsuja. app.js tuo sen myös
+// ensimmäisenä, mutta kokeilubuildissa config.js voi päätyä jaettuun palaan, joka ajetaan ensin.
+import './vendor/index.js';
+
 // Define EPSG:3067 (ETRS-TM35FIN) projection for Proj4
 proj4.defs('EPSG:3067', '+proj=utm +zone=35 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
 
