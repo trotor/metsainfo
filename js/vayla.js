@@ -32,6 +32,8 @@ export function has(name) {
 export const VIESTIT = {
     // Sovellus → lisäosat: yhteenveto piirretty { content, parcel, reference, label, features }
     yhteenveto: 'sovellus:yhteenveto',
+    // Sovellus → lisäosat: kiinteistö tai valinta suljettu (Poista valinta, ×); karttatasot pois
+    tyhjennys: 'sovellus:tyhjennys',
     // Lisäosat → sovellus: avaa kiinteistö tunnuksella { reference }
     avaaKiinteisto: 'sovellus:avaa-kiinteisto',
     // Lisäosat → sovellus: avaa kiinteistö, jolla piste on { points: [[x, y], …] } (EPSG:3067);

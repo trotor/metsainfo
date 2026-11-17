@@ -87,6 +87,23 @@ describe('työkalut', () => {
         expect(chip().hidden).toBe(true);
     });
 
+    it('kiinnitetty lista seuraa nappia, kun tietopaneeli avautuu', async () => {
+        document.body.insertAdjacentHTML('beforeend', '<div id="info-panel" class="hidden"></div>');
+        registerTool(tool());
+        let right = 60;
+        toolButton().getBoundingClientRect = () => ({ right, top: 300, bottom: 344, left: right - 44 });
+        openList();
+        list().querySelector('[data-tk="kiinnita"]').click();
+        expect(list().style.left).toBe('68px');
+        right = 500; // paneeli siirtää nappisarakkeen oikealle
+        document.getElementById('info-panel').classList.remove('hidden');
+        await new Promise(r => setTimeout(r, 0));
+        expect(list().style.left).toBe('508px');
+        right = 120;
+        window.dispatchEvent(new Event('resize'));
+        expect(list().style.left).toBe('128px');
+    });
+
     it('kiinnitys muistetaan ja lista pysyy auki valinnan jälkeen', () => {
         const t = tool();
         registerTool(t);

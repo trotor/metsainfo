@@ -18,7 +18,8 @@
 
 .tyokalut-lista {
     position: fixed;
-    z-index: 2100;
+    /* Työpöydällä tietopaneelin (1001) yllä mutta ohjeen (2000) alla */
+    z-index: 1500;
     width: 300px;
     max-height: min(70vh, 560px);
     overflow-y: auto;
@@ -129,6 +130,7 @@ ul.tk-ohje { padding-left: 0; }
         bottom: calc(8px + env(safe-area-inset-bottom));
         width: auto;
         max-height: 64vh;
+        z-index: 2100; /* korttien (2050) yllä */
     }
     .tyokalu-siru { top: calc(70px + env(safe-area-inset-top)); }
 }

@@ -30,7 +30,7 @@ const PARCEL_MARGIN_MIN_ZOOM = 13;
 const PARCEL_WFS_LIMIT = 2000;
 let lastParcelFetch = null; // { bbox, labels }
 import * as state from './state.js';
-import { on, VIESTIT } from './vayla.js';
+import { on, emit, VIESTIT } from './vayla.js';
 import { T as UI } from './ui/teksti.js';
 import { showToast } from './ui/location-ui.js';
 import { KUVAUSTILA, loadEsimerkkimetsa, createKuvitteellinenKartta, startKuvausohjaus } from './demo/kuvaustila.js';
@@ -348,6 +348,7 @@ function clearSelection() {
     document.getElementById('color-legend').classList.add('hidden');
     state.setState('currentFeatures', []);
     refreshHereRow();
+    emit(VIESTIT.tyhjennys);
 }
 
 /**

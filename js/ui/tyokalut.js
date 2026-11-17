@@ -151,6 +151,13 @@ function ensureList() {
     });
     document.body.appendChild(el);
     ui.list = el;
+    // Kiinnitetty lista seuraa nappisarakkeen siirtymää (tietopaneeli auki/kiinni, ikkunan koko)
+    const follow = () => { if (ui.list && !ui.list.hidden) position(); };
+    window.addEventListener('resize', follow);
+    const panel = document.getElementById('info-panel');
+    if (panel && typeof MutationObserver === 'function') {
+        new MutationObserver(follow).observe(panel, { attributes: true, attributeFilter: ['class'] });
+    }
 }
 
 function renderList() {

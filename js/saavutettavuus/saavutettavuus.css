@@ -72,12 +72,12 @@
 .sv-merkki.sv-heikko { background: #b91c1c; }
 .stand-summary .sv-merkki { margin-right: 6px; }
 
-/* Karttaselite: sovelluksen väriselitteen paikalla, joka piilotetaan värityksen ajaksi */
+/* Karttaselite: sovelluksen väriselitteen paikalla (valitsimen vieressä), joka piilotetaan värityksen ajaksi */
 body.sv-varit #color-legend { display: none !important; }
 #sv-selite {
     position: absolute;
     bottom: 40px;
-    left: 10px;
+    left: 180px; /* #color-legendin paikka: Väritys-valitsin jää näkyviin vasemmalle */
     z-index: 1000;
     background: white;
     border-radius: 6px;

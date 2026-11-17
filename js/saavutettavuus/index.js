@@ -162,6 +162,16 @@ export function startSaavutettavuus() {
         if (!locked() && ctx?.features?.length) run();
     }, { replay: true });
 
+    // Kiinteistö suljettu: väritys ja tiet pois kartalta. Väritystila jää valituksi,
+    // joten seuraava kiinteistö väritetään taas.
+    on(VIESTIT.tyhjennys, () => {
+        ui.ctx = null;
+        ui.result = null;
+        ui.status = 'idle';
+        token++;
+        drawMap();
+    });
+
     purchases.onChange(() => {
         if (!locked() && ui.ctx && !ui.result && ui.status !== 'loading') run();
         else { renderSummaryBox(); decorateStands(); drawMap(); }
