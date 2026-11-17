@@ -84,13 +84,25 @@
 }
 .kortti-lukittu .kortti-btn { margin-top: 10px; }
 
+/* Tabletissa (TABLET_QUERY) tietopaneeli on vasemmalla: kortti oikeaan alakulmaan */
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 501px) {
+    .kortti {
+        left: auto;
+        right: calc(env(safe-area-inset-right) + 12px);
+        width: 380px;
+        max-width: calc(100% - var(--tablet-panel-w, 320px) - 40px);
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        max-height: min(72vh, 640px);
+    }
+}
+
 /*
  * Työpöydällä tietopaneeli on kartan vasemmassa reunassa ja peitti vasemman
  * reunan karttapainikkeet (myös kokeilujen). Kokeilubuildissa painikkeet
  * siirtyvät paneelin viereen, kun paneeli on auki. Ehto on MOBILE_QUERYn
- * (js/ui/layout.js) vastakohta.
+ * (js/ui/layout.js) vastakohta: leveä näyttö ilman kosketusta ensisijaisena.
  */
-@media (min-width: 769px) and (min-height: 501px), (min-width: 769px) and (pointer: fine) {
+@media (min-width: 769px) and (pointer: fine), (min-width: 769px) and (pointer: none) {
     body:has(#info-panel:not(.hidden)) .leaflet-left {
         margin-left: 440px;
     }

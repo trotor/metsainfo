@@ -48,6 +48,6 @@
 .va-actions .kortti-btn { flex: 1; }
 .va-huom { font-size: 12px; color: var(--sammal); }
 
-@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+@media (max-width: 768px), (pointer: coarse) {
     .va-lista { max-height: 22vh; }
 }

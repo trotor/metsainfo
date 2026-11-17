@@ -123,7 +123,7 @@
 .tk-ohje-rivi { display: flex; gap: 8px; align-items: flex-start; list-style: none; margin: 4px 0; }
 ul.tk-ohje { padding-left: 0; }
 
-@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+@media (max-width: 768px), (pointer: coarse) {
     .tyokalut-lista {
         left: calc(env(safe-area-inset-left) + 8px);
         right: calc(env(safe-area-inset-right) + 8px);
@@ -133,4 +133,20 @@ ul.tk-ohje { padding-left: 0; }
         z-index: 2100; /* korttien (2050) yllä */
     }
     .tyokalu-siru { top: calc(70px + env(safe-area-inset-top)); }
+}
+
+/* Tabletissa lista oikeaan reunaan, ei tietopaneelin päälle (TABLET_QUERY) */
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 501px) {
+    .tyokalut-lista {
+        left: auto;
+        right: calc(env(safe-area-inset-right) + 8px);
+        width: 380px;
+    }
+    /* Aktiivisen työkalun siru hakupalkin viereen, ei paneelin päälle */
+    .tyokalu-siru {
+        top: calc(14px + env(safe-area-inset-top));
+        left: calc(var(--tablet-panel-right) + 16px);
+        transform: none;
+        max-width: calc(100% - var(--tablet-panel-right) - 90px);
+    }
 }

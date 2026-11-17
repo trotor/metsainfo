@@ -91,6 +91,6 @@ body.sv-varit #color-legend { display: none !important; }
 .sv-selite-otsikko { font-weight: 600; }
 .sv-selite-viiva { display: inline-block; width: 18px; height: 4px; border-radius: 2px; background: #2563eb; margin-right: 6px; vertical-align: middle; }
 
-@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+@media (max-width: 768px), (pointer: coarse) {
     #sv-selite { position: static; grid-column: 1 / -1; order: 4; border-radius: 10px; }
 }

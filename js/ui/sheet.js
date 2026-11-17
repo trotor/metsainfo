@@ -7,9 +7,12 @@
  * jotta värinauha ja Leafletin alakontrollit voivat asettua sen yläpuolelle.
  */
 
-import { isMobileLayout, topInset } from './layout.js';
+import { isMobileLayout, isTabletLayout, topInset } from './layout.js';
 
 export const PEEK_HEIGHT = 140;
+/** Tabletin pienennetty paneeli: kurkistusrivi ilman vetokahvaa (oletus, jos riviä ei voi mitata) */
+export const TABLET_PEEK_HEIGHT = 96;
+const TABLET_GAP = 8;
 export const TAP_THRESHOLD = 6;
 export const FLING_MS = 150;
 
@@ -20,6 +23,16 @@ export function computeSnapHeights(viewportHeight, topInsetPx, safeBottom = 0, p
     const half = Math.max(Math.round(viewportHeight * 0.5), peek);
     const full = Math.max(viewportHeight - topInsetPx, half);
     return { peek, half, full };
+}
+
+/**
+ * Tabletin sivupaneeli (#32): yläreuna hakupalkin alla, auki koko korkeudelta
+ * (half = full), pienennettynä vain kurkistusrivi
+ */
+export function computeTabletHeights(viewportHeight, panelTop, safeBottom = 0, peekExtra = 0, peekRow = TABLET_PEEK_HEIGHT) {
+    const peek = (peekRow || TABLET_PEEK_HEIGHT) + peekExtra;
+    const full = Math.max(viewportHeight - panelTop - TABLET_GAP - safeBottom, peek);
+    return { peek, half: full, full };
 }
 
 /**
@@ -60,7 +73,9 @@ export function readSafeBottom(doc = document) {
 export function createSheet(panelEl, { win = window, doc = document, onChange, safeBottom = () => readSafeBottom(doc) } = {}) {
     let snap = 'peek';
     let peekExtra = 0;
-    let heights = computeSnapHeights(win.innerHeight, topInset(doc), safeBottom(), peekExtra);
+    let tablet = false;
+    let panelTop = 0;
+    let heights;
     const root = doc.documentElement;
 
     const isHidden = () => panelEl.classList.contains('hidden');
@@ -69,6 +84,7 @@ export function createSheet(panelEl, { win = window, doc = document, onChange, s
         delete panelEl.dataset.snap;
         panelEl.style.removeProperty('--sheet-height');
         root.style.removeProperty('--sheet-offset');
+        root.style.removeProperty('--sheet-top');
     }
 
     function apply() {
@@ -79,21 +95,45 @@ export function createSheet(panelEl, { win = window, doc = document, onChange, s
         const h = heights[snap];
         panelEl.dataset.snap = snap;
         panelEl.style.setProperty('--sheet-height', `${h}px`);
-        root.style.setProperty('--sheet-offset', isHidden() ? '0px' : `${h}px`);
+        if (tablet) {
+            // Sivupaneeli ei peitä alareunaa: alakontrollit ja värinauha pysyvät alhaalla
+            root.style.setProperty('--sheet-offset', '0px');
+            root.style.setProperty('--sheet-top', `${panelTop}px`);
+        } else {
+            root.style.setProperty('--sheet-offset', isHidden() ? '0px' : `${h}px`);
+            root.style.removeProperty('--sheet-top');
+        }
     }
 
     function recompute() {
-        heights = computeSnapHeights(win.innerHeight, topInset(doc), safeBottom(), peekExtra);
+        tablet = isTabletLayout(win);
+        const top = topInset(doc);
+        if (tablet) {
+            panelTop = top + TABLET_GAP;
+            // Kurkistusrivin korkeus vaihtelee paneelin leveyden mukaan (luvut voivat rivittyä)
+            const peekRow = doc.getElementById('sheet-peek')?.offsetHeight;
+            heights = computeTabletHeights(win.innerHeight, panelTop, safeBottom(), peekExtra, peekRow);
+            if (snap === 'half') snap = 'full';
+        } else {
+            heights = computeSnapHeights(win.innerHeight, top, safeBottom(), peekExtra);
+        }
         apply();
     }
+
+    recompute();
 
     return {
         setSnap(name) {
             if (!SNAPS.includes(name)) return;
-            snap = name;
-            apply();
+            // Tabletissa ei ole puolikasta: paneeli on auki tai pienennetty
+            snap = tablet && name === 'half' ? 'full' : name;
+            if (tablet && snap === 'peek') recompute();
+            else apply();
             onChange?.(snap);
         },
+        isTablet: () => tablet,
+        /** Pienennetyn tablettipaneelin alareuna (kartan sovitus) */
+        collapsedBottom: () => panelTop + heights.peek,
         getSnap: () => snap,
         getHeights: () => heights,
         targetHeight: () => (isHidden() ? heights.peek : heights[snap]),

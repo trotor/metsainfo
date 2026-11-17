@@ -4,8 +4,8 @@
  */
 
 import { T } from './teksti.js';
-import { isMobileLayout, onLayoutChange, topInset, fitPadding } from './layout.js';
-import { createSheet, resolveRelease, nextSnapOnTap } from './sheet.js';
+import { isMobileLayout, isTabletLayout, onLayoutChange, topInset, fitPadding, fitsVisibleArea, visibleCenterOffset, tabletCenterOffset } from './layout.js';
+import { createSheet, resolveRelease, nextSnapOnTap, TAP_THRESHOLD } from './sheet.js';
 import { copyParcelLink, downloadCSV } from './actions.js';
 import { initTips } from './tips.js';
 import * as state from '../state.js';
@@ -51,6 +51,22 @@ export function getSheet() {
  * Leafletin fitBounds-asetukset, jotka huomioivat hakupalkin ja paneelin
  */
 export function mapFitOptions(extra = {}, { newSelection = false } = {}) {
+    if (isTabletLayout()) {
+        // Uusi valinta avaa paneelin, joten sovitetaan auki olevan paneelin viereen
+        const shown = panelEl && !panelEl.classList.contains('hidden');
+        const open = newSelection || (shown && sheet?.getSnap() !== 'peek');
+        return {
+            ...fitPadding({
+                mobile: true,
+                tablet: true,
+                topInset: topInset(),
+                open: newSelection || shown ? open : undefined,
+                panelRight: tabletPanelRight(),
+                collapsedBottom: sheet ? sheet.collapsedBottom() : 0
+            }),
+            ...extra
+        };
+    }
     return {
         ...fitPadding({
             mobile: isMobileLayout(),
@@ -59,6 +75,40 @@ export function mapFitOptions(extra = {}, { newSelection = false } = {}) {
         }),
         ...extra
     };
+}
+
+/** Tabletin sivupaneelin oikea reuna; hakupalkki on saman levyinen, joten se kelpaa myös piilotetulle paneelille. */
+function tabletPanelRight() {
+    const rect = panelEl && !panelEl.classList.contains('hidden') ? panelEl.getBoundingClientRect() : null;
+    if (rect?.width) return Math.round(rect.right);
+    const search = document.getElementById('search-control')?.getBoundingClientRect();
+    return search ? Math.round(search.right) : 0;
+}
+
+function refitIfCovered() {
+    const map = state.map;
+    const layer = state.selectedParcelLayer;
+    if (!map || !layer || panelEl.classList.contains('hidden')) return;
+    const bounds = layer.getBounds?.();
+    if (!bounds?.isValid()) return;
+    const a = map.latLngToContainerPoint(bounds.getNorthWest());
+    const b = map.latLngToContainerPoint(bounds.getSouthEast());
+    const box = { left: Math.min(a.x, b.x), top: Math.min(a.y, b.y), right: Math.max(a.x, b.x), bottom: Math.max(a.y, b.y) };
+    const options = mapFitOptions();
+    if (!fitsVisibleArea(box, map.getSize(), options)) map.fitBounds(bounds, { ...options, maxZoom: 16 });
+}
+
+/**
+ * Siirtymä, jolla kartan kohde osuu näkyvän alueen keskelle (paikannus,
+ * kuvion korostus). Työpöydällä ei siirtymää.
+ */
+export function visibleOffset() {
+    if (!isMobileLayout()) return [0, 0];
+    if (isTabletLayout()) {
+        const open = panelEl && !panelEl.classList.contains('hidden') && sheet?.getSnap() !== 'peek';
+        return tabletCenterOffset(open ? tabletPanelRight() : 0, topInset());
+    }
+    return visibleCenterOffset(sheet ? sheet.targetHeight() : 0, topInset());
 }
 
 /**
@@ -77,12 +127,13 @@ export function setPeekMessage(text) {
 }
 
 /**
- * Uusi valinta: paneeli näkyviin, mobiilissa kurkistustilaan
+ * Uusi valinta: paneeli näkyviin, mobiilissa kurkistustilaan, tabletissa
+ * auki (kiinteistö ja tiedot mahtuvat näkyviin yhtä aikaa)
  */
 export function openPanelForSelection() {
     panelEl.classList.remove('hidden');
     closeMenu();
-    sheet.setSnap('peek');
+    sheet.setSnap(isTabletLayout() ? 'full' : 'peek');
     setPeekMessage(T.haetaanTietoja);
 }
 
@@ -106,6 +157,11 @@ function attachDrag(el) {
 
     el.addEventListener('pointerdown', (e) => {
         if (!isMobileLayout() || e.target.closest('button')) return;
+        if (isTabletLayout()) {
+            // Tabletissa ei vetoa: napautus avaa tai pienentää paneelin
+            drag = { id: e.pointerId, startY: e.clientY, startX: e.clientX, tablet: true };
+            return;
+        }
         drag = {
             id: e.pointerId,
             startY: e.clientY,
@@ -117,7 +173,7 @@ function attachDrag(el) {
     });
 
     el.addEventListener('pointermove', (e) => {
-        if (!drag || e.pointerId !== drag.id) return;
+        if (!drag || e.pointerId !== drag.id || drag.tablet) return;
         sheet.setDragHeight(drag.startH - (e.clientY - drag.startY));
         drag.samples.push({ y: e.clientY, t: e.timeStamp });
         if (drag.samples.length > 6) drag.samples.shift();
@@ -125,6 +181,12 @@ function attachDrag(el) {
 
     const end = (e, cancelled) => {
         if (!drag || e.pointerId !== drag.id) return;
+        if (drag.tablet) {
+            const moved = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY);
+            drag = null;
+            if (!cancelled && moved < TAP_THRESHOLD) sheet.setSnap(sheet.getSnap() === 'peek' ? 'full' : 'peek');
+            return;
+        }
         panelEl.classList.remove('dragging');
         const dy = e.clientY - drag.startY;
         const first = drag.samples[0];
@@ -198,9 +260,21 @@ export function initPanel({ onClearSelection }) {
     const placeZoom = (mobile) => state.map?.zoomControl?.setPosition(mobile ? 'topright' : 'topleft');
     placeZoom(isMobileLayout());
 
-    onLayoutChange((mobile) => {
-        sheet.recompute();
+    let wasTablet = isTabletLayout();
+    onLayoutChange((mobile, tablet) => {
+        // Tabletin auki oleva paneeli peittäisi puhelimessa koko näkymän: puolikkaaksi
+        if (wasTablet && !tablet && mobile && sheet.getSnap() === 'full') {
+            sheet.recompute();
+            sheet.setSnap('half');
+        } else {
+            sheet.recompute();
+        }
+        const swapped = wasTablet !== tablet;
+        wasTablet = tablet;
         placeZoom(mobile);
+        // Paneeli vaihtoi paikkaa (Duon avaus, kierto): valittu kiinteistö
+        // näkyviin, jos se jäi paneelin alle. Leaflet päivittää kokonsa ensin.
+        if (swapped) setTimeout(refitIfCovered, 250);
     });
     window.addEventListener('resize', () => sheet.recompute());
 }

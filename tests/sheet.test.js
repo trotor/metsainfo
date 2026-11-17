@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { computeSnapHeights, resolveRelease, nextSnapOnTap, createSheet, sheetHeightForFit } from '../js/ui/sheet.js';
+import { computeSnapHeights, computeTabletHeights, resolveRelease, nextSnapOnTap, createSheet, sheetHeightForFit } from '../js/ui/sheet.js';
+
+const TABLET_MARK = 'min-width: 700px';
 
 const H = computeSnapHeights(844, 64, 34);
 
@@ -15,7 +17,7 @@ describe('sheetin laskenta', () => {
     it('createSheet.setPeekExtra kasvattaa peek-korkeutta', () => {
         document.body.innerHTML = '<div id="search-control"></div><div id="info-panel"></div>';
         document.getElementById('search-control').getBoundingClientRect = () => ({ bottom: 64 });
-        const win = { innerHeight: 844, matchMedia: () => ({ matches: true, addEventListener() {}, removeEventListener() {} }) };
+        const win = { innerHeight: 844, matchMedia: (q) => ({ matches: !q.includes(TABLET_MARK), addEventListener() {}, removeEventListener() {} }) };
         const panel = document.getElementById('info-panel');
         const sheet = createSheet(panel, { win, doc: document, safeBottom: () => 34 });
         sheet.setSnap('peek');
@@ -66,14 +68,17 @@ describe('sheetin laskenta', () => {
 
 describe('createSheet', () => {
     let mobile;
+    let tablet;
     let panel;
     const win = {
         innerHeight: 844,
-        matchMedia: () => ({ matches: mobile, addEventListener() {}, removeEventListener() {} })
+        matchMedia: (q) => ({ matches: q.includes(TABLET_MARK) ? tablet : mobile, addEventListener() {}, removeEventListener() {} })
     };
 
     beforeEach(() => {
         mobile = true;
+        tablet = false;
+        win.innerHeight = 844;
         document.documentElement.removeAttribute('style');
         document.body.innerHTML = '<div id="search-control"></div><div id="info-panel"></div>';
         document.getElementById('search-control').getBoundingClientRect = () => ({ bottom: 64 });
@@ -96,5 +101,55 @@ describe('createSheet', () => {
         expect(panel.dataset.snap).toBeUndefined();
         expect(panel.style.getPropertyValue('--sheet-height')).toBe('');
         expect(document.documentElement.style.getPropertyValue('--sheet-offset')).toBe('');
+    });
+
+    it('tabletissa paneeli on auki koko korkeudelta eikä varaa alareunaa', () => {
+        tablet = true;
+        win.innerHeight = 1180;
+        const sheet = createSheet(panel, { win, doc: document, safeBottom: () => 20 });
+        sheet.setSnap('half');
+        expect(sheet.getSnap()).toBe('full');
+        expect(panel.dataset.snap).toBe('full');
+        expect(panel.style.getPropertyValue('--sheet-height')).toBe('1080px');
+        expect(document.documentElement.style.getPropertyValue('--sheet-offset')).toBe('0px');
+        expect(document.documentElement.style.getPropertyValue('--sheet-top')).toBe('72px');
+    });
+
+    it('tabletissa pienennetty paneeli on kurkistusrivin korkuinen', () => {
+        tablet = true;
+        win.innerHeight = 1180;
+        const sheet = createSheet(panel, { win, doc: document, safeBottom: () => 20 });
+        sheet.setSnap('peek');
+        expect(panel.style.getPropertyValue('--sheet-height')).toBe('96px');
+        sheet.setPeekExtra(48);
+        expect(panel.style.getPropertyValue('--sheet-height')).toBe('144px');
+        expect(sheet.collapsedBottom()).toBe(72 + 144);
+    });
+
+    it('tabletista mobiiliin: --sheet-top poistuu', () => {
+        tablet = true;
+        const sheet = createSheet(panel, { win, doc: document, safeBottom: () => 0 });
+        sheet.setSnap('full');
+        tablet = false;
+        sheet.recompute();
+        expect(document.documentElement.style.getPropertyValue('--sheet-top')).toBe('');
+        expect(panel.style.getPropertyValue('--sheet-height')).toBe('780px');
+    });
+});
+
+describe('computeTabletHeights', () => {
+    it('auki = näkymä paneelin yläreunasta alas, pienennetty = kurkistusrivi', () => {
+        expect(computeTabletHeights(1180, 72, 20)).toEqual({ peek: 96, half: 1080, full: 1080 });
+        expect(computeTabletHeights(820, 72, 0, 48)).toEqual({ peek: 144, half: 740, full: 740 });
+    });
+
+    it('mitattu kurkistusrivi korvaa oletuksen', () => {
+        expect(computeTabletHeights(820, 72, 0, 0, 106).peek).toBe(106);
+        expect(computeTabletHeights(820, 72, 0, 0, 0).peek).toBe(96);
+    });
+
+    it('matalassa näkymässä auki ei ole pienempi kuin pienennetty', () => {
+        const h = computeTabletHeights(150, 72, 0);
+        expect(h.full).toBeGreaterThanOrEqual(h.peek);
     });
 });

@@ -8,8 +8,8 @@ import { T } from './teksti.js';
 import * as state from '../state.js';
 import { formatNumber, getGeometryBounds3067 } from '../utils.js';
 import { tip } from './tips.js';
-import { isMobileLayout, visibleCenterOffset, topInset } from './layout.js';
-import { setActiveTab, getSheet, mapFitOptions } from './panel.js';
+import { isMobileLayout } from './layout.js';
+import { setActiveTab, getSheet, mapFitOptions, visibleOffset } from './panel.js';
 
 /**
  * Highlight a single stand on the map
@@ -29,9 +29,7 @@ export function highlightStand(index, highlight) {
 
         if (isMobileLayout()) {
             // Keskitä näkyvään alueeseen hakupalkin ja tietopaneelin väliin
-            const sheet = getSheet();
-            const offset = visibleCenterOffset(sheet ? sheet.targetHeight() : 0, topInset());
-            const point = state.map.project(L.latLng(lat, lng)).add(offset);
+            const point = state.map.project(L.latLng(lat, lng)).add(visibleOffset());
             state.map.panTo(state.map.unproject(point));
         } else {
             state.map.panTo([lat, lng]);

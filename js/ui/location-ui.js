@@ -7,8 +7,8 @@
 import { T } from './teksti.js';
 import * as state from '../state.js';
 import { coordsEPSG3067ToLatLng } from '../utils.js';
-import { isMobileLayout, onLayoutChange, visibleCenterOffset, topInset } from './layout.js';
-import { getSheet } from './panel.js';
+import { isMobileLayout, onLayoutChange } from './layout.js';
+import { getSheet, visibleOffset } from './panel.js';
 import { openStand } from './stands.js';
 import { isNative } from '../platform/index.js';
 import { watchPosition } from '../platform/location.js';
@@ -270,10 +270,7 @@ function centerOn(pos, { ensureZoom = false } = {}) {
     const map = state.map;
     const current = map.getZoom();
     const zoom = ensureZoom ? Math.max(current, FOLLOW_MIN_ZOOM) : current;
-    const sheet = getSheet();
-    const offset = isMobileLayout()
-        ? visibleCenterOffset(sheet ? sheet.targetHeight() : 0, topInset())
-        : [0, 0];
+    const offset = visibleOffset();
     const target = map.project(L.latLng(pos.lat, pos.lon), zoom).add(offset);
     const now = map.project(map.getCenter(), zoom);
     if (!needsRecenter({ dx: target.x - now.x, dy: target.y - now.y, zoomChanged: zoom !== current })) return;

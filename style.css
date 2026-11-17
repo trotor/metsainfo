@@ -1153,7 +1153,7 @@ h3 .info-tip-icon {
 /* Mobiiliasettelu. Kysely on sama kuin MOBILE_QUERY tiedostossa
    js/ui/layout.js — pidä ne samoina. Työpöytä (kysely ei täsmää) säilyy
    ennallaan. */
-@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+@media (max-width: 768px), (pointer: coarse) {
     body {
         font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         color: var(--kaarna);
@@ -1790,6 +1790,94 @@ h3 .info-tip-icon {
 
     .stands-section h3 {
         display: none;
+    }
+}
+
+/*
+ * Tabletti (#32, #30): mobiilin tyylit, mutta tietopaneeli on kartan päällä
+ * vasemmassa reunassa (auki koko korkeudelta tai pienennettynä kurkistusrivi).
+ * Sama ehto kuin TABLET_QUERY (js/ui/layout.js); osa mobiiliasettelua.
+ */
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 501px) {
+    :root {
+        --tablet-panel-w: clamp(320px, 36vw, 420px);
+        --tablet-panel-right: calc(env(safe-area-inset-left) + 8px + var(--tablet-panel-w));
+    }
+
+    /* Hakupalkki paneelin levyisenä paneelin yläpuolella */
+    #search-control {
+        right: auto;
+        width: var(--tablet-panel-w);
+    }
+
+    /* Oikean reunan kontrollit ylös, koska hakupalkki ei ulotu sinne */
+    .leaflet-top.leaflet-right {
+        margin-top: calc(env(safe-area-inset-top) + 8px);
+    }
+
+    body:has(#info-panel:not(.hidden)) .leaflet-left {
+        margin-left: calc(var(--tablet-panel-right) + 8px);
+    }
+
+    #info-panel {
+        left: calc(env(safe-area-inset-left) + 8px);
+        right: auto;
+        top: var(--sheet-top, calc(env(safe-area-inset-top) + 72px));
+        bottom: auto;
+        width: var(--tablet-panel-w);
+        border-radius: 16px;
+        padding-bottom: 0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    #sheet-handle {
+        display: none;
+    }
+
+    /* Kurkistusrivi avaa ja pienentää paneelin napautuksella; oikeaan
+       reunaan jää tila pienennyspainikkeelle (×) ⋯-painikkeen viereen */
+    #sheet-peek {
+        padding-top: 10px;
+        padding-right: 52px;
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+
+    #close-panel {
+        top: 10px;
+    }
+
+    #info-panel[data-snap] #sheet-menu:not([hidden]) {
+        top: calc(var(--sheet-top, 72px) + 52px);
+        bottom: auto;
+        left: calc(var(--tablet-panel-right) - 208px);
+        right: auto;
+    }
+
+    /* Värinauha kartan alareunaan paneelin oikealle puolelle */
+    #map-strip,
+    #info-panel:not(.hidden) ~ #map-strip {
+        bottom: calc(env(safe-area-inset-bottom) + 26px);
+        max-width: 640px;
+    }
+
+    #info-panel:not(.hidden) ~ #map-strip {
+        left: calc(var(--tablet-panel-right) + 8px);
+    }
+
+    #info-panel[data-snap="full"]:not(.hidden) ~ #map-strip {
+        display: grid;
+    }
+}
+
+/*
+ * Leveä kosketusnäyttö alle tablettirajan (Duo avattuna pystyssä):
+ * alapaneeli ei veny koko leveydelle. Sama ehto kuin MOBILE_WIDE_QUERY.
+ */
+@media (pointer: coarse) and (min-width: 600px) and (max-width: 699px) and (min-height: 501px) {
+    #info-panel {
+        left: calc(50% - 280px);
+        right: calc(50% - 280px);
     }
 }
 
