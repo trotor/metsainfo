@@ -4,15 +4,18 @@
  *
  * Huomio: { id, title, type, text, created, updated, point: [x, y] (EPSG:3067),
  *           accuracy?: m, parcel: { reference, label } | null,
- *           stand: { standId, standNumber } | null }
+ *           stand: { standId, standNumber } | null,
+ *           photos: [{ id, path }] (#37, kuvat sovelluksen tiedostoissa) }
  */
+
+import { cleanPhotos } from './kuvat.js';
 
 const KEY = 'metsainfo.huomiot';
 export const TYYPIT = ['tuulenkaato', 'rajapyykki', 'oja', 'varasto', 'muu'];
 
 const validPoint = (p) => Array.isArray(p) && p.length === 2 && p.every(v => typeof v === 'number' && Number.isFinite(v));
 const validType = (t) => (TYYPIT.includes(t) ? t : 'muu');
-const EDITABLE = ['title', 'type', 'text', 'point', 'accuracy', 'parcel', 'stand'];
+const EDITABLE = ['title', 'type', 'text', 'point', 'accuracy', 'parcel', 'stand', 'photos'];
 
 /** Ladattu huomio siistitään: tuntematon tyyppi → muu, puuttuvat kentät oletuksiin. */
 function clean(i) {
@@ -25,7 +28,8 @@ function clean(i) {
         created,
         updated: typeof i.updated === 'string' ? i.updated : created,
         parcel: i.parcel && typeof i.parcel === 'object' ? i.parcel : null,
-        stand: i.stand && typeof i.stand === 'object' ? i.stand : null
+        stand: i.stand && typeof i.stand === 'object' ? i.stand : null,
+        photos: cleanPhotos(i.photos)
     };
 }
 
@@ -63,14 +67,14 @@ export function createNotes(storage, { now = () => new Date() } = {}) {
         get(id) {
             return items.find(i => i.id === id) || null;
         },
-        add({ point, title = '', type = 'muu', text = '', accuracy, parcel = null, stand = null }) {
+        add({ point, title = '', type = 'muu', text = '', accuracy, parcel = null, stand = null, photos = [] }) {
             if (!validPoint(point)) throw new Error('Huomion piste puuttuu');
             const time = now();
             const id = `h:${time.getTime().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
             const item = {
                 id, title: String(title).trim(), type: validType(type), text: String(text),
                 created: time.toISOString(), updated: time.toISOString(),
-                point: [point[0], point[1]], parcel, stand
+                point: [point[0], point[1]], parcel, stand, photos: cleanPhotos(photos)
             };
             if (Number.isFinite(accuracy)) item.accuracy = accuracy;
             items.push(item);
@@ -85,6 +89,7 @@ export function createNotes(storage, { now = () => new Date() } = {}) {
                 if (key === 'point' && !validPoint(patch.point)) continue;
                 if (key === 'type') item.type = validType(patch.type);
                 else if (key === 'title') item.title = String(patch.title ?? '').trim();
+                else if (key === 'photos') item.photos = cleanPhotos(patch.photos);
                 else item[key] = patch[key];
             }
             item.updated = now().toISOString();
