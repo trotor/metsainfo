@@ -152,6 +152,6 @@ Verkkoversio, App Store ja Google Play käyttävät samaa versionumeroa. Muutoks
 
 ## Lisenssi ja tekijä
 
-Lähdekoodi: [MIT](LICENSE). © Tero Rönkkö / [Inetor Oy](https://inetor.fi).
+Lähdekoodi: MIT. © Tero Rönkkö / [Inetor Oy](https://inetor.fi).
 
 <sub>Apple ja Apple-logo ovat Apple Inc.:n Yhdysvalloissa ja muissa maissa rekisteröityjä tavaramerkkejä. App Store on Apple Inc.:n palvelumerkki. Google Play ja Google Play -logo ovat Google LLC:n tavaramerkkejä.</sub>
