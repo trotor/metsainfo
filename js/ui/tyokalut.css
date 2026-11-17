@@ -1,0 +1,134 @@
+/* Työkalut, siru ja ☰-valikko (js/ui/tyokalut.js). Vain kun toiminto on rekisteröity. */
+
+.tyokalut-control a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: var(--havu);
+    background: #fff;
+}
+.tyokalut-control a[aria-expanded="true"] { color: #fff; background: var(--havu); }
+
+.tk-icon { display: inline-flex; flex: none; width: 24px; height: 24px; align-items: center; justify-content: center; color: var(--havu); }
+.tk-icon svg { width: 22px; height: 22px; }
+.tk-icon-pieni svg { width: 16px; height: 16px; vertical-align: -3px; }
+.tk-ohje-merkki { font-weight: 700; }
+
+.tyokalut-lista {
+    position: fixed;
+    z-index: 2100;
+    width: 300px;
+    max-height: min(70vh, 560px);
+    overflow-y: auto;
+    background: #fff;
+    color: var(--kaarna);
+    border-radius: 14px;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+    padding: 10px 10px 12px;
+    font-size: 15px;
+}
+.tyokalut-lista[hidden] { display: none; }
+.tk-head { display: flex; align-items: center; gap: 4px; padding: 0 4px 6px; }
+.tk-head h2 { flex: 1; margin: 0; font-size: 16px; color: var(--kuusikko); }
+.tk-pin, .tk-sulje {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--sammal);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.tk-pin[aria-pressed="true"] { background: var(--havu); color: #fff; }
+.tk-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.tk-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    width: 100%;
+    text-align: left;
+    border: 1px solid transparent;
+    background: none;
+    color: inherit;
+    border-radius: 10px;
+    padding: 8px;
+    min-height: 44px;
+    cursor: pointer;
+    font: inherit;
+}
+.tk-item:hover { background: #f1f4ef; }
+.tk-item.tk-paalla { border-color: var(--havu); background: #eef5ee; }
+.tk-text { display: grid; gap: 2px; }
+.tk-label { font-weight: 600; color: var(--kuusikko); }
+.tk-desc { font-size: 13px; color: var(--sammal); line-height: 1.35; }
+.tk-lukko { font-size: 12px; }
+.tk-lisaosa { font-size: 11px; font-weight: 600; color: var(--sammal); margin-left: 2px; }
+
+.tyokalu-siru {
+    position: fixed;
+    z-index: 1100;
+    top: calc(80px + env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    max-width: calc(100% - 120px);
+    background: var(--havu);
+    color: #fff;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+.tyokalu-siru[hidden] { display: none; }
+.tyokalu-siru button { border: 0; background: none; color: inherit; font: inherit; cursor: pointer; min-height: 40px; }
+.ts-avaa { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 12px; font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ts-avaa .tk-icon { color: #fff; }
+.ts-lopeta { width: 40px; font-size: 22px; line-height: 1; }
+
+.sovellus-valikko {
+    position: fixed;
+    z-index: 2200;
+    min-width: 200px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    padding: 6px;
+    display: grid;
+}
+.sovellus-valikko[hidden] { display: none; }
+.sovellus-valikko button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 0;
+    background: none;
+    text-align: left;
+    padding: 10px 12px;
+    min-height: 44px;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 15px;
+    color: var(--kaarna);
+    cursor: pointer;
+}
+.sovellus-valikko button:hover { background: #f1f4ef; }
+
+.tk-ohje-rivi { display: flex; gap: 8px; align-items: flex-start; list-style: none; margin: 4px 0; }
+ul.tk-ohje { padding-left: 0; }
+
+@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+    .tyokalut-lista {
+        left: calc(env(safe-area-inset-left) + 8px);
+        right: calc(env(safe-area-inset-right) + 8px);
+        bottom: calc(8px + env(safe-area-inset-bottom));
+        width: auto;
+        max-height: 64vh;
+    }
+    .tyokalu-siru { top: calc(70px + env(safe-area-inset-top)); }
+}
