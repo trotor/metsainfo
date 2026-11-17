@@ -136,11 +136,12 @@ ul.tk-ohje { padding-left: 0; }
 }
 
 /* Tabletissa lista oikeaan reunaan, ei tietopaneelin päälle (TABLET_QUERY) */
-@media (pointer: coarse) and (min-width: 700px) and (min-height: 501px) {
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 501px), (pointer: coarse) and (min-width: 1024px) {
     .tyokalut-lista {
         left: auto;
         right: calc(env(safe-area-inset-right) + 8px);
         width: 380px;
+        max-width: calc(100% - var(--tablet-panel-right) - 24px);
     }
     /* Aktiivisen työkalun siru hakupalkin viereen, ei paneelin päälle */
     .tyokalu-siru {

@@ -12,6 +12,10 @@ describe('Androidin takaisin-painike', () => {
         expect(backAction({ helpOpen: false, menuOpen: false, snap: 'full' })).toBe('peek');
         expect(backAction({ helpOpen: false, menuOpen: false, snap: 'half' })).toBe('peek');
     });
+    it('piilotettu paneeli ei pidätä painallusta, vaikka sen tila olisi auki', () => {
+        expect(backAction({ helpOpen: false, menuOpen: false, snap: 'full', hidden: true })).toBe('exit');
+    });
+
     it('poistuu, kun mitään ei ole auki', () => {
         expect(backAction({ helpOpen: false, menuOpen: false, snap: 'peek' })).toBe('exit');
         expect(backAction({ helpOpen: false, menuOpen: false, snap: undefined })).toBe('exit');

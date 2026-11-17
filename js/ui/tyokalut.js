@@ -119,7 +119,7 @@ function ensureControl() {
     const position = () => (isMobileLayout() ? 'topright' : 'topleft');
     ui.control = new Control({ position: position() }).addTo(state.map);
     onLayoutChange(() => {
-        ui.control?.setPosition(position());
+        if (ui.control && ui.control.getPosition() !== position()) ui.control.setPosition(position());
         if (ui.list && !ui.list.hidden) renderList();
     });
     if (pinned()) queueMicrotask(openList);

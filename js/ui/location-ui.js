@@ -378,7 +378,8 @@ export function initLocation({ selectParcel }) {
     // Zoom siirretään samaan kulmaan initPanelissa; tämä kuuntelija
     // rekisteröidään sen jälkeen, joten painike jää zoomin alle
     onLayoutChange(() => {
-        control.setPosition(position());
+        // Tabletin ja mobiilin vaihdossa kulma ei muutu: ei turhaa uudelleenlisäystä (aria-pressed säilyy)
+        if (control.getPosition() !== position()) control.setPosition(position());
         refreshHereRow();
     });
 

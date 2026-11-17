@@ -4,7 +4,7 @@
  */
 
 import { T } from './teksti.js';
-import { isMobileLayout, isTabletLayout, onLayoutChange, topInset, fitPadding, fitsVisibleArea, visibleCenterOffset, tabletCenterOffset } from './layout.js';
+import { isMobileLayout, isTabletLayout, onLayoutChange, topInset, fitPadding, panIntoView, visibleCenterOffset, tabletCenterOffset } from './layout.js';
 import { createSheet, resolveRelease, nextSnapOnTap, TAP_THRESHOLD } from './sheet.js';
 import { copyParcelLink, downloadCSV } from './actions.js';
 import { initTips } from './tips.js';
@@ -85,7 +85,11 @@ function tabletPanelRight() {
     return search ? Math.round(search.right) : 0;
 }
 
-function refitIfCovered() {
+/**
+ * Siirtää valitun kiinteistön näkyvälle alueelle, jos paneeli peittää sen.
+ * Zoomiin ei kosketa, jotta käyttäjän oma zoomaus säilyy.
+ */
+function revealIfCovered() {
     const map = state.map;
     const layer = state.selectedParcelLayer;
     if (!map || !layer || panelEl.classList.contains('hidden')) return;
@@ -94,8 +98,23 @@ function refitIfCovered() {
     const a = map.latLngToContainerPoint(bounds.getNorthWest());
     const b = map.latLngToContainerPoint(bounds.getSouthEast());
     const box = { left: Math.min(a.x, b.x), top: Math.min(a.y, b.y), right: Math.max(a.x, b.x), bottom: Math.max(a.y, b.y) };
-    const options = mapFitOptions();
-    if (!fitsVisibleArea(box, map.getSize(), options)) map.fitBounds(bounds, { ...options, maxZoom: 16 });
+    const [dx, dy] = panIntoView(box, map.getSize(), mapFitOptions());
+    if (dx || dy) map.panBy([dx, dy]);
+}
+
+let revealTimer = null;
+/** Viivästetty: Leaflet päivittää kokonsa ja mahdollinen sovitusanimaatio päättyy ensin. */
+function scheduleReveal(ms = 300) {
+    clearTimeout(revealTimer);
+    revealTimer = setTimeout(revealIfCovered, ms);
+}
+
+/**
+ * Tabletissa uusi valinta avaa paneelin koko korkeudelle: kartan
+ * napautuksella valittu kiinteistö siirretään paneelin vierestä näkyviin
+ */
+export function revealSelection() {
+    if (isTabletLayout()) scheduleReveal();
 }
 
 /**
@@ -140,7 +159,7 @@ export function openPanelForSelection() {
 function hidePanel() {
     panelEl.classList.add('hidden');
     closeMenu();
-    sheet.refresh();
+    sheet.setSnap('peek');
 }
 
 export function closeMenu() {
@@ -257,7 +276,11 @@ export function initPanel({ onClearSelection }) {
     });
 
     // Mobiilissa zoom oikean reunan pinoon tasovalitsimen alle
-    const placeZoom = (mobile) => state.map?.zoomControl?.setPosition(mobile ? 'topright' : 'topleft');
+    const placeZoom = (mobile) => {
+        const zoom = state.map?.zoomControl;
+        const corner = mobile ? 'topright' : 'topleft';
+        if (zoom && zoom.getPosition() !== corner) zoom.setPosition(corner);
+    };
     placeZoom(isMobileLayout());
 
     let wasTablet = isTabletLayout();
@@ -274,7 +297,18 @@ export function initPanel({ onClearSelection }) {
         placeZoom(mobile);
         // Paneeli vaihtoi paikkaa (Duon avaus, kierto): valittu kiinteistö
         // näkyviin, jos se jäi paneelin alle. Leaflet päivittää kokonsa ensin.
-        if (swapped) setTimeout(refitIfCovered, 250);
+        if (swapped) scheduleReveal();
     });
-    window.addEventListener('resize', () => sheet.recompute());
+    window.addEventListener('resize', () => {
+        sheet.recompute();
+        // Tabletin kierto ja Split View muuttavat paneelin leveyttä ja kartan kokoa
+        if (isTabletLayout()) scheduleReveal();
+    });
+    // Tabletin pienennetty paneeli on kurkistusrivin korkuinen, ja rivi vaihtuu
+    // (haetaan → yhteenveto) ja rivittyy paneelin leveyden mukaan
+    if (typeof ResizeObserver === 'function') {
+        new ResizeObserver(() => {
+            if (isTabletLayout()) sheet.recompute();
+        }).observe(peek);
+    }
 }

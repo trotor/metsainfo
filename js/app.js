@@ -37,7 +37,7 @@ import { KUVAUSTILA, loadEsimerkkimetsa, createKuvitteellinenKartta, startKuvaus
 import { coordsEPSG3067ToLatLng, getGeometryBounds3067, normalizeParcelId, formatCadastralReference } from './utils.js';
 import { featureStyle, cadastralStyle, selectedParcelStyle, highlightedStandStyle, habitatStyle, mkiStyle } from './styles.js';
 import { fetchForestDataByBounds, fetchParcelsByReference, filterFeaturesByParcels, fetchForestUseDeclarations, fetchParcelContaining } from './data.js';
-import { onEachFeature, onEachHabitat, onEachMkiFeature, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, setMkiColorMode, updateMkiLegend, copyParcelLink, downloadCSV, toggleHelp, initPanel, openPanelForSelection, setPeekMessage, mapFitOptions, initLocation, refreshHereRow } from './ui/index.js';
+import { onEachFeature, onEachHabitat, onEachMkiFeature, onEachParcel, addParcelLabel, showSummary, updateLegend, setColorMode, setMkiColorMode, updateMkiLegend, copyParcelLink, downloadCSV, toggleHelp, initPanel, openPanelForSelection, revealSelection, setPeekMessage, mapFitOptions, initLocation, refreshHereRow } from './ui/index.js';
 import { applyPageTexts } from './ui/sivu.js';
 
 // Kuviovalinnan tila (kokeilu, VIESTIT.valintatila)
@@ -624,6 +624,7 @@ function showSelection(features, parcel) {
     state.selectedParcelLayer.clearLayers();
     state.forestLayer.clearLayers();
     parcel.parts.forEach(part => state.selectedParcelLayer.addData(part));
+    revealSelection();
     updateUrlParam(null);
     state.setState('currentParcel', parcel);
     state.setState('currentFeatures', features);
@@ -651,6 +652,7 @@ async function selectParcels(parcels) {
     state.forestLayer.clearLayers();
 
     parcels.forEach(parcel => state.selectedParcelLayer.addData(parcel));
+    revealSelection();
 
     const reference = parcels[0]?.properties?.nationalCadastralReference;
     if (reference) {

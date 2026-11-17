@@ -85,7 +85,7 @@
 .kortti-lukittu .kortti-btn { margin-top: 10px; }
 
 /* Tabletissa (TABLET_QUERY) tietopaneeli on vasemmalla: kortti oikeaan alakulmaan */
-@media (pointer: coarse) and (min-width: 700px) and (min-height: 501px) {
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 501px), (pointer: coarse) and (min-width: 1024px) {
     .kortti {
         left: auto;
         right: calc(env(safe-area-inset-right) + 12px);

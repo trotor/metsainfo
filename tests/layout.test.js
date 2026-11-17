@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { MOBILE_QUERY, TABLET_QUERY, MOBILE_WIDE_QUERY, isMobileLayout, isTabletLayout, onLayoutChange, fitPadding, fitsVisibleArea, visibleCenterOffset, tabletCenterOffset, topInset } from '../js/ui/layout.js';
+import { MOBILE_QUERY, TABLET_QUERY, MOBILE_WIDE_QUERY, isMobileLayout, isTabletLayout, onLayoutChange, fitPadding, panIntoView, visibleCenterOffset, tabletCenterOffset, topInset } from '../js/ui/layout.js';
 
 const fakeWin = (matches) => ({
     matchMedia: (q) => ({ matches, media: q, addEventListener() {}, removeEventListener() {} })
@@ -12,7 +12,8 @@ describe('layout', () => {
     });
 
     it('TABLET_QUERY: kosketus, vähintään 700 px leveä ja yli 500 px korkea', () => {
-        expect(TABLET_QUERY).toBe('(pointer: coarse) and (min-width: 700px) and (min-height: 501px)');
+        // Toinen ehto: Androidin näppäimistö kutistaa näkymää, joten leveä tabletti pysyy tablettina
+        expect(TABLET_QUERY).toBe('(pointer: coarse) and (min-width: 700px) and (min-height: 501px), (pointer: coarse) and (min-width: 1024px)');
     });
 
     it('isTabletLayout käyttää TABLET_QUERYä', () => {
@@ -98,11 +99,14 @@ describe('layout', () => {
         expect(topInset(document)).toBe(0);
     });
 
-    it('fitsVisibleArea: kohde täytteiden sisällä tai peitossa', () => {
-        const pad = { paddingTopLeft: [16, 80], paddingBottomRight: [16, 476] };
-        const size = { x: 669, y: 951 };
-        expect(fitsVisibleArea({ left: 100, top: 100, right: 500, bottom: 400 }, size, pad)).toBe(true);
-        expect(fitsVisibleArea({ left: 100, top: 300, right: 500, bottom: 700 }, size, pad)).toBe(false);
-        expect(fitsVisibleArea({ left: 60, top: 60, right: 100, bottom: 100 }, { x: 1280, y: 800 }, { padding: [50, 50] })).toBe(true);
+    it('panIntoView: siirtää peitossa olevan kohteen näkyviin zoomaamatta', () => {
+        const pad = { paddingTopLeft: [444, 80], paddingBottomRight: [16, 16] };
+        const size = { x: 1180, y: 820 };
+        // Mahtuu: ei siirtoa
+        expect(panIntoView({ left: 500, top: 100, right: 900, bottom: 500 }, size, pad)).toEqual([0, 0]);
+        // Paneelin alla vasemmalla: sisältö oikealle (panBy negatiivinen x)
+        expect(panIntoView({ left: 100, top: 100, right: 400, bottom: 500 }, size, pad)).toEqual([-344, 0]);
+        // Liian suuri: keskitetään näkyvään alueeseen
+        expect(panIntoView({ left: 0, top: 0, right: 2000, bottom: 400 }, size, pad)).toEqual([196, -80]);
     });
 });

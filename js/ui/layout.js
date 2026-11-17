@@ -12,7 +12,9 @@
  */
 
 export const MOBILE_QUERY = '(max-width: 768px), (pointer: coarse)';
-export const TABLET_QUERY = '(pointer: coarse) and (min-width: 700px) and (min-height: 501px)';
+// Jälkimmäinen ehto: Androidissa näppäimistö kutistaa näkymän korkeutta, joten leveä
+// tabletti ei saa vaihtua mobiiliasetteluun kesken kirjoittamisen (puhelimet < 1024 px)
+export const TABLET_QUERY = '(pointer: coarse) and (min-width: 700px) and (min-height: 501px), (pointer: coarse) and (min-width: 1024px)';
 /** Leveä kosketusnäyttö alle tablettirajan (Duo avattuna pystyssä): alapaneeli rajataan */
 export const MOBILE_WIDE_QUERY = '(pointer: coarse) and (min-width: 600px) and (max-width: 699px) and (min-height: 501px)';
 
@@ -79,11 +81,17 @@ export function tabletCenterOffset(panelRight, topInset) {
 }
 
 /**
- * Mahtuuko kohde (näyttökoordinaatit { left, top, right, bottom }) näkyvälle
- * alueelle, kun reunoilta varataan fitPaddingin täytteet
+ * panBy-siirto, joka tuo kohteen näkyvälle alueelle zoomia muuttamatta:
+ * mahtuva kohde siirretään juuri ja juuri näkyviin, liian suuri keskitetään
  */
-export function fitsVisibleArea(box, size, pad) {
+export function panIntoView(box, size, pad) {
     const [l, t] = pad.paddingTopLeft || pad.padding || [0, 0];
     const [r, b] = pad.paddingBottomRight || pad.padding || [0, 0];
-    return box.left >= l && box.top >= t && box.right <= size.x - r && box.bottom <= size.y - b;
+    const axis = (lo, hi, min, max) => {
+        if (hi - lo > max - min) return Math.round((lo + hi) / 2 - (min + max) / 2);
+        if (lo < min) return lo - min;
+        if (hi > max) return hi - max;
+        return 0;
+    };
+    return [axis(box.left, box.right, l, size.x - r), axis(box.top, box.bottom, t, size.y - b)];
 }

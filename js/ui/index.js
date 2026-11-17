@@ -10,4 +10,4 @@ export { renderStandItem, highlightStand, highlightFilteredStands, attachStandEv
 export { showSummary, renderPeek } from './summary.js';
 export { initLocation, refreshHereRow, showToast } from './location-ui.js';
 export { MOBILE_QUERY, isMobileLayout, onLayoutChange, topInset, fitPadding, visibleCenterOffset } from './layout.js';
-export { initPanel, openPanelForSelection, setPeekMessage, getSheet, mapFitOptions, setActiveTab, getActiveTab, initTabs } from './panel.js';
+export { initPanel, openPanelForSelection, revealSelection, setPeekMessage, getSheet, mapFitOptions, setActiveTab, getActiveTab, initTabs } from './panel.js';

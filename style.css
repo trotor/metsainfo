@@ -1798,7 +1798,7 @@ h3 .info-tip-icon {
  * vasemmassa reunassa (auki koko korkeudelta tai pienennettynä kurkistusrivi).
  * Sama ehto kuin TABLET_QUERY (js/ui/layout.js); osa mobiiliasettelua.
  */
-@media (pointer: coarse) and (min-width: 700px) and (min-height: 501px) {
+@media (pointer: coarse) and (min-width: 700px) and (min-height: 501px), (pointer: coarse) and (min-width: 1024px) {
     :root {
         --tablet-panel-w: clamp(320px, 36vw, 420px);
         --tablet-panel-right: calc(env(safe-area-inset-left) + 8px + var(--tablet-panel-w));
@@ -1832,6 +1832,10 @@ h3 .info-tip-icon {
 
     #sheet-handle {
         display: none;
+    }
+
+    #help-modal {
+        max-width: 640px;
     }
 
     /* Kurkistusrivi avaa ja pienentää paneelin napautuksella; oikeaan
