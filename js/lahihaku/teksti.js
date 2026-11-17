@@ -6,6 +6,7 @@ import { pick } from '../i18n.js';
 
 const fi = {
     nappi: 'Etsi läheltä',
+    kuvaus: 'Etsi tietynlaisia metsiä 1 km × 1 km alueelta.',
     otsikko: 'Etsi läheltä',
     sulje: 'Sulje',
     kokeilu: 'Kokeilu · vain testiversiossa',
@@ -64,6 +65,7 @@ const fi = {
 
 const en = {
     nappi: 'Search nearby',
+    kuvaus: 'Find forests of a given kind within a 1 km × 1 km area.',
     otsikko: 'Search nearby',
     sulje: 'Close',
     kokeilu: 'Trial · test version only',
@@ -122,6 +124,7 @@ const en = {
 
 const sv = {
     nappi: 'Sök i närheten',
+    kuvaus: 'Sök skogar av ett visst slag inom ett område på 1 km × 1 km.',
     otsikko: 'Sök i närheten',
     sulje: 'Stäng',
     kokeilu: 'Försöksfunktion · endast i testversionen',

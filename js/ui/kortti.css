@@ -84,21 +84,6 @@
 }
 .kortti-lukittu .kortti-btn { margin-top: 10px; }
 
-/* Karttapainike paikannuspainikkeen alla */
-.kortti-control a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    color: var(--havu);
-    background: #fff;
-}
-.kortti-control a[aria-pressed="true"] {
-    color: #fff;
-    background: var(--havu);
-}
-
 /*
  * Työpöydällä tietopaneeli on kartan vasemmassa reunassa ja peitti vasemman
  * reunan karttapainikkeet (myös kokeilujen). Kokeilubuildissa painikkeet

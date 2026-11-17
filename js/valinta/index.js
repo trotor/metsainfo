@@ -17,9 +17,10 @@ import { fetchForestDataByBounds } from '../data.js';
 import { codeName } from '../koodit.js';
 import { locale } from '../i18n.js';
 import { formatNumber, coordsEPSG3067ToLatLng } from '../utils.js';
-import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
+import { isMobileLayout } from '../ui/layout.js';
 import { showToast } from '../ui/location-ui.js';
-import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
+import { createCard, cardHeader } from '../ui/kortti.js';
+import { registerTool } from '../ui/tyokalut.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import {
     MIN_ZOOM, MAX_TILES, PANE_Z_INDEX, standKey, tileKeys, tileBounds, createSelection, selectionSummary, canShow, toPseudoParcel
@@ -63,10 +64,13 @@ export function startValinta() {
         }
     });
 
-    const button = addMapButton({
-        map: state.map, label: T.nappi, icon: ICON, onClick: onButton,
-        isMobile: isMobileLayout, onLayoutChange
+    // Työkalut-listaan (js/ui/tyokalut.js). Tila jatkuu kortin ollessa piilossa
+    // (mobiilissa yhteenvedon ajan), jolloin rekisteri näyttää sirun.
+    const tool = registerTool({
+        id: 'valinta', label: T.nappi, description: T.kuvaus, icon: ICON, order: 30,
+        onSelect: () => onButton(), onStop: () => setMode(false)
     });
+    const sync = () => tool.setStatus({ active: ui.on, cardOpen: card.isOpen, detail: String(selection.size) });
 
     function bounds3067() {
         const b = state.map.getBounds();
@@ -163,13 +167,13 @@ export function startValinta() {
     });
 
     function onButton() {
-        // Mobiilissa kortti piiloutuu yhteenvedon ajaksi: painike tuo sen takaisin
+        // Mobiilissa kortti piiloutuu yhteenvedon ajaksi: lista tai siru tuo sen takaisin
         if (ui.on && !card.isOpen) {
             card.open();
             render();
             return;
         }
-        setMode(!ui.on);
+        if (!ui.on) setMode(true);
     }
 
     function setMode(on) {
@@ -179,7 +183,6 @@ export function startValinta() {
         }
         ui.on = on;
         emit(VIESTIT.valintatila, { paalla: on });
-        button.setPressed(on);
         if (on) {
             layer.addTo(state.map);
             card.open();
@@ -190,6 +193,7 @@ export function startValinta() {
             layer.remove();
             layer.clearLayers();
         }
+        sync();
     }
 
     function setStatus(s) {
@@ -227,6 +231,7 @@ export function startValinta() {
     }
 
     function render() {
+        sync();
         if (!card.isOpen) return;
         const features = selection.list();
         const sum = selectionSummary(features);

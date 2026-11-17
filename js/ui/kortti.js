@@ -56,35 +56,3 @@ export function cardHeader({ title, badge, closeLabel = 'Sulje' }) {
             <button type="button" class="kortti-close" data-close aria-label="${esc(closeLabel)}">×</button>
         </header>`;
 }
-
-/**
- * Karttapainike kortin avaamiseen paikannuspainikkeen alle (mobiilissa
- * oikealle ylös). Palauttaa { setPressed(bool) }.
- */
-export function addMapButton({ map, label, icon, onClick, isMobile, onLayoutChange }) {
-    let btn;
-    const Control = L.Control.extend({
-        onAdd() {
-            const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control kortti-control');
-            btn = L.DomUtil.create('a', '', container);
-            btn.href = '#';
-            btn.setAttribute('role', 'button');
-            btn.setAttribute('aria-label', label);
-            btn.setAttribute('aria-pressed', 'false');
-            btn.title = label;
-            btn.innerHTML = icon;
-            L.DomEvent.disableClickPropagation(container);
-            L.DomEvent.on(btn, 'click', (e) => {
-                L.DomEvent.preventDefault(e);
-                onClick();
-            });
-            return container;
-        }
-    });
-    const position = () => (isMobile() ? 'topright' : 'topleft');
-    const control = new Control({ position: position() }).addTo(map);
-    onLayoutChange(() => control.setPosition(position()));
-    return {
-        setPressed(on) { btn?.setAttribute('aria-pressed', String(Boolean(on))); }
-    };
-}

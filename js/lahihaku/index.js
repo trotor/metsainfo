@@ -20,9 +20,10 @@ import { on, emit, has, VIESTIT } from '../vayla.js';
 import { pointInside } from '../kuviotieto.js';
 import { standCentroid } from '../data.js';
 import { latLonTo3067 } from '../location/logic.js';
-import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
+import { isMobileLayout } from '../ui/layout.js';
 import { onPositionChange, requestLocation, releaseFollow } from '../ui/location-ui.js';
-import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
+import { createCard, cardHeader } from '../ui/kortti.js';
+import { registerTool } from '../ui/tyokalut.js';
 import { tileCache } from '../rest2.js';
 import { mainShare } from '../kuviotieto.js';
 import { purchases } from '../platform/purchases.js';
@@ -68,10 +69,12 @@ export function startLahihaku() {
         }
     }).addTo(state.map);
 
-    const button = addMapButton({
-        map: state.map, label: T.nappi, icon: ICON, onClick: () => toggle(),
-        isMobile: isMobileLayout, onLayoutChange
+    // Työkalut-listaan (js/ui/tyokalut.js); tila päällä = kortti auki
+    const tool = registerTool({
+        id: 'lahihaku', label: T.nappi, description: T.kuvaus, icon: ICON, order: 20,
+        onSelect: () => toggle(true), onStop: () => toggle(false), locked
     });
+    const button = { setPressed: (on) => tool.setStatus({ active: on, cardOpen: on }) };
 
     function drawMap() {
         boxLayer.clearLayers();

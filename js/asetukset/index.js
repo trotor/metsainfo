@@ -5,8 +5,8 @@
 
 import './asetukset.css';
 import * as state from '../state.js';
-import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
-import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
+import { createCard, cardHeader } from '../ui/kortti.js';
+import { registerMenuItem } from '../ui/tyokalut.js';
 import { isUnlocked } from '../features.js';
 import { KIELET, getLang, setLang, isLangChosen, deviceLang } from '../i18n.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
@@ -21,10 +21,9 @@ export function startAsetukset() {
     if (!isUnlocked('asetukset')) return;
     let open = false;
 
-    const button = addMapButton({
-        map: state.map, label: T.nappi, icon: ICON, onClick: () => toggle(),
-        isMobile: isMobileLayout, onLayoutChange
-    });
+    // ☰-valikkoon (js/ui/tyokalut.js)
+    registerMenuItem({ id: 'asetukset', label: T.nappi, icon: ICON, order: 20, onSelect: () => toggle(true) });
+    const button = { setPressed() {} };
     const card = createCard({ id: 'asetukset', label: T.nappi, className: 'asetukset-kortti', onClose: () => toggle(false) });
 
     function toggle(force) {

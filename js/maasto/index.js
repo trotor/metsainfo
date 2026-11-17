@@ -11,11 +11,12 @@ import { formatNumber } from '../utils.js';
 import { locale } from '../i18n.js';
 import { latLonTo3067 } from '../location/logic.js';
 import { coordsEPSG3067ToLatLng } from '../utils.js';
-import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
+import { isMobileLayout } from '../ui/layout.js';
 import { onPositionChange, requestLocation, releaseFollow } from '../ui/location-ui.js';
 import { tip, initTips } from '../ui/tips.js';
 import { tileKey, neighbourKeys, tileCache } from '../rest2.js';
-import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
+import { createCard, cardHeader } from '../ui/kortti.js';
+import { registerTool } from '../ui/tyokalut.js';
 import { standAt, placeStatus, describePlace } from './paikka.js';
 import { LEVELS, nextQuestion, questionsFor, scoreAnswer, answerLabel } from './visa.js';
 import { createStore } from './tila.js';
@@ -69,10 +70,12 @@ export function startMaasto() {
         coordsToLatLng: coordsEPSG3067ToLatLng
     }).addTo(state.map);
 
-    const button = addMapButton({
-        map: state.map, label: T.nappi, icon: ICON, onClick: () => toggle(),
-        isMobile: isMobileLayout, onLayoutChange
+    // Työkalut-listaan (js/ui/tyokalut.js); tila päällä = kortti auki
+    const tool = registerTool({
+        id: 'maasto', label: T.nappi, description: T.kuvaus, icon: ICON, order: 10,
+        onSelect: () => toggle(true), onStop: () => toggle(false), locked
     });
+    const button = { setPressed: (on) => tool.setStatus({ active: on, cardOpen: on }) };
 
     /* ---------- Kortti ---------- */
 

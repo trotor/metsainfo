@@ -73,8 +73,7 @@
 .stand-summary .sv-merkki { margin-right: 6px; }
 
 /* Karttaselite: sovelluksen väriselitteen paikalla, joka piilotetaan värityksen ajaksi */
-body.sv-varit #color-legend,
-body.sv-varit #color-mode-control { display: none !important; }
+body.sv-varit #color-legend { display: none !important; }
 #sv-selite {
     position: absolute;
     bottom: 40px;

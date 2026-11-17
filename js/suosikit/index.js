@@ -13,11 +13,11 @@
 import './suosikit.css';
 import * as state from '../state.js';
 import { coordsEPSG3067ToLatLng, formatCadastralReference } from '../utils.js';
-import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
 import { openStand } from '../ui/stands.js';
 import { releaseFollow, showToast } from '../ui/location-ui.js';
 import { isUnlocked } from '../features.js';
-import { createCard, cardHeader, addMapButton } from '../ui/kortti.js';
+import { createCard, cardHeader } from '../ui/kortti.js';
+import { registerMenuItem } from '../ui/tyokalut.js';
 import { on, emit, VIESTIT } from '../vayla.js';
 import { pointInside } from '../kuviotieto.js';
 import { createFavorites, filterFavorites, TYYPIT } from './varasto.js';
@@ -53,10 +53,9 @@ export function startSuosikit() {
     /* ---------- Kartta ---------- */
 
     const marker = L.layerGroup().addTo(state.map);
-    const button = addMapButton({
-        map: state.map, label: T.nappi, icon: ICON, onClick: () => toggle(),
-        isMobile: isMobileLayout, onLayoutChange
-    });
+    // ☰-valikkoon (js/ui/tyokalut.js)
+    registerMenuItem({ id: 'suosikit', label: T.nappi, icon: ICON, order: 10, onSelect: () => toggle(true) });
+    const button = { setPressed() {} };
 
     /* ---------- Kortti ---------- */
 

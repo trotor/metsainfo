@@ -9,6 +9,7 @@ import { pick } from '../i18n.js';
 
 const fi = {
     nappi: 'Kerro tästä paikasta',
+    kuvaus: 'Napauta karttaa tai käytä sijaintia: kuvion tiedot ja metsävisa.',
     otsikko: 'Tässä kohtaa',
     sulje: 'Sulje',
     haetaanSijaintia: 'Haetaan sijaintia…',
@@ -145,6 +146,7 @@ const article = (word) => (/^[aeiou]/i.test(word) ? 'an' : 'a');
 
 const en = {
     nappi: 'Tell me about this place',
+    kuvaus: 'Tap the map or use your location: stand details and a forest quiz.',
     otsikko: 'Right here',
     sulje: 'Close',
     haetaanSijaintia: 'Finding your location…',
@@ -284,6 +286,7 @@ const svNeutrum = (adj) => adj.replace(/ad$/, 'at');
 
 const sv = {
     nappi: 'Berätta om den här platsen',
+    kuvaus: 'Tryck på kartan eller använd din position: figurens uppgifter och ett skogsquiz.',
     otsikko: 'Just här',
     sulje: 'Stäng',
     haetaanSijaintia: 'Söker din position…',

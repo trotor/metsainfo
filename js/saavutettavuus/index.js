@@ -16,8 +16,7 @@ import { codeName } from '../koodit.js';
 import { locale } from '../i18n.js';
 import { formatNumber, coordsEPSG3067ToLatLng } from '../utils.js';
 import { on, VIESTIT } from '../vayla.js';
-import { isMobileLayout, onLayoutChange } from '../ui/layout.js';
-import { addMapButton } from '../ui/kortti.js';
+import { registerColorMode } from '../ui/tyokalut.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { showToast } from '../ui/location-ui.js';
 import { purchases } from '../platform/purchases.js';
@@ -27,7 +26,6 @@ import { createRoadSource, harvestArea } from './aineisto.js';
 import { fetchRaster } from './rasteri.js';
 import { T } from './teksti.js';
 
-const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 21 11 3M16 21 13 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M12 7v2M12 12v2M12 17v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 
 export const VARIT = { hyva: '#15803d', kohtalainen: '#ca8a04', heikko: '#b91c1c' };
 
@@ -95,9 +93,11 @@ export function startSaavutettavuus() {
             </div>`;
     }
 
-    const button = addMapButton({
-        map: state.map, label: T.nappi, icon: ICON, onClick: () => toggleColors(),
-        isMobile: isMobileLayout, onLayoutChange
+    // Väritys-valitsimeen (js/ui/tyokalut.js) Tilavuuden, iän … rinnalle
+    const mode = registerColorMode({
+        id: 'saavutettavuus', label: T.variTila,
+        onSelect: () => setColors(true),
+        onDeselect: () => setColors(false)
     });
 
     function openPaywall() {
@@ -111,15 +111,14 @@ export function startSaavutettavuus() {
         b.remove();
     }
 
-    function toggleColors(force) {
-        const next = force ?? !ui.colors;
-        if (next && locked()) return openPaywall();
+    /** Palauttaa false, jos väritys ei käynnisty (lukittu tai ei kuvioita). */
+    function setColors(next) {
+        if (next && locked()) { openPaywall(); return false; }
         if (next && !ui.ctx?.features?.length) {
             showToast(ui.ctx ? T.eiKuvioita : T.valitseKiinteisto);
-            return;
+            return false;
         }
         ui.colors = next;
-        button.setPressed(ui.colors);
         if (ui.colors && ui.status === 'error') run();
         drawMap();
         renderSummaryBox();
@@ -235,7 +234,7 @@ export function startSaavutettavuus() {
             const el = e.target.closest('[data-sv]');
             if (!el) return;
             if (el.dataset.sv === 'retry') run();
-            else if (el.dataset.sv === 'varit') toggleColors();
+            else if (el.dataset.sv === 'varit') (ui.colors ? mode.deselect() : mode.select());
         });
         parcelInfo.after(box);
     }

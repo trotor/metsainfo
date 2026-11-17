@@ -8,6 +8,7 @@ import { pick } from '../i18n.js';
 
 const fi = {
     nappi: 'Saavutettavuus kartalla',
+    variTila: 'Saavutettavuus (arvio)',
     otsikko: 'Saavutettavuus',
     arvioMerkki: 'Arvio',
     kokeilu: 'Kokeilu',
@@ -84,6 +85,7 @@ const fi = {
 
 const sv = {
     nappi: 'Åtkomlighet på kartan',
+    variTila: 'Åtkomlighet (uppskattning)',
     otsikko: 'Åtkomlighet',
     arvioMerkki: 'Uppskattning',
     kokeilu: 'Försök',
@@ -159,6 +161,7 @@ const sv = {
 
 const en = {
     nappi: 'Accessibility on the map',
+    variTila: 'Accessibility (estimate)',
     otsikko: 'Accessibility',
     arvioMerkki: 'Estimate',
     kokeilu: 'Trial',

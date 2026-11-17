@@ -23,7 +23,7 @@ export const OHJE_SV = `
                 <div class="help-section">
                     <h3>Din position</h3>
                     <ul>
-                        <li><strong>Positionsknappen</strong> (pilen under kartkontrollerna) visar var du är som en blå punkt. Första trycket centrerar kartan på dig, det andra visar färdriktningen (om enheten har kompass) och det tredje avslutar positioneringen.</li>
+                        <li><span class="help-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2 4.5 20.3l.7.7L12 18l6.8 3 .7-.7z" fill="currentColor"/></svg></span><strong>Positionsknappen</strong> (pilen under kartkontrollerna) visar var du är som en blå punkt. Första trycket centrerar kartan på dig, det andra visar färdriktningen (om enheten har kompass) och det tredje avslutar positioneringen.</li>
                         <li>Raden <strong>Du är i</strong> berättar vilken figur du står på. Tryck på raden för att se figurens uppgifter.</li>
                         <li>Om ingen fastighet är vald väljer appen automatiskt den fastighet där du befinner dig.</li>
                         <li>En grå punkt betyder att positionen är över 30 sekunder gammal. Positionen används bara på din enhet.</li>
@@ -45,7 +45,7 @@ export const OHJE_SV = `
                     <ul>
                         <li><strong>Fastighetssökning</strong> — Sök med beteckning, t.ex. 91-416-1-123</li>
                         <li><strong>Skogstillgångar</strong> — Trädbeståndets virkesförråd, ålder, trädslag, tillväxt, stockvirke/massaved</li>
-                        <li><strong>Färgalternativ</strong> — Färglägg figurerna enligt virkesförråd, ålder, trädslag eller utvecklingsklass med färgväljaren</li>
+                        <li><strong>Färgalternativ</strong> — Färglägg figurerna enligt virkesförråd, ålder, trädslag eller utvecklingsklass med färgväljaren <span class="help-select" aria-hidden="true">Virkesförråd (m³/ha) ▾</span> nertill på kartan</li>
                         <li><strong>Naturobjekt</strong> — Särskilt viktiga livsmiljöer enligt skogslagen (lagerväljaren)</li>
                         <li><strong>Anmälningar om användning av skog</strong> — Anmälda avverkningsområden på kartan, färgkodade (lagerväljaren)</li>
                         <li><strong>Ordlista i verktygstips</strong> — Ikonen (i) bredvid en term visar en förklaring</li>
@@ -86,7 +86,7 @@ export const OHJE_SV = `
 
                 <div class="help-section">
                     <h3>Kartlager</h3>
-                    <p>Med lagerväljaren kan du byta bakgrundskarta:</p>
+                    <p><span class="help-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 3 2 8l10 5 10-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m2 12.5 10 5 10-5M2 16.5l10 5 10-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Med lagerväljaren (kartans övre högra hörn) kan du byta bakgrundskarta:</p>
                     <ul>
                         <li><strong>Grundkarta</strong> — Detaljerad terrängkarta (standard)</li>
                         <li><strong>Bakgrundskarta</strong> — Förenklad baskarta</li>

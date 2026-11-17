@@ -6,6 +6,7 @@ import { pick } from '../i18n.js';
 
 const fi = {
     nappi: 'Valitse kuvioita',
+    kuvaus: 'Kokoa kuvioita valinnaksi myös kiinteistörajojen yli ja katso niiden yhteenveto.',
     otsikko: 'Valitse kuvioita',
     sulje: 'Sulje',
     kokeilu: 'Kokeilu · vain testiversiossa',
@@ -29,6 +30,7 @@ const fi = {
 
 const sv = {
     nappi: 'Välj figurer',
+    kuvaus: 'Sätt ihop figurer till ett urval, även över fastighetsgränser, och se sammandraget.',
     otsikko: 'Välj figurer',
     sulje: 'Stäng',
     kokeilu: 'Försök · endast i testversionen',
@@ -52,6 +54,7 @@ const sv = {
 
 const en = {
     nappi: 'Select stands',
+    kuvaus: 'Build a selection of stands, also across property borders, and see its summary.',
     otsikko: 'Select stands',
     sulje: 'Close',
     kokeilu: 'Trial · test version only',

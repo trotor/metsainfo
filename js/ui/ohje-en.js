@@ -23,7 +23,7 @@ export const OHJE_EN = `
                 <div class="help-section">
                     <h3>Your location</h3>
                     <ul>
-                        <li>The <strong>location button</strong> (the arrow below the map controls) shows where you are as a blue dot. The first tap centres the map on you, the second shows your direction of travel (if the device has a compass), and the third stops locating.</li>
+                        <li><span class="help-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2 4.5 20.3l.7.7L12 18l6.8 3 .7-.7z" fill="currentColor"/></svg></span>The <strong>location button</strong> (the arrow below the map controls) shows where you are as a blue dot. The first tap centres the map on you, the second shows your direction of travel (if the device has a compass), and the third stops locating.</li>
                         <li>The <strong>You are in</strong> row tells you which stand you are standing in. Tap the row to see the stand's details.</li>
                         <li>If no property is selected, the app automatically selects the property you are on.</li>
                         <li>A grey dot means the location is more than 30 seconds old. Your location is only used on your device.</li>
@@ -45,7 +45,7 @@ export const OHJE_EN = `
                     <ul>
                         <li><strong>Property search</strong> — Search by property ID, e.g. 91-416-1-123</li>
                         <li><strong>Forest resources</strong> — Growing stock volume, age, tree species, growth, logs/pulpwood</li>
-                        <li><strong>Colour options</strong> — Colour the stands by volume, age, tree species or development class with the colour selector</li>
+                        <li><strong>Colour options</strong> — Colour the stands by volume, age, tree species or development class with the colour selector <span class="help-select" aria-hidden="true">Volume (m³/ha) ▾</span> at the bottom of the map</li>
                         <li><strong>Habitats</strong> — Particularly important habitats under the Forest Act (layer selector)</li>
                         <li><strong>Forest use declarations</strong> — Declared felling areas on the map, colour-coded (layer selector)</li>
                         <li><strong>Glossary tooltips</strong> — The (i) icon next to a term shows an explanation</li>
@@ -86,7 +86,7 @@ export const OHJE_EN = `
 
                 <div class="help-section">
                     <h3>Map layers</h3>
-                    <p>You can change the background map with the layer selector:</p>
+                    <p><span class="help-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 3 2 8l10 5 10-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m2 12.5 10 5 10-5M2 16.5l10 5 10-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>You can change the background map with the layer selector (top right corner of the map):</p>
                     <ul>
                         <li><strong>Topographic map</strong> — Detailed terrain map (default)</li>
                         <li><strong>Background map</strong> — Simplified base map</li>

@@ -951,6 +951,30 @@ h3 .info-tip-icon {
     background: rgba(255,255,255,0.4);
 }
 
+/* Ohjeen kuvakkeet: sama kuvake kuin kartan napissa */
+.help-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-right: 6px;
+    vertical-align: middle;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    color: var(--havu, #2d5a27);
+}
+.help-select {
+    display: inline-block;
+    padding: 1px 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 0.85em;
+    white-space: nowrap;
+}
+
 /* Help modal */
 #help-overlay {
     position: fixed;
