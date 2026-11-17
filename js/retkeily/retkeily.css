@@ -1,0 +1,4 @@
+/* Retkeilykohteet (kokeilu): vain VITE_KOKEILU=1 -buildissa */
+.rk-taso strong { color: #7c2d12; }
+.rk-taso .rk-laji { font-size: 12px; color: #555; }
+.rk-taso .rk-lahde { font-size: 11px; color: #888; margin-top: 4px; }

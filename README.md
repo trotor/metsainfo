@@ -53,7 +53,9 @@ Seuraavia toimintoja kokeillaan testiversiossa. Ne voivat vielä muuttua ennen j
 - **Kerro tästä paikasta** – napauta karttaa tai käytä sijaintia: kuvion tiedot maastossa ja metsävisa.
 - **Etsi läheltä** – tietynlaiset metsät (esim. uudistuskypsä kuusikko) 1 km × 1 km alueelta.
 - **Valitse kuvioita** – kokoa kuvioita valinnaksi myös kiinteistörajojen yli ja katso valinnan yhteenveto ja hinta-arvio, esimerkiksi kun harkitset kiinteistön osan ostamista.
-- **Saavutettavuus** – kuvion arvioitu saavutettavuus metsäkuljetusmatkan, maaperän korjuukelpoisuuden ja tieyhteyden perusteella (Digiroad), kartalla väreinä.
+- **Saavutettavuus** – kuvion arvioitu saavutettavuus 0–100: maaperän korjuukelpoisuus, metsäkuljetusmatka, märät kohdat (Luken kosteusindeksi) ja rinteet (MML:n korkeusmalli) kuljetusreitillä sekä tieyhteys (Digiroad), kartalla väreinä. [Miten indeksi lasketaan →](docs/saavutettavuusindeksi.md)
+- **Huomioitavaa metsätöissä** – kiinteistön muinaisjäännökset, kulttuuriperintökohteet, luonnonsuojelu- ja Natura-alueet sekä Metsälain erityisen tärkeät elinympäristöt yhteenvedossa ja kartalla.
+- **Retkeilykohteet** – laavut, kodat, tulentekopaikat, retkeilyreitit ja luontopolut kartalla (LIPAS).
 - **Korkeusmalli** – laserkeilauksen vinovalaistu maastomalli taustakartaksi.
 - **Suosikit ja omat muistiinpanot** kiinteistöille, kuvioille ja hauille.
 - **Kielet** – suomi, ruotsi ja englanti.
@@ -118,6 +120,10 @@ Metsäinfo ei kerää eikä jaa henkilötietoja. Sijainti käsitellään vain la
 | Taustakartat | [Kapsi](https://kartat.kapsi.fi/) / [MML](https://www.maanmittauslaitos.fi/) |
 | Kantohinnat | Metsäteollisuus ry:n puukaupan viikkoseuranta, [Luonnonvarakeskus](https://www.luke.fi/) (CC BY 4.0) |
 | Tieverkko (testiversio) | [Väylävirasto, Digiroad](https://vayla.fi/) (CC BY 4.0) |
+| Kosteusindeksi ja korkeusmalli (testiversio) | [Luonnonvarakeskus](https://www.luke.fi/), [Maanmittauslaitos](https://www.maanmittauslaitos.fi/), jakelu [CSC Paituli](https://paituli.csc.fi/) (CC BY 4.0) |
+| Muinaisjäännökset ja kulttuuriperintö (testiversio) | [Museovirasto](https://www.museovirasto.fi/) (CC BY 4.0) |
+| Suojelu-, Natura- ja erämaa-alueet (testiversio) | [Suomen ympäristökeskus](https://www.syke.fi/) (CC BY 4.0) |
+| Retkeilykohteet (testiversio) | [LIPAS, Jyväskylän yliopisto](https://www.lipas.fi/) (CC BY 4.0) |
 
 ---
 

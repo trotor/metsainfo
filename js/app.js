@@ -85,8 +85,8 @@ function init() {
         Promise.all([
             import('./maasto/index.js'), import('./lahihaku/index.js'), import('./suosikit/index.js'),
             import('./korkeusmalli/index.js'), import('./asetukset/index.js'), import('./saavutettavuus/index.js'),
-            import('./valinta/index.js')
-        ]).then(([maasto, lahihaku, suosikit, korkeusmalli, asetukset, saavutettavuus, valinta]) => {
+            import('./valinta/index.js'), import('./rajoitteet/index.js'), import('./retkeily/index.js')
+        ]).then(([maasto, lahihaku, suosikit, korkeusmalli, asetukset, saavutettavuus, valinta, rajoitteet, retkeily]) => {
             maasto.startMaasto();
             lahihaku.startLahihaku();
             suosikit.startSuosikit();
@@ -94,6 +94,8 @@ function init() {
             asetukset.startAsetukset();
             saavutettavuus.startSaavutettavuus();
             valinta.startValinta();
+            rajoitteet.startRajoitteet();
+            retkeily.startRetkeily();
         });
     }
 }

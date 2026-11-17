@@ -1,0 +1,25 @@
+/* Metsätöiden rajoitteet (kokeilu): vain VITE_KOKEILU=1 -buildissa */
+
+.rj-laatikko {
+    border: 1.5px solid #e7c9a5;
+    background: #fdf7ef;
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+.rj-otsikko { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #92400e; margin-bottom: 6px; }
+.rj-kokeilu { font-size: 11px; font-weight: 600; text-transform: none; letter-spacing: 0; background: #fff3c4; color: #7a5b00; border-radius: 999px; padding: 1px 8px; }
+.rj-lista { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
+.rj-lista li { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+.rj-piste { flex: none; width: 12px; height: 12px; border-radius: 50%; margin-top: 4px; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.2); }
+.rj-nimet { font-size: 13px; color: var(--sammal); }
+.rj-teksti { margin: 0 0 6px; font-size: 14px; }
+.rj-huom { margin: 6px 0 0; font-size: 12px; color: var(--sammal); }
+.rj-lahde { margin: 6px 0 0; font-size: 11px; color: var(--sammal); }
+.rj-laatikko .kortti-btn { width: 100%; }
+.rj-laji { font-size: 12px; color: #555; }
+.rj-merkki {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; margin-right: 6px; border-radius: 50%;
+    background: #92400e; color: #fff; font-size: 12px; font-weight: 700;
+}
+.rj-kuvio p { margin: 0; font-size: 14px; color: #7c2d12; }

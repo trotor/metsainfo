@@ -66,6 +66,8 @@ describe('kokeilubuildin versiojono', () => {
         expect(containsKokeilu(['a', 'b .maasto-kortti{}'])).toBe(true);
         expect(containsKokeilu(['a', 'lahihaku-kortti'])).toBe(true);
         expect(containsKokeilu(['a', 'valinta-kortti'])).toBe(true);
+        expect(containsKokeilu(['a', 'rj-laatikko'])).toBe(true);
+        expect(containsKokeilu(['a', 'rk-taso'])).toBe(true);
         expect(containsKokeilu(['suosikit-kortti'])).toBe(true);
         expect(containsKokeilu(['korkeusmalli-taso'])).toBe(true);
         expect(containsKokeilu(['a', 'b'])).toBe(false);

@@ -38,7 +38,11 @@ export const FEATURES = {
     saavutettavuus: { product: PRODUCT_ID, kokeilu: true },
     // Kokeilu #32: kuviovalinta kiinteistörajojen yli, maksuton (js/valinta/); hinta-arvio
     // ja saavutettavuus pysyvät kertaoston takana
-    valinta: { product: null, kokeilu: true }
+    valinta: { product: null, kokeilu: true },
+    // Kokeilu: metsätöiden rajoitteet (muinaisjäännökset, suojelualueet …), maksuton (js/rajoitteet/)
+    rajoitteet: { product: null, kokeilu: true },
+    // Kokeilu: LIPAS-retkeilykohteet karttatasona, maksuton (js/retkeily/)
+    retkeily: { product: null, kokeilu: true }
 };
 
 /**
