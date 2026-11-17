@@ -153,4 +153,6 @@ ul.tk-ohje { padding-left: 0; }
         transform: none;
         max-width: calc(100% - var(--tablet-panel-right) - 90px);
     }
+    /* Tabletissa siru on paneelin vieressä: näkyy myös, kun paneeli on auki */
+    body:has(#info-panel[data-snap="full"]:not(.hidden)) .tyokalu-siru:not([hidden]) { display: flex; }
 }
