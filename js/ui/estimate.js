@@ -356,6 +356,15 @@ function ctxOf(el) {
     return el.closest('[data-ctx="demo"]') ? demoCtx : parcelCtx;
 }
 
+/**
+ * Avaa hinta-arvion ostonäkymän myös ennen ensimmäistä kiinteistöä
+ * (lisäosat, esim. js/huomiot/: työkalun voi avata heti käynnistyksen jälkeen).
+ */
+export function showPaywall() {
+    wireOnce();
+    openPaywall();
+}
+
 function wireOnce() {
     if (wired) return;
     wired = true;

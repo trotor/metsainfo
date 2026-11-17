@@ -41,6 +41,7 @@ const fi = {
     nimeton: 'Nimetön huomio',
     vainLaitteella: 'Huomiot tallentuvat vain tälle laitteelle.',
     tallennettu: 'Huomio tallennettu',
+    eiTallennettu: 'Huomiota ei voitu tallentaa laitteelle (muisti täynnä tai estetty). Se katoaa, kun sovellus suljetaan.',
     huomiotMaara: (n) => `Huomiot (${n})`,
     kuvionHuomiot: 'Huomiot',
     lisaosa: 'Kuuluu hinta-arvion lisäosaan.'
@@ -83,6 +84,7 @@ const sv = {
     nimeton: 'Observation utan rubrik',
     vainLaitteella: 'Observationerna sparas bara på den här enheten.',
     tallennettu: 'Observationen sparad',
+    eiTallennettu: 'Observationen kunde inte sparas på enheten (minnet är fullt eller blockerat). Den försvinner när appen stängs.',
     huomiotMaara: (n) => `Observationer (${n})`,
     kuvionHuomiot: 'Observationer',
     lisaosa: 'Ingår i tillägget för prisuppskattning.'
@@ -125,6 +127,7 @@ const en = {
     nimeton: 'Untitled note',
     vainLaitteella: 'Notes are saved on this device only.',
     tallennettu: 'Note saved',
+    eiTallennettu: 'The note could not be saved on this device (storage full or blocked). It will be lost when the app is closed.',
     huomiotMaara: (n) => `Notes (${n})`,
     kuvionHuomiot: 'Notes',
     lisaosa: 'Part of the price estimate add-on.'

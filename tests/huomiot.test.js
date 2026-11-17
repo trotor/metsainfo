@@ -96,11 +96,28 @@ describe('huomioiden tallennus', () => {
         expect(calls).toBe(3);
     });
 
-    it('tallennuksen virhe ei kaada (täysi tai estetty muisti)', () => {
+    it('tallennuksen virhe ei kaada, mutta siitä kerrotaan (täysi muisti)', () => {
         const storage = { getItem: () => null, setItem: () => { throw new Error('quota'); } };
         const notes = createNotes(storage, { now: clock() });
         expect(() => notes.add({ point: [1, 1] })).not.toThrow();
         expect(notes.list()).toHaveLength(1);
+        expect(notes.saved).toBe(false);
+        const ok = createNotes(memoryStorage(), { now: clock() });
+        ok.add({ point: [1, 1] });
+        expect(ok.saved).toBe(true);
+    });
+
+    it('estetty muisti (getter heittää) ei kaada', () => {
+        const blocked = { get getItem() { throw new Error('SecurityError'); } };
+        expect(() => createNotes(blocked).list()).not.toThrow();
+    });
+
+    it('ladattu tyyppi ja ajat siistitään', () => {
+        const raw = JSON.stringify([{ id: 'h:1', point: [1, 2], type: 'ufo' }, { id: 'h:2', point: [1, 2], type: 'oja', created: '2026-11-01T00:00:00Z' }]);
+        const notes = createNotes(memoryStorage({ 'metsainfo.huomiot': raw }));
+        expect(notes.get('h:1')).toMatchObject({ type: 'muu', title: '', text: '', parcel: null, stand: null });
+        expect(notes.get('h:2').created).toBe('2026-11-01T00:00:00Z');
+        expect(notes.get('h:2').updated).toBe('2026-11-01T00:00:00Z');
     });
 });
 
@@ -134,6 +151,11 @@ describe('huomion kuvio ja kiinteistö', () => {
             parcel: { reference: '99900100010001', label: '999-1-1-1' },
             stand: { standId: 11, standNumber: '1' }
         });
+    });
+
+    it('kuvio ulottuu rajan yli: kiinteistö vain kiinteistön omasta rajasta', () => {
+        const yli = { ...ctx, features: [...features, stand(14, 4, sq(300, 0, 50))] };
+        expect(linkFromSummary(yli, [310, 10])).toEqual({ parcel: null, stand: { standId: 14, standNumber: '4' } });
     });
 
     it('piste kiinteistön ulkopuolella tai ei yhteenvetoa: ei liitosta', () => {

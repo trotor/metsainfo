@@ -16,11 +16,13 @@ import { coordsEPSG3067ToLatLng } from '../utils.js';
 import { locale } from '../i18n.js';
 import { isUnlocked } from '../features.js';
 import { purchases } from '../platform/purchases.js';
+import { isStale } from '../location/logic.js';
 import { isMobileLayout } from '../ui/layout.js';
 import { showToast, onPositionChange, requestLocation } from '../ui/location-ui.js';
 import { createCard, cardHeader } from '../ui/kortti.js';
 import { registerTool } from '../ui/tyokalut.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
+import { showPaywall } from '../ui/estimate.js';
 import { TYYPIT, createNotes } from './varasto.js';
 import { standRefOf, linkFromSummary, formatCoords, notesFor } from './logiikka.js';
 import { T } from './teksti.js';
@@ -35,7 +37,12 @@ const locked = () => !isUnlocked('huomiot');
 const cm = (v) => Math.round(v * 100) / 100;
 const fromWgs = (lon, lat) => proj4('WGS84', 'EPSG:3067', [lon, lat]).map(cm);
 const toPoint = (latlng) => fromWgs(latlng.lng, latlng.lat);
-const dateOf = (iso) => { try { return new Date(iso).toLocaleDateString(locale()); } catch { return ''; } };
+const dateOf = (iso) => {
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(locale());
+};
+/** Kuvion avain valintalistaan: tunnus, tai numero, jos tunnus puuttuu (esim. esimerkkimetsä). */
+const standKey = (ref) => (ref ? (ref.standId != null ? `id:${ref.standId}` : `nro:${ref.standNumber}`) : '');
 
 export function startHuomiot() {
     addHelpSection({ id: 'huomiot', title: T.ohjeOsio.otsikko, html: T.ohjeOsio.html });
@@ -46,14 +53,16 @@ export function startHuomiot() {
         ctx: null,             // viimeisin yhteenveto (VIESTIT.yhteenveto)
         draft: null,           // muokattava huomio { id?, point, accuracy?, title, type, text, parcel, stand }
         standChosen: false,    // käyttäjä valitsi kuvion itse: ei korvata automaattisesti
-        awaitingParcel: false, // kiinteistö avataan pisteestä
+        standOptions: [],      // kuvion valintalistan kuviot (näkymän piirtohetkeltä)
         tapping: false,
         locating: false,
         confirmDelete: false,
         show: true
     };
-    let stopLocating = null;
+    // Kiinteistön avaus pisteestä kesken: { draft } (muokattava) tai { id } (jo tallennettu), point
+    let pending = null;
     let parcelTimer = null;
+    let stopLocating = null;
 
     /* ---------- Kartta ---------- */
 
@@ -71,8 +80,7 @@ export function startHuomiot() {
         draftMarker = null;
         if (locked() || (!ui.show && !ui.draft)) { layer.remove(); return; }
         for (const n of store.list()) {
-            if (ui.draft?.id === n.id) continue;
-            if (!ui.show) continue;
+            if (ui.draft?.id === n.id || !ui.show) continue;
             const m = L.marker(coordsEPSG3067ToLatLng(n.point), { icon: iconFor(n.type), title: n.title || T.nimeton, keyboard: true });
             m.on('click', () => openNote(n.id));
             layer.addLayer(m);
@@ -87,22 +95,30 @@ export function startHuomiot() {
         layer.addTo(state.map);
     }
 
-    /* ---------- Napautustila ja sijainti ---------- */
+    /** Puhelimessa kortti peittää kartan alaosan: piste näkyviin yläosaan. */
+    function revealPoint(point) {
+        if (!isMobileLayout()) return;
+        const map = state.map;
+        const at = map.latLngToContainerPoint(coordsEPSG3067ToLatLng(point));
+        map.panBy([0, at.y - map.getSize().y * 0.22], { animate: true });
+    }
+
+    /* ---------- Napautustila ja sijainti (vain toinen kerrallaan) ---------- */
 
     function onMapTap(e) {
         if (!ui.tapping) return;
-        stopTap();
         setPoint(toPoint(e.latlng));
     }
 
     function startTap() {
+        stopLocate();
         ui.tapping = true;
         // Vektoritasot läpäisevät napautuksen: piste ei valitse kiinteistöä eikä kuviota
         state.map.getContainer().classList.add('hu-napautus');
         state.map.on('click', onMapTap);
         if (isMobileLayout()) card.close(); // kartta näkyviin; siru tuo kortin takaisin
         showToast(T.napautaOhje, 4000);
-        sync();
+        render();
     }
 
     function stopTap() {
@@ -114,21 +130,27 @@ export function startHuomiot() {
     }
 
     function startLocate() {
+        stopTap();
+        stopLocate();
         ui.locating = true;
         render();
         requestLocation();
+        let done = false;
+        let off = null;
         const timer = setTimeout(() => {
             if (!ui.locating) return;
             stopLocate();
             showToast(T.eiSijaintia);
             render();
         }, LOCATE_TIMEOUT_MS);
-        const off = onPositionChange((pos) => {
-            if (!ui.locating || !pos) return;
-            stopLocate();
-            setPoint(fromWgs(pos.lon, pos.lat), pos.accuracy);
+        stopLocating = () => { done = true; clearTimeout(timer); off?.(); off = null; };
+        off = onPositionChange((pos) => {
+            // Välimuistissa oleva vanha sijainti (katko maastossa) ei kelpaa: odotetaan tuoretta
+            if (done || !ui.locating || !pos || isStale(pos.timestamp, Date.now())) return;
+            done = true; // vain ensimmäinen tuore sijainti
+            const point = fromWgs(pos.lon, pos.lat);
+            queueMicrotask(() => setPoint(point, pos.accuracy)); // tilaus valmis ennen purkua
         });
-        stopLocating = () => { clearTimeout(timer); off(); };
     }
 
     function stopLocate() {
@@ -139,22 +161,15 @@ export function startHuomiot() {
 
     /* ---------- Huomion piste, kiinteistö ja kuvio ---------- */
 
-    /** Puhelimessa kortti peittää kartan alaosan: piste näkyviin yläosaan. */
-    function revealPoint(point) {
-        if (!isMobileLayout()) return;
-        const map = state.map;
-        const at = map.latLngToContainerPoint(coordsEPSG3067ToLatLng(point));
-        const targetY = map.getSize().y * 0.22;
-        map.panBy([0, at.y - targetY], { animate: true });
-    }
-
     function newDraft() {
         return { point: null, title: '', type: 'muu', text: '', parcel: null, stand: null };
     }
 
     function setPoint(point, accuracy, { dragged = false } = {}) {
+        stopTap();
+        stopLocate();
         if (!ui.draft) ui.draft = newDraft();
-        readFormSafe(); // kirjoitettu mutta tallentamaton teksti säilyy siirrossa
+        readFormSafe(); // kirjoitettu mutta tallentamaton teksti säilyy
         ui.draft.point = point;
         if (!dragged) ui.draft.accuracy = Number.isFinite(accuracy) ? Math.round(accuracy) : undefined;
         else delete ui.draft.accuracy; // siirretty käsin: sijainnin tarkkuus ei enää koske pistettä
@@ -168,19 +183,40 @@ export function startHuomiot() {
         if (!dragged) revealPoint(point);
     }
 
+    function cancelPendingDraft() {
+        if (pending?.draft) { pending = null; clearTimeout(parcelTimer); }
+    }
+
     function relink() {
         const d = ui.draft;
         const link = linkFromSummary(ui.ctx, d.point);
         d.parcel = link.parcel;
         if (!ui.standChosen) d.stand = link.stand;
-        clearTimeout(parcelTimer);
-        ui.awaitingParcel = false;
-        // Kiinteistöä ei ole auki pisteen kohdalla: sovellus avaa sen (yhteenveto täyttää liitoksen)
+        cancelPendingDraft();
+        // Kiinteistöä ei ole auki pisteen kohdalla: sovellus avaa sen, ja seuraava yhteenveto täyttää liitoksen
         if (!link.parcel && !(ui.ctx?.parcel?.properties?.valinta && link.stand)) {
-            ui.awaitingParcel = true;
+            pending = { draft: d, point: d.point };
             emit(VIESTIT.avaaKohta, { points: [d.point] });
-            parcelTimer = setTimeout(() => { ui.awaitingParcel = false; render(); }, PARCEL_TIMEOUT_MS);
+            clearTimeout(parcelTimer);
+            parcelTimer = setTimeout(() => { pending = null; updateLinkRows(); }, PARCEL_TIMEOUT_MS);
         }
+    }
+
+    /** Yhteenveto saapui: täydennä kesken jäänyt liitos (muokattava tai jo tallennettu huomio). */
+    function completePending(ctx) {
+        if (!pending) return;
+        const link = linkFromSummary(ctx, pending.point);
+        if (pending.draft) {
+            if (pending.draft === ui.draft) {
+                ui.draft.parcel = link.parcel;
+                if (!ui.standChosen) ui.draft.stand = link.stand;
+            }
+        } else if (pending.id && link.parcel) {
+            const n = store.get(pending.id);
+            if (n && !n.parcel) store.update(pending.id, { parcel: link.parcel, ...(pending.standChosen || n.stand ? {} : { stand: link.stand }) });
+        }
+        pending = null;
+        clearTimeout(parcelTimer);
     }
 
     function openNote(id) {
@@ -188,6 +224,7 @@ export function startHuomiot() {
         if (!n) return;
         stopTap();
         stopLocate();
+        cancelPendingDraft();
         ui.draft = { ...n, point: [...n.point] };
         ui.standChosen = true; // tallennettu kuvio pysyy, kunnes käyttäjä muuttaa sitä tai siirtää pistettä
         ui.view = 'edit';
@@ -207,22 +244,26 @@ export function startHuomiot() {
         ui.draft.text = f.querySelector('[name=text]').value;
     }
 
+    function readFormSafe() {
+        if (ui.view === 'edit' && card.el.querySelector('.hu-lomake')) readForm();
+    }
+
     function save() {
         readForm();
         const d = ui.draft;
         if (!d?.point) return;
-        const fields = { point: d.point, title: d.title, type: d.type, text: d.text, parcel: d.parcel, stand: d.stand };
-        if (d.id) store.update(d.id, { ...fields, accuracy: d.accuracy });
-        else store.add({ ...fields, accuracy: d.accuracy });
-        showToast(T.tallennettu, 2500);
+        const fields = { point: d.point, title: d.title, type: d.type, text: d.text, parcel: d.parcel, stand: d.stand, accuracy: d.accuracy };
+        const item = d.id ? store.update(d.id, fields) : store.add(fields);
+        // Kiinteistö vielä tulossa: täydennetään tallennettuun huomioon, kun yhteenveto saapuu
+        if (pending?.draft === d && item) pending = { id: item.id, point: d.point, standChosen: ui.standChosen };
+        showToast(store.saved ? T.tallennettu : T.eiTallennettu, store.saved ? 2500 : 8000);
         toList();
     }
 
     function toList() {
         stopTap();
         stopLocate();
-        clearTimeout(parcelTimer);
-        ui.awaitingParcel = false;
+        cancelPendingDraft();
         ui.draft = null;
         ui.view = 'list';
         ui.confirmDelete = false;
@@ -232,7 +273,9 @@ export function startHuomiot() {
 
     /* ---------- Kortti ---------- */
 
-    const card = createCard({ id: 'huomiot', label: T.nappi, className: 'huomiot-kortti', onClose: () => close() });
+    // notifyHidden: puhelimessa kortti on piilossa napautustilan ajan, mutta tila päättyy silti,
+    // kun toinen kortti avautuu (muuten kartan kuviot jäisivät napautuksia läpäiseviksi)
+    const card = createCard({ id: 'huomiot', label: T.nappi, className: 'huomiot-kortti', onClose: () => close(), notifyHidden: true });
 
     const tool = registerTool({
         id: 'huomiot', label: T.nappi, description: T.kuvaus, icon: ICON, order: 40,
@@ -240,19 +283,9 @@ export function startHuomiot() {
     });
     const sync = () => tool.setStatus({ active: card.isOpen || ui.tapping || ui.locating, cardOpen: card.isOpen, detail: String(store.list().length) });
 
-    function openPaywall() {
-        // Hinta-arvion ostonäkymä avautuu data-est="paywall" -painikkeesta (js/ui/estimate.js)
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.dataset.est = 'paywall';
-        b.hidden = true;
-        document.body.appendChild(b);
-        b.click();
-        b.remove();
-    }
-
     function openCard() {
-        if (locked()) { openPaywall(); return; }
+        if (locked()) { showPaywall(); return; }
+        readFormSafe();
         card.open();
         render();
     }
@@ -284,12 +317,14 @@ export function startHuomiot() {
     card.el.addEventListener('change', (e) => {
         if (e.target.name === 'nayta') { ui.show = e.target.checked; drawMarkers(); return; }
         if (e.target.name === 'stand' && ui.draft) {
-            readForm();
-            const i = e.target.value;
             ui.standChosen = true;
-            if (i === '') ui.draft.stand = null;
-            else if (i !== 'nykyinen') ui.draft.stand = standRefOf(ui.ctx.features[Number(i)], Number(i));
-            render();
+            const key = e.target.value;
+            if (key === '') ui.draft.stand = null;
+            else {
+                const hit = ui.standOptions.find(o => o.key === key);
+                if (hit) ui.draft.stand = hit.ref;
+            }
+            return;
         }
         if (e.target.name === 'type' && ui.draft) { readForm(); drawMarkers(); }
     });
@@ -310,30 +345,42 @@ export function startHuomiot() {
         }).join('')}</ul>`;
     }
 
-    function standOptions(d) {
+    /** Kuvion valintalista avoimen kiinteistön (tai kuviovalinnan) kuvioista; avaimet talteen muutoksen tulkintaan. */
+    function standOptionsHtml(d) {
         const sameParcel = d.parcel && ui.ctx?.reference === d.parcel.reference;
         const valinta = !d.parcel && ui.ctx?.parcel?.properties?.valinta;
         const features = (sameParcel || valinta) ? ui.ctx.features || [] : [];
-        const opts = features.map((f, i) => {
+        ui.standOptions = features.map((f, i) => {
             const ref = standRefOf(f, i);
-            const selected = d.stand && Number(d.stand.standId) === Number(ref.standId);
-            return { value: String(i), label: T.kuvioNro(ref.standNumber), selected, n: Number(ref.standNumber) };
+            return { key: standKey(ref), ref, label: T.kuvioNro(ref.standNumber), n: Number(ref.standNumber) };
         }).sort((a, b) => (a.n - b.n) || 0);
-        const known = opts.some(o => o.selected);
-        const current = d.stand && !known ? `<option value="nykyinen" selected>${esc(T.kuvioNro(d.stand.standNumber))}</option>` : '';
-        return `<option value=""${d.stand ? '' : ' selected'}>${esc(T.eiKuviota)}</option>${current}${opts.map(o => `<option value="${o.value}"${o.selected ? ' selected' : ''}>${esc(o.label)}</option>`).join('')}`;
+        const current = standKey(d.stand);
+        const known = ui.standOptions.some(o => o.key === current);
+        if (d.stand && !known) ui.standOptions.unshift({ key: current, ref: d.stand, label: T.kuvioNro(d.stand.standNumber) });
+        return `<option value=""${d.stand ? '' : ' selected'}>${esc(T.eiKuviota)}</option>${ui.standOptions.map(o => `<option value="${esc(o.key)}"${o.key === current ? ' selected' : ''}>${esc(o.label)}</option>`).join('')}`;
+    }
+
+    const parcelText = (d) => (pending?.draft === d ? T.haetaanKiinteistoa : (d.parcel?.label || T.eiKiinteistoa));
+
+    /** Kiinteistö ja kuvio päivitetään paikallaan: kirjoitus ja näppäimistö eivät katkea. */
+    function updateLinkRows() {
+        const f = card.el.querySelector('.hu-lomake');
+        if (!f || !ui.draft || ui.view !== 'edit') return;
+        const p = f.querySelector('.hu-kiinteisto');
+        if (p) p.textContent = parcelText(ui.draft);
+        const s = f.querySelector('[name=stand]');
+        if (s && document.activeElement !== s) s.innerHTML = standOptionsHtml(ui.draft);
     }
 
     function editHtml() {
         const d = ui.draft;
         const c = formatCoords(d.point);
-        const parcel = ui.awaitingParcel ? T.haetaanKiinteistoa : (d.parcel?.label || T.eiKiinteistoa);
         return `<form class="hu-lomake" onsubmit="return false">
             <label>${esc(T.otsikkoKentta)}<input name="title" type="text" maxlength="120" value="${esc(d.title)}" placeholder="${esc(T.otsikkoOhje)}"></label>
             <label>${esc(T.tyyppiKentta)}<select name="type">${TYYPIT.map(t => `<option value="${t}"${t === d.type ? ' selected' : ''}>${esc(T.tyypit[t])}</option>`).join('')}</select></label>
             <label>${esc(T.tekstiKentta)}<textarea name="text" rows="3" maxlength="2000" placeholder="${esc(T.tekstiOhje)}">${esc(d.text)}</textarea></label>
-            <div class="hu-rivi-tieto"><span>${esc(T.kiinteisto)}</span><span>${esc(parcel)}</span></div>
-            <label>${esc(T.kuvio)}<select name="stand">${standOptions(d)}</select></label>
+            <div class="hu-rivi-tieto"><span>${esc(T.kiinteisto)}</span><span class="hu-kiinteisto">${esc(parcelText(d))}</span></div>
+            <label>${esc(T.kuvio)}<select name="stand">${standOptionsHtml(d)}</select></label>
             <div class="hu-rivi-tieto"><span>${esc(T.koordinaatit)}</span><span>N ${esc(c.n)} E ${esc(c.e)}<br><span class="hu-pieni">${esc(c.lat)}, ${esc(c.lon)}${d.accuracy ? ` · ${esc(T.tarkkuus(d.accuracy))}` : ''}</span></span></div>
             <p class="hu-pieni">${esc(T.siirraOhje)}</p>
             <button type="button" class="kortti-btn kortti-primary" data-hu="tallenna">${esc(T.tallenna)}</button>
@@ -353,6 +400,7 @@ export function startHuomiot() {
             body = `<div class="hu-valinta">
                 <button type="button" class="kortti-btn kortti-primary" data-hu="tahan" ${ui.locating ? 'disabled' : ''}>${esc(ui.locating ? T.haetaanSijaintia : T.tahan)}</button>
                 <button type="button" class="kortti-btn" data-hu="napauta">${esc(T.napauta)}</button>
+                ${ui.tapping ? `<p class="hu-teksti">${esc(T.napautaOhje)}</p>` : ''}
                 <button type="button" class="kortti-btn" data-hu="takaisin">${esc(T.takaisin)}</button>
             </div>`;
         } else {
@@ -379,14 +427,16 @@ export function startHuomiot() {
             const div = document.createElement('div');
             div.className = 'hu-lisa hu-yhteenveto';
             div.innerHTML = `<button type="button" class="hu-linkki">${esc(T.huomiotMaara(own.length))}</button>`;
-            div.querySelector('button').addEventListener('click', () => { ui.view = 'list'; openCard(); });
+            div.querySelector('button').addEventListener('click', () => { if (ui.view !== 'edit') ui.view = 'list'; openCard(); });
             anchor.appendChild(div);
         }
         content.querySelectorAll('.stand-item').forEach(itemEl => {
             const i = Number(itemEl.dataset.index);
             const f = ui.ctx.features?.[i];
             if (!f) return;
-            const hits = notesFor(notes, { standId: standRefOf(f, i).standId });
+            const ref = standRefOf(f, i);
+            if (ref.standId == null) return; // ilman tunnusta kuviota ei voi yhdistää huomioihin luotettavasti
+            const hits = notesFor(notes, { standId: ref.standId });
             const details = itemEl.querySelector('.stand-details');
             if (!hits.length || !details) return;
             const div = document.createElement('div');
@@ -405,27 +455,20 @@ export function startHuomiot() {
 
     on(VIESTIT.yhteenveto, (ctx) => {
         ui.ctx = ctx;
-        if (ui.draft?.point && (ui.awaitingParcel || !ui.draft.parcel)) {
-            const link = linkFromSummary(ctx, ui.draft.point);
-            if (link.parcel || ui.awaitingParcel) {
-                ui.draft.parcel = link.parcel;
-                if (!ui.standChosen) ui.draft.stand = link.stand;
-            }
-            ui.awaitingParcel = false;
-            clearTimeout(parcelTimer);
-            if (ui.view === 'edit') { readFormSafe(); render(); }
-        }
+        completePending(ctx);
+        updateLinkRows();
         decorate();
     }, { replay: true });
 
-    function readFormSafe() {
-        if (card.el.querySelector('.hu-lomake')) readForm();
-    }
-
-    on(VIESTIT.tyhjennys, () => { ui.ctx = null; if (ui.view === 'edit') { readFormSafe(); render(); } });
+    on(VIESTIT.tyhjennys, () => { ui.ctx = null; updateLinkRows(); });
 
     store.onChange(() => { decorate(); sync(); });
-    purchases.onChange(() => { drawMarkers(); decorate(); sync(); });
+    purchases.onChange(() => {
+        if (locked() && (card.isOpen || ui.draft || ui.tapping)) close(); // osto peruttu tai oikeus poistui
+        drawMarkers();
+        decorate();
+        sync();
+    });
 
     drawMarkers();
     sync();

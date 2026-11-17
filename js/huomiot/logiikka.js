@@ -39,7 +39,8 @@ export function linkFromSummary(ctx, point) {
     const hit = standAt(ctx.features, point);
     const stand = hit ? { standId: hit.standId, standNumber: hit.standNumber } : null;
     const isReal = ctx.reference && !ctx.parcel?.properties?.valinta;
-    const onParcel = isReal && (hit || parcelGeometries(ctx.parcel).some(g => containsPoint(g, point)));
+    // Kiinteistö vain sen omasta rajasta: kuvio voi ulottua rajan yli (kuvio kuuluu kiinteistölle ankkuripisteestään)
+    const onParcel = isReal && parcelGeometries(ctx.parcel).some(g => containsPoint(g, point));
     return {
         parcel: onParcel ? { reference: ctx.reference, label: ctx.label || ctx.reference } : null,
         stand

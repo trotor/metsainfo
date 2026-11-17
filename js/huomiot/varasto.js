@@ -14,27 +14,48 @@ const validPoint = (p) => Array.isArray(p) && p.length === 2 && p.every(v => typ
 const validType = (t) => (TYYPIT.includes(t) ? t : 'muu');
 const EDITABLE = ['title', 'type', 'text', 'point', 'accuracy', 'parcel', 'stand'];
 
-export function createNotes(storage = globalThis.localStorage, { now = () => new Date() } = {}) {
+/** Ladattu huomio siistitään: tuntematon tyyppi → muu, puuttuvat kentät oletuksiin. */
+function clean(i) {
+    const created = typeof i.created === 'string' ? i.created : (typeof i.updated === 'string' ? i.updated : '');
+    return {
+        ...i,
+        title: typeof i.title === 'string' ? i.title : '',
+        type: validType(i.type),
+        text: typeof i.text === 'string' ? i.text : '',
+        created,
+        updated: typeof i.updated === 'string' ? i.updated : created,
+        parcel: i.parcel && typeof i.parcel === 'object' ? i.parcel : null,
+        stand: i.stand && typeof i.stand === 'object' ? i.stand : null
+    };
+}
+
+export function createNotes(storage, { now = () => new Date() } = {}) {
     let items = [];
     try {
+        storage = storage === undefined ? globalThis.localStorage : storage;
         const raw = storage?.getItem(KEY);
         const parsed = raw ? JSON.parse(raw) : [];
-        if (Array.isArray(parsed)) items = parsed.filter(i => i && typeof i.id === 'string' && validPoint(i.point));
+        if (Array.isArray(parsed)) items = parsed.filter(i => i && typeof i.id === 'string' && validPoint(i.point)).map(clean);
     } catch {
         items = [];
     }
     const listeners = new Set();
+    let saved = true;
 
     const save = () => {
         try {
             storage?.setItem(KEY, JSON.stringify(items));
+            saved = true;
         } catch {
-            // Täynnä tai estetty: muutos säilyy tämän istunnon ajan
+            // Täynnä tai estetty: muutos säilyy tämän istunnon ajan (käyttöliittymä varoittaa)
+            saved = false;
         }
         listeners.forEach(fn => fn());
     };
 
     return {
+        /** Onnistuiko viimeisin tallennus laitteelle. */
+        get saved() { return saved; },
         /** Uusin muutos ensin. */
         list() {
             return items.slice().sort((a, b) => String(b.updated).localeCompare(String(a.updated)));
