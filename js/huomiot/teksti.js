@@ -44,7 +44,18 @@ const fi = {
     eiTallennettu: 'Huomiota ei voitu tallentaa laitteelle (muisti täynnä tai estetty). Se katoaa, kun sovellus suljetaan.',
     huomiotMaara: (n) => `Huomiot (${n})`,
     kuvionHuomiot: 'Huomiot',
-    lisaosa: 'Kuuluu hinta-arvion lisäosaan.'
+    lisaosa: 'Kuuluu hinta-arvion lisäosaan.',
+    kuvat: 'Kuvat',
+    otaKuva: 'Ota kuva',
+    valitseKuva: 'Valitse kuvista',
+    poistaKuva: 'Poista kuva',
+    kuvaAlt: (n) => `Huomion kuva ${n}`,
+    suljeKuva: 'Sulje kuva',
+    kuvaGalleriaan: 'Kameralla otettu kuva tallentuu myös laitteen kuviin.',
+    kuvatMax: (n) => `Enintään ${n} kuvaa.`,
+    kuvaEiOnnistunut: 'Kuvan lisääminen ei onnistunut. Tarkista kameran ja kuvien käyttöoikeus laitteen asetuksista.',
+    kuviaEiTallennettu: (n) => (n === 1 ? 'Yhtä kuvaa ei voitu tallentaa.' : `${n} kuvaa ei voitu tallentaa.`),
+    kuviaMaara: (n) => (n === 1 ? '1 kuva' : `${n} kuvaa`)
 };
 
 const sv = {
@@ -87,7 +98,18 @@ const sv = {
     eiTallennettu: 'Observationen kunde inte sparas på enheten (minnet är fullt eller blockerat). Den försvinner när appen stängs.',
     huomiotMaara: (n) => `Observationer (${n})`,
     kuvionHuomiot: 'Observationer',
-    lisaosa: 'Ingår i tillägget för prisuppskattning.'
+    lisaosa: 'Ingår i tillägget för prisuppskattning.',
+    kuvat: 'Bilder',
+    otaKuva: 'Ta en bild',
+    valitseKuva: 'Välj bland bilder',
+    poistaKuva: 'Ta bort bilden',
+    kuvaAlt: (n) => `Observationens bild ${n}`,
+    suljeKuva: 'Stäng bilden',
+    kuvaGalleriaan: 'En bild som tas med kameran sparas också bland enhetens bilder.',
+    kuvatMax: (n) => `Högst ${n} bilder.`,
+    kuvaEiOnnistunut: 'Bilden kunde inte läggas till. Kontrollera behörigheten till kameran och bilderna i enhetens inställningar.',
+    kuviaEiTallennettu: (n) => (n === 1 ? 'En bild kunde inte sparas.' : `${n} bilder kunde inte sparas.`),
+    kuviaMaara: (n) => (n === 1 ? '1 bild' : `${n} bilder`)
 };
 
 const en = {
@@ -130,7 +152,18 @@ const en = {
     eiTallennettu: 'The note could not be saved on this device (storage full or blocked). It will be lost when the app is closed.',
     huomiotMaara: (n) => `Notes (${n})`,
     kuvionHuomiot: 'Notes',
-    lisaosa: 'Part of the price estimate add-on.'
+    lisaosa: 'Part of the price estimate add-on.',
+    kuvat: 'Photos',
+    otaKuva: 'Take a photo',
+    valitseKuva: 'Choose from photos',
+    poistaKuva: 'Remove photo',
+    kuvaAlt: (n) => `Note photo ${n}`,
+    suljeKuva: 'Close photo',
+    kuvaGalleriaan: 'A photo taken with the camera is also saved to the device’s photos.',
+    kuvatMax: (n) => `Up to ${n} photos.`,
+    kuvaEiOnnistunut: 'The photo could not be added. Check camera and photo access in the device settings.',
+    kuviaEiTallennettu: (n) => (n === 1 ? 'One photo could not be saved.' : `${n} photos could not be saved.`),
+    kuviaMaara: (n) => (n === 1 ? '1 photo' : `${n} photos`)
 };
 
 export const TEKSTIT = { fi, sv, en };
@@ -142,8 +175,9 @@ const OHJE = {
 <ul>
 <li>Huomio liitetään kiinteistöön ja kuvioon, joilla piste on. Kuvion voi vaihtaa.</li>
 <li>Pistettä voi siirtää vetämällä merkkiä. Koordinaatit näkyvät ETRS-TM35FIN-muodossa sekä leveys- ja pituusasteina.</li>
+<li>Huomioon voi liittää enintään viisi kuvaa: ota kuva kameralla (tallentuu myös laitteen kuviin) tai valitse kuvista. Kuvan napautus avaa sen koko näytölle.</li>
 <li>Huomiot näkyvät kartalla merkkeinä sekä kiinteistön ja kuvion tiedoissa.</li>
-<li>Huomiot tallentuvat vain tälle laitteelle.</li>
+<li>Huomiot ja niiden kuvat tallentuvat vain tälle laitteelle.</li>
 </ul>
 <p>Kuuluu hinta-arvion lisäosaan (kertaosto).</p>`
     },
@@ -153,8 +187,9 @@ const OHJE = {
 <ul>
 <li>Observationen kopplas till fastigheten och figuren där punkten ligger. Figuren kan bytas.</li>
 <li>Punkten kan flyttas genom att dra markeringen. Koordinaterna visas i ETRS-TM35FIN samt som latitud och longitud.</li>
+<li>Du kan lägga till högst fem bilder till en observation: ta en bild med kameran (sparas också bland enhetens bilder) eller välj bland bilder. Tryck på en bild för att visa den i helskärm.</li>
 <li>Observationerna visas som markeringar på kartan och i fastighetens och figurens uppgifter.</li>
-<li>Observationerna sparas bara på den här enheten.</li>
+<li>Observationerna och deras bilder sparas bara på den här enheten.</li>
 </ul>
 <p>Ingår i tillägget för prisuppskattning (engångsköp).</p>`
     },
@@ -164,8 +199,9 @@ const OHJE = {
 <ul>
 <li>The note is linked to the property and stand where the point is. You can change the stand.</li>
 <li>Move the point by dragging the marker. Coordinates are shown in ETRS-TM35FIN and as latitude and longitude.</li>
+<li>You can add up to five photos to a note: take one with the camera (also saved to the device’s photos) or choose from photos. Tap a photo to view it full screen.</li>
 <li>Notes appear as markers on the map and in the property and stand details.</li>
-<li>Notes are saved on this device only.</li>
+<li>Notes and their photos are saved on this device only.</li>
 </ul>
 <p>Part of the price estimate add-on (one-time purchase).</p>`
     }

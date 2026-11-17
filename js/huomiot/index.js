@@ -7,6 +7,8 @@
  * Suunnitelma: docs/plans/2026-11-17-huomiot-design.md
  *
  * Ei jakoa eikä vientiä vielä (Tero 17.11.2026); tallennusmuoto sallii sen myöhemmin.
+ * Valokuvat (#37): enintään 5 kuvaa huomiota kohden, sovelluksen omissa tiedostoissa
+ * (js/platform/kuvat.js); kameralla otettu kuva myös laitteen kuvagalleriaan.
  */
 
 import './huomiot.css';
@@ -23,7 +25,9 @@ import { createCard, cardHeader } from '../ui/kortti.js';
 import { registerTool } from '../ui/tyokalut.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { showPaywall } from '../ui/estimate.js';
+import { takePhoto, choosePhoto, photoSrc, photoIo } from '../platform/kuvat.js';
 import { TYYPIT, createNotes } from './varasto.js';
+import { MAX_KUVAT, newPhotoId, commitPhotos, removeAllPhotos } from './kuvat.js';
 import { standRefOf, linkFromSummary, formatCoords, notesFor } from './logiikka.js';
 import { T } from './teksti.js';
 
@@ -57,8 +61,11 @@ export function startHuomiot() {
         tapping: false,
         locating: false,
         confirmDelete: false,
+        saving: false,
         show: true
     };
+    // Tallennettujen kuvien osoitteet (polku → <img src>)
+    const srcCache = new Map();
     // Kiinteistön avaus pisteestä kesken: { draft } (muokattava) tai { id } (jo tallennettu), point
     let pending = null;
     let parcelTimer = null;
@@ -162,7 +169,7 @@ export function startHuomiot() {
     /* ---------- Huomion piste, kiinteistö ja kuvio ---------- */
 
     function newDraft() {
-        return { point: null, title: '', type: 'muu', text: '', parcel: null, stand: null };
+        return { point: null, title: '', type: 'muu', text: '', parcel: null, stand: null, photos: [] };
     }
 
     function setPoint(point, accuracy, { dragged = false } = {}) {
@@ -225,7 +232,7 @@ export function startHuomiot() {
         stopTap();
         stopLocate();
         cancelPendingDraft();
-        ui.draft = { ...n, point: [...n.point] };
+        ui.draft = { ...n, point: [...n.point], photos: (n.photos || []).map(p => ({ ...p })) };
         ui.standChosen = true; // tallennettu kuvio pysyy, kunnes käyttäjä muuttaa sitä tai siirtää pistettä
         ui.view = 'edit';
         ui.confirmDelete = false;
@@ -248,16 +255,93 @@ export function startHuomiot() {
         if (ui.view === 'edit' && card.el.querySelector('.hu-lomake')) readForm();
     }
 
-    function save() {
+    async function save() {
         readForm();
         const d = ui.draft;
-        if (!d?.point) return;
+        if (!d?.point || ui.saving) return;
+        ui.saving = true;
+        render();
         const fields = { point: d.point, title: d.title, type: d.type, text: d.text, parcel: d.parcel, stand: d.stand, accuracy: d.accuracy };
-        const item = d.id ? store.update(d.id, fields) : store.add(fields);
+        const before = d.id ? (store.get(d.id)?.photos || []) : [];
+        let item = d.id ? store.update(d.id, fields) : store.add(fields);
         // Kiinteistö vielä tulossa: täydennetään tallennettuun huomioon, kun yhteenveto saapuu
         if (pending?.draft === d && item) pending = { id: item.id, point: d.point, standChosen: ui.standChosen };
-        showToast(store.saved ? T.tallennettu : T.eiTallennettu, store.saved ? 2500 : 8000);
-        toList();
+        let failed = 0;
+        if (item) {
+            // Kuvat kirjoitetaan vasta nyt (huomion tunnus tiedossa); poistetut kuvat pois
+            const r = await commitPhotos({ noteId: item.id, before, draft: d.photos || [], io: photoIo });
+            failed = r.failed;
+            item = store.update(item.id, { photos: r.photos }) || item;
+        }
+        ui.saving = false;
+        if (failed) showToast(T.kuviaEiTallennettu(failed), 8000);
+        else showToast(store.saved ? T.tallennettu : T.eiTallennettu, store.saved ? 2500 : 8000);
+        if (ui.draft === d) toList();
+        else render();
+    }
+
+    /* ---------- Kuvat ---------- */
+
+    async function addPhoto(source) {
+        readFormSafe();
+        const d = ui.draft;
+        if (!d || (d.photos || []).length >= MAX_KUVAT) return;
+        try {
+            const photo = await (source === 'camera' ? takePhoto() : choosePhoto());
+            if (!photo || ui.draft !== d) return; // peruttu tai huomio vaihtui kesken
+            d.photos = [...(d.photos || []), { id: newPhotoId(), ...photo }];
+            readFormSafe();
+            render();
+        } catch {
+            showToast(T.kuvaEiOnnistunut, 6000);
+        }
+    }
+
+    function removeDraftPhoto(id) {
+        readFormSafe();
+        if (!ui.draft) return;
+        ui.draft.photos = (ui.draft.photos || []).filter(p => p.id !== id);
+        render();
+    }
+
+    /** Tallennettujen kuvien osoitteet haetaan piirron jälkeen. */
+    function fillPhotos() {
+        card.el.querySelectorAll('img[data-path]').forEach(async (img) => {
+            const path = img.dataset.path;
+            try {
+                const src = srcCache.get(path) || await photoSrc(path);
+                srcCache.set(path, src);
+                if (img.isConnected) img.src = src;
+            } catch {
+                // Tiedosto puuttuu: pikkukuva jää tyhjäksi, viitteen voi poistaa
+            }
+        });
+    }
+
+    function closeViewer() {
+        document.querySelector('.hu-katselu')?.remove();
+        document.removeEventListener('keydown', onViewerKey);
+    }
+
+    function onViewerKey(e) {
+        if (e.key === 'Escape') closeViewer();
+    }
+
+    function openViewer(img) {
+        const src = img?.currentSrc || img?.getAttribute('src');
+        if (!src) return;
+        closeViewer();
+        const el = document.createElement('div');
+        el.className = 'hu-katselu';
+        el.setAttribute('role', 'dialog');
+        el.setAttribute('aria-modal', 'true');
+        el.setAttribute('aria-label', img.alt);
+        el.innerHTML = `<img alt="${esc(img.alt)}"><button type="button" class="hu-katselu-sulje" aria-label="${esc(T.suljeKuva)}">×</button>`;
+        el.querySelector('img').src = src;
+        el.addEventListener('click', closeViewer);
+        document.addEventListener('keydown', onViewerKey);
+        document.body.appendChild(el);
+        el.querySelector('button').focus();
     }
 
     function toList() {
@@ -307,9 +391,18 @@ export function startHuomiot() {
         else if (action === 'takaisin') toList();
         else if (action === 'avaa') openNote(el.dataset.id);
         else if (action === 'tallenna') save();
+        else if (action === 'ota-kuva') addPhoto('camera');
+        else if (action === 'valitse-kuva') addPhoto('photos');
+        else if (action === 'poista-kuva') removeDraftPhoto(el.dataset.kuva);
+        else if (action === 'nayta-kuva') openViewer(el.querySelector('img'));
         else if (action === 'poista') {
             if (!ui.confirmDelete) { ui.confirmDelete = true; readForm(); render(); return; }
-            if (ui.draft?.id) store.remove(ui.draft.id);
+            if (ui.draft?.id) {
+                // Sovelluksen kopiot pois; gallerian kuvat jäävät
+                const note = store.get(ui.draft.id);
+                if (note) removeAllPhotos(note, photoIo);
+                store.remove(ui.draft.id);
+            }
             toList();
         }
     });
@@ -340,7 +433,7 @@ export function startHuomiot() {
             return `<li><button type="button" class="hu-rivi" data-hu="avaa" data-id="${esc(n.id)}">
                 <span class="hu-ikoni hu-${esc(n.type)}" aria-hidden="true">${MERKIT[n.type] || '!'}</span>
                 <span class="hu-rivi-teksti"><strong>${esc(n.title || T.nimeton)}</strong>
-                <span class="hu-pieni">${esc([T.tyypit[n.type], where, dateOf(n.created)].filter(Boolean).join(' · '))}</span></span>
+                <span class="hu-pieni">${esc([T.tyypit[n.type], where, dateOf(n.created), n.photos?.length ? T.kuviaMaara(n.photos.length) : ''].filter(Boolean).join(' · '))}</span></span>
             </button></li>`;
         }).join('')}</ul>`;
     }
@@ -372,6 +465,19 @@ export function startHuomiot() {
         if (s && document.activeElement !== s) s.innerHTML = standOptionsHtml(ui.draft);
     }
 
+    function photosHtml(d) {
+        const photos = d.photos || [];
+        const thumbs = photos.map((p, i) => `<div class="hu-kuva">
+            <button type="button" class="hu-kuva-avaa" data-hu="nayta-kuva" data-kuva="${esc(p.id)}"><img alt="${esc(T.kuvaAlt(i + 1))}" ${p.src ? `src="${esc(p.src)}"` : `data-path="${esc(p.path)}"`}></button>
+            <button type="button" class="hu-kuva-pois" data-hu="poista-kuva" data-kuva="${esc(p.id)}" aria-label="${esc(`${T.poistaKuva} ${i + 1}`)}">×</button>
+        </div>`).join('');
+        const add = photos.length >= MAX_KUVAT
+            ? `<p class="hu-pieni">${esc(T.kuvatMax(MAX_KUVAT))}</p>`
+            : `<div class="hu-actions"><button type="button" class="kortti-btn" data-hu="ota-kuva">${esc(T.otaKuva)}</button><button type="button" class="kortti-btn" data-hu="valitse-kuva">${esc(T.valitseKuva)}</button></div>
+               <p class="hu-pieni">${esc(T.kuvaGalleriaan)}</p>`;
+        return `<div class="hu-kuvat-osio"><span class="hu-osio-otsikko">${esc(T.kuvat)}</span>${thumbs ? `<div class="hu-kuvat">${thumbs}</div>` : ''}${add}</div>`;
+    }
+
     function editHtml() {
         const d = ui.draft;
         const c = formatCoords(d.point);
@@ -379,11 +485,12 @@ export function startHuomiot() {
             <label>${esc(T.otsikkoKentta)}<input name="title" type="text" maxlength="120" value="${esc(d.title)}" placeholder="${esc(T.otsikkoOhje)}"></label>
             <label>${esc(T.tyyppiKentta)}<select name="type">${TYYPIT.map(t => `<option value="${t}"${t === d.type ? ' selected' : ''}>${esc(T.tyypit[t])}</option>`).join('')}</select></label>
             <label>${esc(T.tekstiKentta)}<textarea name="text" rows="3" maxlength="2000" placeholder="${esc(T.tekstiOhje)}">${esc(d.text)}</textarea></label>
+            ${photosHtml(d)}
             <div class="hu-rivi-tieto"><span>${esc(T.kiinteisto)}</span><span class="hu-kiinteisto">${esc(parcelText(d))}</span></div>
             <label>${esc(T.kuvio)}<select name="stand">${standOptionsHtml(d)}</select></label>
             <div class="hu-rivi-tieto"><span>${esc(T.koordinaatit)}</span><span>N ${esc(c.n)} E ${esc(c.e)}<br><span class="hu-pieni">${esc(c.lat)}, ${esc(c.lon)}${d.accuracy ? ` · ${esc(T.tarkkuus(d.accuracy))}` : ''}</span></span></div>
             <p class="hu-pieni">${esc(T.siirraOhje)}</p>
-            <button type="button" class="kortti-btn kortti-primary" data-hu="tallenna">${esc(T.tallenna)}</button>
+            <button type="button" class="kortti-btn kortti-primary" data-hu="tallenna"${ui.saving ? ' disabled' : ''}>${esc(T.tallenna)}</button>
             <div class="hu-actions">
                 <button type="button" class="kortti-btn" data-hu="takaisin">${esc(T.takaisin)}</button>
                 ${d.id ? `<button type="button" class="kortti-btn hu-poista" data-hu="poista">${esc(ui.confirmDelete ? T.vahvistaPoisto : T.poista)}</button>` : ''}
@@ -410,6 +517,7 @@ export function startHuomiot() {
         }
         card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: T.kokeilu, closeLabel: T.sulje })}
             <div class="hu-body">${body}<p class="hu-pieni hu-huom">${esc(T.vainLaitteella)}</p></div>`;
+        fillPhotos();
     }
 
     /* ---------- Kiinteistön ja kuvion tiedot ---------- */

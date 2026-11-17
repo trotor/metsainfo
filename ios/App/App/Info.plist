@@ -24,6 +24,12 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Kameralla voit ottaa kuvan maastossa tekemääsi huomioon. Kuva tallentuu vain laitteellesi.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Huomioon ottamasi kuva tallennetaan myös laitteen kuviin.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Voit liittää huomioon kuvan laitteesi kuvista. Kuva tallentuu vain laitteellesi.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Sijaintia käytetään oman paikan näyttämiseen kartalla ja sen tunnistamiseen, millä metsikkökuviolla olet.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

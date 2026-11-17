@@ -41,5 +41,8 @@
     <!-- Oma sijainti kartalla (vain sovelluksen ollessa käytössä) -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Huomioiden kuvat (#37): kameralla otetun kuvan tallennus kuvagalleriaan vanhoissa Android-versioissa -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 </manifest>
