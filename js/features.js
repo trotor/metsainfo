@@ -42,7 +42,9 @@ export const FEATURES = {
     // Kokeilu: metsätöiden rajoitteet (muinaisjäännökset, suojelualueet …), maksuton (js/rajoitteet/)
     rajoitteet: { product: null, kokeilu: true },
     // Kokeilu: LIPAS-retkeilykohteet karttatasona, maksuton (js/retkeily/)
-    retkeily: { product: null, kokeilu: true }
+    retkeily: { product: null, kokeilu: true },
+    // Kokeilu #35: puuston arvo €/ha kartan värityksenä (js/arvovari/), hinta-arvion kertaostossa
+    arvovari: { product: PRODUCT_ID, kokeilu: true }
 };
 
 /**

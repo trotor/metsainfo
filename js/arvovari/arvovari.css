@@ -1,0 +1,23 @@
+/* Puuston arvo -väritys (kokeilu): vain VITE_KOKEILU=1 -buildissa */
+body.av-varit #color-legend { display: none !important; }
+#av-selite {
+    position: absolute;
+    bottom: 40px;
+    left: 180px;
+    z-index: 1000;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    padding: 8px 10px;
+    font-size: 0.75rem;
+}
+#av-selite[hidden] { display: none; }
+#av-selite:not([hidden]) { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+#av-selite .legend-items { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.av-selite-otsikko { font-weight: 600; }
+.av-lisa .detail-row span:last-child { font-weight: 600; }
+.av-hinnat { margin: 4px 0 0; font-size: 12px; color: var(--sammal); }
+
+@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+    #av-selite { position: static; grid-column: 1 / -1; order: 4; border-radius: 10px; }
+}

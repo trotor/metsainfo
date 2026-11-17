@@ -80,6 +80,7 @@ Seuraavia toimintoja kokeillaan testiversiossa. Ne voivat vielä muuttua ennen j
 - **Etsi läheltä** – tietynlaiset metsät (esim. uudistuskypsä kuusikko) 1 km × 1 km alueelta.
 - **Valitse kuvioita** – kokoa kuvioita valinnaksi myös kiinteistörajojen yli ja katso valinnan yhteenveto ja hinta-arvio, esimerkiksi kun harkitset kiinteistön osan ostamista.
 - **Saavutettavuus** – kuvion arvioitu saavutettavuus 0–100: maaperän korjuukelpoisuus, metsäkuljetusmatka, märät kohdat (Luken kosteusindeksi) ja rinteet (MML:n korkeusmalli) kuljetusreitillä sekä tieyhteys (Digiroad), kartalla väreinä. [Miten indeksi lasketaan →](docs/saavutettavuusindeksi.md)
+- **Puuston arvo kartalla** – kuviot väritetään puuston arvon mukaan (€/ha) alueen tuoreilla kantohinnoilla; kuvion tiedoissa arvo euroina. Osa hinta-arvion lisäosaa.
 - **Huomioitavaa metsätöissä** – kiinteistön muinaisjäännökset, kulttuuriperintökohteet, luonnonsuojelu- ja Natura-alueet sekä Metsälain erityisen tärkeät elinympäristöt yhteenvedossa ja kartalla.
 - **Retkeilykohteet** – laavut, kodat, tulentekopaikat, retkeilyreitit ja luontopolut kartalla (LIPAS).
 - **Korkeusmalli** – laserkeilauksen vinovalaistu maastomalli taustakartaksi.
