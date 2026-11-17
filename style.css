@@ -2275,6 +2275,10 @@ html.platform-ios .store-generic, html.platform-android .store-generic { display
 .est-prices-act { flex: none; color: var(--havu); font-weight: 700; text-decoration: underline; }
 .est-prices-body { padding: 0 10px 8px; }
 .est-prices-body .est-src { padding: 0; }
+.est-sovellus { margin: 10px 0 6px; font-weight: 600; color: var(--kaarna); }
+.est-kaupat { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+.est-kaupat .est-kauppa { display: inline-flex; align-items: center; text-decoration: none; }
+.pw-sovellus p { margin: 12px 0 4px; font-weight: 600; }
 .est-erittely h4 { margin: 12px 0 6px; font-size: 13px; color: var(--kuusikko); }
 .est-erittely p.est-muted { margin: 4px 0 8px; }
 .est-erittely-table { font-size: 12.5px; }

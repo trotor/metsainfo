@@ -7,6 +7,7 @@
  */
 
 import { purchases } from '../platform/purchases.js';
+import { isNative } from '../platform/index.js';
 import { fetchPrices, loadCachedPrices, loadOverrides, saveOverrides, lookupKunta } from '../platform/prices.js';
 import { shareTextFile } from '../platform/share.js';
 import { PRICE_REGIONS, regionForKunta, parcelPoint } from '../pricing/region.js';
@@ -31,9 +32,23 @@ function newCtx() {
     return { gen: 0, features: [], label: '', region: null, regionAuto: '', prices: null, autoRegion: null, loading: false, resolving: false, error: '', method: 'uudistus', demo: false, valinta: false, pricesOpen: false, breakdownOpen: false };
 }
 
+/** Julkiset kauppasivut: verkkoversio ohjaa hinta-arvioon sovelluksen kautta (#36). */
+export const STORE_LINKS = {
+    appStore: 'https://apps.apple.com/fi/app/mets%C3%A4info/id6832988855',
+    googlePlay: 'https://play.google.com/store/apps/details?id=fi.inetor.metsainfo'
+};
+
+/** Verkkoversio: ei kauppaa eikä sovellusta. Hinta-arvio näkyy esittelynä ja esimerkkinä. */
+const webOnly = () => !purchases.isAvailable() && !isNative();
+
 export function estimateEnabled() {
-    return purchases.isAvailable();
+    return purchases.isAvailable() || webOnly();
 }
+
+const storeLinksHtml = () => `<div class="est-kaupat">
+    <a class="est-btn est-kauppa" href="${STORE_LINKS.appStore}" target="_blank" rel="noopener">${T.appStore}</a>
+    <a class="est-btn est-kauppa" href="${STORE_LINKS.googlePlay}" target="_blank" rel="noopener">${T.googlePlay}</a>
+</div>`;
 
 const unlocked = (ctx) => ctx.demo || purchases.isEntitled();
 
@@ -244,9 +259,10 @@ function lockedPanelHtml(ctx) {
         <h3>${T.nimi}</h3>
         ${t ? `<div class="est-teaser">${t.line}</div><div class="est-muted">${t.question}</div>` : ''}
         <p>${ctx.valinta ? T.esittelyValinta : T.esittely}</p>
+        ${webOnly() ? `<p class="est-sovellus">${T.sovelluksessa}</p>${storeLinksHtml()}` : ''}
         <div class="est-actions">
             <button type="button" class="est-btn-outline" data-est="demo">${T.kokeileEsimerkilla}</button>
-            <button type="button" class="est-btn" data-est="paywall">${T.avaaArvio}</button>
+            ${webOnly() ? '' : `<button type="button" class="est-btn" data-est="paywall">${T.avaaArvio}</button>`}
         </div>
     </div>`;
 }
@@ -512,6 +528,7 @@ async function openPaywall() {
     markSeen();
     const el = document.createElement('div');
     el.id = 'paywall';
+    const web = webOnly();
     el.innerHTML = `<div class="pw-dim" data-est="close-paywall"></div>
     <div class="pw-sheet" role="dialog" aria-modal="true" aria-labelledby="pw-title">
         <button type="button" class="pw-close" data-est="close-paywall" aria-label="${T.sulje}">×</button>
@@ -528,15 +545,19 @@ async function openPaywall() {
             <li>${T.etuKertaosto}</li>
         </ul>
         <button type="button" class="est-btn-outline pw-wide" data-est="demo">${T.kokeileEsimerkilla}</button>
-        <div class="pw-price"><span>${T.kertamaksu}</span><b class="pw-amount">…</b></div>
+        ${web
+        // Verkossa ei ostoa: kerrotaan sovelluksesta ja ohjataan kauppoihin (#36)
+        ? `<div class="pw-sovellus"><p>${T.sovelluksessa}</p>${storeLinksHtml()}</div>`
+        : `<div class="pw-price"><span>${T.kertamaksu}</span><b class="pw-amount">…</b></div>
         <button type="button" class="est-btn pw-wide pw-buy" data-est="buy" disabled>${T.osta}</button>
         <button type="button" class="est-link pw-restore" data-est="restore">${T.palautaOsto}</button>
         <div class="pw-msg" aria-live="polite"><span class="est-loading pw-wait"><span class="est-spinner"></span>${T.haetaanHintaa}</span></div>
-        <p class="est-fine">${T.pwLisat}</p>
+        <p class="est-fine">${T.pwLisat}</p>`}
         <p class="est-fine">${T.pwHieno}</p>
     </div>`;
     document.body.appendChild(el);
     renderPaywallPreview(el);
+    if (web) return;
     try {
         // Kauppa ei aina vastaa (esim. ei verkkoa): ei jäädä odottamaan loputtomiin
         const product = await Promise.race([

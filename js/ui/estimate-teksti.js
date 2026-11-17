@@ -45,6 +45,9 @@ const fi = {
     esittelyValinta: 'Näe, paljonko valinnan ehdotetut hakkuut ovat arvoltaan alueen tuoreilla kantohinnoilla. Voit käyttää myös omia hintoja, esimerkiksi saamasi puukauppatarjouksen mukaan.',
     kokeileEsimerkilla: 'Kokeile esimerkkimetsällä',
     avaaArvio: 'Avaa hinta-arvio',
+    sovelluksessa: 'Hinta-arvio on Metsäinfo-sovelluksen maksullinen lisäosa (kertaosto). Lataa sovellus iPhonelle tai Android-puhelimelle ja katso arvio omille kiinteistöillesi. Verkossa voit kokeilla sitä esimerkkimetsällä.',
+    appStore: 'App Store (iPhone)',
+    googlePlay: 'Google Play (Android)',
 
     /* ---------- Arvio-välilehti ---------- */
     haetaan: 'Haetaan…',
@@ -205,6 +208,9 @@ const sv = {
     esittelyValinta: 'Se hur mycket urvalets föreslagna avverkningar är värda till färska rotpriser i området. Du kan också använda egna priser, till exempel enligt ett anbud på virkesaffär som du har fått.',
     kokeileEsimerkilla: 'Prova med en exempelskog',
     avaaArvio: 'Lås upp prisuppskattningen',
+    sovelluksessa: 'Prisuppskattningen är ett avgiftsbelagt tillägg i appen Metsäinfo (engångsköp). Ladda ner appen till iPhone eller Android-telefon och se uppskattningen för dina egna fastigheter. På webben kan du prova den med exempelskogen.',
+    appStore: 'App Store (iPhone)',
+    googlePlay: 'Google Play (Android)',
 
     /* ---------- Uppskattning-fliken ---------- */
     haetaan: 'Hämtas…',
@@ -374,6 +380,9 @@ const en = {
     esittelyValinta: 'See what the proposed fellings in the selection are worth at recent stumpage prices for the area. You can also use your own prices, for example from a timber sale offer you have received.',
     kokeileEsimerkilla: 'Try with an example forest',
     avaaArvio: 'Unlock timber sale estimate',
+    sovelluksessa: 'The timber sale estimate is a paid add-on in the Metsäinfo app (one-off purchase). Download the app for iPhone or Android and see the estimate for your own properties. On the web you can try it with the example forest.',
+    appStore: 'App Store (iPhone)',
+    googlePlay: 'Google Play (Android)',
 
     /* ---------- Estimate tab ---------- */
     haetaan: 'Fetching…',
