@@ -854,31 +854,50 @@ html:not(.is-native) .app-only,
 .info-tip-text {
     display: none;
     position: absolute;
-    bottom: calc(100% + 6px);
+    bottom: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
     width: 220px;
     padding: 8px 10px;
-    background: #2c3e50;
-    color: white;
-    font-size: 0.72rem;
+    background: #fff;
+    color: var(--kaarna);
+    border: 1px solid #c9d4c4;
+    border-left: 3px solid var(--havu);
+    font-size: 0.75rem;
     font-weight: 400;
     font-style: normal;
-    line-height: 1.4;
+    line-height: 1.45;
+    text-transform: none;
+    letter-spacing: 0;
+    text-align: left;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    z-index: 1000;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22), 0 1px 3px rgba(0, 0, 0, 0.12);
+    z-index: 3000;
     pointer-events: none;
 }
 
+/* Nuoli osoittaa termiin; paikka (--nuoli-x) ja suunta (.alla) tulevat js/ui/tips.js:stä */
 .info-tip-text::after {
     content: '';
     position: absolute;
     top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: #2c3e50;
+    left: var(--nuoli-x, 50%);
+    width: 9px;
+    height: 9px;
+    margin: -5px 0 0 -5px;
+    background: #fff;
+    border-right: 1px solid #c9d4c4;
+    border-bottom: 1px solid #c9d4c4;
+    transform: rotate(45deg);
+}
+
+.info-tip-text.alla::after {
+    top: auto;
+    bottom: 100%;
+    margin: 0 0 -5px -5px;
+    border: none;
+    border-left: 1px solid #c9d4c4;
+    border-top: 1px solid #c9d4c4;
 }
 
 .info-tip:hover .info-tip-text,
@@ -886,40 +905,9 @@ html:not(.is-native) .app-only,
     display: block;
 }
 
-/* Prevent tooltip overflow on left/right edges */
-.stat-item:first-child .info-tip-text {
-    left: 0;
-    transform: none;
-}
-
-.stat-item:first-child .info-tip-text::after {
-    left: 12px;
-    transform: none;
-}
-
-.stat-item:last-child .info-tip-text {
-    left: auto;
-    right: 0;
-    transform: none;
-}
-
-.stat-item:last-child .info-tip-text::after {
-    left: auto;
-    right: 12px;
-    transform: none;
-}
-
-/* Tooltip in detail rows - show below instead of above */
-.detail-row .info-tip-text {
-    bottom: auto;
-    top: calc(100% + 6px);
-}
-
-.detail-row .info-tip-text::after {
-    top: auto;
-    bottom: 100%;
-    border-top-color: transparent;
-    border-bottom-color: #2c3e50;
+.info-tip:hover .info-tip-icon,
+.info-tip:focus .info-tip-icon {
+    background: var(--havu);
 }
 
 /* Tooltip in section headers */
