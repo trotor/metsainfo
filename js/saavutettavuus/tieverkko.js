@@ -53,12 +53,20 @@ function nearestSegment(si, p, filter = () => true, maxDistance = Infinity) {
     return best.dist <= maxDistance ? best : null;
 }
 
+/** Lähin piste janalla ab. */
+function closestOnSegment(p, a, b) {
+    const dx = b[0] - a[0], dy = b[1] - a[1];
+    const len2 = dx * dx + dy * dy;
+    const t = len2 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2)) : 0;
+    return [a[0] + dx * t, a[1] + dy * t];
+}
+
 export function createRoadIndex(links) {
     const si = segmentIndex(links);
     return {
         nearest(p, kind = 'auto') {
             const hit = nearestSegment(si, p, s => roadKind(s.link.props) === kind);
-            return hit ? { dist: hit.dist, link: hit.seg.link } : null;
+            return hit ? { dist: hit.dist, link: hit.seg.link, point: closestOnSegment(p, hit.seg.a, hit.seg.b) } : null;
         }
     };
 }

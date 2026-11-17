@@ -6,12 +6,15 @@
 import { bboxOf, samplePoints, lineCrossesPolygon, lineNearPolygon, distToLine } from './geometria.js';
 import { roadKind, isPublic, createRoadIndex, buildGraph, routeToPublic } from './tieverkko.js';
 import { classShares } from './rasteri.js';
-import { soilScore, attributeScore, haulScore, connectionScore, combine } from './indeksi.js';
+import { soilScore, attributeScore, haulScore, connectionScore, combine, wetnessScore, slopeScore } from './indeksi.js';
+import { linePoints, wetnessStats, slopeStats } from './maasto.js';
 
 export const NEAR = 2000;      // m, tiet kiinteistön ympäriltä
 export const FAR = 5000;       // m, laajempi alue, jos yhteyttä ei löydy
 export const PARCEL_TOL = 50;  // m, tie "kiinteistölle", kun enintään näin kaukana
 export const MAX_ROUTE = 5000; // m
+export const TERRAIN_MARGIN = 300; // m, märkyys ja kaltevuus kuvion ympäriltä (metsäkuljetuksen linjat)
+export const ROUTE_LINES = 25;     // kuviota kohden: linjoja lähimpään autotiehen
 
 const linkBox = (l) => {
     const xs = l.coords.map(p => p[0]), ys = l.coords.map(p => p[1]);
@@ -53,17 +56,21 @@ function roadsToParcel(autoLinks, parts) {
 }
 
 /**
- * analyseParcel({ parcel, features }, { roads, raster, area }) →
+ * analyseParcel({ parcel, features }, { roads, raster, area, dtw, dem }) →
  * { tie, kuviot: Map(index → tulos), lahteet, partial, tiet, reitti }
- * roads: createRoadSource(); raster(bbox) → rasteri tai null; area([x, y]) → nimi tai null.
+ * roads: createRoadSource(); raster(bbox) → rasteri tai null; area([x, y]) → nimi tai null;
+ * dtw(bbox) → DTW-rasteri tai null; dem(bbox) → korkeusmalli tai null (maasto.js).
  */
-export async function analyseParcel({ parcel, features }, { roads, raster = async () => null, area = async () => null }) {
+export async function analyseParcel({ parcel, features }, { roads, raster = async () => null, area = async () => null, dtw = async () => null, dem = async () => null }) {
     const parts = parcelGeometries(parcel);
     const stands = features.map(f => f.geometry).filter(Boolean);
     const all = bboxOf([...parts, ...stands]);
 
     const rasterP = raster(grow(all, 20)).catch(() => null);
     const areaP = area([(all.minX + all.maxX) / 2, (all.minY + all.maxY) / 2]).catch(() => null);
+    const terrainBox = grow(all, TERRAIN_MARGIN);
+    const dtwP = dtw(terrainBox).catch(() => null);
+    const demP = dem(terrainBox).catch(() => null);
 
     // Teiden haku voi epäonnistua: maapohja näytetään silti, metsäkuljetus ja tieyhteys puuttuvat
     let links = [], partial = false, tieVirhe = false;
@@ -127,6 +134,7 @@ export async function analyseParcel({ parcel, features }, { roads, raster = asyn
 
     // Kuviot
     const ras = await rasterP;
+    const [wetRas, demGrid] = await Promise.all([dtwP, demP]);
     const kuviot = new Map();
     features.forEach((f, i) => {
         const g = f.geometry;
@@ -140,9 +148,24 @@ export async function analyseParcel({ parcel, features }, { roads, raster = asyn
         const fromMap = soilScore(shares);
         const M = fromMap ?? attributeScore(f.properties?.ACCESSIBILITY);
         const K = tieVirhe ? null : haulScore(meanDist);
+        // Märkyys ja kaltevuus: kuvio ja suorat metsäkuljetuslinjat lähimpään autotiehen
+        const terrain = [...pts];
+        if (!tieVirhe) {
+            const step = Math.max(1, Math.ceil(pts.length / ROUTE_LINES));
+            for (let k = 0; k < pts.length; k += step) {
+                const hit = index.nearest(pts[k]);
+                if (hit && hit.dist <= TERRAIN_MARGIN) terrain.push(...linePoints(pts[k], hit.point));
+            }
+        }
+        const wet = wetRas ? wetnessStats(wetRas, terrain) : null;
+        const slope = demGrid ? slopeStats(demGrid, terrain) : null;
+        const W = wetnessScore(wet?.share);
+        const S = slopeScore(slope);
         kuviot.set(i, {
-            ...combine({ M, K, Y }),
-            M, K, Y,
+            ...combine({ M, K, W, S, Y }),
+            M, K, W, S, Y,
+            markyys: wet?.share ?? null,
+            kaltevuus: slope?.max ?? null,
             meanDist: tieVirhe || meanDist == null ? null : Math.round(meanDist),
             tieKuviolla,
             paaluokka: mainClass(shares),
@@ -154,7 +177,7 @@ export async function analyseParcel({ parcel, features }, { roads, raster = asyn
     return {
         tie: { reachesParcel, route, tiekunta, rajoitukset, virhe: tieVirhe },
         kuviot,
-        lahteet: { alue: await areaP, rasteri: Boolean(ras) },
+        lahteet: { alue: await areaP, rasteri: Boolean(ras), dtw: Boolean(wetRas), dem: Boolean(demGrid) },
         partial,
         tiet: all3.filter(l => l.kind && overlaps(l.box, view)),
         reitti: auto.filter(l => (route?.linkIds || []).includes(l.linkId ?? l.id))

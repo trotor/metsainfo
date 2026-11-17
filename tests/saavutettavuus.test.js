@@ -130,7 +130,7 @@ describe('pisteytys', () => {
     });
 
     it('yhdistelmä, puuttuva osa ja luokkarajat', () => {
-        expect(combine({ M: 100, K: 50, Y: null })).toEqual({ score: 75, luokka: 'hyva', puuttuu: ['Y'] });
+        expect(combine({ M: 100, K: 50, Y: null })).toEqual({ score: 75, luokka: 'hyva', puuttuu: ['W', 'S', 'Y'] });
         expect(combine({ M: 70, K: 70, Y: 70 }).luokka).toBe('hyva');
         expect(combine({ M: 69, K: 69, Y: 69 }).luokka).toBe('kohtalainen');
         expect(combine({ M: 39, K: 39, Y: 39 }).luokka).toBe('heikko');
@@ -295,6 +295,29 @@ describe('analyysi', () => {
         expect(res.kuviot.get(0).paaluokka).toBe(2);
         expect(res.kuviot.get(0).maapohjaLahde).toBe('kartta');
     });
+
+    it('märkyys ja kaltevuus kuviolta ja metsäkuljetuslinjoilta (v2)', async () => {
+        // Koko alue märkää (DTW 0 cm) ja tasaista 30 %:n rinnettä
+        const width = 10, height = 10, data = new Uint8ClampedArray(width * height * 4);
+        for (let o = 0; o < data.length; o += 4) data.set([0x08, 0x30, 0x6b, 255], o);
+        const cols = 200, rows = 200, values = new Float32Array(cols * rows);
+        for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) values[j * cols + i] = i * 3;
+        const parcel = { geometry: square(0, 0, 1000), properties: {} };
+        const seen = {};
+        const res = await analyseParcel({ parcel, features: [stand(square(600, 600, 100), { ACCESSIBILITY: 1 })] }, {
+            roads: fakeRoads([P, Q]),
+            dtw: async (bbox) => { seen.dtw = bbox; return { data, width, height, bbox }; },
+            dem: async (bbox) => { seen.dem = bbox; return { cols, rows, cell: 10, x0: bbox.minX + 5, y0: bbox.maxY - 5, values }; }
+        });
+        const k = res.kuviot.get(0);
+        expect(k.W).toBe(0);
+        expect(k.markyys).toBe(1);
+        expect(k.S).toBe(0);
+        expect(Math.round(k.kaltevuus)).toBe(30);
+        expect(k.puuttuu).toEqual([]);
+        expect(seen.dtw.minX).toBe(-300); // kuvion ja kiinteistön ympäriltä 300 m
+        expect(res.lahteet).toMatchObject({ dtw: true, dem: true });
+    });
 });
 
 describe('analyysi: virheet ja rajoitusten rajaus', () => {
@@ -310,7 +333,7 @@ describe('analyysi: virheet ja rajoitusten rajaus', () => {
         const k = res.kuviot.get(0);
         expect([k.M, k.K, k.Y]).toEqual([100, null, null]);
         expect(k.score).toBe(100);
-        expect(k.puuttuu).toEqual(['K', 'Y']);
+        expect(k.puuttuu).toEqual(['K', 'W', 'S', 'Y']); // märkyys ja kaltevuus vain, kun aineistot annetaan
     });
 
     it('vain reitin rajoitukset, ei muiden kiinteistölle tulevien teiden', async () => {

@@ -50,6 +50,10 @@ const fi = {
     noin: (m) => `noin ${m}`,
     korjuukelpoisuus: 'Korjuukelpoisuus',
     tieyhteys: 'Tieyhteys',
+    markyys: 'Märkyys',
+    markyysArvo: (p) => (p < 1 ? 'kuiva, ei märkiä kohtia' : `märkiä kohtia noin ${p} %`),
+    kaltevuus: 'Kaltevuus',
+    kaltevuusArvo: (p) => (p < 8 ? 'tasainen' : `jyrkin noin ${p} %`),
     eiTietaLyhyt: 'ei autotietä kiinteistölle',
     yleisenTienVarrellaLyhyt: 'yleisen tien varrella',
     reittiLyhyt: (m) => `yleiselle tielle ${m}`,
@@ -63,20 +67,20 @@ const fi = {
         6: 'Vain talvi (maa jäässä)'
     },
     kuvionTieto: (nimi) => `${nimi} (kuvion tiedoista)`,
-    osat: { M: 'maapohja', K: 'metsäkuljetus', Y: 'tieyhteys' },
+    osat: { M: 'maapohja', K: 'metsäkuljetus', W: 'märkyys', S: 'kaltevuus', Y: 'tieyhteys' },
     puuttuu: (list) => `Ei tietoa: ${list}`,
     arvio: 'Arvio avoimista aineistoista, ei Metsäkeskuksen kuviotieto. Matka tiehen on suora etäisyys, joka ei huomioi vesistöjä, rinteitä eikä naapurin maata.',
     lisamaksu: 'Kuuluu nyt hinta-arvion lisäosaan. Saavutettavuudesta voi myöhemmin tulla erillinen maksullinen lisäosa.',
     lukittu: 'Saavutettavuus arvioi jokaisen kuvion metsäkuljetusmatkan, maapohjan korjuukelpoisuuden ja tieyhteyden kiinteistölle sekä värittää kuviot kartalla. Toiminto kuuluu puukaupan hinta-arvion lisäosaan (sama kertaosto). Saavutettavuudesta voi myöhemmin tulla erillinen maksullinen lisäosa.',
     avaaLisaosa: 'Avaa lisäosa',
-    lahteet: (alue) => `Lähteet: © Väylävirasto, Digiroad (CC BY 4.0). Sisältää Suomen metsäkeskuksen korjuukelpoisuuskartta-aineistoa${alue ? ` (alue ${alue})` : ''} ja metsävaratietoja (CC BY 4.0); muokattu: luokat pisteytetty indeksiksi.`,
+    lahteet: (alue) => `Lähteet: © Väylävirasto, Digiroad (CC BY 4.0). Sisältää Suomen metsäkeskuksen korjuukelpoisuuskartta-aineistoa${alue ? ` (alue ${alue})` : ''} ja metsävaratietoja (CC BY 4.0), Luonnonvarakeskuksen DTW-kosteusindeksiä ja Maanmittauslaitoksen korkeusmallia (CC BY 4.0, CSC Paituli); muokattu: luokat pisteytetty indeksiksi.`,
     ohjeOsio: {
         otsikko: 'Saavutettavuus',
         html: `<p>Saavutettavuus arvioi, kuinka helposti kuvion puut saadaan korjattua ja kuljetettua.</p>
 <ul>
 <li><strong>Kartalla</strong>: karttapainike <strong>Saavutettavuus kartalla</strong> värittää avatun kiinteistön kuviot: vihreä hyvä, keltainen kohtalainen, punainen heikko. Kartalla näkyvät myös autotiet ja reitti yleiselle tielle.</li>
 <li><strong>Kuvion tiedoissa</strong>: avaa kuvio kuvioluettelosta. Saavutettavuus on omassa laatikossaan merkinnällä <em>Arvio</em>, erillään Metsäkeskuksen kuviotiedoista.</li>
-<li><strong>Indeksi 0–100</strong> kootaan kolmesta osasta: maapohja 40 % (Metsäkeskuksen korjuukelpoisuuskartta: ympärivuotinen, normaali kesä, vain kuiva kesä tai vain talvi), metsäkuljetus 40 % (keskimääräinen suora matka lähimpään autotiehen) ja tieyhteys 20 % (tuleeko autotie kiinteistölle ja löytyykö sieltä reitti yleiselle tielle, Digiroad).</li>
+<li><strong>Indeksi 0–100</strong> kootaan viidestä osasta: maapohja 30 % (Metsäkeskuksen korjuukelpoisuuskartta: ympärivuotinen, normaali kesä, vain kuiva kesä tai vain talvi), metsäkuljetus 30 % (keskimääräinen suora matka lähimpään autotiehen), märkyys 15 % (Luken DTW-kosteusindeksi kuviolla ja metsäkuljetuksen linjoilla tielle), kaltevuus 10 % (jyrkät rinteet MML:n korkeusmallista) ja tieyhteys 15 % (tuleeko autotie kiinteistölle ja löytyykö sieltä reitti yleiselle tielle, Digiroad). Koko kuvaus: <a href="https://github.com/trotor/metsainfo/blob/main/docs/saavutettavuusindeksi.md" target="_blank">saavutettavuusindeksi</a>.</li>
 <li>Kiinteistön yhteenvedossa näkyvät tieyhteys, tiekunta sekä kelirikko- ja painorajoitukset.</li>
 </ul>
 <p>Tulos on arvio avoimista aineistoista. Matka ei huomioi vesistöjä, rinteitä eikä naapurin maata. Toiminto kuuluu nyt puukaupan hinta-arvion lisäosaan; saavutettavuudesta voi myöhemmin tulla erillinen maksullinen lisäosa.</p>`
@@ -126,6 +130,10 @@ const sv = {
     noin: (m) => `cirka ${m}`,
     korjuukelpoisuus: 'Drivningsförhållanden',
     tieyhteys: 'Vägförbindelse',
+    markyys: 'Fuktighet',
+    markyysArvo: (p) => (p < 1 ? 'torrt, inga blöta ställen' : `blöta ställen cirka ${p} %`),
+    kaltevuus: 'Lutning',
+    kaltevuusArvo: (p) => (p < 8 ? 'plant' : `brantast cirka ${p} %`),
     eiTietaLyhyt: 'ingen bilväg till fastigheten',
     yleisenTienVarrellaLyhyt: 'vid allmän väg',
     reittiLyhyt: (m) => `${m} till allmän väg`,
@@ -139,20 +147,20 @@ const sv = {
         6: 'Bara vinter (frusen mark)'
     },
     kuvionTieto: (nimi) => `${nimi} (enligt figurens uppgifter)`,
-    osat: { M: 'markförhållanden', K: 'terrängtransport', Y: 'vägförbindelse' },
+    osat: { M: 'markförhållanden', K: 'terrängtransport', W: 'fuktighet', S: 'lutning', Y: 'vägförbindelse' },
     puuttuu: (list) => `Uppgift saknas: ${list}`,
     arvio: 'Uppskattning utifrån öppna data, inte Skogscentralens figuruppgift. Avståndet till vägen är fågelvägen och tar inte hänsyn till vattendrag, sluttningar eller grannens mark.',
     lisamaksu: 'Ingår nu i tillägget Prisuppskattning. Åtkomligheten kan senare bli ett separat avgiftsbelagt tillägg.',
     lukittu: 'Åtkomligheten uppskattar varje figurs terrängtransportavstånd, markens drivningsförhållanden och vägförbindelsen till fastigheten och färglägger figurerna på kartan. Funktionen ingår i tillägget Prisuppskattning för virkesaffär (samma engångsköp). Åtkomligheten kan senare bli ett separat avgiftsbelagt tillägg.',
     avaaLisaosa: 'Lås upp tillägget',
-    lahteet: (alue) => `Källor: © Trafikledsverket, Digiroad (CC BY 4.0). Innehåller data från Finlands skogscentrals karta över drivningsförhållanden${alue ? ` (område ${alue})` : ''} och skogsdata (CC BY 4.0); bearbetat: klasserna poängsatta till ett index.`,
+    lahteet: (alue) => `Källor: © Trafikledsverket, Digiroad (CC BY 4.0). Innehåller data från Finlands skogscentrals karta över drivningsförhållanden${alue ? ` (område ${alue})` : ''} och skogsdata (CC BY 4.0), Naturresursinstitutets DTW-fuktighetsindex och Lantmäteriverkets höjdmodell (CC BY 4.0, CSC Paituli); bearbetat: klasserna poängsatta till ett index.`,
     ohjeOsio: {
         otsikko: 'Åtkomlighet',
         html: `<p>Åtkomligheten uppskattar hur lätt virket på en figur kan avverkas och transporteras.</p>
 <ul>
 <li><strong>På kartan</strong>: kartknappen <strong>Åtkomlighet på kartan</strong> färglägger den öppnade fastighetens figurer: grönt god, gult måttlig, rött svag. Kartan visar också bilvägar och rutten till allmän väg.</li>
 <li><strong>I figurens uppgifter</strong>: öppna en figur i figurlistan. Åtkomligheten finns i en egen ruta märkt <em>Uppskattning</em>, skild från Skogscentralens figuruppgifter.</li>
-<li><strong>Index 0–100</strong> består av tre delar: markförhållanden 40 % (Skogscentralens karta över drivningsförhållanden: året runt, normal sommar, bara torr sommar eller bara vinter), terrängtransport 40 % (genomsnittligt avstånd fågelvägen till närmaste bilväg) och vägförbindelse 20 % (om en bilväg når fastigheten och om det finns en rutt till allmän väg, Digiroad).</li>
+<li><strong>Index 0–100</strong> består av fem delar: markförhållanden 30 % (Skogscentralens karta över drivningsförhållanden), terrängtransport 30 % (genomsnittligt rakt avstånd till närmaste bilväg), fuktighet 15 % (Naturresursinstitutets DTW-fuktighetsindex på figuren och längs terrängtransportens linjer till vägen), lutning 10 % (branta sluttningar enligt Lantmäteriverkets höjdmodell) och vägförbindelse 15 % (Digiroad). Fullständig beskrivning: <a href="https://github.com/trotor/metsainfo/blob/main/docs/saavutettavuusindeksi.md" target="_blank">åtkomlighetsindex</a> (på finska).</li>
 <li>I fastighetens sammandrag visas vägförbindelse, väglag och begränsningar under menföre eller viktbegränsningar.</li>
 </ul>
 <p>Resultatet är en uppskattning utifrån öppna data. Avståndet tar inte hänsyn till vattendrag, sluttningar eller grannens mark. Funktionen ingår nu i tillägget Prisuppskattning för virkesaffär; åtkomligheten kan senare bli ett separat avgiftsbelagt tillägg.</p>`
@@ -202,6 +210,10 @@ const en = {
     noin: (m) => `about ${m}`,
     korjuukelpoisuus: 'Harvesting conditions',
     tieyhteys: 'Road access',
+    markyys: 'Wetness',
+    markyysArvo: (p) => (p < 1 ? 'dry, no wet spots' : `wet spots about ${p} %`),
+    kaltevuus: 'Slope',
+    kaltevuusArvo: (p) => (p < 8 ? 'level' : `steepest about ${p} %`),
     eiTietaLyhyt: 'no road to the property',
     yleisenTienVarrellaLyhyt: 'next to a public road',
     reittiLyhyt: (m) => `${m} to a public road`,
@@ -215,20 +227,20 @@ const en = {
         6: 'Winter only (frozen ground)'
     },
     kuvionTieto: (nimi) => `${nimi} (from stand data)`,
-    osat: { M: 'ground', K: 'forwarding', Y: 'road access' },
+    osat: { M: 'ground', K: 'forwarding', W: 'wetness', S: 'slope', Y: 'road access' },
     puuttuu: (list) => `No data: ${list}`,
     arvio: 'An estimate from open data, not Finnish Forest Centre stand data. The distance to the road is a straight line and ignores water, slopes and neighbouring land.',
     lisamaksu: 'Currently part of the price estimate add-on. Accessibility may later become a separate paid add-on.',
     lukittu: 'Accessibility estimates the forwarding distance, the ground’s harvesting conditions and the road access to the property for every stand, and colours the stands on the map. It is part of the timber sale price estimate add-on (same one-time purchase). Accessibility may later become a separate paid add-on.',
     avaaLisaosa: 'Unlock add-on',
-    lahteet: (alue) => `Sources: © Finnish Transport Infrastructure Agency, Digiroad (CC BY 4.0). Contains data from the Finnish Forest Centre’s harvesting conditions map${alue ? ` (area ${alue})` : ''} and forest data (CC BY 4.0); modified: classes scored into an index.`,
+    lahteet: (alue) => `Sources: © Finnish Transport Infrastructure Agency, Digiroad (CC BY 4.0). Contains data from the Finnish Forest Centre’s harvesting conditions map${alue ? ` (area ${alue})` : ''} and forest data (CC BY 4.0), the Natural Resources Institute Finland’s DTW wetness index and the National Land Survey’s elevation model (CC BY 4.0, CSC Paituli); modified: classes scored into an index.`,
     ohjeOsio: {
         otsikko: 'Accessibility',
         html: `<p>Accessibility estimates how easily the timber on a stand can be harvested and transported.</p>
 <ul>
 <li><strong>On the map</strong>: the map button <strong>Accessibility on the map</strong> colours the open property’s stands: green good, yellow moderate, red poor. The map also shows roads and the route to a public road.</li>
 <li><strong>In the stand details</strong>: open a stand in the stand list. Accessibility is in its own box marked <em>Estimate</em>, separate from the Finnish Forest Centre’s stand data.</li>
-<li><strong>Index 0–100</strong> built from three parts: ground 40 % (the Finnish Forest Centre’s harvesting conditions map: year-round, normal summer, dry summer only or winter only), forwarding 40 % (average straight-line distance to the nearest road) and road access 20 % (whether a road reaches the property and whether there is a route to a public road, Digiroad).</li>
+<li><strong>Index 0–100</strong> built from five parts: ground 30 % (the Finnish Forest Centre’s harvesting conditions map), forwarding 30 % (mean straight distance to the nearest road), wetness 15 % (Natural Resources Institute Finland’s DTW wetness index on the stand and along the forwarding lines to the road), slope 10 % (steep slopes from the National Land Survey’s elevation model) and road access 15 % (Digiroad). Full description: <a href="https://github.com/trotor/metsainfo/blob/main/docs/saavutettavuusindeksi.md" target="_blank">accessibility index</a> (in Finnish).</li>
 <li>The property summary shows road access, road associations and thaw or weight limits.</li>
 </ul>
 <p>The result is an estimate from open data. The distance ignores water, slopes and neighbouring land. The feature is currently part of the timber sale price estimate add-on; accessibility may later become a separate paid add-on.</p>`

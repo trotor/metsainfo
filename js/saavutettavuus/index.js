@@ -24,6 +24,7 @@ import { isUnlocked } from '../features.js';
 import { analyseParcel } from './analyysi.js';
 import { createRoadSource, harvestArea } from './aineisto.js';
 import { fetchRaster } from './rasteri.js';
+import { fetchDtw, fetchDem } from './maasto.js';
 import { T } from './teksti.js';
 
 
@@ -137,6 +138,8 @@ export function startSaavutettavuus() {
             const result = await analyseParcel({ parcel: ctx.parcel, features: ctx.features }, {
                 roads,
                 raster: (bbox) => fetchRaster(bbox),
+                dtw: (bbox) => fetchDtw(bbox),
+                dem: (bbox) => fetchDem(bbox),
                 area: (p) => harvestArea(p)
             });
             if (my !== token) return;
@@ -270,6 +273,8 @@ export function startSaavutettavuus() {
         const rows = [
             [T.metsakuljetus, k.tieKuviolla ? T.tieKuviolla : k.meanDist != null ? T.noin(meters(k.meanDist)) : null],
             [T.korjuukelpoisuus, soilText(k, feature)],
+            [T.markyys, k.markyys != null ? T.markyysArvo(Math.round(k.markyys * 100)) : null],
+            [T.kaltevuus, k.kaltevuus != null ? T.kaltevuusArvo(Math.round(k.kaltevuus)) : null],
             [T.tieyhteys, connectionText(r)]
         ].filter(([, v]) => v);
         const limits = limitsText(r);

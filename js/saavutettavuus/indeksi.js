@@ -7,7 +7,8 @@
 export const SOIL_POINTS = { 1: 100, 2: 80, 3: 60, 4: 50, 5: 35, 6: 20 };
 // Kuvion oma tieto (CODES.accessibility): 1 ympärivuotinen … 4 vain maa jäässä
 export const ATTRIBUTE_POINTS = { 1: 100, 2: 70, 3: 50, 4: 20 };
-export const WEIGHTS = { M: 0.4, K: 0.4, Y: 0.2 };
+// v2 (17.11.2026): märkyys W ja kaltevuus S metsäkuljetuksen reitillä (docs/saavutettavuusindeksi.md)
+export const WEIGHTS = { M: 0.3, K: 0.3, W: 0.15, S: 0.1, Y: 0.15 };
 export const HAUL = { best: 100, worst: 1000 }; // m
 export const RESTRICTION_PENALTY = 20;
 
@@ -36,6 +37,22 @@ export function haulScore(meanDist) {
 export function connectionScore({ reachesParcel, route, restricted }) {
     const base = !reachesParcel ? 0 : route ? 100 : 60;
     return Math.max(0, base - (restricted && reachesParcel ? RESTRICTION_PENALTY : 0));
+}
+
+const clamp = (v) => Math.max(0, Math.min(100, v));
+
+/** Märkyys: wetShare = (märät + 0,5 × kosteat) / näytteet. */
+export function wetnessScore(wetShare) {
+    if (wetShare == null || !Number.isFinite(wetShare)) return null;
+    return Math.round(clamp(100 - 200 * wetShare));
+}
+
+/** Kaltevuus: jyrkkien (> 20 %) osuus; yli 35 %:n rinteitä yli 5 % → enintään 30. */
+export function slopeScore(stats) {
+    if (!stats || stats.steepShare == null) return null;
+    let s = clamp(100 - 250 * stats.steepShare);
+    if (stats.verySteepShare > 0.05) s = Math.min(s, 30);
+    return Math.round(s);
 }
 
 export function classOf(score) {

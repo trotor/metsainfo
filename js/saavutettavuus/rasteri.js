@@ -70,10 +70,14 @@ export function classShares(raster, geometry) {
 }
 
 /** Hakee rasterin ja lukee pikselit (CORS sallittu, joten canvas ei saastu). */
-export async function fetchRaster(bbox, { fetchFn = fetch, signal } = {}) {
-    const req = rasterRequest(bbox);
+export async function fetchRaster(bbox, opts = {}) {
+    return fetchImageRaster(rasterRequest(bbox), opts);
+}
+
+/** Pyynnön { url, width, height, bbox } kuva pikseleiksi (myös DTW, maasto.js). */
+export async function fetchImageRaster(req, { fetchFn = fetch, signal } = {}) {
     const res = await fetchFn(req.url, { signal });
-    if (!res.ok) throw new Error(`Korjuukelpoisuus HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`WMS HTTP ${res.status}`);
     const bitmap = await createImageBitmap(await res.blob());
     const canvas = document.createElement('canvas');
     canvas.width = req.width;
