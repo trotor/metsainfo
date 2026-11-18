@@ -1,6 +1,6 @@
 # Metsäinfo
 
-**Suomen metsävaratiedot kartalla – iPhonelle, Androidille ja selaimeen.**
+**Suomen metsävaratiedot kartalla – iPhonelle, iPadille, Androidille ja selaimeen.**
 
 Näe minkä tahansa metsäkiinteistön puusto, kuviot ja hakkuuehdotukset kartalta muutamalla napautuksella. Metsäinfo kokoaa Metsäkeskuksen ja Maanmittauslaitoksen avoimen datan selkeäksi yhteenvedoksi metsänomistajalle, kiinteistöä harkitsevalle ja metsästä kiinnostuneelle.
 
@@ -77,7 +77,7 @@ Ajantasainen hinta näkyy sovelluksen ostonäkymässä. Osto tehdään App Store
 Seuraavia toimintoja kokeillaan testiversiossa (TestFlight, iPhone ja iPad). Ne voivat vielä muuttua ennen julkaisua, ja myös se, mitkä niistä kuuluvat maksulliseen lisäosaan, voi vielä tarkentua.
 
 ### Hinta-arvion lisäosaan (sama kertaosto)
-- **Mistä arvio koostuu** – hinta-arvion erittely: jokainen hakkuu puutavaralajeittain (m³ × €/m³ = €), kuvioittain ja koko puustolle, keskiarvot €/m³ ja €/ha. Erittely on mukana myös jaettavassa taulukossa. Valmis seuraavaan kauppaversioon.
+- **Mistä arvio koostuu** – hinta-arvion erittely: jokainen hakkuu puutavaralajeittain (m³ × €/m³ = €), kuvioittain ja koko puustolle, keskiarvot €/m³ ja €/ha. Erittely on mukana myös jaettavassa taulukossa. Mukana versiossa 4.0.2, joka on kauppojen tarkastuksessa.
 - **Puuston arvo kartalla** – kuviot väritetään puuston arvon mukaan (€/ha) alueen tuoreilla kantohinnoilla tai omilla hinnoillasi; kuvion tiedoissa arvo euroina.
 - **Kerro tästä paikasta ja metsävisa** – sijaintisi kohdan kuvio: puulajit, ikä, kehitysluokka ja puusto ilman kiinteistön valintaa. Metsävisa kysyy kuviosta neljällä tasolla ja antaa pisteitä. Toimii myös kartalta ilman maastoa.
 - **Etsi läheltä** – tietynlaiset metsät (esim. uudistuskypsä kuusikko tai hakkuuehdotus lähivuosina) 1 km × 1 km alueelta, kartalla ja listassa etäisyyksineen.
@@ -85,7 +85,7 @@ Seuraavia toimintoja kokeillaan testiversiossa (TestFlight, iPhone ja iPad). Ne 
 - **Huomiot** – tallenna huomio tarkkaan paikkaan kartalle (esim. tuulenkaato, rajapyykki tai ojan tukos) omasta sijainnista tai kartalta. Huomio liitetään kiinteistöön ja kuvioon, ja siihen voi liittää enintään viisi kuvaa kamerasta tai kuvakirjastosta. Huomiot ja kuvat pysyvät laitteella.
 
 ### Maksuttomina
-- **iPad** – kartta koko näytöllä ja tietopaneeli sen vasemmassa reunassa, myös Split Viewissä.
+- **iPad ja tabletit** – kartta koko näytöllä ja tietopaneeli sen vasemmassa reunassa, myös Split Viewissä. Mukana versiossa 4.0.2, joka on kauppojen tarkastuksessa.
 - **Työkalut-valikko** – työkalut yhden napin takana nimineen ja kuvauksineen; päällä oleva työkalu näkyy kartan yläreunassa.
 - **Valitse kuvioita** – kokoa kuvioita valinnaksi myös kiinteistörajojen yli ja katso valinnan yhteenveto, esimerkiksi kun harkitset kiinteistön osan ostamista. Valinnan hinta-arvio kuuluu lisäosaan.
 - **Huomioitavaa metsätöissä** – kiinteistön muinaisjäännökset, kulttuuriperintökohteet, luonnonsuojelu- ja Natura-alueet sekä Metsälain erityisen tärkeät elinympäristöt yhteenvedossa ja kartalla.
