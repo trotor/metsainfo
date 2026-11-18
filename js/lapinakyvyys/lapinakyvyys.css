@@ -1,0 +1,5 @@
+/* Läpinäkyvyyssäädin (kokeilu) tasovalitsimen alareunassa */
+.lp-saadin { padding: 2px 0 4px; }
+.lp-rivi { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.lp-rivi output { font-variant-numeric: tabular-nums; color: #555; }
+.lp-saadin input[type="range"] { display: block; width: 100%; min-width: 160px; margin: 6px 0 0; accent-color: #2f6b3a; }

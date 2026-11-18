@@ -46,7 +46,9 @@ export const FEATURES = {
     // Kokeilu #34: puuston arvo €/ha kartan värityksenä (js/arvovari/), hinta-arvion kertaostossa
     arvovari: { product: PRODUCT_ID, kokeilu: true },
     // Kokeilu #33: pistemuotoiset huomiot kartalle (js/huomiot/), hinta-arvion kertaostossa
-    huomiot: { product: PRODUCT_ID, kokeilu: true }
+    huomiot: { product: PRODUCT_ID, kokeilu: true },
+    // Kokeilu trotor/metsainfo#37: kuvioiden värien läpinäkyvyys ilmakuvan päällä, maksuton (js/lapinakyvyys/)
+    lapinakyvyys: { product: null, kokeilu: true }
 };
 
 /**

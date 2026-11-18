@@ -12,6 +12,7 @@
 import './arvovari.css';
 import * as state from '../state.js';
 import { on, VIESTIT } from '../vayla.js';
+import { taytto } from '../peittavyys.js';
 import { formatNumber, coordsEPSG3067ToLatLng } from '../utils.js';
 import { locale } from '../i18n.js';
 import { isUnlocked } from '../features.js';
@@ -39,8 +40,10 @@ export function startArvovari() {
     const standLayer = L.geoJSON(null, {
         interactive: false, // kuvion napautus menee sovelluksen kuviotasolle
         coordsToLatLng: coordsEPSG3067ToLatLng,
-        style: (f) => ({ color: '#5b3a12', weight: 1, fillColor: VARIT[f.properties.luokka], fillOpacity: 0.7 })
+        style: (f) => ({ color: '#5b3a12', weight: 1, fillColor: VARIT[f.properties.luokka], fillOpacity: taytto(0.7) })
     });
+    // Läpinäkyvyyssäädin (kokeilu): täyttö uudelleen
+    on(VIESTIT.peittavyys, () => standLayer.setStyle(standLayer.options.style));
 
     const legend = document.createElement('div');
     legend.id = 'av-selite';

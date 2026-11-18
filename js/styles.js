@@ -4,6 +4,7 @@
 
 import { COLOR_MODES, MKI_COLOR_MODES } from './config.js';
 import { currentColorMode, mkiColorMode } from './state.js';
+import { taytto } from './peittavyys.js';
 
 export function featureStyle(feature) {
     const mode = COLOR_MODES[currentColorMode] || COLOR_MODES.volume;
@@ -12,7 +13,7 @@ export function featureStyle(feature) {
         weight: 2,
         opacity: 0.9,
         color: mode.border,
-        fillOpacity: 0.6
+        fillOpacity: taytto(0.6)
     };
 }
 

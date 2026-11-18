@@ -16,6 +16,7 @@ import { codeName } from '../koodit.js';
 import { locale } from '../i18n.js';
 import { formatNumber, coordsEPSG3067ToLatLng } from '../utils.js';
 import { on, VIESTIT } from '../vayla.js';
+import { taytto } from '../peittavyys.js';
 import { registerColorMode } from '../ui/tyokalut.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { showToast } from '../ui/location-ui.js';
@@ -53,9 +54,11 @@ export function startSaavutettavuus() {
         style: (f) => {
             const r = ui.result?.kuviot.get(f.properties.__index);
             const color = VARIT[r?.luokka] || '#6b7280';
-            return { color, weight: 1.5, fillColor: color, fillOpacity: 0.55 };
+            return { color, weight: 1.5, fillColor: color, fillOpacity: taytto(0.55) };
         }
     });
+    // Läpinäkyvyyssäädin (kokeilu): täyttö uudelleen
+    on(VIESTIT.peittavyys, () => standLayer.setStyle(standLayer.options.style));
 
     const line = (l, style) => L.polyline(l.coords.map(coordsEPSG3067ToLatLng), { interactive: false, ...style });
 

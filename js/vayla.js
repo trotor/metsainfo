@@ -46,5 +46,7 @@ export const VIESTIT = {
     // Kuviovalinta → sovellus: valintatila päällä { paalla }; kiinteistöä ei avata karttanapautuksesta
     valintatila: 'valinta:tila',
     // Kuviovalinta → sovellus: näytä valinta yhteenvetona { features, parcel } (parcel = näennäiskiinteistö)
-    naytaValinta: 'sovellus:nayta-valinta'
+    naytaValinta: 'sovellus:nayta-valinta',
+    // Läpinäkyvyyssäädin → kuvioita värittävät tasot: piirrä täyttö uudelleen { peittavyys } (js/peittavyys.js)
+    peittavyys: 'kartta:peittavyys'
 };

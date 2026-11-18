@@ -81,13 +81,15 @@ function init() {
             .catch(() => showToast(UI.sovellus.hakuEpaonnistui)));
         on(VIESTIT.valintatila, ({ paalla }) => { valintatila = Boolean(paalla); });
         on(VIESTIT.naytaValinta, ({ features, parcel }) => showSelection(features, parcel));
+        // Läpinäkyvyyssäädin (js/lapinakyvyys/): kuviotason täyttö uudelleen
+        on(VIESTIT.peittavyys, () => state.forestLayer?.eachLayer(l => { if (l.feature) l.setStyle(featureStyle(l.feature)); }));
         // Ladataan rinnakkain, käynnistetään aina samassa järjestyksessä (karttapainikkeet)
         Promise.all([
             import('./maasto/index.js'), import('./lahihaku/index.js'), import('./suosikit/index.js'),
             import('./korkeusmalli/index.js'), import('./asetukset/index.js'), import('./saavutettavuus/index.js'),
             import('./valinta/index.js'), import('./rajoitteet/index.js'), import('./retkeily/index.js'), import('./arvovari/index.js'),
-            import('./huomiot/index.js')
-        ]).then(([maasto, lahihaku, suosikit, korkeusmalli, asetukset, saavutettavuus, valinta, rajoitteet, retkeily, arvovari, huomiot]) => {
+            import('./huomiot/index.js'), import('./lapinakyvyys/index.js')
+        ]).then(([maasto, lahihaku, suosikit, korkeusmalli, asetukset, saavutettavuus, valinta, rajoitteet, retkeily, arvovari, huomiot, lapinakyvyys]) => {
             maasto.startMaasto();
             lahihaku.startLahihaku();
             suosikit.startSuosikit();
@@ -99,6 +101,7 @@ function init() {
             retkeily.startRetkeily();
             arvovari.startArvovari();
             huomiot.startHuomiot();
+            lapinakyvyys.startLapinakyvyys();
         });
     }
 }

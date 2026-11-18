@@ -90,7 +90,7 @@ export const OHJE_SV = `
                     <ul>
                         <li><strong>Grundkarta</strong> — Detaljerad terrängkarta (standard)</li>
                         <li><strong>Bakgrundskarta</strong> — Förenklad baskarta</li>
-                        <li><strong>Ortofoto</strong> — Flygbild / satellitbild</li>
+                        <li><strong>Flygbild</strong> — Lantmäteriverkets flygbild (ortofoto)</li>
                     </ul>
                 </div>
 

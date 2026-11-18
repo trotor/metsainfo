@@ -90,7 +90,7 @@ export const OHJE_EN = `
                     <ul>
                         <li><strong>Topographic map</strong> — Detailed terrain map (default)</li>
                         <li><strong>Background map</strong> — Simplified base map</li>
-                        <li><strong>Aerial photo</strong> — Aerial / satellite imagery</li>
+                        <li><strong>Aerial photo</strong> — National Land Survey orthophoto</li>
                     </ul>
                 </div>
 
