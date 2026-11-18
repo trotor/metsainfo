@@ -84,15 +84,29 @@
 }
 .kortti-lukittu .kortti-btn { margin-top: 10px; }
 
-/* Tabletissa (TABLET_QUERY) tietopaneeli on vasemmalla: kortti oikeaan alakulmaan */
+/* Leveä kosketusnäyttö alle tablettirajan (MOBILE_WIDE_QUERY, Duo avattuna pystyssä):
+   kortti on alapaneelin levyinen eikä veny koko näytölle */
+@media (pointer: coarse) and (min-width: 600px) and (max-width: 699px) and (min-height: 501px) {
+    .kortti {
+        left: calc(50% - 280px);
+        right: calc(50% - 280px);
+    }
+}
+
+/* Tabletissa (TABLET_QUERY) tietopaneeli on vasemmalla: kortti oikeaan alakulmaan,
+   värinauhan (valitsin ja selite, style.css #map-strip) yläpuolelle */
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 501px), (pointer: coarse) and (min-width: 1024px) {
     .kortti {
         left: auto;
-        right: calc(env(safe-area-inset-right) + 12px);
+        /* Karttapainikkeiden pinon vasemmalle puolelle (kuten värinauha), jotta zoom
+           ja paikannus jäävät käyttöön, ja paneelin oikealle puolelle */
+        right: calc(env(safe-area-inset-right) + 62px);
         width: 380px;
-        max-width: calc(100% - var(--tablet-panel-w, 320px) - 40px);
-        bottom: calc(12px + env(safe-area-inset-bottom));
-        max-height: min(72vh, 640px);
+        max-width: calc(100% - var(--tablet-panel-right, 368px) - 78px - env(safe-area-inset-right));
+        /* Nauhan alareuna 26 px + nauhan korkeus (kortti.js) + väli */
+        bottom: calc(env(safe-area-inset-bottom) + 36px + var(--map-strip-h, 60px));
+        /* Matalalla näytöllä (Duo avattuna vaakatasossa) kortti ei nouse yläreunan hakupalkin tasolle */
+        max-height: min(72vh, 640px, calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--map-strip-h, 60px) - 108px));
     }
 }
 

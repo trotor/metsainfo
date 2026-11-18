@@ -1263,6 +1263,11 @@ h3 .info-tip-icon {
         max-height: none;
         height: var(--sheet-height, 174px);
         border-radius: 16px 16px 0 0;
+        /* Sivujen suojamarginaali: iPhone vaakatasossa (lovi) ja iPhone Duon
+           suljettu näyttö, jossa tilarivi on pillerinä oikeassa yläkulmassa ja
+           peitti täyden korkeuden paneelin ⋯-painikkeen */
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
         padding-bottom: env(safe-area-inset-bottom);
         background: var(--jakala);
         box-shadow: 0 -2px 16px rgba(0,0,0,0.18);
@@ -1358,7 +1363,7 @@ h3 .info-tip-icon {
         width: 44px;
         height: 44px;
         top: 0;
-        right: 4px;
+        right: calc(env(safe-area-inset-right) + 4px);
         color: var(--sammal);
         z-index: 2;
     }
@@ -1800,7 +1805,8 @@ h3 .info-tip-icon {
  */
 @media (pointer: coarse) and (min-width: 700px) and (min-height: 501px), (pointer: coarse) and (min-width: 1024px) {
     :root {
-        --tablet-panel-w: clamp(320px, 36vw, 420px);
+        /* Vähintään 360 px, jotta välilehdet mahtuvat yhdelle riville (iPad mini pystyssä) */
+        --tablet-panel-w: clamp(360px, 36vw, 420px);
         --tablet-panel-right: calc(env(safe-area-inset-left) + 8px + var(--tablet-panel-w));
     }
 
@@ -1826,7 +1832,7 @@ h3 .info-tip-icon {
         bottom: auto;
         width: var(--tablet-panel-w);
         border-radius: 16px;
-        padding-bottom: 0;
+        padding: 0;
         box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
 
@@ -1871,6 +1877,27 @@ h3 .info-tip-icon {
 
     #info-panel[data-snap="full"]:not(.hidden) ~ #map-strip {
         display: grid;
+    }
+
+    /* Pienennetty paneeli on vain yläkulmassa: nauha koko alareunan levyisenä */
+    #info-panel[data-snap="peek"]:not(.hidden) ~ #map-strip {
+        left: calc(env(safe-area-inset-left) + 8px);
+    }
+
+    /* Selite rivittyy vierityksen sijaan, jotta kaikki luokat näkyvät */
+    #map-strip .legend-items {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        row-gap: 2px;
+    }
+
+    /* Kapea paneeli (iPad mini pystyssä): välilehdet yhdelle riville suomeksi ja
+       englanniksi; pidempi teksti (ruotsi) rivittyy eikä työnnä riviä paneelin yli */
+    .tabbar button {
+        flex: 1 1 auto;
+        padding: 0 6px;
+        font-size: 14px;
+        line-height: 1.15;
     }
 }
 

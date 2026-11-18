@@ -10,6 +10,23 @@ import { getLang } from '../i18n.js';
 
 const OPEN_EVENT = 'metsainfo:kortti-auki';
 
+let stripWatched = false;
+
+/**
+ * Tabletissa kortti on värinauhan (#map-strip) yläpuolella (kortti.css).
+ * Nauhan korkeus vaihtelee (selite rivittyy, kokeilujen valitsimet), joten
+ * se välitetään CSS:lle muuttujana --map-strip-h.
+ */
+function watchMapStrip(doc = document) {
+    if (stripWatched || typeof ResizeObserver === 'undefined') return;
+    const strip = doc.getElementById('map-strip');
+    if (!strip) return;
+    stripWatched = true;
+    new ResizeObserver(() => {
+        doc.documentElement.style.setProperty('--map-strip-h', `${strip.offsetHeight}px`);
+    }).observe(strip);
+}
+
 /**
  * Luo kortin. onClose kutsutaan, kun toinen kortti avautuu. notifyHidden:
  * kutsutaan myös, kun kortti on piilossa (toiminto, jonka tila jatkuu kortin
@@ -24,6 +41,7 @@ export function createCard({ id, label, className = '', onClose, notifyHidden = 
     el.setAttribute('aria-label', label);
     el.lang = getLang(); // muu sovellus on suomeksi, kortti valitulla kielellä
     document.body.appendChild(el);
+    watchMapStrip();
 
     const card = {
         el,

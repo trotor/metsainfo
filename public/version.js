@@ -8,6 +8,6 @@ const VERSION = {
     // TestFlight-kokeilubuildin näkyvä versio (oma jono 4.0.9xx). Kasvatetaan ennen
     // jokaista kokeilulatausta; samaa numeroa ei käytetä uudelleen (scripts/kaytetyt-versiot.json)
     kokeilu: '4.0.905',
-    date: '2026-11-16',
+    date: '2026-11-17',
     author: 'Tero Rönkkö'
 };
