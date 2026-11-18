@@ -31,6 +31,8 @@ export const FEATURES = {
     suosikit: { product: null, kokeilu: true },
     // Kokeilu #28: laserkeilauksen korkeusmalli taustakartaksi, maksuton (js/korkeusmalli/)
     korkeusmalli: { product: null, kokeilu: true },
+    // Kokeilu: Metsäkeskuksen latvusmalli (puuston korkeus) taustakartaksi, maksuton (js/latvusmalli/)
+    latvusmalli: { product: null, kokeilu: true },
     // Kokeilu #23: asetukset ja kielivalinta, maksuton (js/asetukset/, js/i18n.js)
     asetukset: { product: null, kokeilu: true },
     // Kokeilu: kuvion saavutettavuus ja tieyhteys (js/saavutettavuus/); nyt hinta-arvion

@@ -7,6 +7,7 @@ import { TEKSTIT as MAASTO } from '../js/maasto/teksti.js';
 import { TEKSTIT as LAHIHAKU } from '../js/lahihaku/teksti.js';
 import { TEKSTIT as SUOSIKIT } from '../js/suosikit/teksti.js';
 import { TEKSTIT as KORKEUSMALLI } from '../js/korkeusmalli/teksti.js';
+import { TEKSTIT as LATVUSMALLI } from '../js/latvusmalli/teksti.js';
 import { TEKSTIT as ASETUKSET } from '../js/asetukset/teksti.js';
 import { TEKSTIT as SAAVUTETTAVUUS } from '../js/saavutettavuus/teksti.js';
 import { TEKSTIT as VALINTA } from '../js/valinta/teksti.js';
@@ -37,7 +38,7 @@ function shape(obj, prefix = '') {
 describe('kielet', () => {
     it.each([
         ['maasto', MAASTO], ['lähihaku', LAHIHAKU], ['suosikit', SUOSIKIT],
-        ['korkeusmalli', KORKEUSMALLI], ['asetukset', ASETUKSET], ['käyttöliittymä', UI],
+        ['korkeusmalli', KORKEUSMALLI], ['latvusmalli', LATVUSMALLI], ['asetukset', ASETUKSET], ['käyttöliittymä', UI],
         ['hinta-arvio', ESTIMATE], ['sivu', SIVU], ['saavutettavuus', SAAVUTETTAVUUS], ['valinta', VALINTA], ['tyokalut', TYOKALUT], ['rajoitteet', RAJOITTEET], ['retkeily', RETKEILY], ['arvovari', ARVOVARI], ['huomiot', HUOMIOT], ['läpinäkyvyys', LAPINAKYVYYS], ['ohjeosiot', OHJEOSIOT]
     ])('%s: kaikilla kielillä samat avaimet', (_, t) => {
         expect(shape(t.en)).toEqual(shape(t.fi));
