@@ -38,3 +38,9 @@ docs/plans
 docs/superpowers
 docs/kauppa
 fastlane/metadata/review_information
+
+# Paikalliset apu- ja julkaisuskriptit (palvelinosoitteet, kohteet): ei koskaan gittiin
+*.local.sh
+*.local.md
+jm.sh
+.claude/deploy.md
