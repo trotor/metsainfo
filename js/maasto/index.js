@@ -72,7 +72,7 @@ export function startMaasto() {
 
     // Työkalut-listaan (js/ui/tyokalut.js); tila päällä = kortti auki
     const tool = registerTool({
-        id: 'maasto', label: T.nappi, description: T.kuvaus, icon: ICON, order: 10,
+        id: 'maasto', feature: 'maastotila', label: T.nappi, description: T.kuvaus, icon: ICON, order: 10,
         onSelect: () => toggle(true), onStop: () => toggle(false), locked
     });
     const button = { setPressed: (on) => tool.setStatus({ active: on, cardOpen: on }) };

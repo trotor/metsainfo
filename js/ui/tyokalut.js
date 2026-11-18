@@ -251,9 +251,10 @@ function renderChip() {
 /**
  * Työkalu listaan. onSelect avaa työkalun (sen kortin), onStop lopettaa sen.
  * locked() näyttää lukon; lukitus itse on toiminnon omassa koodissa.
+ * feature: js/features.js-tunnus, jos se eroaa id:stä (esittely).
  */
-export function registerTool({ id, label, description = '', icon, onSelect, onStop, locked = () => false, order = 100 }) {
-    tools = tools.filter(t => t.id !== id).concat({ id, label, description, icon, onSelect, onStop, locked, order });
+export function registerTool({ id, label, description = '', icon, onSelect, onStop, locked = () => false, order = 100, feature }) {
+    tools = tools.filter(t => t.id !== id).concat({ id, label, description, icon, onSelect, onStop, locked, order, feature });
     ensureControl();
     if (ui.list && !ui.list.hidden) renderList();
     scheduleHelp();
@@ -362,11 +363,12 @@ function apply(value) {
 
 /**
  * Oma vaihtoehto Väritys-valitsimeen. onSelect voi palauttaa false (esim.
- * lukittu), jolloin valitsin palaa edelliseen.
+ * lukittu), jolloin valitsin palaa edelliseen. feature: js/features.js-tunnus,
+ * jos se eroaa id:stä (esittely tunnistaa maksulliset sen mukaan).
  */
-export function registerColorMode({ id, label, onSelect, onDeselect }) {
+export function registerColorMode({ id, label, onSelect, onDeselect, feature }) {
     const select = wireSelect();
-    colorModes = colorModes.filter(m => m.id !== id).concat({ id, label, onSelect, onDeselect });
+    colorModes = colorModes.filter(m => m.id !== id).concat({ id, label, onSelect, onDeselect, feature });
     if (select && !select.querySelector(`option[value="${CSS.escape(optionValue(id))}"]`)) {
         const opt = document.createElement('option');
         opt.value = optionValue(id);
@@ -386,6 +388,17 @@ export function registerColorMode({ id, label, onSelect, onDeselect }) {
             ui.select.value = ui.builtin;
             apply(ui.builtin);
         }
+    };
+}
+
+/**
+ * Rekisteröidyt kohdat esittelyä varten (js/esittely/): mitä Työkaluissa ja
+ * Väritys-valitsimessa on tässä buildissa. feature = js/features.js-tunnus.
+ */
+export function rekisteroidyt() {
+    return {
+        tyokalut: [...tools].sort(byOrder).map(t => ({ id: t.id, feature: t.feature ?? t.id, label: t.label, description: t.description })),
+        varit: colorModes.map(m => ({ id: m.id, feature: m.feature ?? m.id, label: m.label }))
     };
 }
 

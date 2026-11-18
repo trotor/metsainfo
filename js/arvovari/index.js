@@ -51,7 +51,7 @@ export function startArvovari() {
     document.getElementById('color-legend')?.after(legend);
 
     registerColorMode({
-        id: 'arvo', label: T.variTila,
+        id: 'arvo', feature: 'arvovari', label: T.variTila,
         onSelect: () => setOn(true),
         onDeselect: () => setOn(false)
     });

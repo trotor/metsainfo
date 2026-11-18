@@ -48,5 +48,7 @@ export const VIESTIT = {
     // Kuviovalinta → sovellus: näytä valinta yhteenvetona { features, parcel } (parcel = näennäiskiinteistö)
     naytaValinta: 'sovellus:nayta-valinta',
     // Läpinäkyvyyssäädin → kuvioita värittävät tasot: piirrä täyttö uudelleen { peittavyys } (js/peittavyys.js)
-    peittavyys: 'kartta:peittavyys'
+    peittavyys: 'kartta:peittavyys',
+    // Asetukset → esittely: käynnistä esittely uudelleen (js/esittely/)
+    avaaEsittely: 'esittely:avaa'
 };

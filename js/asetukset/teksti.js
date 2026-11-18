@@ -11,7 +11,8 @@ export const TEKSTIT = {
         laite: 'Laitteen kieli',
         kattavuus: 'Kielivalinta on kokeilu. Suomeksi jäävät vielä tietosuojaseloste, kaupan ostodialogi sekä hintojen lähde ja viikko.',
         epavirallinen: 'Englanninkieliset puulajien ja koodiston nimet ovat epävirallisia käännöksiä.',
-        vainLaitteella: 'Asetukset tallentuvat vain tälle laitteelle.'
+        vainLaitteella: 'Asetukset tallentuvat vain tälle laitteelle.',
+        esittely: 'Näytä esittely uudelleen'
     },
     sv: {
         nappi: 'Inställningar',
@@ -22,7 +23,8 @@ export const TEKSTIT = {
         laite: 'Enhetens språk',
         kattavuus: 'Språkvalet är ett försök. Fortfarande på finska: integritetspolicyn, butikens köpdialog samt prisernas källa och vecka.',
         epavirallinen: 'De flesta svenska namnen på trädslag och koder kommer från de officiella kodlistorna i Metsärekisteri, men en del är inofficiella översättningar.',
-        vainLaitteella: 'Inställningarna sparas endast på den här enheten.'
+        vainLaitteella: 'Inställningarna sparas endast på den här enheten.',
+        esittely: 'Visa introduktionen igen'
     },
     en: {
         nappi: 'Settings',
@@ -33,7 +35,8 @@ export const TEKSTIT = {
         laite: 'Device language',
         kattavuus: 'Language choice is a trial. Still in Finnish: the privacy policy, the store purchase dialog, and the price source and week.',
         epavirallinen: 'English names of tree species and other codes are unofficial translations.',
-        vainLaitteella: 'Settings are saved on this device only.'
+        vainLaitteella: 'Settings are saved on this device only.',
+        esittely: 'Show the introduction again'
     }
 };
 // Käyttöohjeen osio (js/ui/ohje-osiot.js)

@@ -438,6 +438,12 @@ export function showPaywall() {
     openPaywall();
 }
 
+/** Avaa Esimerkkimetsän (esittelyn maksullisten kortista, js/esittely/). */
+export function showDemo() {
+    wireOnce();
+    openDemo();
+}
+
 function wireOnce() {
     if (wired) return;
     wired = true;

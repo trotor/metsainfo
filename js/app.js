@@ -88,8 +88,9 @@ function init() {
             import('./maasto/index.js'), import('./lahihaku/index.js'), import('./suosikit/index.js'),
             import('./korkeusmalli/index.js'), import('./asetukset/index.js'), import('./saavutettavuus/index.js'),
             import('./valinta/index.js'), import('./rajoitteet/index.js'), import('./retkeily/index.js'), import('./arvovari/index.js'),
-            import('./huomiot/index.js'), import('./lapinakyvyys/index.js'), import('./latvusmalli/index.js')
-        ]).then(([maasto, lahihaku, suosikit, korkeusmalli, asetukset, saavutettavuus, valinta, rajoitteet, retkeily, arvovari, huomiot, lapinakyvyys, latvusmalli]) => {
+            import('./huomiot/index.js'), import('./lapinakyvyys/index.js'), import('./latvusmalli/index.js'),
+            import('./esittely/index.js')
+        ]).then(([maasto, lahihaku, suosikit, korkeusmalli, asetukset, saavutettavuus, valinta, rajoitteet, retkeily, arvovari, huomiot, lapinakyvyys, latvusmalli, esittely]) => {
             maasto.startMaasto();
             lahihaku.startLahihaku();
             suosikit.startSuosikit();
@@ -103,6 +104,8 @@ function init() {
             arvovari.startArvovari();
             huomiot.startHuomiot();
             lapinakyvyys.startLapinakyvyys();
+            // Viimeisenä: esittely kokoaa muiden ilmoittamat työkalut ja väritykset
+            esittely.startEsittely();
         });
     }
 }

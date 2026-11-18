@@ -10,6 +10,7 @@ import { registerMenuItem } from '../ui/tyokalut.js';
 import { isUnlocked } from '../features.js';
 import { KIELET, getLang, setLang, isLangChosen, deviceLang } from '../i18n.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
+import { emit, has, VIESTIT } from '../vayla.js';
 import { T, KIELTEN_NIMET } from './teksti.js';
 
 const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.5 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>';
@@ -32,6 +33,7 @@ export function startAsetukset() {
 
     card.el.addEventListener('click', (e) => {
         if (e.target.closest('[data-close]')) toggle(false);
+        if (e.target.closest('[data-as="esittely"]')) { toggle(false); emit(VIESTIT.avaaEsittely); }
     });
     card.el.addEventListener('change', (e) => {
         if (e.target.name === 'kieli' && e.target.value !== getLang()) setLang(e.target.value);
@@ -52,6 +54,7 @@ export function startAsetukset() {
             </fieldset>
             <p class="as-huom">${esc(T.kattavuus)}</p>
             ${getLang() === 'en' ? `<p class="as-huom">${esc(T.epavirallinen)}</p>` : ''}
+            ${has(VIESTIT.avaaEsittely) ? `<button type="button" class="as-esittely" data-as="esittely">${esc(T.esittely)}</button>` : ''}
             <p class="as-huom">${esc(T.vainLaitteella)}</p>`;
     }
 }

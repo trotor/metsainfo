@@ -1,0 +1,71 @@
+/* Esittely (kokeilu): vain VITE_KOKEILU=1 -buildissa. Ostonäkymä (3000) ja
+   ilmoitukset (3100) jäävät päälle, Esimerkkimetsä (2900) avataan esittelyn jälkeen. */
+.es-blocker { position: fixed; inset: 0; z-index: 2800; background: transparent; }
+.es-spot {
+    position: fixed; z-index: 2801; pointer-events: none;
+    border-radius: 12px; border: 2px solid #fff;
+    box-shadow: 0 0 0 4px var(--havu), 0 0 0 9999px rgba(20, 30, 18, 0.45);
+    transition: left .2s, top .2s, width .2s, height .2s;
+}
+.es-spot-toinen { box-shadow: 0 0 0 4px var(--havu); }
+.es-spot[hidden] { display: none; }
+/* Ilman korostettavaa kohdetta tausta tummennetaan kokonaan */
+.es-blocker:has(~ .es-spot[hidden]) { background: rgba(20, 30, 18, 0.45); }
+
+.es-kortti {
+    position: fixed; z-index: 2802; width: min(360px, calc(100vw - 32px));
+    background: #fff; color: var(--kaarna); border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .3); padding: 18px 18px 14px;
+    font-size: 15px; line-height: 1.45;
+}
+.es-kortti.es-mobiili { width: calc(100vw - 32px); }
+.es-kortti h2 { margin: 2px 32px 8px 0; font-size: 18px; color: var(--kuusikko); }
+.es-kortti p { margin: 0 0 8px; }
+.es-askel { font-size: 12px; font-weight: 600; color: var(--sammal); }
+.es-sulje {
+    position: absolute; top: 8px; right: 8px; width: 36px; height: 36px;
+    border: 0; background: none; font-size: 24px; line-height: 1; color: var(--sammal); cursor: pointer;
+}
+.es-lista { margin: 0 0 8px; padding-left: 18px; font-size: 14px; }
+.es-lista li { margin-bottom: 4px; }
+.es-paikka { color: var(--sammal); white-space: nowrap; }
+.es-lisa { margin: 6px 0 4px; }
+.es-lisa .es-nappi { width: 100%; }
+.es-napit { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; }
+.es-napit .es-nappi:last-child { margin-left: auto; }
+.es-nappi {
+    min-height: 44px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--havu);
+    background: var(--havu); color: #fff; font: inherit; font-weight: 600; cursor: pointer;
+}
+.es-nappi.es-toissijainen { background: #fff; color: var(--havu); }
+.es-linkki { min-height: 44px; border: 0; background: none; color: var(--sammal); font: inherit; text-decoration: underline; cursor: pointer; padding: 0 4px; }
+.es-ohjenappi, .as-esittely {
+    min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--havu);
+    background: #fff; color: var(--havu); font: inherit; font-weight: 600; cursor: pointer;
+}
+.as-esittely { width: 100%; margin-top: 12px; min-height: 44px; }
+
+/* Zoomausvihje kartan yläreunassa (mobiilissa alareunassa) */
+.es-vihje {
+    position: absolute; z-index: 1000; left: 50%; top: 10px; transform: translateX(-50%);
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px;
+    max-width: min(560px, calc(100% - 140px)); padding: 8px 40px 8px 14px;
+    background: rgba(255, 255, 255, .96); color: var(--kaarna); border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .2); font-size: 14px;
+}
+.es-vihje[hidden] { display: none; }
+.es-vihje-napit { display: flex; gap: 6px; }
+.es-vihje-napit button {
+    min-height: 34px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--havu);
+    background: #fff; color: var(--havu); font: inherit; font-weight: 600; cursor: pointer;
+}
+.es-vihje-napit button[data-vihje="lahenna"] { background: var(--havu); color: #fff; }
+.es-vihje-sulje {
+    position: absolute; top: 4px; right: 4px; width: 32px; height: 32px;
+    border: 0; background: none; font-size: 20px; color: var(--sammal); cursor: pointer;
+}
+@media (max-width: 768px), (pointer: coarse) {
+    /* Oikean reunan karttanapit jäävät vapaiksi: alareunaan, kun kiinteistöä ei ole auki */
+    .es-vihje { top: auto; bottom: calc(28px + env(safe-area-inset-bottom)); left: 16px; right: 16px; transform: none; max-width: none; font-size: 15px; }
+    .es-vihje-napit button { min-height: 40px; }
+}
