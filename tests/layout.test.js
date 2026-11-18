@@ -23,7 +23,7 @@ describe('layout', () => {
     });
 
     it('CSS-kopiot käyttävät samoja kyselyitä', () => {
-        for (const file of ['style.css', 'js/ui/tyokalut.css', 'js/valinta/valinta.css', 'js/saavutettavuus/saavutettavuus.css', 'js/arvovari/arvovari.css']) {
+        for (const file of ['style.css', 'js/ui/tyokalut.css', 'js/valinta/valinta.css', 'js/saavutettavuus/saavutettavuus.css', 'js/arvovari/arvovari.css', 'js/ui/kortti.css']) {
             const css = readFileSync(file, 'utf8');
             const queries = [...css.matchAll(/@media ([^{]*pointer: coarse[^{]*)\{/g)].map(m => m[1].trim());
             expect(queries.length, file).toBeGreaterThan(0);
