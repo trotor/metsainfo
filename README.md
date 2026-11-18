@@ -74,18 +74,24 @@ Ajantasainen hinta näkyy sovelluksen ostonäkymässä. Osto tehdään App Store
 ---
 
 ## Tulossa – testiversiossa nyt
-Seuraavia toimintoja kokeillaan testiversiossa. Ne voivat vielä muuttua ennen julkaisua.
+Seuraavia toimintoja kokeillaan testiversiossa (TestFlight, iPhone ja iPad). Ne voivat vielä muuttua ennen julkaisua, ja myös se, mitkä niistä kuuluvat maksulliseen lisäosaan, voi vielä tarkentua.
+
+### Hinta-arvion lisäosaan (sama kertaosto)
+- **Mistä arvio koostuu** – hinta-arvion erittely: jokainen hakkuu puutavaralajeittain (m³ × €/m³ = €), kuvioittain ja koko puustolle, keskiarvot €/m³ ja €/ha. Erittely on mukana myös jaettavassa taulukossa. Valmis seuraavaan kauppaversioon.
+- **Puuston arvo kartalla** – kuviot väritetään puuston arvon mukaan (€/ha) alueen tuoreilla kantohinnoilla tai omilla hinnoillasi; kuvion tiedoissa arvo euroina.
+- **Kerro tästä paikasta ja metsävisa** – sijaintisi kohdan kuvio: puulajit, ikä, kehitysluokka ja puusto ilman kiinteistön valintaa. Metsävisa kysyy kuviosta neljällä tasolla ja antaa pisteitä. Toimii myös kartalta ilman maastoa.
+- **Etsi läheltä** – tietynlaiset metsät (esim. uudistuskypsä kuusikko tai hakkuuehdotus lähivuosina) 1 km × 1 km alueelta, kartalla ja listassa etäisyyksineen.
+- **Saavutettavuus** – kuvion arvioitu saavutettavuus 0–100: maaperän korjuukelpoisuus, metsäkuljetusmatka, märät kohdat (Luken kosteusindeksi) ja rinteet (MML:n korkeusmalli) kuljetusreitillä sekä tieyhteys (Digiroad), kartalla väreinä. Yhteenvedossa tiekunta sekä kelirikko- ja painorajoitukset. [Miten indeksi lasketaan →](docs/saavutettavuusindeksi.md)
+- **Huomiot** – tallenna huomio tarkkaan paikkaan kartalle (esim. tuulenkaato, rajapyykki tai ojan tukos) omasta sijainnista tai kartalta. Huomio liitetään kiinteistöön ja kuvioon, ja siihen voi liittää enintään viisi kuvaa kamerasta tai kuvakirjastosta. Huomiot ja kuvat pysyvät laitteella.
+
+### Maksuttomina
+- **iPad** – kartta koko näytöllä ja tietopaneeli sen vasemmassa reunassa, myös Split Viewissä.
 - **Työkalut-valikko** – työkalut yhden napin takana nimineen ja kuvauksineen; päällä oleva työkalu näkyy kartan yläreunassa.
-- **Kerro tästä paikasta** – napauta karttaa tai käytä sijaintia: kuvion tiedot maastossa ja metsävisa.
-- **Etsi läheltä** – tietynlaiset metsät (esim. uudistuskypsä kuusikko) 1 km × 1 km alueelta.
-- **Valitse kuvioita** – kokoa kuvioita valinnaksi myös kiinteistörajojen yli ja katso valinnan yhteenveto ja hinta-arvio, esimerkiksi kun harkitset kiinteistön osan ostamista.
-- **Saavutettavuus** – kuvion arvioitu saavutettavuus 0–100: maaperän korjuukelpoisuus, metsäkuljetusmatka, märät kohdat (Luken kosteusindeksi) ja rinteet (MML:n korkeusmalli) kuljetusreitillä sekä tieyhteys (Digiroad), kartalla väreinä. [Miten indeksi lasketaan →](docs/saavutettavuusindeksi.md)
-- **Puuston arvo kartalla** – kuviot väritetään puuston arvon mukaan (€/ha) alueen tuoreilla kantohinnoilla; kuvion tiedoissa arvo euroina. Osa hinta-arvion lisäosaa.
+- **Valitse kuvioita** – kokoa kuvioita valinnaksi myös kiinteistörajojen yli ja katso valinnan yhteenveto, esimerkiksi kun harkitset kiinteistön osan ostamista. Valinnan hinta-arvio kuuluu lisäosaan.
 - **Huomioitavaa metsätöissä** – kiinteistön muinaisjäännökset, kulttuuriperintökohteet, luonnonsuojelu- ja Natura-alueet sekä Metsälain erityisen tärkeät elinympäristöt yhteenvedossa ja kartalla.
 - **Retkeilykohteet** – laavut, kodat, tulentekopaikat, retkeilyreitit ja luontopolut kartalla (LIPAS).
 - **Korkeusmalli** – laserkeilauksen vinovalaistu maastomalli taustakartaksi.
 - **Suosikit ja omat muistiinpanot** kiinteistöille, kuvioille ja hauille.
-- **Huomiot** – tallenna huomio tarkkaan paikkaan kartalle (esim. tuulenkaato, rajapyykki tai ojan tukos); huomio liitetään kiinteistöön ja kuvioon ja näkyy kartalla. Osa hinta-arvion lisäosaa.
 - **Kielet** – suomi, ruotsi ja englanti.
 
 ---
