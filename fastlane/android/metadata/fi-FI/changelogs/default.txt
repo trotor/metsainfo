@@ -1,2 +1,6 @@
-Uutta versiossa 4.0.1:
-• "Olet kuviolla" -rivi näyttää kuvion kehitysluokan kokonaan, eikä pitkä nimi enää katkea
+Uutta versiossa 4.0.2:
+• Tableteille oma asettelu: kartta koko näytöllä ja tiedot paneelissa sen vieressä
+• Hinta-arvio kertoo, mistä summa koostuu: hakkuut puutavaralajeittain, kuvioittain ja koko puustolle
+• Hinta-arvion tulos näkyy heti ensimmäisenä, ja ostonäkymässä on esimerkkimetsän tulos
+• Kiinteistön yhteenveto näyttää ehdotettujen hakkuiden määrän ja puumäärän
+• Termien selitykset ovat selkeämpiä, ja käyttöohjeessa on osio hinta-arviosta
