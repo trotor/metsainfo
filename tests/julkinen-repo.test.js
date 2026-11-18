@@ -24,7 +24,7 @@ describe('julkinen repo', () => {
 
     it('ei henkilökohtaista sähköpostia eikä oikeaa esimerkkikiinteistöä', () => {
         // Kielletyt merkkijonot paloista, jotta ne eivät ole tässä tiedostossa sellaisenaan
-        const kielletyt = [['tero', 'ronkko'].join('\\.'), ['592', '404', '1', '32'].join('-'), '5924040' + '0010032'];
+        const kielletyt = [['tero', 'ronkko'].join('\\.'), ['592', '404', '1', '32'].join('-'), '5924040' + '0010032', ['tassutie', 'play', 'uploader'].join('-')];
         const hits = git('grep', '-nIE', kielletyt.join('|'), '--', '.');
         expect(hits.trim()).toBe('');
     });
