@@ -26,6 +26,7 @@ import { on, VIESTIT } from '../vayla.js';
 import { T } from './teksti.js';
 import { TILA_KEY, OSTO_KEY, lue, tallenna, naytetaankoAlussa, naytetaankoOsto, aiempiOsto, maksulliset, sijoita, naytetaankoZoomVihje } from './logiikka.js';
 import { KUVAUSTILA } from '../demo/kuvaustila.js';
+import { registerBackStep } from '../ui/back.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const storage = (() => { try { return window.localStorage; } catch { return null; } })();
@@ -225,6 +226,12 @@ export function startEsittely() {
         if (e.key === 'Escape' && ui) lopeta(ui.oma ? 'katsottu' : 'ohitettu');
     });
     window.addEventListener('resize', () => { if (ui) piirra(); });
+    // Androidin takaisin-painike: kuin Esc
+    registerBackStep(() => {
+        if (!ui) return false;
+        lopeta(ui.oma ? 'katsottu' : 'ohitettu');
+        return true;
+    });
     purchases.onChange(() => tarkistaOsto());
 
     const map = state.map;

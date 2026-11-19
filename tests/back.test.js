@@ -61,3 +61,19 @@ describe('createBackHandler', () => {
         expect(document.getElementById('demo-view')).toBeNull();
     });
 });
+
+describe('lisäosien takaisin-askeleet', () => {
+    it('viimeksi rekisteröity ensin, ennen ohjetta ja paneelia', async () => {
+        const { registerBackStep, createBackHandler: create } = await import('../js/ui/back.js');
+        const calls = [];
+        let korttiAuki = true, esittelyAuki = true;
+        registerBackStep(() => { if (!korttiAuki) return false; korttiAuki = false; calls.push('kortti'); return true; });
+        registerBackStep(() => { if (!esittelyAuki) return false; esittelyAuki = false; calls.push('esittely'); return true; });
+        document.body.innerHTML = '';
+        const handler = create({ toggleHelp: () => {}, closeMenu: () => {}, getSheet: () => null });
+        expect(handler()).toBe(true);
+        expect(handler()).toBe(true);
+        expect(handler()).toBe(false);
+        expect(calls).toEqual(['esittely', 'kortti']);
+    });
+});

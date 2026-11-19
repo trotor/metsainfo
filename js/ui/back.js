@@ -10,6 +10,17 @@ export function backAction({ helpOpen, menuOpen, snap, hidden = false }) {
     return 'exit';
 }
 
+const steps = [];
+
+/**
+ * Lisäosan oma takaisin-askel (kortti, esittely): fn palauttaa true, jos se
+ * sulki jotain. Viimeksi rekisteröity kokeillaan ensin (esittely on korttien
+ * päällä, koska se käynnistyy viimeisenä).
+ */
+export function registerBackStep(fn) {
+    steps.push(fn);
+}
+
 /**
  * Palauttaa käsittelijän, joka suorittaa takaisin-toiminnon ja palauttaa
  * false, kun sovelluksesta pitää poistua.
@@ -23,6 +34,9 @@ export function createBackHandler({ toggleHelp, closeMenu, getSheet, doc = docum
                 overlay.remove();
                 return true;
             }
+        }
+        for (let i = steps.length - 1; i >= 0; i--) {
+            if (steps[i]()) return true;
         }
         const sheet = getSheet();
         const action = backAction({

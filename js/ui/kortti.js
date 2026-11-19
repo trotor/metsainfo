@@ -7,6 +7,7 @@
 
 import './kortti.css';
 import { getLang } from '../i18n.js';
+import { registerBackStep } from './back.js';
 
 const OPEN_EVENT = 'metsainfo:kortti-auki';
 
@@ -57,6 +58,13 @@ export function createCard({ id, label, className = '', onClose, notifyHidden = 
 
     document.addEventListener(OPEN_EVENT, (e) => {
         if (e.detail !== id && (notifyHidden || !el.hidden)) onClose?.();
+    });
+    // Androidin takaisin-painike sulkee auki olevan kortin sen omalla sulkupainikkeella
+    registerBackStep(() => {
+        if (el.hidden) return false;
+        const x = el.querySelector('[data-close]');
+        if (x) x.click(); else { card.close(); onClose?.(); }
+        return true;
     });
     return card;
 }
