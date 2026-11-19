@@ -24,7 +24,7 @@ import { isMobileLayout } from '../ui/layout.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { on, VIESTIT } from '../vayla.js';
 import { T } from './teksti.js';
-import { TILA_KEY, OSTO_KEY, lue, tallenna, naytetaankoAlussa, naytetaankoOsto, aiempiOsto, maksulliset, sijoita, naytetaankoZoomVihje } from './logiikka.js';
+import { TILA_KEY, OSTO_KEY, VIHJE_KEY, lue, tallenna, naytetaankoAlussa, naytetaankoOsto, aiempiOsto, maksulliset, sijoita, naytetaankoZoomVihje } from './logiikka.js';
 import { KUVAUSTILA } from '../demo/kuvaustila.js';
 import { registerBackStep } from '../ui/back.js';
 
@@ -33,7 +33,8 @@ const storage = (() => { try { return window.localStorage; } catch { return null
 
 let ui = null;      // { blocker, spot, card, steps, index, onDone }
 let vihje = null;   // zoomausvihjeen elementti
-let vihjeSuljettu = false;
+// Vihjeen × tallentuu pysyvästi (Tero 19.11.2026: suljettu vihje ei tule enää)
+let vihjeSuljettu = lue(storage, VIHJE_KEY) === '1';
 
 /** Ensimmäinen näkyvä elementti valitsimista (mobiilissa ja työpöydällä eri). */
 function kohde(selectors) {
@@ -205,7 +206,7 @@ function paivitaVihje() {
             const a = e.target.closest('[data-vihje]')?.dataset.vihje;
             if (a === 'sijainti') requestLocation();
             else if (a === 'lahenna') map.setZoom(CONFIG.minZoomForParcels);
-            else if (a === 'sulje') { vihjeSuljettu = true; piilotaVihje(); }
+            else if (a === 'sulje') { vihjeSuljettu = true; tallenna(storage, VIHJE_KEY, '1'); piilotaVihje(); }
         });
         map.getContainer().appendChild(vihje);
     }

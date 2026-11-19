@@ -7,6 +7,8 @@
 export const TILA_KEY = 'metsainfo.esittely';
 /** Oston jälkeinen esittely nähty: '1'. */
 export const OSTO_KEY = 'metsainfo.esittely.osto';
+/** Zoomausvihje suljettu ×:llä: '1' → ei enää koskaan. */
+export const VIHJE_KEY = 'metsainfo.esittely.vihje';
 
 export function lue(storage, key) {
     try {
