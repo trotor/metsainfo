@@ -14,6 +14,8 @@
  * olemassa oleva näyttökoodi toimivat sellaisenaan.
  */
 
+import { createCachedFetch } from './valimuisti.js';
+
 export const REST_URL = 'https://avoin.metsakeskus.fi/rest/data/stand-data/area';
 export const TILE_SIZE = 500; // m, EPSG:3067
 
@@ -260,5 +262,12 @@ export function createTileCache({ fetchFn = fetch } = {}) {
     };
 }
 
-/** Sovelluksen yhteinen välimuisti. */
-export const tileCache = createTileCache();
+/**
+ * Sovelluksen yhteinen välimuisti. Ruudut myös pysyvään välimuistiin
+ * (js/valimuisti.js, 30 vrk): kerran haettu alue toimii maastossa ilman verkkoa
+ * ja avautuu heti seuraavalla kerralla. Rajapinnan muuttuessa tallennetut
+ * ruudut toimivat edelleen.
+ */
+export const tileCache = createTileCache({
+    fetchFn: createCachedFetch({ name: 'metsainfo-metsatiedot-v1', ttl: 30 * 24 * 3600 * 1000, maxEntries: 300 })
+});
