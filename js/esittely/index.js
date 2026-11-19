@@ -46,11 +46,15 @@ function kohde(selectors) {
 function maksullisetHtml() {
     const omistettu = purchases.isEntitled();
     const rivit = [`<li><strong>${esc(T.hintaArvio)}</strong>: ${esc(T.hintaArvioKuvaus)} <span class="es-paikka">(${esc(T.paikkaArvio)})</span></li>`];
+    let kokeiluja = false;
     for (const t of maksulliset(rekisteroidyt(), FEATURES)) {
+        if (FEATURES[t.feature]?.kokeilu) kokeiluja = true;
         const paikka = t.paikka === 'vari' ? T.paikkaVari : T.paikkaTyokalut;
         rivit.push(`<li><strong>${esc(t.label)}</strong>${t.description ? `: ${esc(t.description)}` : ''} <span class="es-paikka">(${esc(paikka)})</span></li>`);
     }
-    return { omistettu, html: `<ul class="es-lista">${rivit.join('')}</ul>` };
+    // Kokeilujen hinnoittelu ei ole lukittu: sama varaus kuin ostonäkymässä (#38)
+    const huomio = kokeiluja ? `<p class="es-huomio">${esc(T.muuttuu)}</p>` : '';
+    return { omistettu, html: `<ul class="es-lista">${rivit.join('')}</ul>${huomio}` };
 }
 
 function vaiheet() {
