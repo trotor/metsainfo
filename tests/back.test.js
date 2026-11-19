@@ -76,4 +76,15 @@ describe('lisäosien takaisin-askeleet', () => {
         expect(handler()).toBe(false);
         expect(calls).toEqual(['esittely', 'kortti']);
     });
+
+    it('ohje suljetaan ennen sen alla olevaa korttia', async () => {
+        const { registerBackStep, createBackHandler: create } = await import('../js/ui/back.js');
+        const calls = [];
+        registerBackStep(() => { calls.push('kortti'); return true; });
+        document.body.innerHTML = '<div id="help-modal"></div>';
+        const handler = create({ toggleHelp: () => { calls.push('ohje'); document.getElementById('help-modal').classList.add('hidden'); }, closeMenu: () => {}, getSheet: () => null });
+        handler();
+        handler();
+        expect(calls).toEqual(['ohje', 'kortti']);
+    });
 });

@@ -35,9 +35,6 @@ export function createBackHandler({ toggleHelp, closeMenu, getSheet, doc = docum
                 return true;
             }
         }
-        for (let i = steps.length - 1; i >= 0; i--) {
-            if (steps[i]()) return true;
-        }
         const sheet = getSheet();
         const action = backAction({
             helpOpen: doc.getElementById('help-modal')?.classList.contains('hidden') === false,
@@ -45,6 +42,12 @@ export function createBackHandler({ toggleHelp, closeMenu, getSheet, doc = docum
             snap: sheet?.getSnap(),
             hidden: doc.getElementById('info-panel')?.classList.contains('hidden') === true
         });
+        // Ohje ja valikko ovat korttien ja esittelyn päällä, paneeli niiden alla
+        if (action !== 'help' && action !== 'menu') {
+            for (let i = steps.length - 1; i >= 0; i--) {
+                if (steps[i]()) return true;
+            }
+        }
         if (action === 'help') toggleHelp();
         else if (action === 'menu') closeMenu();
         else if (action === 'peek') sheet.setSnap('peek');
