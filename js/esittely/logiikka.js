@@ -40,6 +40,15 @@ export function naytetaankoOsto({ entitled, nahty, kaynnissa, tila }) {
 }
 
 /**
+ * Käynnistyksessä jo ostanut (osto tehty ennen esittelyä tai aiemmassa
+ * versiossa): kiitoskortti merkitään nähdyksi, joten se tulee vain uuden
+ * oston tai palautuksen jälkeen (purchases.onChange).
+ */
+export function aiempiOsto({ entitled, nahty }) {
+    return Boolean(entitled && !nahty);
+}
+
+/**
  * Maksulliset toiminnot rekisteristä (js/ui/tyokalut.js rekisteroidyt()):
  * ne, joilla on js/features.js:ssä tuote. paikka: 'tyokalut' tai 'vari'.
  */

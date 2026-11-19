@@ -1,7 +1,8 @@
 /**
- * Käyttöohjeen osiot kokeilutoiminnoille. Jokainen toiminto lisää oman
- * osionsa omista teksteistään (teksti.js `ohjeOsio`), joten tavallisen
- * buildin ohje ei muutu ja toiminnon voi irrottaa ohjeineen.
+ * Käyttöohjeen osiot lisätoiminnoille. Jokainen toiminto lisää oman
+ * osionsa omista teksteistään (teksti.js `ohjeOsio`), joten toiminnon voi
+ * irrottaa ohjeineen. Kokeilussa olevan toiminnon osio (kokeilu: true)
+ * menee "Testiversion kokeilut" -otsikon alle.
  */
 
 import { pick, getLang } from '../i18n.js';
@@ -35,10 +36,20 @@ function section(doc, cls, inner) {
  * Lisää osion ohjeeseen ennen alatunnistetta; sama id korvaa edellisen.
  * html on toiminnon omaa, luotettua tekstiä.
  */
-export function addHelpSection({ id, title, html }, doc = document) {
+export function addHelpSection({ id, title, html, kokeilu = false }, doc = document) {
     const help = doc.getElementById('help-content');
     if (!help) return;
     const footer = help.querySelector('.help-footer');
+    // Julkaistujen toimintojen osiot ennen "Testiversion kokeilut" -otsikkoa,
+    // kokeilujen osiot sen jälkeen
+    if (!kokeilu) {
+        const old = help.querySelector(`[data-osio="${CSS.escape(id)}"]`);
+        const el = section(doc, 'help-toiminto', `<h3>${esc(title)}</h3>${html}`);
+        el.dataset.osio = id;
+        if (old) old.replaceWith(el);
+        else help.insertBefore(el, help.querySelector('.help-kokeilut') || footer);
+        return;
+    }
     if (!help.querySelector('.help-kokeilut')) {
         const t = pick(TEKSTIT);
         help.insertBefore(section(doc, 'help-kokeilut', `<h3>${esc(t.otsikko)}</h3><p>${esc(t.kuvaus)}</p>`), footer);

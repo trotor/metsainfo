@@ -18,7 +18,7 @@ const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 export function startAsetukset() {
-    addHelpSection({ id: 'asetukset', title: T.ohjeOsio.otsikko, html: T.ohjeOsio.html });
+    addHelpSection({ id: 'asetukset', title: T.ohjeOsio.otsikko, html: T.ohjeOsio.html, kokeilu: true });
     if (!isUnlocked('asetukset')) return;
     let open = false;
 

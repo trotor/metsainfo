@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { TILA_KEY, lue, tallenna, naytetaankoAlussa, naytetaankoOsto, maksulliset, sijoita, naytetaankoZoomVihje } from '../js/esittely/logiikka.js';
+import { TILA_KEY, lue, tallenna, naytetaankoAlussa, naytetaankoOsto, aiempiOsto, maksulliset, sijoita, naytetaankoZoomVihje } from '../js/esittely/logiikka.js';
 
 const muisti = () => {
     const m = new Map();
@@ -76,5 +76,13 @@ describe('zoomausvihje', () => {
         expect(naytetaankoZoomVihje({ zoom: 10, minZoom: 10, kiinteistoAuki: false, suljettu: false })).toBe(false);
         expect(naytetaankoZoomVihje({ zoom: 5, minZoom: 10, kiinteistoAuki: true, suljettu: false })).toBe(false);
         expect(naytetaankoZoomVihje({ zoom: 5, minZoom: 10, kiinteistoAuki: false, suljettu: true })).toBe(false);
+    });
+});
+
+describe('aiempi osto', () => {
+    it('jo ostanut käynnistyksessä: kiitoskortti merkitään nähdyksi', () => {
+        expect(aiempiOsto({ entitled: true, nahty: null })).toBe(true);
+        expect(aiempiOsto({ entitled: true, nahty: '1' })).toBe(false);
+        expect(aiempiOsto({ entitled: false, nahty: null })).toBe(false);
     });
 });

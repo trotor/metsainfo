@@ -4,15 +4,15 @@ import { pick } from '../i18n.js';
 export const TEKSTIT = {
     fi: {
         taustakartta: 'Maastonmuodot (laserkeilaus)',
-        varjoste: 'Rinnevarjoste (kokeilu)'
+        varjoste: 'Rinnevarjoste'
     },
     sv: {
         taustakartta: 'Terrängformer (laserskanning)',
-        varjoste: 'Terrängskuggning (försök)'
+        varjoste: 'Terrängskuggning'
     },
     en: {
         taustakartta: 'Terrain (laser scanning)',
-        varjoste: 'Hillshade (trial)'
+        varjoste: 'Hillshade'
     }
 };
 // Käyttöohjeen osio (js/ui/ohje-osiot.js)

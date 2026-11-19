@@ -81,8 +81,8 @@
     <strong>Lyhyesti:</strong> Metsäinfo ei kerää käyttäjistään tietoja. Sovelluksessa ei ole käyttäjätilejä,
     analytiikkaa eikä mainoksia. Sijaintitietosi, valokuvasi ja muistiinpanosi käsitellään ja säilytetään
     ainoastaan omalla laitteellasi, eivätkä ne siirry sovelluksen kehittäjälle tai kenellekään muulle.
-    Testiversion kokeiluissa metsätietoja haetaan sijaintisi ympäriltä, katso
-    <a href="#kokeilut">Testiversion kokeilut</a>.
+    Kerro tästä paikasta, metsävisa ja Etsi läheltä hakevat metsätiedot sijaintisi ympäriltä, katso
+    <a href="#lisatoiminnot">Lisätoiminnot</a>.
 </div>
 
 <h2>Rekisterinpitäjä</h2>
@@ -103,7 +103,7 @@
     <tr>
         <td>Sijainti (GPS)</td>
         <td>Oman sijainnin näyttäminen kartalla ja sen tunnistaminen, millä metsikkökuviolla olet</td>
-        <td>Vain laitteen muistissa käytön ajan. Ei tallenneta eikä lähetetä mihinkään. (Testiversion kokeilut: katso alla.)</td>
+        <td>Vain laitteen muistissa käytön ajan. Ei tallenneta eikä lähetetä mihinkään. (Lisätoiminnot: katso alla.)</td>
     </tr>
     <tr>
         <td>Valokuvat</td>
@@ -149,13 +149,12 @@
 <p>
     Näiden palveluiden omat tietosuojakäytännöt koskevat niille päätyvää liikennettä.
     Sovellus ei lähetä näihin palveluihin sijaintiasi, valokuviasi eikä muistiinpanojasi.
-    Poikkeus ovat testiversion kokeilut alla.
+    Poikkeus ovat lisätoiminnot alla.
 </p>
 
-<h2 id="kokeilut">Testiversion kokeilut</h2>
-<p>
-    Sovelluksen testiversiossa (TestFlight) on kokeilutoimintoja, joita julkaistussa sovelluksessa
-    ja verkkoversiossa ei ole. Niissä tietoja käsitellään näin:
+<h2 id="lisatoiminnot">Lisätoiminnot</h2>
+<p id="kokeilut">
+    Kartan työkaluissa, väritysvaihtoehdoissa ja karttatasoissa tietoja käsitellään näin:
 </p>
 <ul>
     <li><strong>Kerro tästä paikasta, metsävisa ja Etsi läheltä</strong> hakevat metsätiedot
@@ -175,9 +174,11 @@
     <li><strong>Retkeilykohteet</strong> hakee laavut, tulentekopaikat ja reitit Jyväskylän
         yliopiston LIPAS-palvelusta (<code>lipas.fi</code>) kartalla näkyvältä alueelta.</li>
     <li><strong>Maastonmuodot</strong> hakee karttakuvat Geologian tutkimuskeskukselta
-        (<code>gtkdata.gtk.fi</code>) kartalla näkyvältä alueelta.</li>
+        (<code>gtkdata.gtk.fi</code>) ja <strong>Puuston korkeus</strong> Suomen metsäkeskukselta
+        (<code>avoin.metsakeskus.fi</code>) kartalla näkyvältä alueelta.</li>
     <li>Suosikit, muistiinpanot, huomiot (kartalle tallennetut pisteet koordinaatteineen),
-        metsävisan pisteet ja havainnot sekä asetukset tallentuvat vain laitteelle.
+        metsävisan pisteet ja havainnot, kuvioiden läpinäkyvyys, esittelyn ohitus sekä asetukset
+        tallentuvat vain laitteelle.
         Niitä ei lähetetä mihinkään.</li>
     <li><strong>Huomioiden kuvat:</strong> sovellus käyttää kameraa ja kuvia vain, kun lisäät kuvan
         huomioon, ja pyytää siihen luvan. Kameralla otettu kuva tallentuu laitteen kuviin, ja sovellus
@@ -187,8 +188,9 @@
 
 <h2>Sovelluksen sisäiset ostot</h2>
 <p>
-    Hinta-arvio on iOS- ja Android-sovelluksen maksullinen lisäosa. Verkkoversio esittelee sen
-    ja ohjaa linkeillä App Storeen ja Google Playhin; verkkoversiossa ei voi ostaa. Osto ja maksu tehdään
+    Hinta-arvio ja siihen kuuluvat lisätoiminnot (Kerro tästä paikasta, Etsi läheltä, huomiot,
+    puuston arvo -väritys ja saavutettavuus) ovat iOS- ja Android-sovelluksen maksullinen lisäosa.
+    Verkkoversio esittelee ne ja ohjaa linkeillä App Storeen ja Google Playhin; verkkoversiossa ei voi ostaa. Osto ja maksu tehdään
     App Storen tai Google Playn kautta, ja niiden ehdot ja tietosuojakäytännöt koskevat
     maksutietoja. Inetor Oy ei saa nimeäsi, maksutietojasi eikä muita henkilötietojasi.
     Sovellus tarkistaa oston laitteella kaupan omalla rajapinnalla, ja tieto ostosta säilyy
@@ -225,7 +227,11 @@
     <li>Karttapohjat: © Maanmittauslaitos, tarjoiltu Kapsi Internet-käyttäjät ry:n palvelusta</li>
     <li>Puun kantohinnat: Metsäteollisuus ry:n puukaupan viikkoseuranta ja Luonnonvarakeskus, Teollisuuspuun kauppa (Luken tilastotietokanta, lisenssi CC BY 4.0)</li>
     <li>Kuntarajat ja kuntaluokitus: © Tilastokeskus, lisenssi CC BY 4.0</li>
-    <li>Testiversio: tiet ja tierajoitukset © Väylävirasto, Digiroad, lisenssi CC BY 4.0; korjuukelpoisuuskartta © Suomen metsäkeskus, lisenssi CC BY 4.0; korkeusmalli GTK, aineisto © Maanmittauslaitos</li>
+    <li>Puuston korkeus (latvusmalli) ja korjuukelpoisuuskartta: © Suomen metsäkeskus, lisenssi CC BY 4.0</li>
+    <li>Tiet ja tierajoitukset: © Väylävirasto, Digiroad, lisenssi CC BY 4.0</li>
+    <li>Maastonmuodot: GTK, korkeusmalli © Maanmittauslaitos</li>
+    <li>Muinaisjäännökset ja kulttuuriperintökohteet: Museovirasto; luonnonsuojelualueet, Natura 2000 ja erämaat: Suomen ympäristökeskus; lisenssi CC BY 4.0</li>
+    <li>Retkeilykohteet: LIPAS, Jyväskylän yliopisto, lisenssi CC BY 4.0</li>
 </ul>
 
 <div class="korostus">
@@ -249,7 +255,7 @@
 </main>
 
 <footer>
-    Päivitetty 17.11.2026 · <a href="./">Takaisin Metsäinfoon</a>
+    Päivitetty 19.11.2026 · <a href="./">Takaisin Metsäinfoon</a>
 </footer>
 
 </body>

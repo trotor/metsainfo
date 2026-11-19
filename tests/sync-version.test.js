@@ -44,35 +44,29 @@ describe('sync-version', () => {
     });
 });
 
-describe('kokeilubuildin versiojono', () => {
-    it('kokeiluversio version.js:n kokeilu-kentästä, oma jono x.y.9zz', () => {
-        expect(parseKokeiluVersion("const VERSION = { number: '4.0.2', kokeilu: '4.0.903' };")).toBe('4.0.903');
-        expect(() => parseKokeiluVersion("kokeilu: '4.0.3'")).toThrow();
+describe('yhteinen versiojono (4.1.0 alkaen)', () => {
+    it('kokeiluversio version.js:n kokeilu-kentästä, muoto x.y.z', () => {
+        expect(parseKokeiluVersion("const VERSION = { number: '4.1.0', kokeilu: '4.1.1' };")).toBe('4.1.1');
+        expect(() => parseKokeiluVersion("kokeilu: '4.1'")).toThrow();
         expect(() => parseKokeiluVersion("number: '4.0.2'")).toThrow();
     });
 
-    it('samaa näkyvää versiota ei käytetä uudelleen eikä pienempää', () => {
-        const used = { kauppa: ['4.0.0', '4.0.1'], kokeilu: ['4.0.902'] };
-        expect(() => assertUnusedVersion('4.0.902', used, 'kokeilu')).toThrow(/jo käytetty/);
-        expect(() => assertUnusedVersion('4.0.901', used, 'kokeilu')).toThrow(/pienempi/);
-        expect(() => assertUnusedVersion('4.0.903', used, 'kokeilu')).not.toThrow();
-        expect(() => assertUnusedVersion('4.0.1', used, 'kauppa')).toThrow(/jo käytetty/);
-        expect(() => assertUnusedVersion('4.0.2', used, 'kauppa')).not.toThrow();
+    it('samaa näkyvää versiota ei käytetä kummassakaan jonossa eikä pienempää kuin mikään ladattu', () => {
+        const used = { kauppa: ['4.0.1', '4.0.2'], kokeilu: ['4.0.906', '4.0.907'] };
+        expect(() => assertUnusedVersion('4.0.907', used, 'kauppa')).toThrow(/jo käytetty/);
+        expect(() => assertUnusedVersion('4.0.2', used, 'kokeilu')).toThrow(/jo käytetty/);
+        expect(() => assertUnusedVersion('4.0.3', used, 'kauppa')).toThrow(/pienempi/);
+        expect(() => assertUnusedVersion('4.1.0', used, 'kauppa')).not.toThrow();
+        const after = { kauppa: [...used.kauppa, '4.1.0'], kokeilu: [...used.kokeilu, '4.1.1'] };
+        expect(() => assertUnusedVersion('4.1.0', after, 'kokeilu')).toThrow(/jo käytetty/);
+        expect(() => assertUnusedVersion('4.1.2', after, 'kauppa')).not.toThrow();
         expect(compareVersions('4.0.10', '4.0.9')).toBeGreaterThan(0);
         expect(compareVersions('4.1', '4.1.0')).toBe(0);
     });
 
     it('tunnistaa kokeilukoodin buildista', () => {
-        expect(containsKokeilu(['a', 'b .maasto-kortti{}'])).toBe(true);
-        expect(containsKokeilu(['a', 'lahihaku-kortti'])).toBe(true);
-        expect(containsKokeilu(['a', 'valinta-kortti'])).toBe(true);
-        expect(containsKokeilu(['a', 'rj-laatikko'])).toBe(true);
-        expect(containsKokeilu(['a', 'rk-taso'])).toBe(true);
-        expect(containsKokeilu(['a', 'av-selite'])).toBe(true);
-        expect(containsKokeilu(['a', 'tyokalut-control'])).toBe(true);
-        expect(containsKokeilu(['a', 'huomiot-kortti'])).toBe(true);
-        expect(containsKokeilu(['suosikit-kortti'])).toBe(true);
-        expect(containsKokeilu(['korkeusmalli-taso'])).toBe(true);
+        expect(containsKokeilu(['a', 'b .asetukset-kortti{}'])).toBe(true);
+        expect(containsKokeilu(['a', 'maasto-kortti'])).toBe(false);
         expect(containsKokeilu(['a', 'b'])).toBe(false);
         expect(containsKokeilu([])).toBe(false);
     });

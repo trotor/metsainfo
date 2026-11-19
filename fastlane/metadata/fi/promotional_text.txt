@@ -1,1 +1,1 @@
-Uutta: puukaupan hinta-arvio. Näe hakkuiden arvo alueen tuoreilla kantohinnoilla. Lisäksi oma sijainti kartalla ja kuvion puusto, ikä ja hakkuuehdotukset.
+Uutta: työkaluja metsätöihin ja maastoon. Valitse kuvioita, katso puuston korkeus ja huomioitavat kohteet ja tallenna huomiot kuvineen kartalle.

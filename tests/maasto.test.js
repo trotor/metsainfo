@@ -273,10 +273,17 @@ describe('maastotilan tallennus', () => {
 
 describe('toimintojen avaus (features.js)', () => {
     const store = (available, entitled) => ({ isAvailable: () => available, isEntitled: () => entitled });
-    it('kokeilu auki kehitysselaimessa ilman kauppaa, hinta-arvio ei', async () => {
+    it('julkaistu maksullinen on verkossa lukossa, maksuton ja kokeilu auki', async () => {
         const { isUnlocked } = await import('../js/features.js');
-        expect(isUnlocked('maastotila', store(false, false))).toBe(true);
+        expect(isUnlocked('maastotila', store(false, false))).toBe(false);
         expect(isUnlocked('hintaArvio', store(false, false))).toBe(false);
+        expect(isUnlocked('valinta', store(false, false))).toBe(true);
+        expect(isUnlocked('asetukset', store(false, false))).toBe(true);
+    });
+    it('Kokeilu-merkki vain kokeilussa olevalle toiminnolle', async () => {
+        const { kokeiluMerkki } = await import('../js/features.js');
+        expect(kokeiluMerkki('maastotila', 'Kokeilu')).toBe('');
+        expect(kokeiluMerkki('asetukset', 'Kokeilu')).toBe('Kokeilu');
     });
     it('sovelluksessa vaatii hinta-arvion oston', async () => {
         const { isUnlocked } = await import('../js/features.js');

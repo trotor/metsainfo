@@ -15,7 +15,7 @@ import * as state from '../state.js';
 import { coordsEPSG3067ToLatLng, formatCadastralReference } from '../utils.js';
 import { openStand } from '../ui/stands.js';
 import { releaseFollow, showToast } from '../ui/location-ui.js';
-import { isUnlocked } from '../features.js';
+import { isUnlocked, kokeiluMerkki } from '../features.js';
 import { createCard, cardHeader } from '../ui/kortti.js';
 import { registerMenuItem } from '../ui/tyokalut.js';
 import { on, emit, VIESTIT } from '../vayla.js';
@@ -120,7 +120,7 @@ export function startSuosikit() {
 
     function render() {
         if (!ui.open) return;
-        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: T.kokeilu, closeLabel: T.sulje })}
+        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('suosikit', T.kokeilu), closeLabel: T.sulje })}
             <div class="sk-suodatus"></div>
             <input type="search" class="sk-haku" placeholder="${esc(T.hae)}" aria-label="${esc(T.hae)}" value="${esc(ui.text)}">
             <ul class="sk-lista"></ul>

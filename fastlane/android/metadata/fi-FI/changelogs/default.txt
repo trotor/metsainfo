@@ -1,6 +1,6 @@
-Uutta versiossa 4.0.2:
-• Tableteille oma asettelu: kartta koko näytöllä ja tiedot paneelissa sen vieressä
-• Hinta-arvio kertoo, mistä summa koostuu: hakkuut puutavaralajeittain, kuvioittain ja koko puustolle
-• Hinta-arvion tulos näkyy heti ensimmäisenä, ja ostonäkymässä on esimerkkimetsän tulos
-• Kiinteistön yhteenveto näyttää ehdotettujen hakkuiden määrän ja puumäärän
-• Termien selitykset ovat selkeämpiä, ja käyttöohjeessa on osio hinta-arviosta
+Uutta versiossa 4.1.0:
+• Huomioitavaa metsätöissä: muinaisjäännökset, suojelualueet ja erityisen tärkeät elinympäristöt kiinteistöltä
+• Valitse kuvioita kiinteistörajojen yli ja tallenna suosikit
+• Uudet karttatasot: puuston korkeus, maastonmuodot, rinnevarjoste ja retkeilykohteet sekä kuvioiden läpinäkyvyys
+• Kertaostoon kuuluvat nyt myös Kerro tästä paikasta ja metsävisa, Etsi läheltä, huomiot kuvineen, puuston arvo -väritys ja saavutettavuus
+• Lyhyt esittely ensimmäisellä avauksella

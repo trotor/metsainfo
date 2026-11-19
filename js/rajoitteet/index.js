@@ -17,6 +17,7 @@ import { addHelpSection } from '../ui/ohje-osiot.js';
 import { createConstraintSource } from './aineisto.js';
 import { matchArea, matchStand, groupItems, TOL } from './logiikka.js';
 import { T } from './teksti.js';
+import { kokeiluMerkki } from '../features.js';
 
 const VARIT = {
     muinais: '#92400e', kulttuuri: '#b45309', suojelu: '#166534',
@@ -126,7 +127,7 @@ export function startRajoitteet() {
                 : `<p class="rj-teksti">${esc(valinta ? T.eiKohteitaValinta : T.eiKohteita)}</p>`;
             if (ui.partial) body += `<p class="rj-huom">${esc(T.osittain)}</p>`;
         }
-        return `<div class="rj-otsikko"><span>${esc(T.otsikko)}</span><span class="rj-kokeilu">${esc(T.kokeilu)}</span></div>
+        return `<div class="rj-otsikko"><span>${esc(T.otsikko)}</span>${kokeiluMerkki('rajoitteet', T.kokeilu) ? `<span class="rj-kokeilu">${esc(T.kokeilu)}</span>` : ''}</div>
             ${body}
             <p class="rj-huom">${esc(T.huom)}</p>
             <p class="rj-lahde">${esc(T.lahteet)}</p>`;

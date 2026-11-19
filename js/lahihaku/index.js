@@ -27,7 +27,7 @@ import { registerTool } from '../ui/tyokalut.js';
 import { tileCache } from '../rest2.js';
 import { mainShare } from '../kuviotieto.js';
 import { purchases } from '../platform/purchases.js';
-import { isUnlocked } from '../features.js';
+import { isUnlocked, kokeiluMerkki } from '../features.js';
 import {
     VAIHEET, PUULAJIT, emptyCriteria, hasCriteria, searchBox, boxTileKeys, search, tilesStatus
 } from './haku.js';
@@ -354,7 +354,7 @@ export function startLahihaku() {
         const body = ui.view === 'detail' && ui.search ? detailHtml()
             : ui.view === 'results' && ui.search ? resultsHtml()
             : formHtml();
-        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: T.kokeilu, closeLabel: T.sulje })}
+        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('lahihaku', T.kokeilu), closeLabel: T.sulje })}
             <div class="lh-body">${body}</div>`;
     }
 }

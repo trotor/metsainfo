@@ -23,7 +23,7 @@ import { createStore } from './tila.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { T, arvonimi } from './teksti.js';
 import { purchases } from '../platform/purchases.js';
-import { isUnlocked } from '../features.js';
+import { isUnlocked, kokeiluMerkki } from '../features.js';
 
 const ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 2 6 10h3l-4 6h5v6h4v-6h5l-4-6h3z" fill="currentColor"/></svg>';
 
@@ -369,7 +369,7 @@ export function startMaasto() {
         const flash = ui.flash ? `<p class="mk-flash" role="status">${esc(ui.flash)}</p>` : '';
         ui.flash = null;
         card.el.innerHTML = `
-            ${cardHeader({ title: T.otsikko, badge: T.kokeilu, closeLabel: T.sulje })}
+            ${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('maastotila', T.kokeilu), closeLabel: T.sulje })}
             ${locked() ? '' : scoreBar()}
             ${flash}
             <div class="mk-body">${body}</div>

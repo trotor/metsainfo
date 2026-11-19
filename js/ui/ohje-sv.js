@@ -119,6 +119,11 @@ export const OHJE_SV = `
                     <h3>Nytt i versionen</h3>
                     <div class="changelog app-only">
                         <div class="changelog-entry">
+                            <span class="changelog-version">4.1.0</span>
+                            <span class="changelog-date">2026</span>
+                            <p>Nya verktyg och kartlager: figurval, favoriter, Att beakta vid skogsarbeten, trädhöjd, terrängformer, friluftsmål och figurernas genomskinlighet. Engångsköpet omfattar nu också Berätta om den här platsen, Sök i närheten, observationer, värdefärgläggning och åtkomlighet. En kort introduktion vid första start.</p>
+                        </div>
+                        <div class="changelog-entry">
                             <span class="changelog-version">4.0.2</span>
                             <span class="changelog-date">2026</span>
                             <p>Prisuppskattning: kortet visar fastighetens avverkningsförslag redan före köpet, köpvyn har ett exempel, resultatet visas först och bruksanvisningen har ett eget avsnitt om priset och beräkningen.</p>
@@ -140,6 +145,11 @@ export const OHJE_SV = `
                         </div>
                     </div>
                     <div class="changelog web-only">
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v4.1.0</span>
+                            <span class="changelog-date">2026-11-19</span>
+                            <p>Nya verktyg och kartlager: figurval, favoriter, Att beakta vid skogsarbeten, trädhöjd, terrängformer, friluftsmål och figurernas genomskinlighet. Appens tilläggsfunktioner presenteras. En kort introduktion vid första start.</p>
+                        </div>
                         <div class="changelog-entry">
                             <span class="changelog-version">v4.0.2</span>
                             <span class="changelog-date">2026-11-16</span>

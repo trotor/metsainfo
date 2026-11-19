@@ -20,6 +20,7 @@ import { formatNumber, coordsEPSG3067ToLatLng } from '../utils.js';
 import { isMobileLayout } from '../ui/layout.js';
 import { showToast } from '../ui/location-ui.js';
 import { createCard, cardHeader } from '../ui/kortti.js';
+import { kokeiluMerkki } from '../features.js';
 import { registerTool } from '../ui/tyokalut.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import {
@@ -236,7 +237,7 @@ export function startValinta() {
         const features = selection.list();
         const sum = selectionSummary(features);
         const changed = ui.shown !== null && ui.shown !== selection.signature() && features.length > 0;
-        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: T.kokeilu, closeLabel: T.sulje })}
+        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('valinta', T.kokeilu), closeLabel: T.sulje })}
             <div class="va-body">
                 <p class="va-ohje">${esc(T.ohje)}</p>
                 ${statusHtml()}

@@ -547,7 +547,7 @@ async function openPaywall() {
         <ul>
             <li>${T.etuHinnat}</li>
             <li>${T.etuRaportti}</li>
-            ${import.meta.env?.VITE_KOKEILU === '1' ? `<li>${T.etuMaasto}</li><li>${T.etuLahihaku}</li><li>${T.etuArvovari}</li><li>${T.etuHuomiot}</li><li>${T.etuSaavutettavuus}</li>` : ''}
+            <li>${T.etuMaasto}</li><li>${T.etuLahihaku}</li><li>${T.etuArvovari}</li><li>${T.etuHuomiot}</li><li>${T.etuSaavutettavuus}</li>
             <li>${T.etuKertaosto}</li>
         </ul>
         <button type="button" class="est-btn-outline pw-wide" data-est="demo">${T.kokeileEsimerkilla}</button>

@@ -24,7 +24,8 @@ import { isMobileLayout } from '../ui/layout.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { on, VIESTIT } from '../vayla.js';
 import { T } from './teksti.js';
-import { TILA_KEY, OSTO_KEY, lue, tallenna, naytetaankoAlussa, naytetaankoOsto, maksulliset, sijoita, naytetaankoZoomVihje } from './logiikka.js';
+import { TILA_KEY, OSTO_KEY, lue, tallenna, naytetaankoAlussa, naytetaankoOsto, aiempiOsto, maksulliset, sijoita, naytetaankoZoomVihje } from './logiikka.js';
+import { KUVAUSTILA } from '../demo/kuvaustila.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const storage = (() => { try { return window.localStorage; } catch { return null; } })();
@@ -46,14 +47,12 @@ function kohde(selectors) {
 function maksullisetHtml() {
     const omistettu = purchases.isEntitled();
     const rivit = [`<li><strong>${esc(T.hintaArvio)}</strong>: ${esc(T.hintaArvioKuvaus)} <span class="es-paikka">(${esc(T.paikkaArvio)})</span></li>`];
-    let kokeiluja = false;
     for (const t of maksulliset(rekisteroidyt(), FEATURES)) {
-        if (FEATURES[t.feature]?.kokeilu) kokeiluja = true;
         const paikka = t.paikka === 'vari' ? T.paikkaVari : T.paikkaTyokalut;
         rivit.push(`<li><strong>${esc(t.label)}</strong>${t.description ? `: ${esc(t.description)}` : ''} <span class="es-paikka">(${esc(paikka)})</span></li>`);
     }
-    // Kokeilujen hinnoittelu ei ole lukittu: sama varaus kuin ostonäkymässä (#38)
-    const huomio = kokeiluja ? `<p class="es-huomio">${esc(T.muuttuu)}</p>` : '';
+    // Sama varaus kuin ostonäkymässä ja kauppateksteissä (#38)
+    const huomio = rivit.length > 1 ? `<p class="es-huomio">${esc(T.muuttuu)}</p>` : '';
     return { omistettu, html: `<ul class="es-lista">${rivit.join('')}</ul>${huomio}` };
 }
 
@@ -213,7 +212,9 @@ function paivitaVihje() {
 
 export function startEsittely() {
     addHelpSection({ id: 'esittely', title: T.ohjeOsio.otsikko, html: T.ohjeOsio.html });
-    if (!isUnlocked('esittely')) return;
+    // Kauppakuvien kuvaustilassa ei esittelyä eikä vihjettä
+    if (!isUnlocked('esittely') || KUVAUSTILA) return;
+    if (aiempiOsto({ entitled: purchases.isEntitled(), nahty: lue(storage, OSTO_KEY) })) tallenna(storage, OSTO_KEY, 'aiempi');
     on(VIESTIT.avaaEsittely, () => aloitaEsittely());
     document.addEventListener('click', (e) => {
         if (!e.target.closest('[data-esittely="avaa"]')) return;

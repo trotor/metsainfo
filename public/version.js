@@ -4,10 +4,11 @@
  */
 const VERSION = {
     // Yhteinen versio: verkko, App Store ja Google Play
-    number: '4.0.2',
-    // TestFlight-kokeilubuildin näkyvä versio (oma jono 4.0.9xx). Kasvatetaan ennen
-    // jokaista kokeilulatausta; samaa numeroa ei käytetä uudelleen (scripts/kaytetyt-versiot.json)
-    kokeilu: '4.0.907',
+    number: '4.1.0',
+    // TestFlight-kokeilubuildin näkyvä versio. Sama nouseva jono kuin kauppaversiolla
+    // (4.1.0 kauppaan, 4.1.1 kokeiluun …): ennen jokaista latausta suurempi kuin mikään
+    // jo ladattu (scripts/kaytetyt-versiot.json)
+    kokeilu: '4.1.1',
     date: '2026-11-19',
     author: 'Tero Rönkkö'
 };

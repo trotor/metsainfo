@@ -16,7 +16,7 @@ import * as state from '../state.js';
 import { on, emit, VIESTIT } from '../vayla.js';
 import { coordsEPSG3067ToLatLng } from '../utils.js';
 import { locale } from '../i18n.js';
-import { isUnlocked } from '../features.js';
+import { isUnlocked, kokeiluMerkki } from '../features.js';
 import { purchases } from '../platform/purchases.js';
 import { isStale } from '../location/logic.js';
 import { isMobileLayout } from '../ui/layout.js';
@@ -515,7 +515,7 @@ export function startHuomiot() {
                 <label class="hu-nayta"><input type="checkbox" name="nayta" ${ui.show ? 'checked' : ''}> ${esc(T.nayta)}</label>
                 ${listHtml()}`;
         }
-        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: T.kokeilu, closeLabel: T.sulje })}
+        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('huomiot', T.kokeilu), closeLabel: T.sulje })}
             <div class="hu-body">${body}<p class="hu-pieni hu-huom">${esc(T.vainLaitteella)}</p></div>`;
         fillPhotos();
     }

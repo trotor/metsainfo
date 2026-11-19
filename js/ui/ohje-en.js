@@ -119,6 +119,11 @@ export const OHJE_EN = `
                     <h3>What's new</h3>
                     <div class="changelog app-only">
                         <div class="changelog-entry">
+                            <span class="changelog-version">4.1.0</span>
+                            <span class="changelog-date">2026</span>
+                            <p>New tools and map layers: stand selection, favourites, Things to note in forestry work, tree height, terrain forms, outdoor sites and stand transparency. The one-time purchase now also includes Tell me about this place, Search nearby, notes, timber value colouring and accessibility. A short introduction on first launch.</p>
+                        </div>
+                        <div class="changelog-entry">
                             <span class="changelog-version">4.0.2</span>
                             <span class="changelog-date">2026</span>
                             <p>Timber sale estimate: the card shows the property's proposed fellings even before purchase, the purchase view includes an example, the result is shown first, and the guide has its own section on the price and the calculation.</p>
@@ -140,6 +145,11 @@ export const OHJE_EN = `
                         </div>
                     </div>
                     <div class="changelog web-only">
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v4.1.0</span>
+                            <span class="changelog-date">2026-11-19</span>
+                            <p>New tools and map layers: stand selection, favourites, Things to note in forestry work, tree height, terrain forms, outdoor sites and stand transparency. The app add-on features are introduced. A short introduction on first launch.</p>
+                        </div>
                         <div class="changelog-entry">
                             <span class="changelog-version">v4.0.2</span>
                             <span class="changelog-date">2026-11-16</span>

@@ -9,10 +9,11 @@
  *   kasvavan numeron)
  *
  * Kokeilubuild (METSAINFO_KOKEILU=1, npm run ios:sync:kokeilu): iOS-versioksi
- * tulee version.js:n kokeilu-kenttä (oma jono 4.0.9xx). Se on oma
- * TestFlight-versiojononsa, joten fastlanen release_settings (joka liittää
- * uusimman buildin *saman versionumeron* buildeista) ei voi liittää
- * kokeilubuildia kauppaversioon. Android jätetään kokeilussa ennalleen.
+ * tulee version.js:n kokeilu-kenttä. Kauppa- ja kokeiluversiot ovat yhtä
+ * nousevaa jonoa (4.1.0 kauppaan, 4.1.1 kokeiluun …), joten kokeilubuildilla
+ * on aina eri numero kuin kauppaversiolla, eikä fastlanen release_settings
+ * (joka liittää uusimman buildin *saman versionumeron* buildeista) voi liittää
+ * sitä kauppaversioon. Android jätetään kokeilussa ennalleen.
  *
  * Näkyvää versionumeroa ei käytetä kahdesti (Teron sääntö 16.11.2026):
  * ladatut versiot ovat scripts/kaytetyt-versiot.json:ssa, ja skripti
@@ -52,16 +53,16 @@ export function applyAndroidVersion(gradle, { name, code }) {
 }
 
 // Kunkin kokeilutoiminnon tunnusluokka (js/maasto/, js/lahihaku/, js/suosikit/, js/korkeusmalli/, js/asetukset/, js/saavutettavuus/, js/valinta/, js/rajoitteet/, js/retkeily/, js/arvovari/)
-export const KOKEILU_MARKERS = ['maasto-kortti', 'lahihaku-kortti', 'suosikit-kortti', 'korkeusmalli-taso', 'asetukset-kortti', 'sv-laatikko', 'valinta-kortti', 'rj-laatikko', 'rk-taso', 'av-selite', 'tyokalut-control', 'huomiot-kortti', 'lp-saadin', 'latvusmalli-taso', 'es-kortti'];
-export const KOKEILU_PATCH_OFFSET = 900;
+// 4.1.0: muut kokeilut julkaistu, kokeilussa vain asetukset ja kielivalinta
+export const KOKEILU_MARKERS = ['asetukset-kortti'];
 
 /** version.js:n kokeilu-kenttä (TestFlight-kokeilun näkyvä versio). */
 export function parseKokeiluVersion(source) {
     const match = source.match(/kokeilu:\s*'([^']+)'/);
     if (!match) throw new Error('version.js: kokeilu-kenttää ei löytynyt');
     const version = match[1];
-    if (!/^\d+\.\d+\.\d+$/.test(version) || Number(version.split('.')[2]) < KOKEILU_PATCH_OFFSET) {
-        throw new Error(`version.js: kokeiluversion "${version}" pitää olla muotoa x.y.9zz (oma jono)`);
+    if (!/^\d+\.\d+\.\d+$/.test(version)) {
+        throw new Error(`version.js: kokeiluversion "${version}" pitää olla muotoa x.y.z`);
     }
     return version;
 }
@@ -76,17 +77,19 @@ export function compareVersions(a, b) {
 }
 
 /**
- * Näkyvä versio ei saa olla jo käytetty, ja sen pitää olla suurempi kuin
- * saman jonon aiemmat. Heittää virheen, jos sääntö rikkoutuu.
+ * Yksi yhteinen jono (Tero 18.11.2026, 4.1.0 alkaen): näkyvä versio ei saa
+ * olla jo käytetty kaupassa eikä kokeilussa, ja sen pitää olla suurempi kuin
+ * kaikki aiemmin ladatut. Heittää virheen, jos sääntö rikkoutuu.
  */
 export function assertUnusedVersion(version, used, jono) {
-    const list = used[jono] || [];
-    if (list.some(v => compareVersions(v, version) === 0)) {
-        throw new Error(`Versio ${version} on jo käytetty (${jono}). Kasvata public/version.js:n ${jono === 'kokeilu' ? 'kokeilu' : 'number'}-kenttää.`);
+    const field = jono === 'kokeilu' ? 'kokeilu' : 'number';
+    const all = [...(used.kauppa || []), ...(used.kokeilu || [])];
+    if (all.some(v => compareVersions(v, version) === 0)) {
+        throw new Error(`Versio ${version} on jo käytetty. Kasvata public/version.js:n ${field}-kenttää.`);
     }
-    const max = list.reduce((m, v) => (compareVersions(v, m) > 0 ? v : m), '0');
+    const max = all.reduce((m, v) => (compareVersions(v, m) > 0 ? v : m), '0');
     if (compareVersions(version, max) < 0) {
-        throw new Error(`Versio ${version} on pienempi kuin jo käytetty ${max} (${jono}).`);
+        throw new Error(`Versio ${version} on pienempi kuin jo ladattu ${max}. Kasvata public/version.js:n ${field}-kenttää.`);
     }
 }
 

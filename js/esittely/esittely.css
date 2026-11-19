@@ -67,6 +67,7 @@
 }
 @media (max-width: 768px), (pointer: coarse) {
     /* Oikean reunan karttanapit jäävät vapaiksi: alareunaan, kun kiinteistöä ei ole auki */
-    .es-vihje { top: auto; bottom: calc(28px + env(safe-area-inset-bottom)); left: 16px; right: 16px; transform: none; max-width: none; font-size: 15px; }
+    /* Hakukentän alle, oikean reunan karttanappien vasemmalle puolelle (alakulmassa sijainti ja Työkalut) */
+    .es-vihje { top: calc(70px + env(safe-area-inset-top)); left: 16px; right: 68px; transform: none; max-width: none; font-size: 15px; }
     .es-vihje-napit button { min-height: 40px; }
 }

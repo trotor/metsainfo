@@ -24,6 +24,7 @@ import { PRICE_REGIONS, regionForKunta, parcelPoint } from '../pricing/region.js
 import { applyOverrides } from '../pricing/prices.js';
 import { VARIT, valuePerHa, classIndex } from './logiikka.js';
 import { T } from './teksti.js';
+import { showPaywall } from '../ui/estimate.js';
 
 const STALE_MS = 7 * 24 * 3600 * 1000;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -56,16 +57,8 @@ export function startArvovari() {
         onDeselect: () => setOn(false)
     });
 
-    function openPaywall() {
-        // Hinta-arvion ostonäkymä avautuu data-est="paywall" -painikkeesta (js/ui/estimate.js)
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.dataset.est = 'paywall';
-        b.hidden = true;
-        document.body.appendChild(b);
-        b.click();
-        b.remove();
-    }
+    // Hinta-arvion ostonäkymä (js/ui/estimate.js); toimii myös ennen ensimmäistä kiinteistöä
+    const openPaywall = () => showPaywall();
 
     /** Palauttaa false, jos väritys ei käynnisty (lukittu tai ei kuvioita). */
     function setOn(next) {

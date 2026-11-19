@@ -70,44 +70,46 @@ function init() {
     initLocation({ selectParcel });
     initEventListeners();
     checkUrlParams();
-    // Kokeilutoiminnot vain kokeilubuildissa (TestFlight, kehitys). Tavallinen
-    // build karsii haaran ja dynaamisen importin pois kokonaan.
-    if (import.meta.env?.VITE_KOKEILU === '1') {
-        on(VIESTIT.avaaKohta, ({ points }) => openParcelAtFirst(points)
-            .then(ok => { if (!ok) showToast(UI.sovellus.eiLoytynyt); })
-            .catch(() => showToast(UI.sovellus.hakuEpaonnistui)));
-        on(VIESTIT.avaaKiinteisto, ({ reference }) => openParcelByReference(reference)
-            .then(ok => { if (!ok) showToast(UI.sovellus.eiLoytynyt); })
-            .catch(() => showToast(UI.sovellus.hakuEpaonnistui)));
-        on(VIESTIT.valintatila, ({ paalla }) => { valintatila = Boolean(paalla); });
-        on(VIESTIT.naytaValinta, ({ features, parcel }) => showSelection(features, parcel));
-        // Läpinäkyvyyssäädin (js/lapinakyvyys/): kuviotason täyttö uudelleen
-        on(VIESTIT.peittavyys, () => state.forestLayer?.eachLayer(l => { if (l.feature) l.setStyle(featureStyle(l.feature)); }));
-        // Ladataan rinnakkain, käynnistetään aina samassa järjestyksessä (karttapainikkeet)
-        Promise.all([
-            import('./maasto/index.js'), import('./lahihaku/index.js'), import('./suosikit/index.js'),
-            import('./korkeusmalli/index.js'), import('./asetukset/index.js'), import('./saavutettavuus/index.js'),
-            import('./valinta/index.js'), import('./rajoitteet/index.js'), import('./retkeily/index.js'), import('./arvovari/index.js'),
-            import('./huomiot/index.js'), import('./lapinakyvyys/index.js'), import('./latvusmalli/index.js'),
-            import('./esittely/index.js')
-        ]).then(([maasto, lahihaku, suosikit, korkeusmalli, asetukset, saavutettavuus, valinta, rajoitteet, retkeily, arvovari, huomiot, lapinakyvyys, latvusmalli, esittely]) => {
-            maasto.startMaasto();
-            lahihaku.startLahihaku();
-            suosikit.startSuosikit();
-            korkeusmalli.startKorkeusmalli();
-            latvusmalli.startLatvusmalli();
-            asetukset.startAsetukset();
-            saavutettavuus.startSaavutettavuus();
-            valinta.startValinta();
-            rajoitteet.startRajoitteet();
-            retkeily.startRetkeily();
-            arvovari.startArvovari();
-            huomiot.startHuomiot();
-            lapinakyvyys.startLapinakyvyys();
-            // Viimeisenä: esittely kokoaa muiden ilmoittamat työkalut ja väritykset
-            esittely.startEsittely();
-        });
-    }
+    // Lisätoiminnot (js/features.js): ladataan rinnakkain omiksi paloikseen,
+    // käynnistetään aina samassa järjestyksessä (karttapainikkeet)
+    on(VIESTIT.avaaKohta, ({ points }) => openParcelAtFirst(points)
+        .then(ok => { if (!ok) showToast(UI.sovellus.eiLoytynyt); })
+        .catch(() => showToast(UI.sovellus.hakuEpaonnistui)));
+    on(VIESTIT.avaaKiinteisto, ({ reference }) => openParcelByReference(reference)
+        .then(ok => { if (!ok) showToast(UI.sovellus.eiLoytynyt); })
+        .catch(() => showToast(UI.sovellus.hakuEpaonnistui)));
+    on(VIESTIT.valintatila, ({ paalla }) => { valintatila = Boolean(paalla); });
+    on(VIESTIT.naytaValinta, ({ features, parcel }) => showSelection(features, parcel));
+    // Läpinäkyvyyssäädin (js/lapinakyvyys/): kuviotason täyttö uudelleen
+    on(VIESTIT.peittavyys, () => state.forestLayer?.eachLayer(l => { if (l.feature) l.setStyle(featureStyle(l.feature)); }));
+    // Kokeilut vain kokeilubuildissa (TestFlight, kehitys): tavallinen build
+    // karsii haaran ja dynaamisen importin pois kokonaan
+    const kokeilut = import.meta.env?.VITE_KOKEILU === '1'
+        ? import('./asetukset/index.js').then(m => [m])
+        : Promise.resolve([]);
+    Promise.all([
+        import('./maasto/index.js'), import('./lahihaku/index.js'), import('./suosikit/index.js'),
+        import('./korkeusmalli/index.js'), import('./saavutettavuus/index.js'),
+        import('./valinta/index.js'), import('./rajoitteet/index.js'), import('./retkeily/index.js'), import('./arvovari/index.js'),
+        import('./huomiot/index.js'), import('./lapinakyvyys/index.js'), import('./latvusmalli/index.js'),
+        import('./esittely/index.js'), kokeilut
+    ]).then(([maasto, lahihaku, suosikit, korkeusmalli, saavutettavuus, valinta, rajoitteet, retkeily, arvovari, huomiot, lapinakyvyys, latvusmalli, esittely, [asetukset]]) => {
+        maasto.startMaasto();
+        lahihaku.startLahihaku();
+        suosikit.startSuosikit();
+        korkeusmalli.startKorkeusmalli();
+        latvusmalli.startLatvusmalli();
+        asetukset?.startAsetukset();
+        saavutettavuus.startSaavutettavuus();
+        valinta.startValinta();
+        rajoitteet.startRajoitteet();
+        retkeily.startRetkeily();
+        arvovari.startArvovari();
+        huomiot.startHuomiot();
+        lapinakyvyys.startLapinakyvyys();
+        // Viimeisenä: esittely kokoaa muiden ilmoittamat työkalut ja väritykset
+        esittely.startEsittely();
+    });
 }
 
 /**

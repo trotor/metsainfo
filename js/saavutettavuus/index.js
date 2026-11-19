@@ -21,12 +21,13 @@ import { registerColorMode } from '../ui/tyokalut.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { showToast } from '../ui/location-ui.js';
 import { purchases } from '../platform/purchases.js';
-import { isUnlocked } from '../features.js';
+import { isUnlocked, kokeiluMerkki } from '../features.js';
 import { analyseParcel } from './analyysi.js';
 import { createRoadSource, harvestArea } from './aineisto.js';
 import { fetchRaster } from './rasteri.js';
 import { fetchDtw, fetchDem } from './maasto.js';
 import { T } from './teksti.js';
+import { showPaywall } from '../ui/estimate.js';
 
 
 export const VARIT = { hyva: '#15803d', kohtalainen: '#ca8a04', heikko: '#b91c1c' };
@@ -108,16 +109,8 @@ export function startSaavutettavuus() {
         onDeselect: () => setColors(false)
     });
 
-    function openPaywall() {
-        // Hinta-arvion ostonäkymä avautuu data-est="paywall" -painikkeesta (js/ui/estimate.js)
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.dataset.est = 'paywall';
-        b.hidden = true;
-        document.body.appendChild(b);
-        b.click();
-        b.remove();
-    }
+    // Hinta-arvion ostonäkymä (js/ui/estimate.js); toimii myös ennen ensimmäistä kiinteistöä
+    const openPaywall = () => showPaywall();
 
     /** Palauttaa false, jos väritys ei käynnisty (lukittu tai ei kuvioita). */
     function setColors(next) {
@@ -193,7 +186,7 @@ export function startSaavutettavuus() {
         return `<div class="sv-laatikko-otsikko">
             <span>${esc(T.otsikko)}</span>
             <span class="sv-arvio-merkki">${esc(T.arvioMerkki)}</span>
-            ${kokeilu ? `<span class="sv-kokeilu-merkki">${esc(T.kokeilu)}</span>` : ''}
+            ${kokeilu && kokeiluMerkki('saavutettavuus', T.kokeilu) ? `<span class="sv-kokeilu-merkki">${esc(T.kokeilu)}</span>` : ''}
         </div>`;
     }
 
