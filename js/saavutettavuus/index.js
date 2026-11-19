@@ -31,6 +31,7 @@ import { createRoadSource, harvestArea } from './aineisto.js';
 import { fetchRaster } from './rasteri.js';
 import { fetchDtw, fetchDem } from './maasto.js';
 import { T } from './teksti.js';
+import { createCachedFetch } from '../valimuisti.js';
 import { showPaywall } from '../ui/estimate.js';
 
 
@@ -45,7 +46,12 @@ const locked = () => !isUnlocked('saavutettavuus');
 export function startSaavutettavuus() {
     addHelpSection({ id: 'saavutettavuus', title: T.ohjeOsio.otsikko, html: T.ohjeOsio.html });
 
-    const roads = createRoadSource();
+    // Aineistot pysyvään välimuistiin (Tero 19.11.2026: nopeutus): tiet ja rajoitukset
+    // muuttuvat (kelirikko), joten viikko; maapohja, kosteus ja korkeusmalli harvoin
+    const DAY = 24 * 3600 * 1000;
+    const tieHaku = createCachedFetch({ name: 'metsainfo-tiet-v1', ttl: 7 * DAY });
+    const maastoHaku = createCachedFetch({ name: 'metsainfo-maasto-v1', ttl: 90 * DAY, maxEntries: 200 });
+    const roads = createRoadSource({ fetchFn: tieHaku });
     const ui = { colors: false, ctx: null, status: 'idle', result: null };
     let token = 0;
     let observer = null; // kuvioluettelon avaukset (watchStands)
@@ -161,10 +167,10 @@ export function startSaavutettavuus() {
         try {
             const result = await analyseParcel({ parcel: ctx.parcel, features: ctx.features }, {
                 roads,
-                raster: (bbox) => fetchRaster(bbox),
-                dtw: (bbox) => fetchDtw(bbox),
-                dem: (bbox) => fetchDem(bbox),
-                area: (p) => harvestArea(p)
+                raster: (bbox) => fetchRaster(bbox, { fetchFn: maastoHaku }),
+                dtw: (bbox) => fetchDtw(bbox, { fetchFn: maastoHaku }),
+                dem: (bbox) => fetchDem(bbox, { fetchFn: maastoHaku }),
+                area: (p) => harvestArea(p, { fetchFn: maastoHaku })
             });
             if (my !== token) return;
             ui.result = result;
