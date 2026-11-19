@@ -19,6 +19,7 @@ import { isUnlocked } from '../features.js';
 import { showToast } from '../ui/location-ui.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { registerColorMode } from '../ui/tyokalut.js';
+import { seliteNappi } from '../ui/legend.js';
 import { fetchPrices, loadCachedPrices, loadOverrides, lookupKunta } from '../platform/prices.js';
 import { PRICE_REGIONS, regionForKunta, parcelPoint } from '../pricing/region.js';
 import { applyOverrides } from '../pricing/prices.js';
@@ -124,7 +125,7 @@ export function startArvovari() {
             standLayer.addData({ type: 'Feature', geometry: f.geometry, properties: { luokka: classIndex(vals[i].perHa) } });
         });
         standLayer.addTo(state.map);
-        legend.innerHTML = `<div class="av-selite-otsikko">${esc(T.selite)}</div>
+        legend.innerHTML = `${seliteNappi()}<div class="av-selite-otsikko legend-title">${esc(T.selite)}</div>
             <div class="legend-items">${VARIT.map((c, k) => `<div class="legend-item"><span class="legend-color" style="background:${c}"></span>${esc(T.luokat[k])}</div>`).join('')}</div>`;
     }
 

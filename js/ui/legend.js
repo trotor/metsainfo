@@ -7,6 +7,54 @@ import * as state from '../state.js';
 import { featureStyle, mkiStyle } from '../styles.js';
 import { T } from './teksti.js';
 
+/* ---------- Selitteiden sulkeminen (kaikki selitteet: värit, MKI, lisäosat) ---------- */
+
+const SELITE_KEY = 'metsainfo.selite';
+let seliteValmis = false;
+
+function seliteKiinni() {
+    return document.body.classList.contains('selitteet-kiinni');
+}
+
+function paivitaSeliteNapit() {
+    const kiinni = seliteKiinni();
+    document.querySelectorAll('[data-selite]').forEach(b => {
+        b.setAttribute('aria-expanded', String(!kiinni));
+        b.setAttribute('aria-label', kiinni ? T.seliteNayta : T.selitePiilota);
+        b.title = kiinni ? T.seliteNayta : T.selitePiilota;
+    });
+}
+
+function initSelite() {
+    if (seliteValmis) return;
+    seliteValmis = true;
+    let kiinni = false;
+    try { kiinni = localStorage.getItem(SELITE_KEY) === 'kiinni'; } catch { /* ei tallennustilaa */ }
+    document.body.classList.toggle('selitteet-kiinni', kiinni);
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest?.('[data-selite]')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const next = !seliteKiinni();
+        document.body.classList.toggle('selitteet-kiinni', next);
+        try { localStorage.setItem(SELITE_KEY, next ? 'kiinni' : 'auki'); } catch { /* ei tallennustilaa */ }
+        paivitaSeliteNapit();
+    }, true);
+}
+
+/**
+ * Selitteen sulku- ja avausnappi (myös lisäosien selitteisiin, esim.
+ * js/saavutettavuus/, js/arvovari/). Suljettuna selite on pieni "Selite"-nappi;
+ * tila on yhteinen kaikille selitteille ja säilyy laitteella.
+ */
+export function seliteNappi() {
+    initSelite();
+    queueMicrotask(paivitaSeliteNapit);
+    const kiinni = seliteKiinni();
+    const label = kiinni ? T.seliteNayta : T.selitePiilota;
+    return `<button type="button" class="selite-nappi" data-selite aria-expanded="${!kiinni}" aria-label="${label}" title="${label}"><span class="selite-nappi-teksti">${T.selite}</span><span class="selite-nappi-ikoni" aria-hidden="true"></span></button>`;
+}
+
 // Selitteen otsikko ja rivit valitulla kielellä (värit config.js:stä)
 const labelOf = (texts, key, mode) => texts[key]?.label ?? mode.label;
 const itemLabel = (texts, key, item, i) => texts[key]?.legend?.[i] ?? item.label;
@@ -59,7 +107,7 @@ export function updateLegend() {
     }
 
     legendEl.classList.remove('hidden');
-    legendEl.innerHTML = `
+    legendEl.innerHTML = `${seliteNappi()}
         <div class="legend-title">${labelOf(T.varitila, state.currentColorMode, mode)}</div>
         <div class="legend-items">
             ${mode.legend.map((item, i) =>
@@ -101,5 +149,7 @@ export function updateMkiLegend() {
         items.appendChild(el);
     });
 
-    legendEl.replaceChildren(title, items);
+    const tmp = document.createElement('div');
+    tmp.innerHTML = seliteNappi();
+    legendEl.replaceChildren(tmp.firstElementChild, title, items);
 }

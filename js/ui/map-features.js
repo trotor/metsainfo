@@ -9,6 +9,7 @@ import * as state from '../state.js';
 import { formatNumber, formatCadastralReference, getGeometryBounds3067 } from '../utils.js';
 import { isMobileLayout } from './layout.js';
 import { openStand } from './stands.js';
+import { emit, VIESTIT } from '../vayla.js';
 
 /**
  * Show popup for a single feature
@@ -17,7 +18,8 @@ export function showFeaturePopup(feature, layer) {
     const props = feature.properties;
 
     const fmt = (v, d) => formatNumber(v, d, locale());
-    const content = `
+    const el = document.createElement('div');
+    el.innerHTML = `
         <strong>${T.kuvio(props.STANDNUMBER || '-')}</strong><br>
         ${T.pintaAla}: ${fmt(props.AREA, 2)} ha<br>
         ${T.tilavuus}: ${fmt(props.VOLUME, 0)} m³/ha<br>
@@ -25,7 +27,12 @@ export function showFeaturePopup(feature, layer) {
         ${T.ikaPopup}: ${props.MEANAGE || '-'} ${T.vuotta}
     `;
 
-    layer.bindPopup(content).openPopup();
+    layer.bindPopup(el).openPopup();
+    // Lisäosat (esim. saavutettavuus) voivat lisätä ponnahdukseen rivin
+    emit(VIESTIT.kuvioPopup, {
+        feature, index: state.currentFeatures.indexOf(feature), el,
+        paivita: () => layer.getPopup()?.update()
+    });
 }
 
 /**

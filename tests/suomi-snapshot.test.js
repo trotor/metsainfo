@@ -96,7 +96,8 @@ describe('suomenkielinen käyttöliittymä pysyy ennallaan', () => {
         onEachHabitat({ properties: { SPECIALFEATURECODE: 9999, AREA: 0.5 } }, h2);
         const m = fakeLayer();
         onEachMkiFeature({ properties: { CUTTINGPURPOSE: 2, CUTTINGREALIZATIONPRACTICE: 5, DECLARATIONMAINTREESPECIES: 1, AREA: 2.3, DECLARATIONARRIVALYEAR: 2024 } }, m);
-        expect([a.popup, h.popup, h2.popup, m.popup, m.tooltip].map(norm)).toMatchSnapshot();
+        // Kuvion ponnahdus on elementti (lisäosat voivat lisätä siihen rivin)
+        expect([a.popup, h.popup, h2.popup, m.popup, m.tooltip].map(x => x?.innerHTML ?? x).map(norm)).toMatchSnapshot();
     });
 
     it('selitteet, termit ja koodistot', () => {

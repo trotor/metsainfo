@@ -8,6 +8,9 @@
  * - Kuvion tietokorttiin (kuvioluettelon avattu rivi) tulee arviolaatikko,
  *   joka erottuu Metsäkeskuksen faktatiedoista.
  * - Yhteenvetoon tulee kiinteistön tieyhteys samanlaisessa laatikossa.
+ * - Lasketaan vasta tarvittaessa (Tero 19.11.2026): kun kuvion tiedot avataan,
+ *   väritys valitaan tai yhteenvedon Laske-nappia painetaan. Tulos säilyy
+ *   muistissa kiinteistöittäin (TULOKSET), joten uudelleen avaus ei hae uudelleen.
  */
 
 import './saavutettavuus.css';
@@ -18,6 +21,7 @@ import { formatNumber, coordsEPSG3067ToLatLng } from '../utils.js';
 import { on, VIESTIT } from '../vayla.js';
 import { taytto } from '../peittavyys.js';
 import { registerColorMode } from '../ui/tyokalut.js';
+import { seliteNappi } from '../ui/legend.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { showToast } from '../ui/location-ui.js';
 import { purchases } from '../platform/purchases.js';
@@ -44,6 +48,26 @@ export function startSaavutettavuus() {
     const roads = createRoadSource();
     const ui = { colors: false, ctx: null, status: 'idle', result: null };
     let token = 0;
+    let observer = null; // kuvioluettelon avaukset (watchStands)
+    let popup = null;    // työpöydän kuvioponnahdus { index, el, paivita }
+
+    // Valmiit tulokset muistissa kiinteistön (tai valinnan kuvioiden) mukaan, enintään 12
+    const TULOKSET = new Map();
+    const tulosAvain = (ctx) => ctx?.reference
+        || ctx?.features?.map(f => f.properties?.STANDID ?? '').join(',')
+        || null;
+    function muista(ctx, result) {
+        const key = tulosAvain(ctx);
+        if (!key) return;
+        TULOKSET.delete(key);
+        TULOKSET.set(key, result);
+        if (TULOKSET.size > 12) TULOKSET.delete(TULOKSET.keys().next().value);
+    }
+
+    /** Laske, jos ei jo laskettu tai kesken (kuvion tiedot avattu, väritys, Laske-nappi). */
+    function ensure() {
+        if (ui.status === 'idle' || ui.status === 'error') run();
+    }
 
     /* ---------- Kartta: kuviot luokan väreillä ---------- */
 
@@ -95,7 +119,7 @@ export function startSaavutettavuus() {
         });
         standLayer.addTo(state.map);
         roadLayer.addTo(state.map);
-        legend.innerHTML = `<div class="sv-selite-otsikko">${esc(T.selite)}</div>
+        legend.innerHTML = `${seliteNappi()}<div class="sv-selite-otsikko legend-title">${esc(T.selite)}</div>
             <div class="legend-items">
                 ${['hyva', 'kohtalainen', 'heikko'].map(k => `<div class="legend-item"><span class="legend-color" style="background:${VARIT[k]}"></span>${esc(T.luokat[k])}</div>`).join('')}
                 ${r.reitti.length ? `<div class="legend-item"><span class="sv-selite-viiva"></span>${esc(T.seliteReitti)}</div>` : ''}
@@ -120,7 +144,7 @@ export function startSaavutettavuus() {
             return false;
         }
         ui.colors = next;
-        if (ui.colors && ui.status === 'error') run();
+        if (ui.colors) ensure();
         drawMap();
         renderSummaryBox();
     }
@@ -145,6 +169,7 @@ export function startSaavutettavuus() {
             if (my !== token) return;
             ui.result = result;
             ui.status = 'done';
+            if (!result.partial && !result.tie?.virhe) muista(ctx, result);
         } catch (err) {
             if (my !== token) return;
             console.warn('[saavutettavuus]', err);
@@ -153,21 +178,87 @@ export function startSaavutettavuus() {
         renderSummaryBox();
         decorateStands();
         drawMap();
+        renderPopup();
     }
 
     on(VIESTIT.yhteenveto, (ctx) => {
         ui.ctx = ctx;
-        ui.result = null;
-        ui.status = 'idle';
+        const muistissa = TULOKSET.get(tulosAvain(ctx));
+        ui.result = muistissa || null;
+        ui.status = muistissa ? 'done' : 'idle';
         token++;
         renderSummaryBox();
+        if (muistissa) decorateStands();
         drawMap();
-        if (!locked() && ctx?.features?.length) run();
+        watchStands(ctx?.content);
+        // Väritys valittuna: lasketaan heti, muuten vasta kun tietoja katsotaan
+        if (!locked() && ctx?.features?.length && (ui.colors || openStandIndex(ctx.content) != null)) ensure();
     }, { replay: true });
+
+    /* ---------- Työpöydän kuvioponnahdus: saavutettavuusrivi ---------- */
+
+    on(VIESTIT.kuvioPopup, ({ index, el, paivita }) => {
+        if (locked() || !ui.ctx?.features?.length || index < 0 || !el) { popup = null; return; }
+        popup = { index, el, paivita };
+        ensure();
+        renderPopup();
+    });
+
+    function renderPopup() {
+        if (!popup?.el?.isConnected) return;
+        popup.el.querySelector('.sv-popup')?.remove();
+        const k = ui.result?.kuviot.get(popup.index);
+        let html;
+        if (ui.status === 'loading') html = esc(T.lasketaan);
+        else if (ui.status === 'error') html = esc(T.virhe);
+        else if (k?.score != null) html = `<span class="sv-merkki sv-${esc(k.luokka)}">${k.score}</span> ${esc(T.luokat[k.luokka])} · ${esc(T.pisteet(k.score))}`;
+        else return;
+        const row = document.createElement('div');
+        row.className = 'sv-popup';
+        row.innerHTML = `<strong>${esc(T.otsikko)}:</strong> ${html}`;
+        popup.el.append(row);
+        popup.paivita?.();
+    }
+
+    /* ---------- Kuvion tiedot avattu → laske ---------- */
+
+    function openStandIndex(content) {
+        const el = content?.querySelector?.('.stand-item.expanded');
+        return el ? Number(el.dataset.index) : null;
+    }
+
+    function watchStands(content) {
+        observer?.disconnect();
+        observer = null;
+        if (!content || typeof MutationObserver === 'undefined') return;
+        observer = new MutationObserver((records) => {
+            const avattu = records.some(r => r.target.classList?.contains('stand-item') && r.target.classList.contains('expanded'));
+            if (!avattu || locked() || !ui.ctx?.features?.length) return;
+            if (ui.status === 'done') return;
+            ensure();
+            renderStandPending();
+        });
+        observer.observe(content, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    }
+
+    // Avatun kuvion tietoihin "lasketaan" siksi aikaa, kun analyysi on kesken
+    function renderStandPending() {
+        const content = ui.ctx?.content;
+        if (!content?.isConnected) return;
+        content.querySelectorAll('.stand-item .sv-odottaa').forEach(el => el.remove());
+        if (ui.status !== 'loading') return;
+        const details = content.querySelector('.stand-item.expanded .stand-details');
+        if (!details) return;
+        const box = document.createElement('div');
+        box.className = 'detail-group sv-lisa sv-laatikko sv-kuvio sv-odottaa';
+        box.innerHTML = `${boxHead()}<p class="sv-status" role="status">${esc(T.lasketaan)}</p>`;
+        details.insertBefore(box, details.querySelector('.detail-footer'));
+    }
 
     // Kiinteistö suljettu: väritys ja tiet pois kartalta. Väritystila jää valituksi,
     // joten seuraava kiinteistö väritetään taas.
     on(VIESTIT.tyhjennys, () => {
+        observer?.disconnect();
         ui.ctx = null;
         ui.result = null;
         ui.status = 'idle';
@@ -175,10 +266,7 @@ export function startSaavutettavuus() {
         drawMap();
     });
 
-    purchases.onChange(() => {
-        if (!locked() && ui.ctx && !ui.result && ui.status !== 'loading') run();
-        else { renderSummaryBox(); decorateStands(); drawMap(); }
-    });
+    purchases.onChange(() => { renderSummaryBox(); decorateStands(); drawMap(); });
 
     /* ---------- Yhteenveto: kiinteistön laatikko ---------- */
 
@@ -214,7 +302,12 @@ export function startSaavutettavuus() {
             return `<p class="sv-rivi-teksti">${esc(T.lukittu)}</p>
                 <button type="button" class="kortti-btn kortti-primary" data-est="paywall">${esc(T.avaaLisaosa)}</button>`;
         }
-        if (ui.status === 'loading' || ui.status === 'idle') return `<p class="sv-status" role="status">${esc(T.lasketaan)}</p>`;
+        if (ui.status === 'idle') {
+            return `<p class="sv-rivi-teksti">${esc(T.laskeKuvaus)}</p>
+                <button type="button" class="kortti-btn kortti-primary" data-sv="laske">${esc(T.laske)}</button>
+                <p class="sv-huom">${esc(T.lisamaksu)}</p>`;
+        }
+        if (ui.status === 'loading') return `<p class="sv-status" role="status">${esc(T.lasketaan)}</p>`;
         if (ui.status === 'error') {
             return `<p class="sv-status">${esc(T.virhe)}</p>
                 <button type="button" class="kortti-btn" data-sv="retry">${esc(T.yritaUudelleen)}</button>`;
@@ -247,6 +340,7 @@ export function startSaavutettavuus() {
             const el = e.target.closest('[data-sv]');
             if (!el) return;
             if (el.dataset.sv === 'retry') run();
+            else if (el.dataset.sv === 'laske') ensure();
             else if (el.dataset.sv === 'varit') (ui.colors ? mode.deselect() : mode.select());
         });
         parcelInfo.after(box);

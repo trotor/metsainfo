@@ -50,5 +50,8 @@ export const VIESTIT = {
     // Läpinäkyvyyssäädin → kuvioita värittävät tasot: piirrä täyttö uudelleen { peittavyys } (js/peittavyys.js)
     peittavyys: 'kartta:peittavyys',
     // Asetukset → esittely: käynnistä esittely uudelleen (js/esittely/)
-    avaaEsittely: 'esittely:avaa'
+    avaaEsittely: 'esittely:avaa',
+    // Sovellus → lisäosat: kuvion ponnahdus avattu työpöydällä { feature, index, el, paivita };
+    // lisäosa voi lisätä el:iin rivin ja kutsua paivita() (ponnahduksen koko)
+    kuvioPopup: 'sovellus:kuvio-popup'
 };

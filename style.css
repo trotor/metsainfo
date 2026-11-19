@@ -288,6 +288,64 @@ body {
     border: 1px solid rgba(0,0,0,0.15);
 }
 
+/* Selitteiden sulkeminen (js/ui/legend.js seliteNappi): sama tila kaikille selitteille */
+/* body-etuliite: lisäosien omat tyylit (padding) ladataan myöhemmin */
+body #color-legend, body #mki-legend, body #sv-selite, body #av-selite {
+    padding-right: 34px;
+}
+.selite-nappi {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: 13px;
+    background: #f1f1ee;
+    color: #333;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 6px;
+}
+.selite-nappi:focus-visible { outline: 2px solid #2d5016; outline-offset: 1px; }
+.selite-nappi-teksti { display: none; }
+.selite-nappi-ikoni::before { content: '×'; font-size: 17px; }
+.legend-color { width: 14px; height: 14px; }
+.legend-item { color: #333; }
+body.selitteet-kiinni .legend-title,
+body.selitteet-kiinni .legend-items,
+body.selitteet-kiinni #sv-selite > :not(.selite-nappi),
+body.selitteet-kiinni #av-selite > :not(.selite-nappi) { display: none !important; }
+body.selitteet-kiinni #color-legend,
+body.selitteet-kiinni #mki-legend,
+body.selitteet-kiinni #sv-selite,
+body.selitteet-kiinni #av-selite { padding: 0; background: transparent; box-shadow: none; }
+body.selitteet-kiinni .selite-nappi {
+    position: static;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 16px;
+    background: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+body.selitteet-kiinni .selite-nappi-teksti { display: inline; font-weight: 600; }
+body.selitteet-kiinni .selite-nappi-ikoni::before { content: '▴'; font-size: 12px; }
+
+/* Työpöytä: tietopaneelin ollessa auki värivalitsimet ja selitteet paneelin oikealle
+   puolelle, jottei paneeli peitä niitä (mobiilissa ja tabletissa nauhassa, left ei vaikuta) */
+#info-panel:not(.hidden) ~ #map-strip #color-mode-control,
+#info-panel:not(.hidden) ~ #map-strip #mki-color-mode-control { left: 440px; }
+#info-panel:not(.hidden) ~ #map-strip #color-legend,
+#info-panel:not(.hidden) ~ #map-strip #mki-legend,
+#info-panel:not(.hidden) ~ #map-strip #sv-selite,
+#info-panel:not(.hidden) ~ #map-strip #av-selite { left: 610px; }
+
 /* Layer controls */
 #layer-controls {
     position: absolute;
@@ -1730,11 +1788,23 @@ h3 .info-tip-icon {
         display: none;
     }
 
+    /* Avoin selite omalle rivilleen valitsimen alle, kaikki luokat näkyvissä (rivittyy) */
     #map-strip .legend-items {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        scrollbar-width: none;
+        flex-wrap: wrap;
+        gap: 4px 10px;
     }
+    body #color-legend, body #mki-legend, body #sv-selite, body #av-selite {
+        position: static;
+        grid-column: 1 / -1;
+        padding-right: 40px;
+    }
+    #map-strip .selite-nappi { top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border-radius: 16px; }
+    /* Suljettuna pieni Selite-nappi valitsimen viereen */
+    body.selitteet-kiinni #color-legend,
+    body.selitteet-kiinni #mki-legend,
+    body.selitteet-kiinni #sv-selite,
+    body.selitteet-kiinni #av-selite { grid-column: auto; justify-self: start; padding: 0; }
+    body.selitteet-kiinni #map-strip .selite-nappi { transform: none; width: auto; height: 44px; border-radius: 10px; }
 
     #here-row {
         margin: 0 12px 8px;
