@@ -7,6 +7,7 @@
  */
 
 import { purchases } from '../platform/purchases.js';
+import { FEATURES } from '../features.js';
 import { isNative } from '../platform/index.js';
 import { fetchPrices, loadCachedPrices, loadOverrides, saveOverrides, lookupKunta } from '../platform/prices.js';
 import { shareTextFile } from '../platform/share.js';
@@ -44,6 +45,10 @@ const webOnly = () => !purchases.isAvailable() && !isNative();
 export function estimateEnabled() {
     return purchases.isAvailable() || webOnly();
 }
+
+// Ostonäkymän listaan vain kertaostoon kuuluvat toiminnot (js/features.js product);
+// maksuttomat (myöhemmin ehkä maksulliset) eivät ole listalla
+const ETU_TOIMINNOT = [['maastotila', 'etuMaasto'], ['lahihaku', 'etuLahihaku'], ['arvovari', 'etuArvovari'], ['huomiot', 'etuHuomiot'], ['saavutettavuus', 'etuSaavutettavuus']];
 
 const storeLinksHtml = () => `<div class="est-kaupat">
     <a class="est-btn est-kauppa" href="${STORE_LINKS.appStore}" target="_blank" rel="noopener">${T.appStore}</a>
@@ -547,7 +552,7 @@ async function openPaywall() {
         <ul>
             <li>${T.etuHinnat}</li>
             <li>${T.etuRaportti}</li>
-            <li>${T.etuMaasto}</li><li>${T.etuLahihaku}</li><li>${T.etuArvovari}</li><li>${T.etuHuomiot}</li><li>${T.etuSaavutettavuus}</li>
+            ${ETU_TOIMINNOT.filter(([id]) => FEATURES[id]?.product).map(([, k]) => `<li>${T[k]}</li>`).join('')}
             <li>${T.etuKertaosto}</li>
         </ul>
         <button type="button" class="est-btn-outline pw-wide" data-est="demo">${T.kokeileEsimerkilla}</button>

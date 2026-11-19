@@ -1,4 +1,4 @@
-Metsäinfo näyttää Suomen metsävaratiedot kartalla. Hae kiinteistötunnuksella tai napauta kiinteistöä kartalta, niin saat yhteenvedon sen metsikkökuvioista: puuston määrän, puulajit, iän sekä hakkuu- ja hoitoehdotukset. Lisäosana puukaupan hinta-arvio ja maastotyökalut.
+Metsäinfo näyttää Suomen metsävaratiedot kartalla. Hae kiinteistötunnuksella tai napauta kiinteistöä kartalta, niin saat yhteenvedon sen metsikkökuvioista: puuston määrän, puulajit, iän sekä hakkuu- ja hoitoehdotukset. Lisäosana puukaupan hinta-arvio.
 
 Sovellus on tehty käytettäväksi myös maastossa.
 
@@ -18,10 +18,15 @@ METSÄTIEDOT
 • Aineiston mittausvuosi näkyvissä
 
 TYÖKALUT
+• Kerro tästä paikasta: kuvion tiedot sijaintisi tai kartan kohdan mukaan ilman kiinteistöä, ja metsävisa
+• Etsi läheltä: tietynlaiset metsät ympäriltäsi kartalle
+• Huomiot: muistiinpanot ja valokuvat tarkkaan paikkaan kartalle
+• Saavutettavuus: kuvioiden tieyhteys ja metsäkuljetusmatka (arvio)
 • Valitse kuvioita myös kiinteistörajojen yli ja katso valinnan yhteenveto
 • Huomioitavaa metsätöissä: muinaisjäännökset, luonnonsuojelu- ja Natura-alueet sekä metsälain erityisen tärkeät elinympäristöt kiinteistön alueelta
 • Suosikkikiinteistöt ja omat muistiinpanot
 • Lyhyt esittely ensimmäisellä avauksella
+• Työkalut ovat nyt maksuttomia. Osa niistä voi myöhemmin muuttua erikseen ostettaviksi tai kuukausimaksullisiksi.
 
 KARTAT JA TASOT
 • Peruskartta, taustakartta ja ilmakuva
@@ -33,18 +38,13 @@ KARTAT JA TASOT
 • Retkeilykohteet: laavut, tulentekopaikat ja reitit
 • Kuvioiden värien läpinäkyvyys ilmakuvan päällä
 
-LISÄOSA: HINTA-ARVIO JA MAASTOTYÖKALUT
+LISÄOSA: PUUKAUPAN HINTA-ARVIO
 • Ehdotettujen hakkuiden arvo vuosittain alueen tuoreilla kantohinnoilla
 • Hinnat verkosta: Metsäteollisuus ry:n puukaupan viikkoseuranta (Luonnonvarakeskuksen tilastot); hinta-alue kiinteistön kunnan mukaan
 • Omat hinnat esimerkiksi puukauppatarjouksen mukaan
 • Koko puuston kantoraha-arvo ja jaettava arvioraportti, esimerkiksi kuolinpesän osakkaille
 • Puuston arvo kartalla: kuviot väritetään arvon mukaan (€/ha)
-• Kerro tästä paikasta: kuvion tiedot sijaintisi tai kartan kohdan mukaan ilman kiinteistöä, ja metsävisa
-• Etsi läheltä: tietynlaiset metsät ympäriltäsi kartalle
-• Huomiot: muistiinpanot ja valokuvat tarkkaan paikkaan kartalle
-• Saavutettavuus: kuvioiden tieyhteys ja metsäkuljetusmatka (arvio)
-• Kertaosto, ei tilausta. Kokeile hinta-arviota ilmaiseksi kuvitteellisella esimerkkimetsällä.
-• Kertaosto sisältää nämä toiminnot. Jatkossa uudet toiminnot voivat olla erikseen ostettavia tai kuukausimaksullisia.
+• Kertaosto, ei tilausta: hinta-arvio pysyy käytössäsi. Kokeile sitä ilmaiseksi kuvitteellisella esimerkkimetsällä.
 
 MUUTA
 • Jaa linkki kiinteistöön

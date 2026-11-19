@@ -27,10 +27,11 @@ const KOKEILUBUILD = import.meta.env?.VITE_KOKEILU === '1';
 export const FEATURES = {
     // Julkaistu: hinta-arvio (js/ui/estimate.js, js/pricing/)
     hintaArvio: { product: PRODUCT_ID, kokeilu: false },
-    // Kokeilu #25/#26: "Kerro tästä paikasta" ja metsävisa (js/maasto/)
-    maastotila: { product: PRODUCT_ID, kokeilu: false },
-    // Suunniteltu #27: tietynlaiset metsät 1 km × 1 km alueelta (js/lahihaku/)
-    lahihaku: { product: PRODUCT_ID, kokeilu: false },
+    // Kokeilu #25/#26: "Kerro tästä paikasta" ja metsävisa (js/maasto/); nyt maksuton,
+    // voi myöhemmin muuttua maksulliseksi
+    maastotila: { product: null, kokeilu: false, myohemminMaksullinen: true },
+    // Suunniteltu #27: tietynlaiset metsät 1 km × 1 km alueelta (js/lahihaku/); nyt maksuton
+    lahihaku: { product: null, kokeilu: false, myohemminMaksullinen: true },
     // Kokeilu #24: suosikit ja omat muistiinpanot, maksuton (js/suosikit/)
     suosikit: { product: null, kokeilu: false },
     // Kokeilu #28: laserkeilauksen korkeusmalli taustakartaksi, maksuton (js/korkeusmalli/)
@@ -39,9 +40,9 @@ export const FEATURES = {
     latvusmalli: { product: null, kokeilu: false },
     // Kokeilu #23: asetukset ja kielivalinta, maksuton (js/asetukset/, js/i18n.js)
     asetukset: { product: null, kokeilu: true },
-    // Kokeilu: kuvion saavutettavuus ja tieyhteys (js/saavutettavuus/); nyt hinta-arvion
-    // kertaostossa, voi myöhemmin olla oma maksullinen lisäosa
-    saavutettavuus: { product: PRODUCT_ID, kokeilu: false },
+    // Kokeilu: kuvion saavutettavuus ja tieyhteys (js/saavutettavuus/); nyt maksuton,
+    // voi myöhemmin olla oma maksullinen lisäosa
+    saavutettavuus: { product: null, kokeilu: false, myohemminMaksullinen: true },
     // Kokeilu #31: kuviovalinta kiinteistörajojen yli, maksuton (js/valinta/); hinta-arvio
     // ja saavutettavuus pysyvät kertaoston takana
     valinta: { product: null, kokeilu: false },
@@ -50,9 +51,10 @@ export const FEATURES = {
     // Kokeilu: LIPAS-retkeilykohteet karttatasona, maksuton (js/retkeily/)
     retkeily: { product: null, kokeilu: false },
     // Kokeilu #34: puuston arvo €/ha kartan värityksenä (js/arvovari/), hinta-arvion kertaostossa
+    // (kantohinnoin laskettu arvo on hinta-arvion tulos kartalla)
     arvovari: { product: PRODUCT_ID, kokeilu: false },
-    // Kokeilu #33: pistemuotoiset huomiot kartalle (js/huomiot/), hinta-arvion kertaostossa
-    huomiot: { product: PRODUCT_ID, kokeilu: false },
+    // Kokeilu #33: pistemuotoiset huomiot kartalle (js/huomiot/); nyt maksuton
+    huomiot: { product: null, kokeilu: false, myohemminMaksullinen: true },
     // Kokeilu trotor/metsainfo#37: kuvioiden värien läpinäkyvyys ilmakuvan päällä, maksuton (js/lapinakyvyys/)
     lapinakyvyys: { product: null, kokeilu: false },
     // Kokeilu: esittely ensimmäisellä avauksella, oston jälkeen ja zoomausvihje, maksuton (js/esittely/)
@@ -64,6 +66,15 @@ export const FEATURES = {
  * ovat auki, jotta niitä voi kehittää selaimessa; kokeilukoodi ei ole
  * tavallisessa buildissa lainkaan.
  */
+/**
+ * Maksuton toiminto, joka voi myöhemmin muuttua maksulliseksi (Tero 19.11.2026:
+ * kertaosto takaa vain puukaupan hinta-arvion). Kortti ja kauppatekstit kertovat sen.
+ */
+export function myohemminMaksullinen(id) {
+    const f = FEATURES[id];
+    return Boolean(f && !f.product && f.myohemminMaksullinen);
+}
+
 /** Kortin Kokeilu-merkki vain toiminnolle, joka on vielä kokeilussa. */
 export function kokeiluMerkki(id, teksti) {
     return FEATURES[id]?.kokeilu ? teksti : '';

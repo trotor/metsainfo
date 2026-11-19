@@ -36,6 +36,7 @@ const fi = {
     tallennaKuvio: 'Tallenna kuvio suosikiksi',
     haetaan: (n, kaikki) => `Haetaan metsätietoja… ${n}/${kaikki}`,
     eiVerkkoa: 'Metsätietoja ei saatu. Tarkista verkkoyhteys.',
+    palveluPoissa: 'Metsäkeskuksen palvelu ei nyt vastaa odotetusti, joten toiminto ei ole käytettävissä. Yritä myöhemmin uudelleen.',
     osittain: (n, kaikki) => `Osa alueesta jäi hakematta (${n}/${kaikki} ruutua puuttuu), joten kaikkia kuvioita ei ehkä löytynyt.`,
     yritaUudelleen: 'Yritä uudelleen',
     tulokset: (n) => (n === 1 ? '1 kuvio' : `${n} kuviota`),
@@ -95,6 +96,7 @@ const en = {
     tallennaKuvio: 'Save stand as a favourite',
     haetaan: (n, kaikki) => `Loading forest data… ${n}/${kaikki}`,
     eiVerkkoa: 'Could not load forest data. Check your connection.',
+    palveluPoissa: 'The Finnish Forest Centre service is not responding as expected, so this feature is unavailable. Please try again later.',
     osittain: (n, kaikki) => `Part of the area could not be loaded (${n}/${kaikki} tiles missing), so some stands may be missing.`,
     yritaUudelleen: 'Try again',
     tulokset: (n) => (n === 1 ? '1 stand' : `${n} stands`),
@@ -154,6 +156,7 @@ const sv = {
     tallennaKuvio: 'Spara figuren som favorit',
     haetaan: (n, kaikki) => `Hämtar skogsdata… ${n}/${kaikki}`,
     eiVerkkoa: 'Skogsdata kunde inte hämtas. Kontrollera nätverksanslutningen.',
+    palveluPoissa: 'Skogscentralens tjänst svarar inte som väntat, så funktionen är inte tillgänglig. Försök igen senare.',
     osittain: (n, kaikki) => `En del av området kunde inte hämtas (${n}/${kaikki} rutor saknas), så alla figurer hittades kanske inte.`,
     yritaUudelleen: 'Försök igen',
     tulokset: (n) => (n === 1 ? '1 figur' : `${n} figurer`),
@@ -192,7 +195,7 @@ const OHJE = {
 <li>Löydetyt kuviot näkyvät kartalla ja listassa etäisyyksineen. Kuvion napautus näyttää sen tiedot.</li>
 <li>Haun ja kuvion voi tallentaa suosikkeihin.</li>
 </ul>
-<p>Kartan ja listan kuviot kuuluvat puukaupan hinta-arvion lisäosaan (sama kertaosto).</p>`
+<p>Maksuton nyt. Toiminto voi myöhemmin muuttua maksulliseksi.</p>`
     },
     sv: {
         otsikko: "Sök i närheten",
@@ -202,7 +205,7 @@ const OHJE = {
 <li>Figurerna som hittas visas på kartan och i listan med avstånd. Tryck på en figur för att se uppgifterna.</li>
 <li>Sökningen och figuren kan sparas bland favoriterna.</li>
 </ul>
-<p>Figurerna på kartan och i listan ingår i tillägget Prisuppskattning för virkesaffär (samma engångsköp).</p>`
+<p>Kostnadsfri nu. Funktionen kan senare bli avgiftsbelagd.</p>`
     },
     en: {
         otsikko: "Search nearby",
@@ -212,7 +215,7 @@ const OHJE = {
 <li>The stands found are shown on the map and in a list with distances. Tap a stand to see its details.</li>
 <li>The search and the stand can be saved to favourites.</li>
 </ul>
-<p>The stands on the map and in the list are part of the timber sale price estimate add-on (same one-time purchase).</p>`
+<p>Free for now. This feature may become paid later.</p>`
     }
 };
 for (const lang of Object.keys(OHJE)) TEKSTIT[lang].ohjeOsio = OHJE[lang];

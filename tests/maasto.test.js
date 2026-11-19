@@ -275,8 +275,9 @@ describe('toimintojen avaus (features.js)', () => {
     const store = (available, entitled) => ({ isAvailable: () => available, isEntitled: () => entitled });
     it('julkaistu maksullinen on verkossa lukossa, maksuton ja kokeilu auki', async () => {
         const { isUnlocked } = await import('../js/features.js');
-        expect(isUnlocked('maastotila', store(false, false))).toBe(false);
         expect(isUnlocked('hintaArvio', store(false, false))).toBe(false);
+        expect(isUnlocked('arvovari', store(false, false))).toBe(false);
+        expect(isUnlocked('maastotila', store(false, false))).toBe(true);
         expect(isUnlocked('valinta', store(false, false))).toBe(true);
         expect(isUnlocked('asetukset', store(false, false))).toBe(true);
     });
@@ -285,12 +286,24 @@ describe('toimintojen avaus (features.js)', () => {
         expect(kokeiluMerkki('maastotila', 'Kokeilu')).toBe('');
         expect(kokeiluMerkki('asetukset', 'Kokeilu')).toBe('Kokeilu');
     });
-    it('sovelluksessa vaatii hinta-arvion oston', async () => {
+    it('sovelluksessa hinta-arvio ja arvoväritys vaativat oston, muut lisätoiminnot maksuttomia', async () => {
         const { isUnlocked } = await import('../js/features.js');
-        expect(isUnlocked('maastotila', store(true, false))).toBe(false);
-        expect(isUnlocked('maastotila', store(true, true))).toBe(true);
-        expect(isUnlocked('lahihaku', store(true, true))).toBe(true);
+        expect(isUnlocked('hintaArvio', store(true, false))).toBe(false);
+        expect(isUnlocked('arvovari', store(true, false))).toBe(false);
+        expect(isUnlocked('arvovari', store(true, true))).toBe(true);
+        for (const id of ['maastotila', 'lahihaku', 'huomiot', 'saavutettavuus']) {
+            expect(isUnlocked(id, store(true, false))).toBe(true);
+        }
         expect(isUnlocked('tuntematon', store(true, true))).toBe(false);
+    });
+    it('maksuton lisätoiminto merkitään myöhemmin ehkä maksulliseksi', async () => {
+        const { myohemminMaksullinen } = await import('../js/features.js');
+        for (const id of ['maastotila', 'lahihaku', 'huomiot', 'saavutettavuus']) {
+            expect(myohemminMaksullinen(id)).toBe(true);
+        }
+        expect(myohemminMaksullinen('hintaArvio')).toBe(false);
+        expect(myohemminMaksullinen('arvovari')).toBe(false);
+        expect(myohemminMaksullinen('suosikit')).toBe(false);
     });
 });
 
@@ -307,14 +320,45 @@ describe('jaettu ruutuvälimuisti', () => {
         // Sama kuvio kahdessa ruudussa (raja ylittyy) vain kerran
         expect(cache.stands(['1:1', '1:2'])).toHaveLength(1);
     });
-    it('epäonnistunut ruutu haetaan uudelleen', async () => {
+    it('verkkovirheen jälkeen ruutu haetaan uudelleen', async () => {
         const { createTileCache } = await import('../js/rest2.js');
         let fail = true;
-        const fetchFn = async () => (fail ? { ok: false, status: 500 } : { ok: true, json: async () => ({ features: [] }) });
+        const fetchFn = async () => { if (fail) throw new TypeError('Failed to fetch'); return { ok: true, json: async () => ({ features: [] }) }; };
         const cache = createTileCache({ fetchFn });
-        expect((await cache.get('5:5').promise).status).toBe('error');
+        const e = await cache.get('5:5').promise;
+        expect(e.status).toBe('error');
+        expect(e.kind).toBe('verkko');
+        expect(cache.palveluPoissa).toBe(false);
         fail = false;
         expect((await cache.get('5:5').promise).status).toBe('ok');
+    });
+    it('palvelun virhe keskeyttää haut, kunnes käyttäjä yrittää uudelleen', async () => {
+        const { createTileCache } = await import('../js/rest2.js');
+        let calls = 0;
+        let fail = true;
+        const fetchFn = async () => { calls++; return fail ? { ok: false, status: 404 } : { ok: true, json: async () => ({ features: [] }) }; };
+        const cache = createTileCache({ fetchFn });
+        const e = await cache.get('5:5').promise;
+        expect(e.kind).toBe('palvelu');
+        expect(cache.palveluPoissa).toBe(true);
+        // Ei uusia hakuja: sama ja uusi ruutu palautuvat virheenä hakematta
+        expect((await cache.get('5:5').promise).status).toBe('error');
+        expect((await cache.get('6:6').promise).kind).toBe('palvelu');
+        expect(calls).toBe(1);
+        fail = false;
+        cache.uudelleen();
+        expect((await cache.get('5:5').promise).status).toBe('ok');
+        expect(cache.palveluPoissa).toBe(false);
+        expect(calls).toBe(2);
+    });
+    it('muuttunut vastauksen muoto on palvelun virhe, tyhjä lista ei', async () => {
+        const { fetchTile } = await import('../js/rest2.js');
+        const vastaus = (data) => async () => ({ ok: true, json: async () => data });
+        await expect(fetchTile('1:1', { fetchFn: vastaus({ items: [] }) })).rejects.toMatchObject({ kind: 'palvelu' });
+        await expect(fetchTile('1:1', { fetchFn: vastaus({ features: [{ type: 'Feature', properties: {} }] }) })).rejects.toMatchObject({ kind: 'palvelu' });
+        await expect(fetchTile('1:1', { fetchFn: async () => ({ ok: true, json: async () => { throw new SyntaxError('x'); } }) })).rejects.toMatchObject({ kind: 'palvelu' });
+        await expect(fetchTile('1:1', { fetchFn: async () => { throw new TypeError('Failed to fetch'); } })).rejects.toMatchObject({ kind: 'verkko' });
+        expect(await fetchTile('1:1', { fetchFn: vastaus({ features: [] }) })).toEqual([]);
     });
 });
 

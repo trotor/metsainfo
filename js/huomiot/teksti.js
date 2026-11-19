@@ -179,7 +179,7 @@ const OHJE = {
 <li>Huomiot näkyvät kartalla merkkeinä sekä kiinteistön ja kuvion tiedoissa.</li>
 <li>Huomiot ja niiden kuvat tallentuvat vain tälle laitteelle.</li>
 </ul>
-<p>Kuuluu hinta-arvion lisäosaan (kertaosto).</p>`
+<p>Maksuton nyt. Toiminto voi myöhemmin muuttua maksulliseksi.</p>`
     },
     sv: {
         otsikko: 'Observationer',
@@ -191,7 +191,7 @@ const OHJE = {
 <li>Observationerna visas som markeringar på kartan och i fastighetens och figurens uppgifter.</li>
 <li>Observationerna och deras bilder sparas bara på den här enheten.</li>
 </ul>
-<p>Ingår i tillägget för prisuppskattning (engångsköp).</p>`
+<p>Kostnadsfri nu. Funktionen kan senare bli avgiftsbelagd.</p>`
     },
     en: {
         otsikko: 'Notes',
@@ -203,7 +203,7 @@ const OHJE = {
 <li>Notes appear as markers on the map and in the property and stand details.</li>
 <li>Notes and their photos are saved on this device only.</li>
 </ul>
-<p>Part of the price estimate add-on (one-time purchase).</p>`
+<p>Free for now. This feature may become paid later.</p>`
     }
 };
 for (const lang of Object.keys(OHJE)) TEKSTIT[lang].ohjeOsio = OHJE[lang];

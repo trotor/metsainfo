@@ -119,7 +119,7 @@ export function startLahihaku() {
             ui.criteria.hakkuu = !ui.criteria.hakkuu;
             render();
         } else if (action === 'hae') runSearch();
-        else if (action === 'retry') runSearch(ui.search?.center, ui.search?.source);
+        else if (action === 'retry') { tileCache.uudelleen(); runSearch(ui.search?.center, ui.search?.source); }
         else if (action === 'tallenna') saveFavorite();
         else if (action === 'muuta') { ui.view = 'form'; render(); }
         else if (action === 'listaan') { ui.view = 'results'; ui.selected = null; drawMap(); render(); }
@@ -180,6 +180,7 @@ export function startLahihaku() {
         s.status = tilesStatus(entries);
         s.loaded = entries.filter(e => e && e.status !== 'loading').length;
         s.failed = entries.filter(e => e?.status === 'error').length;
+        s.palvelu = entries.some(e => e?.status === 'error' && e.kind === 'palvelu');
         s.done = s.status !== 'loading';
         if (s.done) {
             const okKeys = s.keys.filter((k, i) => entries[i]?.status === 'ok');
@@ -289,7 +290,7 @@ export function startLahihaku() {
             </div>`;
         if (!s.done) return `${head}<p class="lh-status" role="status">${esc(T.haetaan(s.loaded, s.keys.length))}</p>`;
         if (s.status === 'error') {
-            return `${head}<p class="lh-status">${esc(T.eiVerkkoa)}</p>
+            return `${head}<p class="lh-status">${esc(s.palvelu ? T.palveluPoissa : T.eiVerkkoa)}</p>
                 <button type="button" class="kortti-btn" data-lh="retry">${esc(T.yritaUudelleen)}</button>${actions}`;
         }
         const partial = s.status === 'partial'
@@ -354,7 +355,7 @@ export function startLahihaku() {
         const body = ui.view === 'detail' && ui.search ? detailHtml()
             : ui.view === 'results' && ui.search ? resultsHtml()
             : formHtml();
-        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('lahihaku', T.kokeilu), closeLabel: T.sulje })}
+        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('lahihaku', T.kokeilu), closeLabel: T.sulje, feature: 'lahihaku' })}
             <div class="lh-body">${body}</div>`;
     }
 }

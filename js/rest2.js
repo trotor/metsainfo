@@ -146,32 +146,80 @@ export function toStand(feature) {
     };
 }
 
-/** Ruudun kuviot. Heittää virheen, jos haku epäonnistuu. */
+/** Palvelu vastasi, mutta vastausta ei voi käyttää (virhekoodi tai muuttunut muoto). */
+function palveluVirhe(message) {
+    const error = new Error(`REST 2.0: ${message}`);
+    error.kind = 'palvelu';
+    return error;
+}
+
+/**
+ * Ruudun kuviot. Heittää virheen, jos haku epäonnistuu: error.kind on
+ * 'verkko' (ei yhteyttä) tai 'palvelu' (rajapinta vastasi virheellä tai
+ * vastauksen muoto on muuttunut). Rajapinta ei ole Metsäkeskuksen julkaistujen
+ * rajapintojen listalla, joten se voi muuttua ilmoittamatta.
+ */
 export async function fetchTile(key, { fetchFn = fetch, signal } = {}) {
     const url = `${REST_URL}?geometry=${encodeURIComponent(tileWkt(key))}`;
-    const response = await fetchFn(url, { signal });
-    if (!response.ok) throw new Error(`REST 2.0: HTTP ${response.status}`);
-    const data = await response.json();
-    return (data.features || []).map(toStand).filter(f => f.geometry);
+    let response;
+    try {
+        response = await fetchFn(url, { signal });
+    } catch (error) {
+        if (error?.name === 'AbortError') throw error;
+        const e = new Error(`REST 2.0: ${error?.message || error}`);
+        e.kind = 'verkko';
+        throw e;
+    }
+    if (!response.ok) throw palveluVirhe(`HTTP ${response.status}`);
+    let data;
+    try {
+        data = await response.json();
+    } catch {
+        throw palveluVirhe('vastaus ei ole JSONia');
+    }
+    // Tyhjä features-lista on oikea vastaus (ei metsätietoja ruudulla)
+    if (!Array.isArray(data?.features)) throw palveluVirhe('vastauksessa ei ole features-listaa');
+    const stands = data.features.map(toStand).filter(f => f.geometry);
+    if (data.features.length && !stands.length) throw palveluVirhe('kuvioilla ei ole geometriaa');
+    return stands;
 }
 
 /* ---------- Jaettu ruutuvälimuisti ---------- */
 
 /**
- * Ruutuvälimuisti: { status: 'loading' | 'ok' | 'error', stands, promise }.
+ * Ruutuvälimuisti: { status: 'loading' | 'ok' | 'error', kind, stands, promise }.
  * Sama ruutu haetaan vain kerran, vaikka useampi toiminto pyytää sitä.
- * Epäonnistunut ruutu haetaan uudelleen seuraavalla pyynnöllä.
+ * Epäonnistunut ruutu haetaan uudelleen seuraavalla pyynnöllä, paitsi kun
+ * palvelu on vastannut viallisesti (kind 'palvelu'): silloin toiminnot ovat
+ * pois käytöstä eikä uusia hakuja tehdä ennen kuin käyttäjä yrittää uudelleen
+ * (uudelleen()). Tila ei tallennu, joten sovelluksen uusi käynnistys kokeilee taas.
  */
 export function createTileCache({ fetchFn = fetch } = {}) {
     const entries = new Map();
+    let palveluPoissa = false;
 
     function get(key) {
         const existing = entries.get(key);
         if (existing && existing.status !== 'error') return existing;
-        const entry = { status: 'loading', stands: [] };
+        if (palveluPoissa) {
+            if (existing) return existing;
+            const entry = { status: 'error', kind: 'palvelu', stands: [] };
+            entry.promise = Promise.resolve(entry);
+            entries.set(key, entry);
+            return entry;
+        }
+        const entry = { status: 'loading', kind: null, stands: [] };
         entry.promise = fetchTile(key, { fetchFn }).then(
-            (stands) => { entry.status = 'ok'; entry.stands = stands; return entry; },
-            () => { entry.status = 'error'; return entry; }
+            (stands) => { entry.status = 'ok'; entry.stands = stands; palveluPoissa = false; return entry; },
+            (error) => {
+                entry.status = 'error';
+                entry.kind = error?.kind === 'palvelu' ? 'palvelu' : 'verkko';
+                if (entry.kind === 'palvelu') {
+                    palveluPoissa = true;
+                    console.warn('[rest2] palvelu ei vastaa odotetusti, haut keskeytetty', error);
+                }
+                return entry;
+            }
         );
         entries.set(key, entry);
         return entry;
@@ -180,6 +228,10 @@ export function createTileCache({ fetchFn = fetch } = {}) {
     return {
         get,
         peek: (key) => entries.get(key) || null,
+        /** Onko palvelu vastannut viallisesti (toiminnot pois käytöstä). */
+        get palveluPoissa() { return palveluPoissa; },
+        /** Käyttäjä yrittää uudelleen: seuraava get hakee virheruudut taas. */
+        uudelleen() { palveluPoissa = false; },
         /** Kaikki ladatut kuviot annetuista ruuduista, kukin kuvio kerran. */
         stands(keys) {
             const seen = new Set();

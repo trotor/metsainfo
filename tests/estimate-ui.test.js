@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('../js/platform/purchases.js', () => ({
+    PRODUCT_ID: 'testi',
     purchases: { isAvailable: () => true, isEntitled: () => mocks.entitled, onChange: () => () => {} }
 }));
 vi.mock('../js/platform/share.js', () => ({ shareTextFile: vi.fn() }));

@@ -515,7 +515,7 @@ export function startHuomiot() {
                 <label class="hu-nayta"><input type="checkbox" name="nayta" ${ui.show ? 'checked' : ''}> ${esc(T.nayta)}</label>
                 ${listHtml()}`;
         }
-        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('huomiot', T.kokeilu), closeLabel: T.sulje })}
+        card.el.innerHTML = `${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('huomiot', T.kokeilu), closeLabel: T.sulje, feature: 'huomiot' })}
             <div class="hu-body">${body}<p class="hu-pieni hu-huom">${esc(T.vainLaitteella)}</p></div>`;
         fillPhotos();
     }

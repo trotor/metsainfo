@@ -15,6 +15,7 @@ const fi = {
     haetaanSijaintia: 'Haetaan sijaintia…',
     haetaanKuvioita: 'Haetaan metsätietoja…',
     eiVerkkoa: 'Metsätietoja ei saatu. Tarkista verkkoyhteys.',
+    palveluPoissa: 'Metsäkeskuksen palvelu ei nyt vastaa odotetusti, joten toiminto ei ole käytettävissä. Yritä myöhemmin uudelleen.',
     yritaUudelleen: 'Yritä uudelleen',
     epatarkka: (m) => `Sijainti on vielä epätarkka (±${m} m). Odota hetki avoimella paikalla.`,
     eiKuviota: 'Tästä kohdasta ei ole metsävaratietoa. Se voi olla pelto, piha, tie tai vesi.',
@@ -152,6 +153,7 @@ const en = {
     haetaanSijaintia: 'Finding your location…',
     haetaanKuvioita: 'Loading forest data…',
     eiVerkkoa: 'Could not load forest data. Check your connection.',
+    palveluPoissa: 'The Finnish Forest Centre service is not responding as expected, so this feature is unavailable. Please try again later.',
     yritaUudelleen: 'Try again',
     epatarkka: (m) => `Your location is still inaccurate (±${m} m). Wait a moment in an open spot.`,
     eiKuviota: 'There is no forest data for this spot. It may be a field, a yard, a road or water.',
@@ -292,6 +294,7 @@ const sv = {
     haetaanSijaintia: 'Söker din position…',
     haetaanKuvioita: 'Hämtar skogsdata…',
     eiVerkkoa: 'Skogsdata kunde inte hämtas. Kontrollera nätverksanslutningen.',
+    palveluPoissa: 'Skogscentralens tjänst svarar inte som väntat, så funktionen är inte tillgänglig. Försök igen senare.',
     yritaUudelleen: 'Försök igen',
     epatarkka: (m) => `Positionen är ännu inte exakt (±${m} m). Vänta en stund på en öppen plats.`,
     eiKuviota: 'Det finns ingen skogsdata för den här platsen. Det kan vara en åker, en gårdsplan, en väg eller vatten.',
@@ -436,7 +439,7 @@ const OHJE = {
 <li><strong>Kokeile kartalta</strong>: ilman maastoa voit siirtää karttaa niin, että risti on haluamassasi kohdassa.</li>
 <li>Pisteet ja havainnot tallentuvat vain tälle laitteelle.</li>
 </ul>
-<p>Koko kuvaus, metsävisa ja pisteet kuuluvat puukaupan hinta-arvion lisäosaan (sama kertaosto).</p>`
+<p>Maksuton nyt. Toiminto voi myöhemmin muuttua maksulliseksi.</p>`
     },
     sv: {
         otsikko: "Berätta om den här platsen och skogsquiz",
@@ -446,7 +449,7 @@ const OHJE = {
 <li><strong>Testa på kartan</strong>: utan att vara i terrängen kan du flytta kartan så att krysset är där du vill.</li>
 <li>Poäng och observationer sparas bara på den här enheten.</li>
 </ul>
-<p>Hela beskrivningen, skogsquizet och poängen ingår i tillägget Prisuppskattning för virkesaffär (samma engångsköp).</p>`
+<p>Kostnadsfri nu. Funktionen kan senare bli avgiftsbelagd.</p>`
     },
     en: {
         otsikko: "Tell me about this place and forest quiz",
@@ -456,7 +459,7 @@ const OHJE = {
 <li><strong>Try it on the map</strong>: without going outdoors, move the map so that the crosshair is where you want.</li>
 <li>Points and observations are saved on this device only.</li>
 </ul>
-<p>The full description, the quiz and the points are part of the timber sale price estimate add-on (same one-time purchase).</p>`
+<p>Free for now. This feature may become paid later.</p>`
     }
 };
 for (const lang of Object.keys(OHJE)) TEKSTIT[lang].ohjeOsio = OHJE[lang];

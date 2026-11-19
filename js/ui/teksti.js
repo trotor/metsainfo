@@ -12,6 +12,8 @@ import { pick } from '../i18n.js';
 import { TOOLTIPS } from '../config.js';
 
 const fi = {
+    // Lisätoimintojen kortit (js/ui/kortti.js, js/features.js myohemminMaksullinen)
+    myohemminMaksullinen: 'Maksuton nyt. Tämä voi muuttua myöhemmin maksulliseksi.',
     // Kurkistusrivi
     toiminnot: 'Toiminnot',
     kuviotaYksikko: 'kuviota',
@@ -165,6 +167,7 @@ const fi = {
 };
 
 const en = {
+    myohemminMaksullinen: 'Free for now. This may become a paid feature later.',
     toiminnot: 'Actions',
     kuviotaYksikko: 'stands',
     eiMetsavaratietoja: 'No forest data',
@@ -327,6 +330,7 @@ const en = {
 };
 
 const sv = {
+    myohemminMaksullinen: 'Kostnadsfri nu. Detta kan senare bli avgiftsbelagt.',
     toiminnot: 'Åtgärder',
     kuviotaYksikko: 'figurer',
     eiMetsavaratietoja: 'Ingen skogsdata',

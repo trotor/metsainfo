@@ -89,7 +89,7 @@ export function startMaasto() {
         const action = el.dataset.mk;
         if (action === 'quiz' && !locked()) { ui.view = 'quiz'; pickQuestion(); render(); }
         else if (action === 'place') { ui.view = 'place'; ui.feedback = null; render(); }
-        else if (action === 'retry') update(); // virheruutu haetaan uudelleen
+        else if (action === 'retry') { tileCache.uudelleen(); update(); } // virheruutu haetaan uudelleen
         else if (action === 'level') { store.setLevel(el.dataset.level); ui.feedback = null; pickQuestion(); render(); }
         else if (action === 'answer') answer(el.dataset.value);
         else if (action === 'next') { ui.feedback = null; pickQuestion(); render(); }
@@ -203,6 +203,7 @@ export function startMaasto() {
         const entry = ensureTile(tileKey(ui.point));
         if (entry.status !== 'ok') {
             ui.status = entry.status;
+            ui.virhe = entry.kind;
             return render();
         }
         const stand = standAt(entry.stands, ui.point);
@@ -281,7 +282,7 @@ export function startMaasto() {
         case 'waiting': return `<p class="mk-status">${esc(T.haetaanSijaintia)}</p>`;
         case 'inaccurate': return `<p class="mk-status">${esc(T.epatarkka(acc))}</p>`;
         case 'loading': return `<p class="mk-status">${esc(T.haetaanKuvioita)}</p>`;
-        case 'error': return `<p class="mk-status">${esc(T.eiVerkkoa)}</p><button type="button" class="kortti-btn" data-mk="retry">${esc(T.yritaUudelleen)}</button>`;
+        case 'error': return `<p class="mk-status">${esc(ui.virhe === 'palvelu' ? T.palveluPoissa : T.eiVerkkoa)}</p><button type="button" class="kortti-btn" data-mk="retry">${esc(T.yritaUudelleen)}</button>`;
         case 'none': return `<p class="mk-status">${esc(T.eiKuviota)}</p>`;
         default: return '';
         }
@@ -369,7 +370,7 @@ export function startMaasto() {
         const flash = ui.flash ? `<p class="mk-flash" role="status">${esc(ui.flash)}</p>` : '';
         ui.flash = null;
         card.el.innerHTML = `
-            ${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('maastotila', T.kokeilu), closeLabel: T.sulje })}
+            ${cardHeader({ title: T.otsikko, badge: kokeiluMerkki('maastotila', T.kokeilu), closeLabel: T.sulje, feature: 'maastotila' })}
             ${locked() ? '' : scoreBar()}
             ${flash}
             <div class="mk-body">${body}</div>

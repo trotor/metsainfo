@@ -89,7 +89,7 @@ const OHJE = {
 <li>Valitaan kokonaisia kuvioita, ja valinta saa olla enintään 10 km × 10 km. Hinta-arvio koskee vain puustoa, ei maapohjaa.</li>
 <li>Valinta säilyy, kunnes tyhjennät sen tai suljet sovelluksen. Sitä ei tallenneta.</li>
 </ul>
-<p>Valinta on maksuton. Hinta-arvio ja saavutettavuus kuuluvat puukaupan hinta-arvion lisäosaan (sama kertaosto).</p>`
+<p>Valinta on maksuton. Valinnan hinta-arvio kuuluu puukaupan hinta-arvion kertaostoon.</p>`
     },
     sv: {
         otsikko: 'Välj figurer',
@@ -100,7 +100,7 @@ const OHJE = {
 <li>Hela figurer väljs, och urvalet får vara högst 10 km × 10 km. Prisuppskattningen gäller endast trädbeståndet, inte marken.</li>
 <li>Urvalet finns kvar tills du tömmer det eller stänger appen. Det sparas inte.</li>
 </ul>
-<p>Urvalet är gratis. Prisuppskattningen och åtkomligheten ingår i tillägget för prisuppskattning (samma engångsköp).</p>`
+<p>Urvalet är gratis. Urvalets prisuppskattning ingår i engångsköpet Prisuppskattning för virkesaffär.</p>`
     },
     en: {
         otsikko: 'Select stands',
@@ -111,7 +111,7 @@ const OHJE = {
 <li>Whole stands are selected, and the selection can be at most 10 km × 10 km. The price estimate covers the trees only, not the land.</li>
 <li>The selection is kept until you clear it or close the app. It is not saved.</li>
 </ul>
-<p>Selecting is free. The price estimate and accessibility belong to the price estimate add-on (same one-time purchase).</p>`
+<p>Selecting is free. The price estimate for a selection is part of the timber sale estimate one-time purchase.</p>`
     }
 };
 for (const lang of Object.keys(OHJE)) TEKSTIT[lang].ohjeOsio = OHJE[lang];

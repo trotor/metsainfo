@@ -1,6 +1,7 @@
 Uutta versiossa 4.1.0:
+• Uudet maksuttomat työkalut: Kerro tästä paikasta ja metsävisa, Etsi läheltä, huomiot kuvineen ja saavutettavuus
 • Huomioitavaa metsätöissä: muinaisjäännökset, suojelualueet ja erityisen tärkeät elinympäristöt kiinteistöltä
 • Valitse kuvioita kiinteistörajojen yli ja tallenna suosikit
-• Uudet karttatasot: puuston korkeus, maastonmuodot, rinnevarjoste ja retkeilykohteet sekä kuvioiden läpinäkyvyys
-• Kertaostoon kuuluvat nyt myös Kerro tästä paikasta ja metsävisa, Etsi läheltä, huomiot kuvineen, puuston arvo -väritys ja saavutettavuus
+• Uudet karttatasot: puuston korkeus, maastonmuodot, rinnevarjoste ja retkeilykohteet
+• Hinta-arvioon puuston arvo kartalla
 • Lyhyt esittely ensimmäisellä avauksella

@@ -121,7 +121,7 @@ export const OHJE_SV = `
                         <div class="changelog-entry">
                             <span class="changelog-version">4.1.0</span>
                             <span class="changelog-date">2026</span>
-                            <p>Nya verktyg och kartlager: figurval, favoriter, Att beakta vid skogsarbeten, trädhöjd, terrängformer, friluftsmål och figurernas genomskinlighet. Engångsköpet omfattar nu också Berätta om den här platsen, Sök i närheten, observationer, värdefärgläggning och åtkomlighet. En kort introduktion vid första start.</p>
+                            <p>Nya verktyg och kartlager: figurval, favoriter, Att beakta vid skogsarbeten, trädhöjd, terrängformer, friluftsmål och figurernas genomskinlighet. Nya kostnadsfria verktyg: Berätta om den här platsen och skogsquiz, Sök i närheten, observationer och åtkomlighet. Engångsköpet för prisuppskattning omfattar nu också trädbeståndets värde på kartan. En kort introduktion vid första start.</p>
                         </div>
                         <div class="changelog-entry">
                             <span class="changelog-version">4.0.2</span>
@@ -148,7 +148,7 @@ export const OHJE_SV = `
                         <div class="changelog-entry">
                             <span class="changelog-version">v4.1.0</span>
                             <span class="changelog-date">2026-11-19</span>
-                            <p>Nya verktyg och kartlager: figurval, favoriter, Att beakta vid skogsarbeten, trädhöjd, terrängformer, friluftsmål och figurernas genomskinlighet. Appens tilläggsfunktioner presenteras. En kort introduktion vid första start.</p>
+                            <p>Nya verktyg och kartlager: figurval, favoriter, Att beakta vid skogsarbeten, trädhöjd, terrängformer, friluftsmål och figurernas genomskinlighet. Nya kostnadsfria verktyg: Berätta om den här platsen och skogsquiz, Sök i närheten, observationer och åtkomlighet. En kort introduktion vid första start.</p>
                         </div>
                         <div class="changelog-entry">
                             <span class="changelog-version">v4.0.2</span>

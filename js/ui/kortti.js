@@ -8,6 +8,8 @@
 import './kortti.css';
 import { getLang } from '../i18n.js';
 import { registerBackStep } from './back.js';
+import { myohemminMaksullinen } from '../features.js';
+import { T } from './teksti.js';
 
 const OPEN_EVENT = 'metsainfo:kortti-auki';
 
@@ -71,8 +73,12 @@ export function createCard({ id, label, className = '', onClose, notifyHidden = 
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-/** Kortin otsikkorivi: otsikko, merkki (esim. "Kokeilu") ja sulkupainike data-close. */
-export function cardHeader({ title, badge, closeLabel = 'Sulje' }) {
+/**
+ * Kortin otsikkorivi: otsikko, merkki (esim. "Kokeilu") ja sulkupainike data-close.
+ * feature: features.js-tunnus; maksuttoman, myöhemmin ehkä maksullisen toiminnon
+ * kortin alkuun tulee siitä kertova rivi.
+ */
+export function cardHeader({ title, badge, closeLabel = 'Sulje', feature }) {
     return `
         <header class="kortti-head">
             <div>
@@ -80,5 +86,5 @@ export function cardHeader({ title, badge, closeLabel = 'Sulje' }) {
                 ${badge ? `<span class="kortti-merkki">${esc(badge)}</span>` : ''}
             </div>
             <button type="button" class="kortti-close" data-close aria-label="${esc(closeLabel)}">×</button>
-        </header>`;
+        </header>${feature && myohemminMaksullinen(feature) ? `<p class="kortti-varaus">${esc(T.myohemminMaksullinen)}</p>` : ''}`;
 }

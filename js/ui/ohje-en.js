@@ -121,7 +121,7 @@ export const OHJE_EN = `
                         <div class="changelog-entry">
                             <span class="changelog-version">4.1.0</span>
                             <span class="changelog-date">2026</span>
-                            <p>New tools and map layers: stand selection, favourites, Things to note in forestry work, tree height, terrain forms, outdoor sites and stand transparency. The one-time purchase now also includes Tell me about this place, Search nearby, notes, timber value colouring and accessibility. A short introduction on first launch.</p>
+                            <p>New tools and map layers: stand selection, favourites, Things to note in forestry work, tree height, terrain forms, outdoor sites and stand transparency. New free tools: Tell me about this place and a forest quiz, Search nearby, notes and accessibility. The timber sale estimate purchase now also includes timber value on the map. A short introduction on first launch.</p>
                         </div>
                         <div class="changelog-entry">
                             <span class="changelog-version">4.0.2</span>
@@ -148,7 +148,7 @@ export const OHJE_EN = `
                         <div class="changelog-entry">
                             <span class="changelog-version">v4.1.0</span>
                             <span class="changelog-date">2026-11-19</span>
-                            <p>New tools and map layers: stand selection, favourites, Things to note in forestry work, tree height, terrain forms, outdoor sites and stand transparency. The app add-on features are introduced. A short introduction on first launch.</p>
+                            <p>New tools and map layers: stand selection, favourites, Things to note in forestry work, tree height, terrain forms, outdoor sites and stand transparency. New free tools: Tell me about this place and a forest quiz, Search nearby, notes and accessibility. A short introduction on first launch.</p>
                         </div>
                         <div class="changelog-entry">
                             <span class="changelog-version">v4.0.2</span>

@@ -45,6 +45,7 @@
     border-radius: 999px;
     padding: 2px 8px;
 }
+.kortti-varaus { margin: 4px 0 0; font-size: 12px; color: var(--kaarna); opacity: .8; }
 .kortti-close {
     border: 0;
     background: var(--jakala);

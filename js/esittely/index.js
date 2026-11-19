@@ -52,8 +52,9 @@ function maksullisetHtml() {
         const paikka = t.paikka === 'vari' ? T.paikkaVari : T.paikkaTyokalut;
         rivit.push(`<li><strong>${esc(t.label)}</strong>${t.description ? `: ${esc(t.description)}` : ''} <span class="es-paikka">(${esc(paikka)})</span></li>`);
     }
-    // Sama varaus kuin ostonäkymässä ja kauppateksteissä (#38)
-    const huomio = rivit.length > 1 ? `<p class="es-huomio">${esc(T.muuttuu)}</p>` : '';
+    // Sama lupaus ja varaus kuin ostonäkymässä ja kauppateksteissä (#38): kertaosto
+    // takaa hinta-arvion, muut työkalut maksuttomia ja ehkä myöhemmin maksullisia
+    const huomio = `<p class="es-huomio">${esc(T.muuttuu)}</p>`;
     return { omistettu, html: `<ul class="es-lista">${rivit.join('')}</ul>${huomio}` };
 }
 

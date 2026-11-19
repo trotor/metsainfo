@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Verkkoversio (#36): ei kauppaa eikä natiivia sovellusta
 vi.mock('../js/platform/purchases.js', () => ({
+    PRODUCT_ID: 'testi',
     purchases: { isAvailable: () => false, isEntitled: () => false, onChange: () => () => {}, getProduct: vi.fn() }
 }));
 vi.mock('../js/platform/index.js', () => ({ isNative: () => false }));
