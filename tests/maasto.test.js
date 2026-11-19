@@ -351,11 +351,24 @@ describe('jaettu ruutuvälimuisti', () => {
         expect(cache.palveluPoissa).toBe(false);
         expect(calls).toBe(2);
     });
+    it('tilapäinen palvelinvika (5xx) ei keskeytä hakuja', async () => {
+        const { createTileCache } = await import('../js/rest2.js');
+        let calls = 0;
+        const fetchFn = async () => { calls++; return { ok: false, status: 503 }; };
+        const cache = createTileCache({ fetchFn });
+        expect((await cache.get('5:5').promise).kind).toBe('palvelu');
+        expect(cache.palveluPoissa).toBe(false);
+        await cache.get('5:5').promise;
+        expect(calls).toBe(2);
+    });
     it('muuttunut vastauksen muoto on palvelun virhe, tyhjä lista ei', async () => {
         const { fetchTile } = await import('../js/rest2.js');
         const vastaus = (data) => async () => ({ ok: true, json: async () => data });
         await expect(fetchTile('1:1', { fetchFn: vastaus({ items: [] }) })).rejects.toMatchObject({ kind: 'palvelu' });
-        await expect(fetchTile('1:1', { fetchFn: vastaus({ features: [{ type: 'Feature', properties: {} }] }) })).rejects.toMatchObject({ kind: 'palvelu' });
+        // Kuviot ilman geometriaa ovat tavallisia: ohitetaan, ei virhe
+        expect(await fetchTile('1:1', { fetchFn: vastaus({ features: [{ type: 'Feature', properties: {} }] }) })).toEqual([]);
+        // Kuvion muoto muuttunut niin, ettei sitä voi lukea
+        await expect(fetchTile('1:1', { fetchFn: vastaus({ features: [{ type: 'Feature', properties: { standData: { activeForestDevelopmentData: { treeData: 'x' } } } }] }) })).rejects.toMatchObject({ kind: 'palvelu' });
         await expect(fetchTile('1:1', { fetchFn: async () => ({ ok: true, json: async () => { throw new SyntaxError('x'); } }) })).rejects.toMatchObject({ kind: 'palvelu' });
         await expect(fetchTile('1:1', { fetchFn: async () => { throw new TypeError('Failed to fetch'); } })).rejects.toMatchObject({ kind: 'verkko' });
         expect(await fetchTile('1:1', { fetchFn: vastaus({ features: [] }) })).toEqual([]);

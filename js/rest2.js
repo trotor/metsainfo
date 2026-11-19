@@ -146,10 +146,15 @@ export function toStand(feature) {
     };
 }
 
-/** Palvelu vastasi, mutta vastausta ei voi käyttää (virhekoodi tai muuttunut muoto). */
-function palveluVirhe(message) {
+/**
+ * Palvelu vastasi, mutta vastausta ei voi käyttää. pysyva: rajapinta on
+ * todennäköisesti muuttunut (4xx, ei JSONia, muuttunut muoto); tilapäinen
+ * palvelinvika (5xx, 429) ei keskeytä hakuja.
+ */
+function palveluVirhe(message, pysyva = true) {
     const error = new Error(`REST 2.0: ${message}`);
     error.kind = 'palvelu';
+    error.pysyva = pysyva;
     return error;
 }
 
@@ -170,18 +175,24 @@ export async function fetchTile(key, { fetchFn = fetch, signal } = {}) {
         e.kind = 'verkko';
         throw e;
     }
-    if (!response.ok) throw palveluVirhe(`HTTP ${response.status}`);
+    if (!response.ok) {
+        const tilapainen = response.status >= 500 || response.status === 429 || response.status === 408;
+        throw palveluVirhe(`HTTP ${response.status}`, !tilapainen);
+    }
     let data;
     try {
         data = await response.json();
     } catch {
         throw palveluVirhe('vastaus ei ole JSONia');
     }
-    // Tyhjä features-lista on oikea vastaus (ei metsätietoja ruudulla)
+    // Tyhjä features-lista on oikea vastaus (ei metsätietoja ruudulla). Osalla
+    // kuvioista ei ole geometriaa (tavallista, ne ohitetaan).
     if (!Array.isArray(data?.features)) throw palveluVirhe('vastauksessa ei ole features-listaa');
-    const stands = data.features.map(toStand).filter(f => f.geometry);
-    if (data.features.length && !stands.length) throw palveluVirhe('kuvioilla ei ole geometriaa');
-    return stands;
+    try {
+        return data.features.map(toStand).filter(f => f.geometry);
+    } catch (error) {
+        throw palveluVirhe(`kuvioiden muoto muuttunut (${error?.message || error})`);
+    }
 }
 
 /* ---------- Jaettu ruutuvälimuisti ---------- */
@@ -190,8 +201,8 @@ export async function fetchTile(key, { fetchFn = fetch, signal } = {}) {
  * Ruutuvälimuisti: { status: 'loading' | 'ok' | 'error', kind, stands, promise }.
  * Sama ruutu haetaan vain kerran, vaikka useampi toiminto pyytää sitä.
  * Epäonnistunut ruutu haetaan uudelleen seuraavalla pyynnöllä, paitsi kun
- * palvelu on vastannut viallisesti (kind 'palvelu'): silloin toiminnot ovat
- * pois käytöstä eikä uusia hakuja tehdä ennen kuin käyttäjä yrittää uudelleen
+ * rajapinta näyttää muuttuneen (kind 'palvelu', pysyvä virhe): silloin toiminnot
+ * ovat pois käytöstä eikä uusia hakuja tehdä ennen kuin käyttäjä yrittää uudelleen
  * (uudelleen()). Tila ei tallennu, joten sovelluksen uusi käynnistys kokeilee taas.
  */
 export function createTileCache({ fetchFn = fetch } = {}) {
@@ -214,7 +225,7 @@ export function createTileCache({ fetchFn = fetch } = {}) {
             (error) => {
                 entry.status = 'error';
                 entry.kind = error?.kind === 'palvelu' ? 'palvelu' : 'verkko';
-                if (entry.kind === 'palvelu') {
+                if (error?.pysyva) {
                     palveluPoissa = true;
                     console.warn('[rest2] palvelu ei vastaa odotetusti, haut keskeytetty', error);
                 }
