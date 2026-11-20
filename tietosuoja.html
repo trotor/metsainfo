@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tietosuojaseloste – Metsäinfo</title>
+    <meta name="description" content="Metsäinfo-sovelluksen tietosuojaseloste. Sovellus ei kerää käyttäjätietoja.">
+    <style>
+        :root {
+            --vihrea: #2d5a27;
+            --vihrea-tumma: #1a3518;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.65;
+            color: #222;
+            background: #f5f5f5;
+        }
+        header {
+            background: linear-gradient(135deg, var(--vihrea) 0%, var(--vihrea-tumma) 100%);
+            color: #fff;
+            padding: 2rem 1.5rem;
+        }
+        header .wrap { max-width: 44rem; margin: 0 auto; }
+        header h1 { margin: 0 0 .35rem; font-size: 1.6rem; }
+        header p { margin: 0; opacity: .9; font-size: .95rem; }
+        main {
+            max-width: 44rem;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+            background: #fff;
+        }
+        h2 {
+            color: var(--vihrea);
+            margin-top: 2.25rem;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #e3e8e2;
+            padding-bottom: .35rem;
+        }
+        h2:first-of-type { margin-top: 0; }
+        ul { padding-left: 1.25rem; }
+        li { margin-bottom: .4rem; }
+        table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .95rem; }
+        th, td { text-align: left; padding: .55rem .6rem; border-bottom: 1px solid #e3e8e2; vertical-align: top; }
+        th { background: #f8f9fa; font-weight: 600; }
+        .korostus {
+            background: #e8f5e9;
+            border-left: 4px solid var(--vihrea);
+            padding: .9rem 1.1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+        footer {
+            max-width: 44rem;
+            margin: 0 auto;
+            padding: 1.5rem;
+            font-size: .875rem;
+            color: #666;
+        }
+        a { color: var(--vihrea); }
+        code { background: #f1f3f1; padding: .1rem .3rem; border-radius: 3px; font-size: .9em; }
+        @media (max-width: 600px) {
+            header { padding: 1.5rem 1rem; }
+            main { padding: 1.5rem 1rem 3rem; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="wrap">
+        <h1>Tietosuojaseloste</h1>
+        <p>Metsäinfo – verkkosovellus sekä Android- ja iOS-sovellukset</p>
+    </div>
+</header>
+
+<main>
+
+<div class="korostus">
+    <strong>Lyhyesti:</strong> Metsäinfo ei kerää käyttäjistään tietoja. Sovelluksessa ei ole käyttäjätilejä,
+    analytiikkaa eikä mainoksia. Sijaintitietosi, valokuvasi ja muistiinpanosi käsitellään ja säilytetään
+    ainoastaan omalla laitteellasi, eivätkä ne siirry sovelluksen kehittäjälle tai kenellekään muulle.
+    Kerro tästä paikasta, metsävisa ja Etsi läheltä hakevat metsätiedot sijaintisi ympäriltä, katso
+    <a href="#lisatoiminnot">Lisätoiminnot</a>.
+</div>
+
+<h2>Rekisterinpitäjä</h2>
+<p>
+    Inetor Oy<br>
+    Y-tunnus 3130000-6<br>
+    Sähköposti: <a href="mailto:inetoroy@gmail.com">inetoroy@gmail.com</a>
+</p>
+
+<h2>Mitä tietoja sovellus käsittelee</h2>
+
+<table>
+    <tr>
+        <th>Tieto</th>
+        <th>Mihin sitä käytetään</th>
+        <th>Missä se säilyy</th>
+    </tr>
+    <tr>
+        <td>Sijainti (GPS)</td>
+        <td>Oman sijainnin näyttäminen kartalla ja sen tunnistaminen, millä metsikkökuviolla olet</td>
+        <td>Vain laitteen muistissa käytön ajan. Ei tallenneta eikä lähetetä mihinkään. (Lisätoiminnot: katso alla.)</td>
+    </tr>
+    <tr>
+        <td>Valokuvat</td>
+        <td>Maastohavaintojen liittäminen muistiinpanoihin</td>
+        <td>Vain laitteella, sovelluksen omassa hakemistossa</td>
+    </tr>
+    <tr>
+        <td>Muistiinpanot</td>
+        <td>Omat havaintosi kuvioista ja pisteistä</td>
+        <td>Vain laitteella</td>
+    </tr>
+    <tr>
+        <td>Suosikkikiinteistöt ja offline-aineistot</td>
+        <td>Usein käytettyjen kiinteistöjen nopea avaaminen ja maastokäyttö ilman verkkoa</td>
+        <td>Vain laitteella</td>
+    </tr>
+</table>
+
+<p>
+    Sovellus ei pyydä eikä käytä nimeä, sähköpostiosoitetta, puhelinnumeroa, yhteystietoja,
+    kalenteria, mikrofonia eikä mitään muuta henkilötietoa. Käyttäjätilejä ei ole, joten
+    kirjautumista ei tarvita eikä käyttäjäkohtaista profiilia synny.
+</p>
+
+<h2>Yhteydet ulkopuolisiin palveluihin</h2>
+
+<p>
+    Metsäinfo hakee kartta- ja metsätietoaineistot suoraan avoimista rajapinnoista. Kun sovellus
+    hakee tietoja, kyseiset palvelut näkevät yhteyden teknisen tiedon samalla tavalla kuin mikä
+    tahansa verkkosivu näkisi: <strong>IP-osoitteesi</strong> sekä sen, <strong>miltä alueelta
+    tai millä kiinteistötunnuksella tietoja haetaan</strong>. Sovelluksen kehittäjä ei näe näitä
+    yhteyksiä eikä saa niistä tietoa.
+</p>
+
+<ul>
+    <li><strong>Suomen metsäkeskus</strong> (<code>avoin.metsakeskus.fi</code>) – metsävaratiedot ja metsänkäyttöilmoitukset</li>
+    <li><strong>Maanmittauslaitos</strong> (<code>inspire-wfs.maanmittauslaitos.fi</code>) – kiinteistörajat</li>
+    <li><strong>Kapsi Internet-käyttäjät ry</strong> (<code>kartat.kapsi.fi</code>) – karttapohjat</li>
+    <li><strong>Luonnonvarakeskus</strong> (<code>statdb.luke.fi</code>) – puun kantohinnat hinta-arvioon: sovellusten hinta-arvio sekä verkkoversiossa hinta-arvion esimerkkimetsä ja esikatselu. Pyynnössä on vain hinta-alue.</li>
+    <li><strong>Tilastokeskus</strong> (<code>geo.stat.fi</code>) – valitun kiinteistön kunta hinta-alueen päättelemiseksi (vain hinta-arvio). Pyynnössä on kiinteistön sijaintipiste, ei käyttäjän sijaintia.</li>
+</ul>
+
+<p>
+    Näiden palveluiden omat tietosuojakäytännöt koskevat niille päätyvää liikennettä.
+    Sovellus ei lähetä näihin palveluihin sijaintiasi, valokuviasi eikä muistiinpanojasi.
+    Poikkeus ovat lisätoiminnot alla.
+</p>
+
+<h2 id="lisatoiminnot">Lisätoiminnot</h2>
+<p id="kokeilut">
+    Kartan työkaluissa, väritysvaihtoehdoissa ja karttatasoissa tietoja käsitellään näin:
+</p>
+<ul>
+    <li><strong>Kerro tästä paikasta, metsävisa ja Etsi läheltä</strong> hakevat metsätiedot
+        Suomen metsäkeskuksen rajapinnasta (<code>avoin.metsakeskus.fi</code>) 500 m × 500 m
+        ruutuina sijaintisi tai kartan keskipisteen ympäriltä. Pyynnössä on ruudun rajaus, josta
+        sijaintisi voi päätellä noin 500 metrin tarkkuudella. Tarkkaa sijaintipistettä ei lähetetä.
+        Haetut ruudut tallentuvat laitteen välimuistiin 30 päiväksi, jotta jo katsottu alue toimii
+        ilman verkkoa; välimuistista ei lähetetä mitään.</li>
+    <li><strong>Saavutettavuus</strong> hakee tiet ja tierajoitukset Väylävirastolta
+        (<code>avoinapi.vaylapilvi.fi</code>, Digiroad) ja korjuukelpoisuuskartan Suomen
+        metsäkeskukselta sekä kosteusindeksin ja korkeusmallin CSC:n Paituli-palvelusta
+        (<code>paituli.csc.fi</code>, Luonnonvarakeskuksen ja Maanmittauslaitoksen aineistot)
+        valitun kiinteistön ympäriltä. Pyynnössä on kiinteistön alueen rajaus, ei sijaintiasi.
+        Haetut aineistot tallentuvat laitteen välimuistiin (tiet viikoksi, muut 90 päiväksi), jotta
+        samaa aluetta ei haeta uudelleen; välimuistista ei lähetetä mitään.</li>
+    <li><strong>Huomioitavaa metsätöissä</strong> hakee muinaisjäännökset ja kulttuuriperintökohteet
+        Museovirastolta (<code>geoserver.museovirasto.fi</code>), luonnonsuojelu-, Natura- ja
+        erämaa-alueet Suomen ympäristökeskukselta (<code>paikkatiedot.ymparisto.fi</code>) ja
+        erityisen tärkeät elinympäristöt Suomen metsäkeskukselta valitun kiinteistön tai
+        kuviovalinnan alueelta. Pyynnössä on alueen rajaus, ei sijaintiasi.</li>
+    <li><strong>Retkeilykohteet</strong> hakee laavut, tulentekopaikat ja reitit Jyväskylän
+        yliopiston LIPAS-palvelusta (<code>lipas.fi</code>) kartalla näkyvältä alueelta.</li>
+    <li><strong>Maastonmuodot</strong> hakee karttakuvat Geologian tutkimuskeskukselta
+        (<code>gtkdata.gtk.fi</code>) ja <strong>Puuston korkeus</strong> Suomen metsäkeskukselta
+        (<code>avoin.metsakeskus.fi</code>) kartalla näkyvältä alueelta.</li>
+    <li>Suosikit, muistiinpanot, huomiot (kartalle tallennetut pisteet koordinaatteineen),
+        metsävisan pisteet ja havainnot, kuvioiden läpinäkyvyys, esittelyn ja selitteiden tila sekä asetukset
+        tallentuvat vain laitteelle.
+        Niitä ei lähetetä mihinkään.</li>
+    <li><strong>Huomioiden kuvat:</strong> sovellus käyttää kameraa ja kuvia vain, kun lisäät kuvan
+        huomioon, ja pyytää siihen luvan. Kameralla otettu kuva tallentuu laitteen kuviin, ja sovellus
+        tallentaa huomiota varten pienennetyn kopion omiin tiedostoihinsa. Kuvia ei lähetetä mihinkään.
+        Huomion poisto poistaa sovelluksen kopion; laitteen kuviin tallentunut kuva säilyy.</li>
+</ul>
+
+<h2>Sovelluksen sisäiset ostot</h2>
+<p>
+    Puukaupan hinta-arvio ja siihen kuuluva puuston arvo -väritys ovat iOS- ja Android-sovelluksen
+    maksullinen lisäosa; muut toiminnot ovat maksuttomia. Verkkoversio esittelee hinta-arvion ja ohjaa linkeillä App Storeen ja Google Playhin; verkkoversiossa ei voi ostaa. Osto ja maksu tehdään
+    App Storen tai Google Playn kautta, ja niiden ehdot ja tietosuojakäytännöt koskevat
+    maksutietoja. Inetor Oy ei saa nimeäsi, maksutietojasi eikä muita henkilötietojasi.
+    Sovellus tarkistaa oston laitteella kaupan omalla rajapinnalla, ja tieto ostosta säilyy
+    laitteella. Itse syöttämäsi puun hinnat tallentuvat vain laitteellesi.
+</p>
+
+<h2>Evästeet ja analytiikka</h2>
+<p>
+    Sovellus ei käytä evästeitä seurantaan, analytiikkatyökaluja, mainosverkostoja
+    eikä kolmansien osapuolten seurantatunnisteita.
+</p>
+
+<h2>Tietojen poistaminen</h2>
+<p>
+    Koska kaikki tietosi ovat laitteellasi, hallitset niitä itse:
+</p>
+<ul>
+    <li>Yksittäiset muistiinpanot, valokuvat, suosikit ja offline-aineistot voi poistaa sovelluksen sisältä.</li>
+    <li>Sovelluksen poistaminen laitteelta poistaa kaikki sen tallentamat tiedot lopullisesti.</li>
+</ul>
+<p>
+    Kehittäjällä ei ole hallussaan tietojasi, joten poistopyyntöä ei tarvitse esittää kenellekään.
+</p>
+
+<h2>Lapset</h2>
+<p>
+    Sovellusta ei ole suunnattu lapsille eikä se kerää tietoja keneltäkään, lasten ikäryhmä mukaan lukien.
+</p>
+
+<h2>Aineistojen lähteet ja käyttöoikeudet</h2>
+<ul>
+    <li>Metsävaratiedot ja metsänkäyttöilmoitukset: © Suomen metsäkeskus, lisenssi CC BY 4.0</li>
+    <li>Kiinteistörajat: © Maanmittauslaitos, INSPIRE-aineisto, lisenssi CC BY 4.0</li>
+    <li>Karttapohjat: © Maanmittauslaitos, tarjoiltu Kapsi Internet-käyttäjät ry:n palvelusta</li>
+    <li>Puun kantohinnat: Metsäteollisuus ry:n puukaupan viikkoseuranta ja Luonnonvarakeskus, Teollisuuspuun kauppa (Luken tilastotietokanta, lisenssi CC BY 4.0)</li>
+    <li>Kuntarajat ja kuntaluokitus: © Tilastokeskus, lisenssi CC BY 4.0</li>
+    <li>Puuston korkeus (latvusmalli) ja korjuukelpoisuuskartta: © Suomen metsäkeskus, lisenssi CC BY 4.0</li>
+    <li>Tiet ja tierajoitukset: © Väylävirasto, Digiroad, lisenssi CC BY 4.0</li>
+    <li>Maastonmuodot: GTK, korkeusmalli © Maanmittauslaitos</li>
+    <li>Muinaisjäännökset ja kulttuuriperintökohteet: Museovirasto; luonnonsuojelualueet, Natura 2000 ja erämaat: Suomen ympäristökeskus; lisenssi CC BY 4.0</li>
+    <li>Retkeilykohteet: LIPAS, Jyväskylän yliopisto, lisenssi CC BY 4.0</li>
+</ul>
+
+<div class="korostus">
+    Metsäinfo on itsenäinen sovellus, joka hyödyntää Suomen metsäkeskuksen ja Maanmittauslaitoksen
+    avoimia aineistoja. Sovellus <strong>ei ole</strong> Suomen metsäkeskuksen tai Maanmittauslaitoksen
+    virallinen tuote eikä näiden organisaatioiden ylläpitämä. Aineistojen oikeellisuudesta ja
+    ajantasaisuudesta vastaavat aineistojen tuottajat.
+</div>
+
+<h2>Muutokset tähän selosteeseen</h2>
+<p>
+    Jos sovelluksen tietojenkäsittely muuttuu, päivitämme tämän selosteen ja muutamme alla
+    näkyvää päivämäärää. Merkittävistä muutoksista kerrotaan sovelluksen julkaisutiedoissa.
+</p>
+
+<h2>Yhteystiedot</h2>
+<p>
+    Tietosuojaa koskevat kysymykset: <a href="mailto:inetoroy@gmail.com">inetoroy@gmail.com</a>
+</p>
+
+</main>
+
+<footer>
+    Päivitetty 19.11.2026 · <a href="./">Takaisin Metsäinfoon</a>
+</footer>
+
+</body>
+</html>

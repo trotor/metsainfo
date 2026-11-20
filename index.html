@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Metsäinfo - Suomen metsävaratiedot kartalla</title>
+    <meta name="description" content="Interaktiivinen karttasovellus Suomen metsävaratietojen tarkasteluun. Hae kiinteistötunnuksella tai klikkaa kartalta.">
+    <meta name="author" content="Tero Rönkkö">
+
+    <!-- Version info -->
+    <script src="version.js"></script>
+
+  <script type="module" crossorigin src="./assets/index-EczW7Dt5.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/config-DlN54n_8.js">
+  <link rel="modulepreload" crossorigin href="./assets/dist-BZ5u_Dz8.js">
+  <link rel="modulepreload" crossorigin href="./assets/state-IKDl7OFB.js">
+  <link rel="modulepreload" crossorigin href="./assets/logic-CMLm7KI6.js">
+  <link rel="stylesheet" crossorigin href="./assets/config-vh-t_kPv.css">
+  <link rel="stylesheet" crossorigin href="./assets/index-DwSHcZKo.css">
+</head>
+<body>
+    <div id="safe-area-probe" aria-hidden="true"></div>
+    <div id="app">
+        <!-- Header -->
+        <header id="header">
+            <h1>Metsäinfo <span id="version-badge"></span> <button id="help-toggle" onclick="toggleHelp()" title="Käyttöohje" data-i18n-attr="title:kayttoohje">?</button></h1>
+            <p data-i18n="alaotsikko">Suomen metsävaratiedot kartalla - hae kiinteistötunnuksella tai klikkaa karttaa</p>
+        </header>
+
+        <!-- Map container -->
+        <div id="map"></div>
+
+        <!-- Info panel -->
+        <div id="info-panel" class="hidden">
+            <div id="sheet-handle" role="button" tabindex="0" aria-label="Muuta tietopaneelin kokoa" data-i18n-attr="aria-label:muutaPaneelinKokoa"></div>
+            <div id="sheet-peek"></div>
+            <div id="sheet-menu" role="menu" hidden>
+                <button role="menuitem" data-action="copy" data-i18n="kopioiLinkki">Kopioi linkki</button>
+                <button role="menuitem" data-action="csv" data-i18n="lataaCsv">Lataa CSV</button>
+                <button role="menuitem" data-action="print" data-i18n="tulosta">Tulosta</button>
+                <button role="menuitem" data-action="clear" data-i18n="poistaValinta">Poista valinta</button>
+            </div>
+            <button id="close-panel" aria-label="Sulje" data-i18n-attr="aria-label:sulje">&times;</button>
+            <h2 data-i18n="metsavaratiedot">Metsävaratiedot</h2>
+            <button id="here-row" type="button" hidden><span class="here-dot" aria-hidden="true"></span><span class="here-text"></span></button>
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p data-i18n="haetaanTietoja">Haetaan tietoja...</p>
+            </div>
+            <div id="info-content"></div>
+        </div>
+
+        <!-- Värivalinnat ja selitteet: mobiilissa nauhana tietopaneelin yllä -->
+        <div id="map-strip">
+
+        <!-- Color mode selector -->
+        <div id="color-mode-control" class="hidden">
+            <select id="color-mode-select">
+                <option value="volume" data-i18n="variTilavuus">Tilavuus (m³/ha)</option>
+                <option value="age" data-i18n="variIka">Ikä (v)</option>
+                <option value="species" data-i18n="variPaapuulaji">Pääpuulaji</option>
+                <option value="devclass" data-i18n="variKehitysluokka">Kehitysluokka</option>
+            </select>
+        </div>
+
+        <!-- Color legend -->
+        <div id="color-legend" class="hidden"></div>
+
+        <!-- MKI color mode selector -->
+        <div id="mki-color-mode-control" class="hidden">
+            <select id="mki-color-mode-select">
+                <option value="year" data-i18n="mkiVuosi">Vuoden mukaan</option>
+                <option value="purpose" data-i18n="mkiTarkoitus">Hakkuutarkoitus</option>
+            </select>
+        </div>
+
+        <!-- MKI color legend -->
+        <div id="mki-legend" class="hidden"></div>
+
+        </div>
+
+        <!-- Search control -->
+        <div id="search-control">
+            <button id="search-toggle" title="Hae kiinteistötunnuksella" data-i18n-attr="title:haeTunnuksella">&#128269;</button>
+            <div id="search-form" class="hidden">
+                <input type="text" id="search-input" placeholder="esim. 91-416-1-123" data-i18n-attr="placeholder:hakuEsimerkki" enterkeyhint="search" autocomplete="off">
+                <button id="search-button" data-i18n="hae">Hae</button>
+                <div id="search-error" class="hidden"></div>
+            </div>
+            <button id="mobile-help-toggle" aria-label="Käyttöohje" data-i18n-attr="aria-label:kayttoohje" onclick="toggleHelp()">?</button>
+        </div>
+
+
+        <!-- Help modal -->
+        <div id="help-overlay" class="hidden" onclick="toggleHelp()"></div>
+        <div id="help-modal" class="hidden">
+            <button id="close-help" onclick="toggleHelp()">&times;</button>
+            <h2 data-i18n="ohjeOtsikko">Metsäinfo — Käyttöohje</h2>
+            <div id="help-content">
+                <div class="help-section">
+                    <h3>Miten käytän sovellusta?</h3>
+                    <ol>
+                        <li><strong>Zoomaa karttaa</strong> haluamallesi alueelle — kiinteistörajat ilmestyvät lähemmäs zoomattaessa.</li>
+                        <li><strong>Valitse kiinteistö</strong> kartalta tai <strong>hae kiinteistötunnuksella</strong> hakukentästä.</li>
+                        <li>Tietopaneeliin avautuu <strong>yhteenveto</strong> kiinteistön metsävaratiedoista.</li>
+                        <li>Valitse kuvio listasta tai kartalta nähdäksesi <strong>yksityiskohdat</strong>. Kuvio korostuu kartalla.</li>
+                    </ol>
+                </div>
+
+                <div class="help-section">
+                    <h3>Oma sijainti</h3>
+                    <ul>
+                        <li><span class="help-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2 4.5 20.3l.7.7L12 18l6.8 3 .7-.7z" fill="currentColor"/></svg></span><strong>Sijaintipainike</strong> (nuoli karttakontrollien alla) näyttää oman paikkasi sinisenä pisteenä. Ensimmäinen napautus keskittää kartan sinuun, toinen näyttää kulkusuunnan (jos laitteessa on kompassi), kolmas lopettaa paikannuksen.</li>
+                        <li><strong>Olet kuviolla</strong> -rivi kertoo, millä kuviolla seisot. Napauta riviä nähdäksesi kuvion tiedot.</li>
+                        <li>Jos kiinteistöä ei ole valittu, sovellus valitsee automaattisesti kiinteistön, jolla olet.</li>
+                        <li>Harmaa piste tarkoittaa, että sijainti on yli 30 sekuntia vanha. Sijaintia käytetään vain laitteellasi.</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3><span class="web-only">Puhelimella</span><span class="app-only">Tietopaneeli</span></h3>
+                    <ul>
+                        <li><strong>Tietopaneeli</strong> on näytön alareunassa. Vedä kahvasta tai napauta sitä, niin paneeli kasvaa tai pienenee.</li>
+                        <li><strong>Välilehdet</strong> Yhteenveto, Kuviot ja Ehdotukset pitävät tiedot lyhyinä.</li>
+                        <li><strong>Kuvion napautus kartalla</strong> avaa sen tiedot Kuviot-välilehdelle.</li>
+                        <li><strong>⋯-valikosta</strong> löytyvät <span class="web-only">linkin kopiointi, CSV-lataus, tulostus</span><span class="app-only">linkin ja CSV-tiedoston jakaminen</span> ja valinnan poisto.</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>Ominaisuudet</h3>
+                    <ul>
+                        <li><strong>Kiinteistöhaku</strong> — Hae tunnuksella esim. 91-416-1-123</li>
+                        <li><strong>Metsävarat</strong> — Puuston tilavuus, ikä, puulajit, kasvu, tukki/kuitu</li>
+                        <li><strong>Väritysvaihtoehdot</strong> — Vaihda kuvioiden väritys tilavuuden, iän, puulajin tai kehitysluokan mukaan värivalinnasta <span class="help-select" aria-hidden="true">Tilavuus (m³/ha) ▾</span> kartan alareunassa</li>
+                        <li><strong>Luontokohteet</strong> — Metsälain erityisen tärkeät elinympäristöt (tasovalitsin)</li>
+                        <li><strong>Metsänkäyttöilmoitukset</strong> — Ilmoitetut hakkuualueet kartalla värikoodattuina (tasovalitsin)</li>
+                        <li><strong>Sanasto-tooltipit</strong> — (i)-kuvake termin vieressä näyttää selityksen</li>
+                        <li><strong>CSV-tiedosto</strong> — <span class="web-only">Lataa</span><span class="app-only">Jaa</span> kuviotiedot taulukkolaskentaohjelmaan</li>
+                        <li class="web-only"><strong>Tulostus</strong> — Tulosta yhteenveto paperille</li>
+                        <li><strong>Linkki</strong> — <span class="web-only">Kopioi</span><span class="app-only">Jaa</span> suora linkki kiinteistöön</li>
+                    </ul>
+                </div>
+
+                <div class="help-section estimate-only">
+                    <h3>Hinta-arvio (lisäosa)</h3>
+                    <p>Hinta-arvio kertoo, paljonko kiinteistön ehdotetut hakkuut ovat arvoltaan alueen tuoreilla kantohinnoilla. Se on suuntaa-antava eikä korvaa puukauppatarjousta.</p>
+                    <h4>Mistä löydät</h4>
+                    <ul>
+                        <li><strong>Yhteenvedon Arvio nykyhinnoin -kortti</strong> näyttää ennen ostoa kiinteistön hakkuuehdotukset ja niiden puumäärän, oston jälkeen arvon euroina.</li>
+                        <li><strong>Arvio-välilehdellä</strong> on summa vuosittain, koko puuston arvo ja käytetyt hinnat.</li>
+                        <li><strong>Kokeile esimerkkimetsällä</strong> näyttää koko toiminnon ilmaiseksi kuvitteellisella kiinteistöllä.</li>
+                    </ul>
+                    <h4>Hinta ja osto</h4>
+                    <ul>
+                        <li><strong>Kertaosto, ei tilausta.</strong> Julkaisuhinta on 9,99 € 31.1.2027 asti, sen jälkeen 12,99 €. Ajantasainen hinta näkyy ostonäkymässä.</li>
+                        <li>Yksi osto avaa hinta-arvion kaikille kiinteistöille. Kantohinnat päivittyvät ilman lisämaksua.</li>
+                        <li>Osto maksetaan <span class="ios-only">Apple ID:lläsi App Storen</span><span class="android-only">Google-tililläsi Google Playn</span><span class="store-generic">sovelluskaupan</span> kautta. Uudessa laitteessa tai uudelleenasennuksen jälkeen valitse ostonäkymästä <strong>Palauta aiempi osto</strong>.</li>
+                    </ul>
+                    <h4>Näin arvio lasketaan</h4>
+                    <ul>
+                        <li><strong>Kantohinnat</strong> ovat Metsäteollisuus ry:n puukaupan viikkoseurannasta Luonnonvarakeskuksen tilastoista. Puuttuvat hinnat täydennetään kuukausitilastosta tai koko maan luvuista.</li>
+                        <li><strong>Hinta-alue</strong> päätellään kiinteistön kunnasta. Sen voi vaihtaa Hinnat-kohdasta (Muokkaa).</li>
+                        <li><strong>Puumäärä</strong> on Metsäkeskuksen kuviotiedoista: tukki- ja kuitupuu jaetaan puulajiosuuksien mukaan. Muut lehtipuut hinnoitellaan koivun hinnoilla.</li>
+                        <li><strong>Hakkuut:</strong> uudistushakkuussa myydään koko puusto, harvennuksessa noin 30 % ja ensiharvennuksessa noin 35 %.</li>
+                    </ul>
+                    <h4>Omat hinnat ja jakaminen</h4>
+                    <ul>
+                        <li>Avaa Hinnat-kohta ja kirjoita hinta taulukkoon esimerkiksi saamasi puukauppatarjouksen mukaan. Omat hinnat korostetaan, ja <strong>Palauta verkon hinnat</strong> poistaa ne.</li>
+                        <li><strong>Jaa arvio</strong> luo taulukon, jonka voi lähettää esimerkiksi kuolinpesän osakkaille.</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>Karttatasot</h3>
+                    <p><span class="help-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 3 2 8l10 5 10-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m2 12.5 10 5 10-5M2 16.5l10 5 10-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Tasovalitsimesta (kartan oikea yläkulma) voit vaihtaa taustakarttaa:</p>
+                    <ul>
+                        <li><strong>Peruskartta</strong> — Yksityiskohtainen maastokartta (oletus)</li>
+                        <li><strong>Taustakartta</strong> — Pelkistetympi pohjakartta</li>
+                        <li><strong>Ilmakuva</strong> — Maanmittauslaitoksen ilmakuva (ortokuva)</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>Tietolähteet</h3>
+                    <p>Sovellus käyttää avointa dataa suoraan rajapinnoista:</p>
+                    <ul>
+                        <li><strong>Metsävaratiedot:</strong> <a href="https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto" target="_blank">Metsäkeskus</a></li>
+                        <li><strong>Kiinteistörajat:</strong> <a href="https://www.maanmittauslaitos.fi/" target="_blank">Maanmittauslaitos</a> (INSPIRE WFS)</li>
+                        <li><strong>Taustakartat:</strong> <a href="https://kartat.kapsi.fi/" target="_blank">Kapsi</a> / <a href="https://www.maanmittauslaitos.fi/" target="_blank">MML</a></li>
+                    </ul>
+                </div>
+
+                <div class="help-section web-only">
+                    <h3>MCP-palvelin (tekoälyintegraatio)</h3>
+                    <p>Metsäinfon tiedot ovat käytettävissä myös tekoälytyökaluissa <a href="https://modelcontextprotocol.io/" target="_blank">MCP-palvelimen</a> kautta. Voit hakea metsävaratietoja suoraan tekoälykeskustelussa.</p>
+                    <ul>
+                        <li><strong>Työkalu:</strong> <code>hae_metsavaratieto(kiinteistotunnus)</code></li>
+                        <li><strong>Esimerkki:</strong> <em>"Hae metsävaratiedot kiinteistölle 999-1-1-1"</em></li>
+                        <li><strong>Yhteensopivuus:</strong> Claude Code, Claude Desktop ja muut MCP-yhteensopivat sovellukset</li>
+                    </ul>
+                    <p>Asennusohjeet: <a href="https://github.com/trotor/metsainfo" target="_blank">GitHub</a></p>
+                </div>
+
+                <div class="help-section">
+                    <h3>Uutta versiossa</h3>
+                    <div class="changelog app-only">
+                        <div class="changelog-entry">
+                            <span class="changelog-version">4.1.0</span>
+                            <span class="changelog-date">2026</span>
+                            <p>Uusia työkaluja ja karttatasoja: kuviovalinta, suosikit, Huomioitavaa metsätöissä, puuston korkeus, maastonmuodot, retkeilykohteet ja kuvioiden läpinäkyvyys. Uusia maksuttomia työkaluja: Kerro tästä paikasta ja metsävisa, Etsi läheltä, huomiot ja saavutettavuus. Hinta-arvion kertaostoon kuuluu nyt myös puuston arvo kartalla. Lyhyt esittely ensimmäisellä avauksella.</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">4.0.2</span>
+                            <span class="changelog-date">2026</span>
+                            <p>Hinta-arvio: kortti kertoo kiinteistön hakkuuehdotukset jo ennen ostoa, ostonäkymässä on esimerkki, tulos näkyy ensin ja ohjeessa on oma osio hinnasta ja laskennasta.</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">4.0.1</span>
+                            <span class="changelog-date">2026</span>
+                            <p>Olet kuviolla -rivi näyttää kehitysluokan kokonaan myös kapealla näytöllä.</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">4.0.0</span>
+                            <span class="changelog-date">2026</span>
+                            <p>Värikoodatut tietoruudut, puukaupan hinta-arvio (lisäosa) ja esimerkkimetsä. Versionumero on nyt sama kuin verkkoversiossa.</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">1.0</span>
+                            <span class="changelog-date">2026</span>
+                            <p>Ensimmäinen julkaisu</p>
+                        </div>
+                    </div>
+                    <div class="changelog web-only">
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v4.1.0</span>
+                            <span class="changelog-date">2026-11-19</span>
+                            <p>Uusia työkaluja ja karttatasoja: kuviovalinta, suosikit, Huomioitavaa metsätöissä, puuston korkeus, maastonmuodot, retkeilykohteet ja kuvioiden läpinäkyvyys. Uusia maksuttomia työkaluja: Kerro tästä paikasta ja metsävisa, Etsi läheltä, huomiot ja saavutettavuus. Lyhyt esittely ensimmäisellä avauksella.</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v4.0.2</span>
+                            <span class="changelog-date">2026-11-16</span>
+                            <p>Sovellusten hinta-arvion käyttöönottoa selkeytetty. Verkkoversioon ei muutoksia.</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v4.0.1</span>
+                            <span class="changelog-date">2026-11-15</span>
+                            <p>Olet kuviolla -rivi näyttää kehitysluokan kokonaan myös kapealla näytöllä.</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v4.0.0</span>
+                            <span class="changelog-date">2026-11-13</span>
+                            <p>Värikoodatut tietoruudut puhelimella. Sama versionumero kuin iOS- ja Android-sovelluksissa.</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v3.3.0</span>
+                            <span class="changelog-date">2026-11-10</span>
+                            <p>Oma sijainti, keskitys ja kulkusuunta, Olet kuviolla -tieto</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v3.2.0</span>
+                            <span class="changelog-date">2026-11-09</span>
+                            <p>Mobiilikäyttöliittymä: koko näytön kartta, tietopaneeli alareunassa, välilehdet</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v3.1.0</span>
+                            <span class="changelog-date">2026-11-09</span>
+                            <p>Automaattinen julkaisu ja yksikkötestit</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v3.0.0</span>
+                            <span class="changelog-date">2026-03-05</span>
+                            <p>Metsänkäyttöilmoitukset karttataso</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v2.3.0</span>
+                            <span class="changelog-date">2026-02-21</span>
+                            <p>MCP-palvelimen dokumentaatio</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v2.1.0</span>
+                            <span class="changelog-date">2026-02-19</span>
+                            <p>Käyttöohjeet (tämä ikkuna)</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v2.0.0</span>
+                            <span class="changelog-date">2026-02-19</span>
+                            <p>Koodin modularisointi ES6-moduuleiksi</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v1.9.0</span>
+                            <span class="changelog-date">2026-02-19</span>
+                            <p>Luontotietokerros, sanasto-tooltipit, väritysvaihtoehdot, tulostustuki</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v1.8.0</span>
+                            <span class="changelog-date">2026-02-19</span>
+                            <p>URL-jako ja mittausvuosi-indikaattori</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v1.6.0</span>
+                            <span class="changelog-date">2026-01-22</span>
+                            <p>EPSG:3067 projektio, suomalaiset taustakartat</p>
+                        </div>
+                        <div class="changelog-entry">
+                            <span class="changelog-version">v1.0.0</span>
+                            <span class="changelog-date">2026-01-19</span>
+                            <p>Ensimmäinen julkaisu</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-section help-footer">
+                    <p>Metsäinfo on avoimen datan opetuksellinen katselusovellus. Tiedot eivät korvaa metsäammattilaisen arviota.</p>
+                    <p>Henkilökohtaiset hoitosuositukset: <a href="https://www.metsaan.fi" target="_blank">metsään.fi</a></p>
+                    <p><a href="tietosuoja.html" target="_blank">Tietosuojaseloste</a></p>
+                    <p class="help-contact web-only">Tero Rönkkö — <a href="mailto:inetoroy@gmail.com">inetoroy@gmail.com</a> — <a href="https://github.com/trotor/metsainfo" target="_blank">GitHub</a></p>
+                    <p class="help-contact app-only">Metsäinfo <span id="app-version"></span> — © Inetor Oy — <a href="mailto:inetoroy@gmail.com">inetoroy@gmail.com</a></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast" role="status" aria-live="polite" hidden></div>
+
+        <!-- Footer -->
+        <footer id="footer">
+            <p>
+                <span id="author-info"></span> <a href="mailto:inetoroy@gmail.com">inetoroy@gmail.com</a> |
+                <span data-i18n="alaMetsatiedot">Metsätiedot:</span> <a href="https://www.metsakeskus.fi/fi/avoin-metsa-ja-luontotieto" target="_blank" data-i18n="alaMetsakeskus">Metsäkeskus</a> |
+                <span data-i18n="alaKartta">Kartta:</span> <a href="https://kartat.kapsi.fi/" target="_blank">Kapsi</a> / <a href="https://www.maanmittauslaitos.fi/" target="_blank" data-i18n="alaMml">MML</a> |
+                <span data-i18n="alaKiinteistot">Kiinteistöt:</span> <a href="https://www.maanmittauslaitos.fi/" target="_blank" data-i18n="alaMml">MML</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Application script -->
+    <script>
+        // Display version info
+        document.getElementById('version-badge').textContent = 'v' + VERSION.number;
+        document.getElementById('author-info').innerHTML = '© ' + VERSION.author + ' ' + new Date().getFullYear();
+    </script>
+</body>
+</html>
