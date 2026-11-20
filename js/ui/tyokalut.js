@@ -397,9 +397,18 @@ export function registerColorMode({ id, label, onSelect, onDeselect, feature }) 
  */
 export function rekisteroidyt() {
     return {
-        tyokalut: [...tools].sort(byOrder).map(t => ({ id: t.id, feature: t.feature ?? t.id, label: t.label, description: t.description })),
+        tyokalut: [...tools].sort(byOrder).map(t => ({ id: t.id, feature: t.feature ?? t.id, label: t.label, description: t.description, icon: t.icon })),
         varit: colorModes.map(m => ({ id: m.id, feature: m.feature ?? m.id, label: m.label }))
     };
+}
+
+/** Avaa rekisteröity työkalu kuin Työkalut-listasta (esittelyn uutta-ikkuna). */
+export function avaaTyokalu(id) {
+    const t = tools.find(x => x.id === id);
+    if (!t) return false;
+    closeList();
+    t.onSelect();
+    return true;
 }
 
 /* ---------- Ohje ---------- */

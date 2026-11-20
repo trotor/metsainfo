@@ -33,7 +33,16 @@ export const TEKSTIT = {
         zoomVihje: 'Lähennä karttaa, niin kiinteistöt ja kuviot tulevat näkyviin.',
         zoomSijainti: 'Näytä sijaintini',
         zoomLahenna: 'Lähennä',
-        zoomSulje: 'Sulje vihje'
+        zoomSulje: 'Sulje vihje',
+        uuttaOtsikko: 'Uutta Metsäinfossa',
+        uutta: 'Tässä versiossa on paljon uutta:',
+        uuttaTyokalut: 'Uudet työkalut Työkalut-napissa, napauta kokeillaksesi:',
+        uuttaSaavutettavuus: 'Saavutettavuus: kuvion tieyhteys ja metsäkuljetusmatka kuvion tiedoissa ja Väritys-valitsimessa',
+        uuttaRajoitteet: 'Huomioitavaa metsätöissä: muinaisjäännökset, suojelualueet ja erityisen tärkeät elinympäristöt kiinteistöltä',
+        uuttaTasot: 'Uudet karttatasot: puuston korkeus, maastonmuodot, rinnevarjoste ja retkeilykohteet',
+        uuttaArvo: 'Hinta-arvioon kuuluu nyt myös puuston arvo kartalla',
+        uuttaHuomio: 'Uudet työkalut ovat nyt maksuttomia. Osa niistä voi myöhemmin muuttua maksulliseksi.',
+        katsoEsittely: 'Katso esittely'
     },
     sv: {
         ohita: 'Hoppa över',
@@ -66,7 +75,16 @@ export const TEKSTIT = {
         zoomVihje: 'Zooma in så syns fastigheter och figurer.',
         zoomSijainti: 'Visa min position',
         zoomLahenna: 'Zooma in',
-        zoomSulje: 'Stäng tipset'
+        zoomSulje: 'Stäng tipset',
+        uuttaOtsikko: 'Nytt i Metsäinfo',
+        uutta: 'Den här versionen har mycket nytt:',
+        uuttaTyokalut: 'Nya verktyg under Verktyg-knappen, tryck för att prova:',
+        uuttaSaavutettavuus: 'Åtkomlighet: figurens vägförbindelse och terrängtransportavstånd i figurens uppgifter och i färgväljaren',
+        uuttaRajoitteet: 'Att beakta i skogsarbeten: fornlämningar, skyddsområden och särskilt viktiga livsmiljöer på fastigheten',
+        uuttaTasot: 'Nya kartlager: trädhöjd, terrängformer, terrängskuggning och friluftsobjekt',
+        uuttaArvo: 'Prisuppskattningen omfattar nu också trädbeståndets värde på kartan',
+        uuttaHuomio: 'De nya verktygen är kostnadsfria nu. En del av dem kan senare bli avgiftsbelagda.',
+        katsoEsittely: 'Visa introduktionen'
     },
     en: {
         ohita: 'Skip',
@@ -99,7 +117,16 @@ export const TEKSTIT = {
         zoomVihje: 'Zoom in to see properties and stands.',
         zoomSijainti: 'Show my location',
         zoomLahenna: 'Zoom in',
-        zoomSulje: 'Close the tip'
+        zoomSulje: 'Close the tip',
+        uuttaOtsikko: 'New in Metsäinfo',
+        uutta: 'This version brings a lot of new things:',
+        uuttaTyokalut: 'New tools under the Tools button, tap to try:',
+        uuttaSaavutettavuus: 'Accessibility: road access and forwarding distance in the stand details and the colour selector',
+        uuttaRajoitteet: 'Things to note in forestry work: ancient monuments, protected areas and especially important habitats on the property',
+        uuttaTasot: 'New map layers: tree height, landforms, hillshade and outdoor sites',
+        uuttaArvo: 'The price estimate now also includes the timber value on the map',
+        uuttaHuomio: 'The new tools are free for now. Some of them may later become paid.',
+        katsoEsittely: 'Show the introduction'
     }
 };
 // Käyttöohjeen osio (js/ui/ohje-osiot.js)

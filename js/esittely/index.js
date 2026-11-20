@@ -10,6 +10,9 @@
  * itsestään (localStorage TILA_KEY); asetuksista ja käyttöohjeesta sen saa
  * uudelleen (VIESTIT.avaaEsittely). Käynnistetään viimeisenä, kun muut
  * kokeilut ovat ilmoittautuneet rekisteriin.
+ *
+ * Uutta-ikkuna: päivittäjälle kerran versiota kohden (UUTTA_KEY/UUTTA_VERSIO),
+ * uusi käyttäjä saa esittelyn. Uusien työkalujen napit avaavat työkalun.
  */
 
 import './esittely.css';
@@ -17,14 +20,14 @@ import * as state from '../state.js';
 import { CONFIG } from '../config.js';
 import { FEATURES, isUnlocked } from '../features.js';
 import { purchases } from '../platform/purchases.js';
-import { rekisteroidyt } from '../ui/tyokalut.js';
+import { rekisteroidyt, avaaTyokalu } from '../ui/tyokalut.js';
 import { estimateEnabled, showDemo } from '../ui/estimate.js';
 import { requestLocation } from '../ui/location-ui.js';
 import { isMobileLayout } from '../ui/layout.js';
 import { addHelpSection } from '../ui/ohje-osiot.js';
 import { on, VIESTIT } from '../vayla.js';
 import { T } from './teksti.js';
-import { TILA_KEY, OSTO_KEY, VIHJE_KEY, lue, tallenna, naytetaankoAlussa, naytetaankoOsto, aiempiOsto, maksulliset, sijoita, naytetaankoZoomVihje } from './logiikka.js';
+import { TILA_KEY, OSTO_KEY, VIHJE_KEY, UUTTA_KEY, UUTTA_VERSIO, lue, tallenna, naytetaankoAlussa, naytetaankoOsto, aiempiOsto, maksulliset, sijoita, naytetaankoZoomVihje, vanhaKayttaja, naytetaankoUutta } from './logiikka.js';
 import { KUVAUSTILA } from '../demo/kuvaustila.js';
 import { registerBackStep } from '../ui/back.js';
 
@@ -35,6 +38,14 @@ let ui = null;      // { blocker, spot, card, steps, index, onDone }
 let vihje = null;   // zoomausvihjeen elementti
 // Vihjeen × tallentuu pysyvästi (Tero 19.11.2026: suljettu vihje ei tule enää)
 let vihjeSuljettu = lue(storage, VIHJE_KEY) === '1';
+// Aiemman käytön jäljet luetaan moduulin latautuessa, ennen kuin tämä käynnistys kirjoittaa mitään
+const vanha = (() => {
+    try {
+        return vanhaKayttaja(Array.from({ length: storage?.length ?? 0 }, (_, i) => storage.key(i) ?? ''));
+    } catch {
+        return false;
+    }
+})();
 
 /** Ensimmäinen näkyvä elementti valitsimista (mobiilissa ja työpöydällä eri). */
 function kohde(selectors) {
@@ -103,6 +114,8 @@ function rakenna() {
         else if (a === 'ohita') lopeta('ohitettu');
         else if (a === 'valmis') lopeta('katsottu');
         else if (a === 'demo') { lopeta('katsottu'); showDemo(); }
+        else if (a === 'esittely') { lopeta('katsottu'); aloitaEsittely(); }
+        else if (a === 'tyokalu') { lopeta('katsottu'); avaaTyokalu(b.dataset.id); }
     });
     return { blocker, spot, spot2, card };
 }
@@ -162,8 +175,12 @@ function sulje() {
 }
 
 function lopeta(tila) {
-    if (ui?.oma) tallenna(storage, OSTO_KEY, '1');
-    else tallenna(storage, TILA_KEY, tila);
+    if (ui?.oma) ui.oma.tallenna();
+    else {
+        tallenna(storage, TILA_KEY, tila);
+        // Esittelyn nähnyt ei tarvitse saman version uutuuksia
+        tallenna(storage, UUTTA_KEY, UUTTA_VERSIO);
+    }
     sulje();
     paivitaVihje();
     tarkistaOsto();
@@ -177,7 +194,40 @@ export function aloitaEsittely() {
 function tarkistaOsto() {
     if (!naytetaankoOsto({ entitled: purchases.isEntitled(), nahty: lue(storage, OSTO_KEY), kaynnissa: Boolean(ui), tila: lue(storage, TILA_KEY) })) return;
     const m = maksullisetHtml();
-    avaa([{ id: 'osto', otsikko: T.ostoOtsikko, html: `<p>${esc(T.osto)}</p>${m.html}`, kohteet: ['.tyokalut-control'] }], { oma: { nappi: T.selva } });
+    avaa([{ id: 'osto', otsikko: T.ostoOtsikko, html: `<p>${esc(T.osto)}</p>${m.html}`, kohteet: ['.tyokalut-control'] }],
+        { oma: { nappi: T.selva, tallenna: () => tallenna(storage, OSTO_KEY, '1') } });
+}
+
+/* ---------- Uutta-ikkuna (päivittäjille kerran versiota kohden) ---------- */
+
+/** Versiossa 4.1 tulleet työkalut (js/ui/tyokalut.js), vain tässä buildissa rekisteröidyt. */
+const UUDET_TYOKALUT = ['maasto', 'lahihaku', 'valinta', 'huomiot'];
+
+function uutuudetHtml() {
+    const tyokalut = rekisteroidyt().tyokalut.filter(t => UUDET_TYOKALUT.includes(t.id));
+    const napit = tyokalut.map(t => `<button type="button" class="es-tyokalu" data-es="tyokalu" data-id="${esc(t.id)}"><span class="es-tyokalu-ikoni" aria-hidden="true">${t.icon || ''}</span>${esc(t.label)}</button>`).join('');
+    const rivit = [
+        tyokalut.length ? `<li>${esc(T.uuttaTyokalut)}<div class="es-tyokalut">${napit}</div></li>` : '',
+        `<li>${esc(T.uuttaSaavutettavuus)}</li>`,
+        `<li>${esc(T.uuttaRajoitteet)}</li>`,
+        `<li>${esc(T.uuttaTasot)}</li>`,
+        estimateEnabled() ? `<li>${esc(T.uuttaArvo)}</li>` : ''
+    ].join('');
+    return `<p>${esc(T.uutta)}</p><ul class="es-lista es-uutta">${rivit}</ul><p class="es-huomio">${esc(T.uuttaHuomio)}</p>`;
+}
+
+function naytaUutuudet() {
+    // Ennen esittelyä käyttänyt (4.0.x) saa esittelyn halutessaan napista; suljettuna se ei tule itsestään
+    const ilmanEsittelya = !lue(storage, TILA_KEY);
+    avaa([{ id: 'uutta', otsikko: T.uuttaOtsikko, html: uutuudetHtml(), lisanappi: { label: T.katsoEsittely, toiminto: 'esittely' } }], {
+        oma: {
+            nappi: T.selva,
+            tallenna: () => {
+                tallenna(storage, UUTTA_KEY, UUTTA_VERSIO);
+                if (ilmanEsittelya && !lue(storage, TILA_KEY)) tallenna(storage, TILA_KEY, 'ohitettu');
+            }
+        }
+    });
 }
 
 /* ---------- Zoomausvihje ---------- */
@@ -244,7 +294,10 @@ export function startEsittely() {
     }
     // Kartta ja napit ehtivät asettua ennen esittelyä
     setTimeout(() => {
-        if (naytetaankoAlussa({ tila: lue(storage, TILA_KEY), search: window.location.search })) aloitaEsittely();
+        const tila = lue(storage, TILA_KEY);
+        const search = window.location.search;
+        if (naytetaankoUutta({ nahty: lue(storage, UUTTA_KEY), tila, vanha, search })) naytaUutuudet();
+        else if (naytetaankoAlussa({ tila, search })) aloitaEsittely();
         else tarkistaOsto();
         paivitaVihje();
     }, 600);

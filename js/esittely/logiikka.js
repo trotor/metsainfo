@@ -89,3 +89,27 @@ export function sijoita(kohde, kortti, ikkuna, { mobiili = false, rako = 12, reu
 export function naytetaankoZoomVihje({ zoom, minZoom, kiinteistoAuki, suljettu }) {
     return !suljettu && !kiinteistoAuki && zoom < minZoom;
 }
+
+/**
+ * Uutta-ikkuna päivittäjille (Tero 20.11.2026): kerran versiota kohden.
+ * UUTTA_VERSIO kasvatetaan, kun ikkunan sisältö vaihdetaan uuteen versioon.
+ */
+export const UUTTA_KEY = 'metsainfo.uutta';
+export const UUTTA_VERSIO = '4.1';
+const EI_KAYTTOA = ['metsainfo.esittely', UUTTA_KEY, 'metsainfo.kieli', 'metsainfo.devOstot'];
+
+/** Onko laitteella aiemman käytön jälkiä (avaimet luettu ennen kuin tämä käynnistys kirjoittaa mitään). */
+export function vanhaKayttaja(keys) {
+    return keys.some(k => k.startsWith('metsainfo') && !EI_KAYTTOA.some(e => k === e || k.startsWith(`${e}.`)));
+}
+
+/**
+ * Näytetäänkö uutuudet: ei, jos tämän version uutuudet on nähty tai avataan
+ * jaettu kiinteistölinkki. Muuten kyllä, jos esittely on jo nähty tai laite
+ * on ollut käytössä ennen esittelyä (4.0.x). Uusi käyttäjä saa esittelyn.
+ */
+export function naytetaankoUutta({ nahty, tila, vanha, search = '' }) {
+    if (nahty === UUTTA_VERSIO) return false;
+    if (new URLSearchParams(search).has('parcel')) return false;
+    return Boolean(tila || vanha);
+}

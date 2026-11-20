@@ -86,3 +86,31 @@ describe('aiempi osto', () => {
         expect(aiempiOsto({ entitled: false, nahty: null })).toBe(false);
     });
 });
+
+import { UUTTA_VERSIO, vanhaKayttaja, naytetaankoUutta } from '../js/esittely/logiikka.js';
+
+describe('uutta-ikkuna', () => {
+    it('vanha käyttäjä tunnistetaan aiemmista metsainfo-avaimista', () => {
+        expect(vanhaKayttaja([])).toBe(false);
+        expect(vanhaKayttaja(['muu.avain'])).toBe(false);
+        // Esittelyn, uutuuksien, kielen ja kehitystilan avaimet eivät kerro aiemmasta käytöstä
+        expect(vanhaKayttaja(['metsainfo.esittely.vihje', 'metsainfo.uutta', 'metsainfo.kieli', 'metsainfo.devOstot'])).toBe(false);
+        expect(vanhaKayttaja(['metsainfo.hinnat.2026-46'])).toBe(true);
+        expect(vanhaKayttaja(['metsainfo.hintaArvioNahty'])).toBe(true);
+    });
+
+    it('näytetään päivittäjälle kerran versiota kohden', () => {
+        expect(naytetaankoUutta({ nahty: null, tila: 'katsottu', vanha: false })).toBe(true);
+        expect(naytetaankoUutta({ nahty: null, tila: null, vanha: true })).toBe(true);
+        expect(naytetaankoUutta({ nahty: UUTTA_VERSIO, tila: 'katsottu', vanha: true })).toBe(false);
+        expect(naytetaankoUutta({ nahty: '4.0', tila: 'ohitettu', vanha: true })).toBe(true);
+    });
+
+    it('uusi käyttäjä saa esittelyn, ei uutuuksia', () => {
+        expect(naytetaankoUutta({ nahty: null, tila: null, vanha: false })).toBe(false);
+    });
+
+    it('jaettu kiinteistölinkki ei avaa uutuuksia', () => {
+        expect(naytetaankoUutta({ nahty: null, tila: 'katsottu', vanha: true, search: '?parcel=999-1-1-1' })).toBe(false);
+    });
+});
