@@ -66,3 +66,16 @@ describe('pysyvä välimuisti', () => {
         expect(calls).toBe(2);
     });
 });
+
+import { salliHaku } from '../js/demo/kuvaustila.js';
+
+describe('kuvaustilan hakurajaus', () => {
+    it('sallii vain oman palvelimen ja Luken hintatilastot', () => {
+        const o = 'http://localhost:5199';
+        expect(salliHaku('demo/esimerkkimetsa.json', o)).toBe(true);
+        expect(salliHaku('https://statdb.luke.fi/PxWeb/api/v1/fi/x', o)).toBe(true);
+        expect(salliHaku('https://geoserver.museovirasto.fi/geoserver/wfs', o)).toBe(false);
+        expect(salliHaku('https://avoin.metsakeskus.fi/rajapinnat/v1/stand/ows', o)).toBe(false);
+        expect(salliHaku('https://geo.stat.fi/geoserver/tilastointialueet/wfs', o)).toBe(false);
+    });
+});

@@ -10,6 +10,28 @@
  */
 export const KUVAUSTILA = import.meta.env?.VITE_KUVAUSTILA === '1';
 
+/**
+ * Kuvaustilassa ei haeta mitään ulkoisista rajapinnoista (paitsi Luken
+ * hintatilastot hinta-arvioon): lisäosat (rajoitteet, saavutettavuus,
+ * lähihaku …) hakisivat muuten oikeita kohteita saaren koordinaateilla.
+ * Estetty haku saa tyhjän GeoJSON-vastauksen, joten lisäosat näyttävät
+ * "ei kohteita" eivätkä virhettä.
+ */
+const SALLITUT = ['statdb.luke.fi'];
+export function salliHaku(url, origin) {
+    const u = new URL(url, origin);
+    return u.origin === origin || SALLITUT.includes(u.hostname);
+}
+if (KUVAUSTILA && typeof window !== 'undefined' && window.fetch) {
+    const alkuperainen = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+        const url = typeof input === 'string' ? input : (input?.url ?? String(input));
+        if (salliHaku(url, window.location.origin)) return alkuperainen(input, init);
+        console.info('[kuvaustila] estetty', url);
+        return Promise.resolve(new Response('{"type":"FeatureCollection","features":[]}', { status: 200, headers: { 'Content-Type': 'application/json' } }));
+    };
+}
+
 let data = null;
 
 /** Esimerkkimetsän kiinteistö ja kuviot (public/demo/esimerkkimetsa.json). */

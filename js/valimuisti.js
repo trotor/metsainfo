@@ -9,10 +9,13 @@
  * - ilman Cache APIa (vanha selain, testit) haetaan suoraan verkosta
  */
 
+import { KUVAUSTILA } from './demo/kuvaustila.js';
+
 const AIKA = 'x-metsainfo-tallennettu';
 
 export function createCachedFetch({ name, ttl, maxEntries = 400, fetchFn = (...a) => fetch(...a), cacheStorage, now = () => Date.now() }) {
-    const storage = () => cacheStorage ?? (typeof caches !== 'undefined' ? caches : null);
+    // Kuvaustilassa ei välimuistia: aiemmin tallennettu oikea aineisto ei saa päätyä kauppakuviin
+    const storage = () => cacheStorage ?? (!KUVAUSTILA && typeof caches !== 'undefined' ? caches : null);
     let avoin = null;
     const avaa = () => (avoin ??= storage()?.open(name).catch(() => null) ?? Promise.resolve(null));
     let lisatty = 0;
