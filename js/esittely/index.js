@@ -268,6 +268,10 @@ export function startEsittely() {
     // Kauppakuvien kuvaustilassa ei esittelyä eikä vihjettä
     if (!isUnlocked('esittely') || KUVAUSTILA) return;
     if (aiempiOsto({ entitled: purchases.isEntitled(), nahty: lue(storage, OSTO_KEY) })) tallenna(storage, OSTO_KEY, 'aiempi');
+    // Uusi käyttäjä (ei esittelyä eikä aiempaa käyttöä): tämän version uutuudet
+    // merkitään heti nähdyiksi. Muuten jaetulla linkillä aloittanut saisi
+    // seuraavalla avauksella uutuudet esittelyn sijaan, koska käyttö kirjoittaa avaimia.
+    if (!lue(storage, TILA_KEY) && !vanha) tallenna(storage, UUTTA_KEY, UUTTA_VERSIO);
     on(VIESTIT.avaaEsittely, () => aloitaEsittely());
     document.addEventListener('click', (e) => {
         if (!e.target.closest('[data-esittely="avaa"]')) return;
