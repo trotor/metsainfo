@@ -1,0 +1,8 @@
+import{g as e}from"./state-IKDl7OFB.js";import{U as t,g as n}from"./index-EczW7Dt5.js";import{y as r}from"./logic-CMLm7KI6.js";var i=`metsainfo:kortti-auki`,a=!1;function o(e=document){if(a||typeof ResizeObserver>`u`)return;let t=e.getElementById(`map-strip`);t&&(a=!0,new ResizeObserver(()=>{e.documentElement.style.setProperty(`--map-strip-h`,`${t.offsetHeight}px`)}).observe(t))}function s({id:n,label:r,className:a=``,onClose:s,notifyHidden:c=!1}){let l=document.createElement(`section`);l.className=`kortti ${a}`.trim(),l.hidden=!0,l.setAttribute(`role`,`dialog`),l.setAttribute(`aria-label`,r),l.lang=e(),document.body.appendChild(l),o();let u={el:l,get isOpen(){return!l.hidden},open(){l.hidden=!1,document.dispatchEvent(new CustomEvent(i,{detail:n}))},close(){l.hidden=!0}};return document.addEventListener(i,e=>{e.detail!==n&&(c||!l.hidden)&&s?.()}),t(()=>{if(l.hidden)return!1;let e=l.querySelector(`[data-close]`);return e?e.click():(u.close(),s?.()),!0}),u}var c=e=>String(e??``).replace(/[&<>"']/g,e=>({"&":`&amp;`,"<":`&lt;`,">":`&gt;`,'"':`&quot;`,"'":`&#39;`})[e]);function l({title:e,badge:t,closeLabel:i=`Sulje`,feature:a}){return`
+        <header class="kortti-head">
+            <div>
+                <h2>${c(e)}</h2>
+                ${t?`<span class="kortti-merkki">${c(t)}</span>`:``}
+            </div>
+            <button type="button" class="kortti-close" data-close aria-label="${c(i)}">×</button>
+        </header>${a&&n(a)?`<p class="kortti-varaus">${c(r.myohemminMaksullinen)}</p>`:``}`}export{s as n,l as t};
